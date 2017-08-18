@@ -23,6 +23,10 @@ DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
 # debug decorator that announces function call/entry and lists args
 def debug_fxn(func):
+    """Function decorator that (if enabled by DEBUG_FXN_ENTRY bit in DEBUG)
+    prints the function name and the arguments used in the function call
+    before executing the function
+    """
     def func_wrapper(*args, **kwargs):
         if DEBUG & DEBUG_FXN_ENTRY:
             print("FXN:" + func.__qualname__ + "(", flush=True)
@@ -35,7 +39,12 @@ def debug_fxn(func):
     return func_wrapper
 
 
+# really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
+    """Window (in the wx sense) widget that displays an image, zooms in and
+    out, and allows scrolling/panning in up/down and side/side if image is
+    big enough.  If image is smaller than window it is auto-centered
+    """
     @debug_fxn
     def __init__(self, parent, id_=wx.ID_ANY, *args, **kwargs):
         super().__init__(parent, id_, *args, **kwargs)
@@ -155,21 +164,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             else:
                 print("    Orientation="+repr(Orientation))
 
-            if evt.GetEventType()==wx.wxEVT_SCROLLWIN_TOP:
+            if evt.GetEventType() == wx.wxEVT_SCROLLWIN_TOP:
                 print("    wx.wxEVT_SCROLLWIN_TOP")
-            elif evt.GetEventType()==wx.wxEVT_SCROLLWIN_BOTTOM:
+            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_BOTTOM:
                 print("    wx.wxEVT_SCROLLWIN_BOTTOM")
-            elif evt.GetEventType()==wx.wxEVT_SCROLLWIN_LINEUP:
+            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_LINEUP:
                 print("    wx.wxEVT_SCROLLWIN_LINEUP")
-            elif evt.GetEventType()==wx.wxEVT_SCROLLWIN_LINEDOWN:
+            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_LINEDOWN:
                 print("    wx.wxEVT_SCROLLWIN_LINEDOWN")
-            elif evt.GetEventType()==wx.wxEVT_SCROLLWIN_PAGEUP:
+            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_PAGEUP:
                 print("    wx.wxEVT_SCROLLWIN_PAGEUP")
-            elif evt.GetEventType()==wx.wxEVT_SCROLLWIN_PAGEDOWN:
+            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_PAGEDOWN:
                 print("    wx.wxEVT_SCROLLWIN_PAGEDOWN")
-            elif evt.GetEventType()==wx.wxEVT_SCROLLWIN_THUMBTRACK:
+            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_THUMBTRACK:
                 print("    wx.wxEVT_SCROLLWIN_THUMBTRACK")
-            elif evt.GetEventType()==wx.wxEVT_SCROLLWIN_THUMBRELEASE:
+            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_THUMBRELEASE:
                 print("    wx.wxEVT_SCROLLWIN_THUMBRELEASE")
             else:
                 print("    EventType="+repr(EventType))
@@ -229,12 +238,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # center image if Virtual Size is larger than image
         if win_size_x > self.img_size_x * self.zoom:
-            self.img_coord_xlation_x = int((win_size_x - self.img_size_x * self.zoom) / 2)
+            self.img_coord_xlation_x = int(
+                    (win_size_x - self.img_size_x * self.zoom) / 2
+                    )
         else:
             self.img_coord_xlation_x = 0
 
         if win_size_y > self.img_size_y * self.zoom:
-            self.img_coord_xlation_y = int((win_size_y - self.img_size_y * self.zoom) / 2)
+            self.img_coord_xlation_y = int(
+                    (win_size_y - self.img_size_y * self.zoom) / 2
+                    )
         else:
             self.img_coord_xlation_y = 0
 
@@ -289,7 +302,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
 
         # get rect coord origin translation based on scroll position
-        (rect_pos_x, rect_pos_y) = self.CalcUnscrolledPosition(rect_pos_x, rect_pos_y)
+        (rect_pos_x, rect_pos_y) = self.CalcUnscrolledPosition(
+                rect_pos_x, rect_pos_y
+                )
 
         # see if we need to use a downscaled version of memdc
         if self.zoom > 0.5:
@@ -345,12 +360,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.img_dc.SelectObject(img_bmp)
 
             # half-size static DC
-            img_bmp = wx.Bitmap(self.img.Scale(self.img_size_x/2, self.img_size_y/2))
+            img_bmp = wx.Bitmap(
+                    self.img.Scale(self.img_size_x/2, self.img_size_y/2)
+                    )
             self.img_dc_div2 = wx.MemoryDC()
             self.img_dc_div2.SelectObject(img_bmp)
 
             # quarter-size static DC
-            img_bmp = wx.Bitmap(self.img.Scale(self.img_size_x/4, self.img_size_y/4))
+            img_bmp = wx.Bitmap(
+                    self.img.Scale(self.img_size_x/4, self.img_size_y/4)
+                    )
             self.img_dc_div4 = wx.MemoryDC()
             self.img_dc_div4.SelectObject(img_bmp)
 
@@ -386,6 +405,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def zoom_in(self, zoom_amt, do_refresh=True):
+        """Zoom in the image in this window (increase zoom ratio).  There
+        is a fixed list of zoom ratios, move down in the list
+
+        Args:
+            zoom_amt (int): How many positions to move down in the zoom ratio
+                list
+            do_refresh (bool, default=True): whether to force a refresh now
+                after changing the zoom ratio
+
+        Returns:
+            self.zoom (float): resulting zoom ratio (1.00 is 1x zoom)
+        """
         # return early if we're at max
         if not self.img or self.zoom_idx == len(self.zoom_list)-1:
             return
@@ -414,6 +445,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def zoom_out(self, zoom_amt, do_refresh=True):
+        """Zoom out the image in this window (reduce zoom ratio).  There
+        is a fixed list of zoom ratios, move up in the list
+
+        Args:
+            zoom_amt (int): How many positions to move up in the zoom ratio
+                list
+            do_refresh (bool, default=True): whether to force a refresh now
+                after changing the zoom ratio
+
+        Returns:
+            self.zoom (float): resulting zoom ratio (1.00 is 1x zoom)
+        """
         # return early if no image or we're at max
         if not self.img or self.zoom_idx == 0:
             return
@@ -449,7 +492,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   events either
 
         scroll_y = self.GetScrollPos(wx.VERTICAL)
-        (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
+        (_, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
         scroll_amt = max([round(pan_amt/scroll_ppu_y), 1])
 
         self.Scroll(wx.DefaultCoord, scroll_y + scroll_amt)
@@ -466,7 +509,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   events either
 
         scroll_y = self.GetScrollPos(wx.VERTICAL)
-        (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
+        (_, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
         scroll_amt = max([round(pan_amt/scroll_ppu_y), 1])
 
         self.Scroll(wx.DefaultCoord, scroll_y - scroll_amt)
@@ -483,7 +526,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   events either
 
         scroll_x = self.GetScrollPos(wx.HORIZONTAL)
-        (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
+        (scroll_ppu_x, _) = self.GetScrollPixelsPerUnit()
         scroll_amt = max([round(pan_amt/scroll_ppu_x), 1])
 
         self.Scroll(scroll_x + scroll_amt, wx.DefaultCoord)
@@ -500,7 +543,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   events either
 
         scroll_x = self.GetScrollPos(wx.HORIZONTAL)
-        (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
+        (scroll_ppu_x, _) = self.GetScrollPixelsPerUnit()
         scroll_amt = max([round(pan_amt/scroll_ppu_x), 1])
 
         self.Scroll(scroll_x - scroll_amt, wx.DefaultCoord)
@@ -655,8 +698,7 @@ class MainWindow(wx.Frame):
         # else: proceed asking to the user the new file to open
         open_file_dialog = wx.FileDialog(self,
                 "Open image file",
-                wildcard="Tiff files (*.tif)|*.tif|*.TIF|*.tiff"
-                    "|PNG files (.png)|.png",
+                wildcard=wx.Image.GetImageExtWildcard(),
                 style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 
         if open_file_dialog.ShowModal() == wx.ID_CANCEL:
@@ -670,13 +712,19 @@ class MainWindow(wx.Frame):
         if img_ok:
             self.statusbar.SetStatusText("Image " + img_path + " loaded OK.")
         else:
-            self.statusbar.SetStatusText("Image " + img_path + " loading ERROR. ")
+            self.statusbar.SetStatusText(
+                    "Image " + img_path + " loading ERROR."
+                    )
 
 
 def process_command_line(argv):
-    """
-    Return args struct
-    `argv` is a list of arguments, or `None` for ``sys.argv[1:]``.
+    """Process command line invocation arguments and switches.
+
+    Args:
+        argv: list of arguments, or `None` from ``sys.argv[1:]``.
+
+    Returns:
+        args: Namespace with named attributes of arguments and switches
     """
     #script_name = argv[0]
     argv = argv[1:]
@@ -694,12 +742,9 @@ def process_command_line(argv):
 
     # switches/options:
     #parser.add_argument(
-    #    '-s', '--max_size', action='store',
-    #    help='String specifying maximum size of images.  ' \
-    #            'Larger images will be resized. (e.g. "1024x768")')
-    #parser.add_argument(
-    #    '-o', '--omit_hidden', action='store_true',
-    #    help='Do not copy picasa hidden images to destination directory.')
+    #    '-d', '--debug', action='store_true',
+    #    help='Enable debugging messages to console'
+    #    )
 
     #(settings, args) = parser.parse_args(argv)
     args = parser.parse_args(argv)
@@ -708,7 +753,7 @@ def process_command_line(argv):
 
 def main(argv=None):
     # process command line if started from there
-    process_command_line(argv)
+    args = process_command_line(argv)
 
     # setup main wx event loop
     myapp = wx.App()
