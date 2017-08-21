@@ -1,0 +1,6 @@
+# python compiled files
+*.pyc
+# Mac internal Finder state
+.DS_Store
+# vim swap files
+.*.swp
