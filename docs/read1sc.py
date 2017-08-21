@@ -7,7 +7,7 @@ import sys
 import os.path
 import struct
 
-def print_list(byte_list, line_len=8, bits=8, dec_not_hex=True):
+def print_list(byte_list, bits=8, dec_not_hex=True):
     # log10(2**bits) = log10(2)*bits = 0.301*bits
     # log16(2**bits) = log16(2)*bits = 0.25*bits
     hex_digits = int(0.25 * bits)
@@ -39,62 +39,107 @@ def print_list(byte_list, line_len=8, bits=8, dec_not_hex=True):
     print("]")
 
 
-def debug_signed_ints(byte_stream, byte_idx, note_str, num=1):
-    out_int = struct.unpack("<"+"i"*num,in_bytes[byte_idx:byte_idx+4*num])
-    byte_idx +=4*num
-    print("%6d-%6d"%(byte_idx-4,byte_idx-1), end="")
+def debug_generic(byte_stream, byte_start, note_str, format_str):
+    bytes_per = struct.calcsize(format_str)
+    num_shorts = len(byte_stream)//(bytes_per)
+    out_shorts = struct.unpack("<"+format_str*num_shorts, byte_stream)
+    byte_idx = byte_start + len(byte_stream)
+    print("%6d-%6d"%(byte_start,byte_idx-1), end="")
     print("\t"+note_str+":")
-    print_list(out_int, bits=32)
-    print_list(out_int, bits=32, dec_not_hex=False)
-    return (out_int, byte_idx)
-
-
-def debug_unsigned_ints(byte_stream, byte_idx, note_str, num=1):
-    out_int = struct.unpack("<"+"I"*num,in_bytes[byte_idx:byte_idx+4*num])
-    byte_idx +=4*num
-    print("%6d-%6d"%(byte_idx-4,byte_idx-1), end="")
-    print("\t"+note_str+":")
-    print_list(out_int, bits=32)
-    print_list(out_int, bits=32, dec_not_hex=False)
-    return (out_int, byte_idx)
-
-
-def debug_unsigned_shorts(byte_stream, byte_idx, note_str, num=1):
-    out_shorts = struct.unpack("<"+"H"*num,in_bytes[byte_idx:(byte_idx+2*num)])
-    byte_idx +=2*num
-    print("%6d-%6d"%(byte_idx-2*num,byte_idx-1), end="")
-    print("\t"+note_str+":")
-    print_list(out_shorts, bits=16)
-    print_list(out_shorts, bits=16, dec_not_hex=False)
+    print_list(out_shorts, bits=bytes_per*8)
+    print_list(out_shorts, bits=bytes_per*8, dec_not_hex=False)
     return (out_shorts, byte_idx)
 
 
-def debug_string(byte_stream, byte_idx_start, byte_idx_end, note_str):
-    byte_string = byte_stream[byte_idx_start:byte_idx_end+1]
-    byte_idx = byte_idx_end + 1
-    print("%6d-%6d"%(byte_idx_start,byte_idx_end), end="")
-    print("\t"+note_str+":" )
-    print("\t"+byte_string.decode("utf-8","ignore"))
-    return (byte_string, byte_idx)
+def debug_ints(byte_stream, byte_start, note_str):
+    (out_ints, byte_idx) = debug_generic(
+            byte_stream, byte_start, note_str, "i")
+    return (out_ints, byte_idx)
 
 
-def debug_bytes(byte_stream, byte_idx_start, byte_idx_end, note_str):
-    byte_string = byte_stream[byte_idx_start:byte_idx_end+1]
-    byte_string_nums = [x for x in byte_string]
-    byte_idx = byte_idx_end + 1
-    print("%6d-%6d"%(byte_idx_start,byte_idx_end), end="")
-    print("\t"+note_str+":" )
-    print_list(byte_string_nums)
-    print_list(byte_string_nums, dec_not_hex=False)
-    return (byte_string, byte_idx)
+def debug_uints(byte_stream, byte_start, note_str):
+    (out_uints, byte_idx) = debug_generic(
+            byte_stream, byte_start, note_str, "I")
+    return (out_uints, byte_idx)
 
 
-def debug_nullterm_string(byte_stream, byte_idx_start, note_str):
-    byte_idx = byte_idx_start
-    while byte_stream[byte_idx] != 0:
+def debug_ushorts(byte_stream, byte_start, note_str):
+    (out_shorts, byte_idx) = debug_generic(
+            byte_stream, byte_start, note_str, "H")
+    return (out_shorts, byte_idx)
+
+
+def debug_bytes(byte_stream, byte_start, note_str):
+    (out_bytes, byte_idx) = debug_generic(
+            byte_stream, byte_start, note_str, "B")
+    return (out_bytes, byte_idx)
+
+
+def debug_string(byte_stream, byte_start, note_str):
+    out_string = byte_stream.decode("utf-8","ignore")
+    byte_idx = byte_start + len(byte_stream)
+    print("%6d-%6d"%(byte_start,byte_idx - 1), end="")
+    print("\t"+note_str+":")
+    print("\t"+out_string)
+    return (out_string, byte_idx)
+
+
+def debug_nullterm_string(in_bytes, byte_start, note_str):
+    byte_idx = byte_start
+    while in_bytes[byte_idx] != 0:
         byte_idx += 1
-    return debug_bytes(byte_stream, byte_idx_start, byte_idx, note_str)
+    return debug_string(in_bytes[byte_start:byte_idx+1], byte_start, note_str)
 
+
+def is_valid_string(byte_stream):
+    try:
+        out_string = byte_stream.decode("utf-8","strict")
+    except:
+        return False
+    return True
+
+
+def read_field(in_bytes, byte_idx, note_str="??"):
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    #(out_bytes, _) = debug_bytes(
+    #        in_bytes[byte_idx:byte_idx+8], byte_idx, "bytes")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    #(out_uints, _) = debug_uints(
+    #        in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_string, _) = debug_string(
+            field_payload, byte_idx+8, note_str)
+    (out_bytes, _) = debug_bytes(
+            field_payload, byte_idx+8, "bytes")
+    if len(field_payload)%2 == 0:
+        (out_ushorts, _) = debug_ushorts(
+                field_payload, byte_idx+8, "ushorts")
+    if len(field_payload)%4 == 0:
+        (out_uints, _) = debug_uints(
+                field_payload, byte_idx+8, "uints")
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    return (field_type, field_payload, byte_idx+field_len)
 
 filename = os.path.realpath(sys.argv[1])
 
@@ -106,115 +151,57 @@ with open(filename, 'rb') as in_fh:
 byte_idx = 160
 codeFound = False
 
-while( True ):
+while( byte_idx < len(in_bytes) ):
     codeFound = False
-    # <2-byte code><2-byte length><2*(length+1)-byte payload>
-    print("---------------------------------------------------------")
-    (code, byte_idx) = debug_unsigned_shorts(in_bytes, byte_idx, "code")
-    code = code[0]
-    if code==0x81:
-        codeFound = True
+    field_start = byte_idx
+    (field_type, field_payload, byte_idx) = read_field(in_bytes, byte_idx )
 
-    # short length = in.readShort();
-    (length, byte_idx) = debug_unsigned_shorts(in_bytes, byte_idx, "length")
-    length = length[0]
+    # restart after garbage
+    if field_start==380 and byte_idx==380:
+        byte_idx=4924
+    if field_start==7659 and byte_idx==7659:
+        byte_idx=11013
+    if field_start==22710 and byte_idx==22710:
+        byte_idx=23002
+    if field_start==23157 and byte_idx==23157:
+        byte_idx=24325
+    if field_start==41995 and byte_idx==41995:
+        byte_idx=42771
+    if field_start==43570 and byte_idx==43570:
+        byte_idx=44500
 
-    # Matt DEBUG: store start of rest of field
-    byte_idx_payload_start = byte_idx
+    # break if we still aren't advancing
+    if byte_idx==field_start:
+        print("BREAK!!!!")
+        break
 
-    if codeFound:
+    if field_type==0x81:
         print("Code Found")
+        (out_uints, _) = debug_uints(
+                field_payload, field_start+8, "uints")
+        interesting_field_start = field_start
+        interesting1 = out_uints[0]
+        #break
 
-        # baseFP = in.getFilePointer() + 2;
-        baseFP = byte_idx + 2 + 2 + 2*length
-        print("baseFP: %d"%baseFP)
+print("interesting1 = "+repr(interesting1))
+print("interesting_field_start = "+repr(interesting_field_start))
+print("interesting1 - 8161 = "+repr(interesting1-8161))
 
-        #if (length > 1) {in.seek(in.getFilePointer() - 2);}
-        if length > 1:
-            print("length > 1 so adjust byte_idx = byte_idx-2")
-            byte_idx += -2 +2 + 2*length
-
-        # readInt - Read four input bytes and return an int value.
-        # skip = in.readInt() - 32;
-        (skip, byte_idx) = debug_signed_ints(in_bytes, byte_idx, "skip")
-        skip = skip[0] - 32
-
-    byte_idx = byte_idx_payload_start
-    if length==1 or length==2:
-        # in.skipBytes(2 + 2 * length);
-        byte_idx += 16
-    else:
-        # in.skipBytes(2 + 2 * length);
-        byte_idx += 2 + 2*length
-
-    if byte_idx > len(in_bytes):
-        print("EOF reached")
-        break
-
-    debug_bytes(in_bytes, byte_idx_payload_start, byte_idx-1, "bytes")
-    debug_unsigned_shorts(in_bytes, byte_idx_payload_start, "shorts", num=8)
-    debug_unsigned_ints(in_bytes, byte_idx_payload_start, "unsigned ints", num=8)
-    debug_signed_ints(in_bytes, byte_idx_payload_start, "ints", num=8)
-    debug_string(in_bytes, byte_idx_payload_start, byte_idx-1, "string")
-
-    if codeFound:
-        break
-
-# BASE_OFFSET = 352
-# diff = BASE_OFFSET - baseFP;
-# skip += diff;
-diff = 352 - baseFP
-skip = skip + diff
-
-print("baseFP + skip = "+repr(baseFP + skip))
-
-if (baseFP + skip - 8187) > 0:
-    #in.seek(baseFP + skip - 8187)
-    byte_idx = baseFP + skip - 8187
+if (interesting1 - 8161) > 0:
+    byte_idx = interesting1 - 8161
     print("byte_idx = "+repr(byte_idx))
 
-    # HACK: TODO: setting this hard coded right now (???)
-    #   TODO: figure out how to get to here later
-    # need 50232 for test.1sc
-    byte_idx = baseFP + skip - 8473
+    (field_type, scanner_name_str, byte_idx) = read_field(
+            in_bytes, byte_idx, note_str="Scanner Name")
 
-    # readCString - Read a string of arbitrary length, terminated by a
-    #      null char.
-    #scannerName = in.readCString()
-    (scanner_name, byte_idx) = debug_nullterm_string(
-            in_bytes, byte_idx, "Scanner Name"
-            )
-  
-    #in.skipBytes(8)
-    byte_idx += 8
-  
-    # readCString - Read a string of arbitrary length, terminated by a
-    #      null char.
-    #in.readCString()
-    (number_of_pixels, byte_idx) = debug_nullterm_string(
-            in_bytes, byte_idx, "Number of Pixels"
-            )
-  
-    #in.skipBytes(8)
-    byte_idx += 8
-  
-    # readCString - Read a string of arbitrary length, terminated by a
-    #      null char.
-    (image_area, byte_idx) = debug_nullterm_string(
-            in_bytes, byte_idx, "Image Area"
-            )
-  
-    #imageArea = imageArea.substring(imageArea.indexOf(':') + 1).trim()
-    #int xIndex = imageArea.indexOf('x')
-    #if (xIndex > 0) {
-    #    int space = imageArea.indexOf(' ')
-    #    if (space >= 0) {
-    #        String width = imageArea.substring(1, space)
-    #        int nextSpace = imageArea.indexOf(" ", xIndex + 2)
-    #        if (nextSpace > xIndex) {
-    #            String height = imageArea.substring(xIndex + 1, nextSpace)
-    #            physicalWidth = Double.parseDouble(width.trim()) * 1000
-    #            physicalHeight = Double.parseDouble(height.trim()) * 1000
+    (field_type, num_pixels_str, byte_idx) = read_field(
+            in_bytes, byte_idx, note_str="Number of Pixels")
+
+    (field_type, image_area_str, byte_idx) = read_field(
+            in_bytes, byte_idx, note_str="Image Area")
+
+    (field_type, scan_mem_str, byte_idx) = read_field(
+            in_bytes, byte_idx, note_str="Scan Memory Size")
 
 
 #  protected void initFile(String id) throws FormatException, IOException {
