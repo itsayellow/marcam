@@ -141,6 +141,14 @@ def read_field(in_bytes, byte_idx, note_str="??"):
 
     return (field_type, field_payload, byte_idx+field_len)
 
+
+def jump_idx(jump_from, jump_to, chk_field_start, chk_byte_idx):
+    if chk_field_start==jump_from and chk_byte_idx==jump_from:
+        print("jump....jump....jump....jump....jump")
+        return jump_to
+    else:
+        return byte_idx
+
 filename = os.path.realpath(sys.argv[1])
 
 print(filename)
@@ -157,22 +165,24 @@ while( byte_idx < len(in_bytes) ):
     (field_type, field_payload, byte_idx) = read_field(in_bytes, byte_idx )
 
     # restart after garbage
-    if field_start==380 and byte_idx==380:
-        byte_idx=4924
-    if field_start==7659 and byte_idx==7659:
-        byte_idx=11013
-    if field_start==22710 and byte_idx==22710:
-        byte_idx=23002
-    if field_start==23157 and byte_idx==23157:
-        byte_idx=24325
-    if field_start==41995 and byte_idx==41995:
-        byte_idx=42771
-    if field_start==43570 and byte_idx==43570:
-        byte_idx=44500
+    byte_idx = jump_idx(380, 4924, field_start, byte_idx)
+    byte_idx = jump_idx(7659, 11013, field_start, byte_idx)
+    byte_idx = jump_idx(22710, 23002, field_start, byte_idx)
+    byte_idx = jump_idx(23157, 24325, field_start, byte_idx)
+    byte_idx = jump_idx(41995, 42771, field_start, byte_idx)
+    byte_idx = jump_idx(43570, 44500, field_start, byte_idx)
+    byte_idx = jump_idx(49848, 50224, field_start, byte_idx)
+    byte_idx = jump_idx(50924, 52908, field_start, byte_idx)
+    byte_idx = jump_idx(58329, 59881, field_start, byte_idx)
+
+    # NOTES:
+    # image starts somewhere around 59946 in test.1sc
+    # I think field_type==100 is data for preceding/following text fields
 
     # break if we still aren't advancing
     if byte_idx==field_start:
         print("BREAK!!!!")
+        print("--------------------------------------------------------------")
         break
 
     if field_type==0x81:
