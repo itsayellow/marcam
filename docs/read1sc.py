@@ -16,8 +16,8 @@ Header
     <4-byte possible index or other>
 Payload
     <bytes or ushort or int or uint until end of field>
---------
 
+--------
 field_type=0=0x0
     end of data, beginning of 0 fill (control field)
     always field_len=8
@@ -39,10 +39,13 @@ field_type=129=0x81
 field_type=1000=0x03e8
     has date and scanner name in text, amongst binary
 
+fiel_type>999 may have negative-valued ints (or it may be other data)
+
 After 380, all zeros, ending in bytes:
     0xbf,0x0d,0x00,0x00,0x04,0x00,0x00,0x00
     0x00000dbf, 0x00000004
 
+--------
 bio-formats.java:
     codeFound == 0x81 (field_type)
     baseFP = <byte_idx of start of payload of field_type=0x81> + 2
@@ -88,6 +91,7 @@ bio-formats.java:
             2*xsize         2*xsize+1       2*xsize+2       3*xsize-1
         (x=0,y=ysize-3), (x=1,y=ysize-3), (2,ysize-3) .. (xsize-1,ysize-3),
 
+--------
 test.1sc:
     BitsPerPixel   16
     DimensionOrder    XYCZT
@@ -226,6 +230,7 @@ def read_field(in_bytes, byte_idx, note_str="??"):
     return return_vals
 
 def read_field_generic(in_bytes, byte_idx, note_str="??"):
+    field_info = {}
     print("---------------------------------------------------------------")
     print("byte_idx = "+repr(byte_idx))
 
@@ -262,13 +267,18 @@ def read_field_generic(in_bytes, byte_idx, note_str="??"):
     if len(field_payload)%4 == 0:
         (out_uints, _) = debug_uints(
                 field_payload, byte_idx+8, "uints")
-        (out_ints, _) = debug_ints(
-                field_payload, byte_idx+8, "ints")
+        if any([x>0x7FFFFFFF for x in out_uints]):
+            # only print signed integers if one is different than uint
+            (out_ints, _) = debug_ints(
+                    field_payload, byte_idx+8, "ints")
 
-    return (field_type, field_payload, byte_idx+field_len)
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    return (byte_idx+field_len, field_info)
 
 
 def read_field_type0(in_bytes, byte_idx, note_str="??"):
+    field_info = {}
     print("---------------------------------------------------------------")
     print("byte_idx = "+repr(byte_idx))
 
@@ -288,10 +298,12 @@ def read_field_type0(in_bytes, byte_idx, note_str="??"):
     print("field_type= %d"%field_type)
     print("field_len = %d"%field_len)
 
-    return (field_type, field_payload, byte_idx+field_len)
+    field_info['type'] = field_type
+    return (byte_idx+field_len, field_info)
 
 
 def read_field_type16(in_bytes, byte_idx, note_str="??"):
+    field_info = {}
     print("---------------------------------------------------------------")
     print("byte_idx = "+repr(byte_idx))
 
@@ -321,13 +333,19 @@ def read_field_type16(in_bytes, byte_idx, note_str="??"):
 
     (out_string, _) = debug_string(
             field_payload, byte_idx+8, "string")
-    (out_bytes, _) = debug_bytes(
-            field_payload, byte_idx+8, "bytes")
+    if not is_valid_string(field_payload):
+        # some byte does not resolve to valid utf-8 character
+        print("invalid string")
+        (out_bytes, _) = debug_bytes(
+                field_payload, byte_idx+8, "bytes")
 
-    return (field_type, field_payload, byte_idx+field_len)
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    return (byte_idx+field_len, field_info)
 
 
 def read_field_type100(in_bytes, byte_idx, note_str="??"):
+    field_info = {}
     print("---------------------------------------------------------------")
     print("byte_idx = "+repr(byte_idx))
 
@@ -354,10 +372,16 @@ def read_field_type100(in_bytes, byte_idx, note_str="??"):
 
     (out_uints, _) = debug_uints(
             field_payload, byte_idx+8, "uints")
-    (out_ints, _) = debug_ints(
-            field_payload, byte_idx+8, "ints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
 
-    return (field_type, field_payload, byte_idx+field_len)
+    # TODO: parse out_uints or out_ints into data dict with keys of data_id
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = out_uints
+    return (byte_idx+field_len, field_info)
 
 
 def jump_idx(jump_from, jump_to, chk_field_start, chk_byte_idx):
@@ -409,7 +433,7 @@ codeFound = False
 while( byte_idx < len(in_bytes) ):
     codeFound = False
     field_start = byte_idx
-    (field_type, field_payload, byte_idx) = read_field(in_bytes, byte_idx )
+    (byte_idx, field_info) = read_field(in_bytes, byte_idx )
 
     # restart after garbage
     # jump of 3768=0xeb8
@@ -459,10 +483,10 @@ while( byte_idx < len(in_bytes) ):
         print("--------------------------------------------------------------")
         break
 
-    if field_type==0x81:
+    if field_info['type']==0x81:
         print("Code Found")
         (out_uints, _) = debug_uints(
-                field_payload, field_start+8, "uints")
+                field_info['payload'], field_start+8, "uints")
         interesting_field_start = field_start
         interesting1 = out_uints[0]
         #break
@@ -483,17 +507,10 @@ if (interesting1 - 8161) > 0:
     byte_idx = interesting1 - 8161
     print("byte_idx = "+repr(byte_idx))
 
-    (field_type, scanner_name_str, byte_idx) = read_field(
-            in_bytes, byte_idx, note_str="Scanner Name")
-
-    (field_type, num_pixels_str, byte_idx) = read_field(
-            in_bytes, byte_idx, note_str="Number of Pixels")
-
-    (field_type, image_area_str, byte_idx) = read_field(
-            in_bytes, byte_idx, note_str="Image Area")
-
-    (field_type, scan_mem_str, byte_idx) = read_field(
-            in_bytes, byte_idx, note_str="Scan Memory Size")
+    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scanner Name")
+    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Number of Pixels")
+    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Image Area")
+    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scan Memory Size")
 
 (img_ushorts, _) = debug_ushorts(
         in_bytes[59918:len(in_bytes)], 59918, "ushorts", quiet=True)
