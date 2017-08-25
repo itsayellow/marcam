@@ -234,6 +234,51 @@ def is_valid_string(byte_stream):
 
 
 def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
+    # 0     Jump Field - nop filler data (or used somehow?)
+    # 2     nop field - payload is all 0's
+    # 16    String field - text label assigned to previous data through data_id
+    #       Last 4 bytes of field header of this field is data_id that matches
+    #       data_id uint in field_type=100 payload
+    # 100   Data field - contains multiple data assigned to future text labels
+    #       Last 4 bytes of field headers of field_type=16 is data_id that match
+    #       data_id uints in this field payload
+    # 101   Data field - contains multiple data assigned to future text
+    #       4 uint string matches data from field_type=100 assigned to
+    #       field_type=16 text label
+    # 102   Data field - contains multiple data assigned to future text
+    #       4 uint string matches data from field_type=100 assigned to
+    #       field_type=16 text label
+    # 126   1st uint a pointer to byte val=6180 near end of Jump Field,
+    #       right before field_type=102, data corresponding to text label
+    #       "Audit Trail"
+    # 127   1st uint a pointer to byte val=1020 near end of Jump Field,
+    #       right before field_type=1000 with "Audit Trail" text inside
+    # 128
+    # 129
+    # 130   1st uint a pointer to byte val=68 4 uints before end of Jump Field,
+    #       right at IMAGE DATA START
+    #       Image data pointer
+    #       uint[0] = img data start, uint[1] = img data length
+    # 131
+    # 132
+    # 133
+    # 140
+    # 141
+    # 142
+    # 143
+    # 1000
+    # 1004
+    # 1007
+    # 1008
+    # 1010
+    # 1011
+    # 1015
+    # 1020
+    # 1022
+    # 1024
+    # 1030
+    # 1040
+    
     # field types:
     # may be zero-padding and not real field type
     # 0, 2,
