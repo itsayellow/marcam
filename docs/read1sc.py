@@ -33,9 +33,6 @@ field_type=16=0x10
     last 4 bytes of header (uint or int) matches number in field_type=100
     data field_payload
     comes AFTER field_type=100 data
-field_type=129=0x81
-    first int of payload is probably offset to get us to image data
-        (from start of file?  from start of field?)
 field_type=1000=0x03e8
     has date and scanner name in text, amongst binary
 
@@ -190,15 +187,15 @@ def debug_bytes(byte_stream, byte_start, note_str, quiet=False):
             byte_stream, byte_start, note_str, "B", quiet=quiet)
     return (out_bytes, byte_idx)
 
-def debug_string(byte_stream, byte_start, note_str, quiet=False):
+def debug_string(byte_stream, byte_start, note_str, multiline=False, quiet=False):
     chars_in_line = 30
     out_string = byte_stream.decode("utf-8","replace")
     byte_idx = byte_start + len(byte_stream)
     if not quiet:
         print("%6d-%6d"%(byte_start,byte_idx - 1), end="")
         print("\t"+note_str+":")
-        if len(byte_stream) > chars_in_line:
-            for i in range(len(byte_stream)//chars_in_line):
+        if multiline:
+            for i in range(1+len(byte_stream)//chars_in_line):
                 byte_substream = byte_stream[i*chars_in_line:(i+1)*chars_in_line]
                 byte_substring = str_safe_bytes(byte_substream)
                 out_substring = byte_substring.decode("utf-8","replace")
@@ -248,53 +245,64 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     # 102   Data field - contains multiple data assigned to future text
     #       4 uint string matches data from field_type=100 assigned to
     #       field_type=16 text label
-    # 126   1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
+    # 126   Data Block 6
+    #       1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
     #       right before field_type=102, data corresponding to text label
     #       "Audit Trail"
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=140's data block
-    # 127   1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
+    # 127   Data Block 7
+    #       1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
     #       right before field_type=1000 with "Audit Trail" text inside
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=126's data block
-    # 128   1st uint a pointer to byte val=7293 4 uints before end of Jump Field,
+    # 128   Data Block 8
+    #       1st uint a pointer to byte val=7293 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=127's data block
-    # 129   1st uint a pointer to byte val=1533 4 uints before end of Jump Field,
+    # 129   Data Block 9
+    #       1st uint a pointer to byte val=1533 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=128's data block
-    # 130   1st uint a pointer to byte val=68 4 uints before end of Jump Field,
+    # 130   Data Block 10 - Image Data
+    #       1st uint a pointer to byte val=68 4 uints before end of Jump Field,
     #       right at IMAGE DATA START
     #       ends at end of image data (could be end of file)
     #       Image data pointer
     #       uint[0] = img data start, uint[1] = img data length
     #       this starts after end of field_type=129's data block
     # 131   ???
-    # 132   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    # 132   Data Block 2
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=143's data block
-    # 133   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    # 133   Data Block 3
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=132's data block
-    # 140   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    # 140   Data Block 5
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=141's data block
-    # 141   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    # 141   Data Block 4
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=133's data block
-    # 142   1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+    # 142   Data Block 0
+    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of long zero fill after 160-380 fields
-    # 143   1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+    # 143   Data Block 1
+    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=142's data block
@@ -350,6 +358,12 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
                 )
     elif field_type==102:
         return_vals = read_field_type102(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
+    elif field_type==129:
+        return_vals = read_field_type129(
                 in_bytes, byte_idx,
                 note_str=note_str,
                 field_data=field_data
@@ -421,7 +435,7 @@ def read_field_generic(in_bytes, byte_idx, note_str="??"):
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     (out_string, _) = debug_string(
-            field_payload, byte_idx+8, note_str)
+            field_payload, byte_idx+8, note_str, multiline=True)
     (out_bytes, _) = debug_bytes(
             field_payload, byte_idx+8, "bytes")
     if len(field_payload)%2 == 0:
@@ -681,6 +695,52 @@ def read_field_type102(in_bytes, byte_idx, note_str="??", field_data={}):
     return (byte_idx+field_len, field_info)
 
 
+def read_field_type129(in_bytes, byte_idx, note_str="??", field_data={}):
+    """
+    field_type==129 contains the pointer to the start of the data block
+    before the image data
+    """
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # out_uints[0] = data start
+    # out_uints[1] = data length
+    # out_uints[2] = ???
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
 def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={}):
     """
     field_type==130 contains the pointer to the start of the image data
@@ -716,9 +776,9 @@ def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={}):
         (out_ints, _) = debug_ints(
                 field_payload, byte_idx+8, "ints")
 
-    # TODO: what is the format of this??
-    #for i in range(len(out_uints)//4):
-    #    field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+    # out_uints[0] = image data start
+    # out_uints[1] = image data length
+    # out_uints[2] = ???
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -799,7 +859,7 @@ def read_field_type1000(in_bytes, byte_idx, note_str="??", field_data={}):
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     (out_string, _) = debug_string(
-            field_payload, byte_idx+8, "string")
+            field_payload, byte_idx+8, "string", multiline=True)
     (out_ushorts, _) = debug_ushorts(
             field_payload, byte_idx+8, "ushorts")
     (out_uints, _) = debug_uints(
@@ -967,60 +1027,38 @@ while( byte_idx < len(in_bytes) ):
     (byte_idx, field_info) = read_field(in_bytes, byte_idx, field_data=field_data)
     if 'data' in field_info:
         field_data = field_info['data']
+    if field_info['type']==127:
+        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
+        data07_idx_start = out_uints[0]
+        data07_len = out_uints[1]
+        print("Field Type 127 - Data Block 07 (???)")
+        print("    data starts at byte %d"%(data07_idx_start))
+        print("    data length is %d bytes"%(data07_len))
+    if field_info['type']==128:
+        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
+        data08_idx_start = out_uints[0]
+        data08_len = out_uints[1]
+        print("Field Type 128 - Data Block 08 (???)")
+        print("    data starts at byte %d"%(data08_idx_start))
+        print("    data length is %d bytes"%(data08_len))
+    if field_info['type']==129:
+        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
+        data09_idx_start = out_uints[0]
+        data09_len = out_uints[1]
+        print("Field Type 129 - Data Block 09 (???)")
+        print("    data starts at byte %d"%(data09_idx_start))
+        print("    data length is %d bytes"%(data09_len))
     if field_info['type']==130:
         (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
         img_data_idx_start = out_uints[0]
         img_data_len = out_uints[1]
-        print("Field Type 130")
-        print("    img_data starts at byte %d"%(img_data_idx_start))
-        print("    img_data length is %d bytes"%(img_data_len))
-
-    # THESE JUMPS ARE OBSOLETE WITH field_type==0 JUMP LOGIC
-    ## restart after garbage
-    ## jump of 3768=0xeb8
-    #byte_idx = jump_idx(380, 4148, field_start, byte_idx)
-
-    ## jump of 118=0x76
-    #byte_idx = jump_idx(7659, 7777, field_start, byte_idx)
-    ## or:
-    ## maybe wrong? field_type=0 with field_len=102 seems invalid
-    ##byte_idx = jump_idx(7659, 7699, field_start, byte_idx)
-
-    ## jump of 64=0x40
-    #byte_idx = jump_idx(22710, 22774, field_start, byte_idx)
-    ## jump of 36=0x24
-    #byte_idx = jump_idx(23157, 23193, field_start, byte_idx)
-    ## jump of 64=0x40
-    #byte_idx = jump_idx(41995, 42059, field_start, byte_idx)
-
-    ## jump of 106=0x6a
-    #byte_idx = jump_idx(43570, 43676, field_start, byte_idx)
-    ## or:
-    ## maybe wrong?: field_type=29160, odd field_type
-    ##byte_idx = jump_idx(43570, 44192, field_start, byte_idx) # may not be right
-
-    ## jump of 64=0x40
-    #byte_idx = jump_idx(49848, 49912, field_start, byte_idx)
-    ## or:
-    ##byte_idx = jump_idx(49848, 50050, field_start, byte_idx)
-    ##byte_idx = jump_idx(49848, 50154, field_start, byte_idx)
-
-    ## jump of 120=0x78
-    #byte_idx = jump_idx(50924, 51044, field_start, byte_idx)
-    ## or:
-    ### jump of 132=0x84
-    ##byte_idx = jump_idx(50924, 51056, field_start, byte_idx)
-
-    ## jump of 64=0x40
-    #byte_idx = jump_idx(58329, 58393, field_start, byte_idx)
-
-    # NOTES:
-    # image starts somewhere around 59946 in test.1sc
-    # I think field_type==100 is data for preceding/following text fields
+        print("Field Type 130 - Data Block 10 (Image Data)")
+        print("    data starts at byte %d"%(img_data_idx_start))
+        print("    data length is %d bytes"%(img_data_len))
 
     # break if we still aren't advancing
     if byte_idx==field_start:
-        print("BREAK!!!!")
+        print("ERROR BREAK!!!!")
         print("--------------------------------------------------------------")
         break
 
@@ -1030,179 +1068,42 @@ while( byte_idx < len(in_bytes) ):
         print("--------------------------------------------------------------")
         break
 
-    if field_info['type']==0x81:
-        print("Code Found")
-        (out_uints, _) = debug_uints(
-                field_info['payload'], field_start+8, "uints")
-        interesting_field_start = field_start
-        interesting1 = out_uints[0]
-        #break
+# parse data blocks
+data07_idx_start = out_uints[0]
+data07_len = out_uints[1]
 
-# jump to image 59946 - 783785 (last byte of file)
-# jump of 28=0x1c
-byte_idx = jump_idx(59918, 59946, field_start, byte_idx)
 
-(out_ushorts, _) = debug_ushorts(
-        in_bytes[59946:len(in_bytes)],
-        59946, "img_data")
+#    if field_info['type']==0x81:
+#        print("Code Found")
+#        (out_uints, _) = debug_uints(
+#                field_info['payload'], field_start+8, "uints")
+#        interesting_field_start = field_start
+#        interesting1 = out_uints[0]
+#        #break
+#
+## jump to image 59946 - 783785 (last byte of file)
+## jump of 28=0x1c
+#byte_idx = jump_idx(59918, 59946, field_start, byte_idx)
+#
+#(out_ushorts, _) = debug_ushorts(
+#        in_bytes[59946:len(in_bytes)],
+#        59946, "img_data")
+#
+#print("interesting1 = "+repr(interesting1))
+#print("interesting_field_start = "+repr(interesting_field_start))
+#print("interesting1 - 8161 = "+repr(interesting1-8161))
+#
+#if (interesting1 - 8161) > 0:
+#    byte_idx = interesting1 - 8161
+#    print("byte_idx = "+repr(byte_idx))
+#
+#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scanner Name")
+#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Number of Pixels")
+#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Image Area")
+#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scan Memory Size")
 
-print("interesting1 = "+repr(interesting1))
-print("interesting_field_start = "+repr(interesting_field_start))
-print("interesting1 - 8161 = "+repr(interesting1-8161))
+#(img_ushorts, _) = debug_ushorts(
+#        in_bytes[59918:len(in_bytes)], 59918, "ushorts", quiet=True)
 
-if (interesting1 - 8161) > 0:
-    byte_idx = interesting1 - 8161
-    print("byte_idx = "+repr(byte_idx))
-
-    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scanner Name")
-    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Number of Pixels")
-    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Image Area")
-    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scan Memory Size")
-
-(img_ushorts, _) = debug_ushorts(
-        in_bytes[59918:len(in_bytes)], 59918, "ushorts", quiet=True)
-
-for img_ushort in img_ushorts:
-    print(img_ushort)
-    
-#  protected void initFile(String id) throws FormatException, IOException {
-#    super.initFile(id);
-#    in = new RandomAccessInputStream(id);
-#
-#    // if string at byte 48 is "Intel Format" then this is little-endian
-#    // little endian means LSByte is first, then next MSByte, then next...
-#    String check = in.readString(48);
-#    if (check.indexOf("Intel Format") != -1) {
-#      // order specifies little-endian if true, otw big-endian
-#      in.order(true);
-#    }
-#
-#    // seek - Seeks to the given offset within the stream.
-#    // start at byte 160
-#    in.seek(START_OFFSET);
-#
-#    boolean codeFound = false;
-#    int skip = 0;
-#    long baseFP = 0;
-#
-#    while (!codeFound) {
-#      // readShort - Read two input bytes and return a short value.
-#      short code = in.readShort();
-#
-#      if (code == 0x81) codeFound = true;
-#      short length = in.readShort();
-#
-#      // skipBytes - Skip n bytes within the stream
-#      in.skipBytes(2 + 2 * length);
-#      if (codeFound) {
-#        // getFilePointer - Gets the current (absolute) file pointer.
-#        baseFP = in.getFilePointer() + 2;
-#        if (length > 1) {
-#          in.seek(in.getFilePointer() - 2);
-#        }
-#        // readInt - Read four input bytes and return an int value.
-#        skip = in.readInt() - 32;
-#      }
-#      else {
-#        if (length == 1) in.skipBytes(12);
-#        else if (length == 2) in.skipBytes(10);
-#      }
-#    }
-#
-#    diff = BASE_OFFSET - baseFP;
-#    skip += diff;
-#
-#    double physicalWidth = 0d, physicalHeight = 0d;
-#    if (getMetadataOptions().getMetadataLevel() != MetadataLevel.MINIMUM) {
-#      if (baseFP + skip - 8187 > 0) {
-#        in.seek(baseFP + skip - 8187);
-#        // readCString - Read a string of arbitrary length, terminated by a
-#        //      null char.
-#        String scannerName = in.readCString();
-#
-#        in.skipBytes(8);
-#
-#        // readCString - Read a string of arbitrary length, terminated by a
-#        //      null char.
-#        in.readCString();
-#
-#        in.skipBytes(8);
-#
-#        // readCString - Read a string of arbitrary length, terminated by a
-#        //      null char.
-#        String imageArea = in.readCString();
-#
-#        imageArea = imageArea.substring(imageArea.indexOf(':') + 1).trim();
-#        int xIndex = imageArea.indexOf('x');
-#        if (xIndex > 0) {
-#          int space = imageArea.indexOf(' ');
-#          if (space >= 0) {
-#            String width = imageArea.substring(1, space);
-#            int nextSpace = imageArea.indexOf(" ", xIndex + 2);
-#            if (nextSpace > xIndex) {
-#              String height = imageArea.substring(xIndex + 1, nextSpace);
-#              physicalWidth = Double.parseDouble(width.trim()) * 1000;
-#              physicalHeight = Double.parseDouble(height.trim()) * 1000;
-#            }
-#          }
-#        }
-#      }
-#    }
-#
-#    in.seek(baseFP + skip - 298);
-#    String date = in.readString(17);
-#    date = DateTools.formatDate(date, "dd-MMM-yyyy HH:mm");
-#    in.skipBytes(73);
-#    String scannerName = in.readCString();
-#    addGlobalMeta("Scanner name", scannerName);
-#
-#    in.seek(baseFP + skip);
-#
-#    CoreMetadata m = core.get(0);
-#
-#    m.sizeX = in.readShort() & 0xffff;
-#    m.sizeY = in.readShort() & 0xffff;
-#    if (getSizeX() * getSizeY() > in.length()) {
-#      in.order(true);
-#      in.seek(in.getFilePointer() - 4);
-#      m.sizeX = in.readShort();
-#      m.sizeY = in.readShort();
-#    }
-#    in.skipBytes(2);
-#
-#    int bpp = in.readShort();
-#    m.pixelType = FormatTools.pixelTypeFromBytes(bpp, false, false);
-#
-#    offset = in.getFilePointer();
-#
-#    m.sizeZ = 1;
-#    m.sizeC = 1;
-#    m.sizeT = 1;
-#    m.imageCount = 1;
-#    m.dimensionOrder = "XYCZT";
-#    m.rgb = false;
-#    m.interleaved = false;
-#    m.indexed = false;
-#    m.littleEndian = in.isLittleEndian();
-#
-#    MetadataStore store = makeFilterMetadata();
-#    MetadataTools.populatePixels(store, this);
-#
-#    if (date != null) {
-#      store.setImageAcquisitionDate(new Timestamp(date), 0);
-#    }
-#    if (getMetadataOptions().getMetadataLevel() != MetadataLevel.MINIMUM) {
-#      Length sizeX =
-#        FormatTools.getPhysicalSizeX(physicalWidth / getSizeX());
-#      Length sizeY =
-#        FormatTools.getPhysicalSizeY(physicalHeight / getSizeY());
-#
-#      if (sizeX != null) {
-#        store.setPixelsPhysicalSizeX(sizeX, 0);
-#      }
-#      if (sizeY != null) {
-#        store.setPixelsPhysicalSizeY(sizeY, 0);
-#      }
-#    }
-#  }
-#
+#for img_ushort in img_ushorts:
+#    print(img_ushort)
