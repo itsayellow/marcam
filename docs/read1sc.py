@@ -253,6 +253,7 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     #       "Audit Trail"
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=140's data block
     # 127   1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
     #       right before field_type=1000 with "Audit Trail" text inside
     #       ends at another spot 4 uints before end of Jump Field
@@ -272,13 +273,31 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     #       Image data pointer
     #       uint[0] = img data start, uint[1] = img data length
     #       this starts after end of field_type=129's data block
-    # 131
-    # 132
-    # 133
-    # 140
-    # 141
-    # 142
-    # 143
+    # 131   ???
+    # 132   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=143's data block
+    # 133   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=132's data block
+    # 140   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=141's data block
+    # 141   1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=133's data block
+    # 142   1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of long zero fill after 160-380 fields
+    # 143   1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=142's data block
     # 1000
     # 1004
     # 1007
