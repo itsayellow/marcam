@@ -248,17 +248,30 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     # 102   Data field - contains multiple data assigned to future text
     #       4 uint string matches data from field_type=100 assigned to
     #       field_type=16 text label
-    # 126   1st uint a pointer to byte val=6180 near end of Jump Field,
+    # 126   1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
     #       right before field_type=102, data corresponding to text label
     #       "Audit Trail"
-    # 127   1st uint a pointer to byte val=1020 near end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    # 127   1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
     #       right before field_type=1000 with "Audit Trail" text inside
-    # 128
-    # 129
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=126's data block
+    # 128   1st uint a pointer to byte val=7293 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=127's data block
+    # 129   1st uint a pointer to byte val=1533 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=128's data block
     # 130   1st uint a pointer to byte val=68 4 uints before end of Jump Field,
     #       right at IMAGE DATA START
+    #       ends at end of image data (could be end of file)
     #       Image data pointer
     #       uint[0] = img data start, uint[1] = img data length
+    #       this starts after end of field_type=129's data block
     # 131
     # 132
     # 133
