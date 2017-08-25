@@ -233,9 +233,11 @@ def is_valid_string(byte_stream):
 def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     # 0     Jump Field - nop filler data (or used somehow?)
     # 2     nop field - payload is all 0's
+
     # 16    String field - text label assigned to previous data through data_id
     #       Last 4 bytes of field header of this field is data_id that matches
     #       data_id uint in field_type=100 payload
+
     # 100   Data field - contains multiple data assigned to future text labels
     #       Last 4 bytes of field headers of field_type=16 is data_id that match
     #       data_id uints in this field payload
@@ -245,6 +247,10 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     # 102   Data field - contains multiple data assigned to future text
     #       4 uint string matches data from field_type=100 assigned to
     #       field_type=16 text label
+    # 131   Data field - contains multiple data assigned to future text labels
+    #       Last 4 bytes of field headers of field_type=16 is data_id that match
+    #       data_id uints in this field payload
+
     # 126   Data Block 6
     #       1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
     #       right before field_type=102, data corresponding to text label
@@ -275,7 +281,6 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     #       Image data pointer
     #       uint[0] = img data start, uint[1] = img data length
     #       this starts after end of field_type=129's data block
-    # 131   ???
     # 132   Data Block 2
     #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
     #       ends at another spot 4 uints before end of Jump Field
@@ -306,6 +311,7 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     #       ends at another spot 4 uints before end of Jump Field
     #       uint[0] = data block start, uint[1] = data length
     #       this starts after end of field_type=142's data block
+
     # 1000
     # 1004
     # 1007
@@ -318,17 +324,6 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
     # 1024
     # 1030
     # 1040
-    
-    # field types:
-    # may be zero-padding and not real field type
-    # 0, 2,
-    # string to go with data via id_tag
-    # 16,
-    # data for future field_type=16
-    # 100, 101, 102,
-    # 126, 127, 128, 129, 130, 131, 132, 133,
-    # 140, 141, 142, 143,
-    # 1000, 1007, 1008, 1010, 1011, 1015, 1020, 1022, 1024, 1030, 1040
     
     (out_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
@@ -603,7 +598,7 @@ def read_field_type100(in_bytes, byte_idx, note_str="??", field_data={}):
 
     # parse out_uints into data dict with keys of data_id
     for i in range(len(out_uints)//9):
-        field_data[out_uints[i*9+3]] = out_uints[i*9:i*9+9]
+        field_data[out_uints[i*9+3]] = out_uints[i*9:(i+1)*9]
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -645,7 +640,7 @@ def read_field_type101(in_bytes, byte_idx, note_str="??", field_data={}):
 
     # parse out_uints into data dict with keys of data_id
     for i in range(len(out_uints)//5):
-        field_data[out_uints[i*5+4]] = out_uints[i*5:i*5+5]
+        field_data[out_uints[i*5+4]] = out_uints[i*5:(i+1)*5]
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -687,7 +682,7 @@ def read_field_type102(in_bytes, byte_idx, note_str="??", field_data={}):
 
     # parse out_uints into data dict with keys of data_id
     for i in range(len(out_uints)//4):
-        field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+        field_data[out_uints[i*4+3]] = out_uints[i*4:(i+1)*4]
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -818,9 +813,9 @@ def read_field_type131(in_bytes, byte_idx, note_str="??", field_data={}):
         (out_ints, _) = debug_ints(
                 field_payload, byte_idx+8, "ints")
 
-    # TODO: what is the format of this??
-    #for i in range(len(out_uints)//4):
-    #    field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+    # parse out_uints into data dict with keys of data_id
+    for i in range(len(out_uints)//3):
+        field_data[out_uints[i*3+1]] = out_uints[i*3:(i+1)*3]
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -1003,6 +998,39 @@ def search_backwards(in_bytes, field_start, level=0, min_search_idx=0):
                 min_search_idx=min_search_idx
                 )
 
+
+def parse_datablock(field_payload):
+    (out_uints, _) = debug_uints(field_payload, 0, "", quiet=True)
+    data_start = out_uints[0]
+    data_len = out_uints[1]
+    return(data_start, data_len)
+
+
+def print_datablock(data_start, data_len, block_name):
+    print()
+    print()
+    print()
+    print("=====================================================================")
+    print("DATA BLOCK %s"%block_name)
+    print("Start: %d"%(data_start))
+    print("End:   %d"%(data_start + data_len))
+    print()
+
+    byte_idx = data_start
+    # read first 4 ushorts
+    (out_uints, byte_idx) = debug_ushorts(in_bytes[byte_idx:byte_idx+8],
+            byte_idx,
+            "Data Block %s Header"%block_name
+            )
+
+    field_data = {}
+    while( byte_idx < data_start + data_len ):
+        field_start = byte_idx
+        (byte_idx, field_info) = read_field(in_bytes, byte_idx, field_data=field_data)
+        if 'data' in field_info:
+            field_data = field_info['data']
+
+
 filename = os.path.realpath(sys.argv[1])
 
 print(filename)
@@ -1011,7 +1039,6 @@ with open(filename, 'rb') as in_fh:
     in_bytes = in_fh.read()
 
 byte_idx = 160
-codeFound = False
 
 #SEARCH DEBUG
 #search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
@@ -1022,36 +1049,27 @@ codeFound = False
 field_data = {}
 img_data_idx_start = 0xffffffff
 while( byte_idx < len(in_bytes) ):
-    codeFound = False
     field_start = byte_idx
     (byte_idx, field_info) = read_field(in_bytes, byte_idx, field_data=field_data)
     if 'data' in field_info:
         field_data = field_info['data']
     if field_info['type']==127:
-        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
-        data07_idx_start = out_uints[0]
-        data07_len = out_uints[1]
+        (data07_idx_start, data07_len) = parse_datablock(field_info['payload'])
         print("Field Type 127 - Data Block 07 (???)")
         print("    data starts at byte %d"%(data07_idx_start))
         print("    data length is %d bytes"%(data07_len))
     if field_info['type']==128:
-        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
-        data08_idx_start = out_uints[0]
-        data08_len = out_uints[1]
+        (data08_idx_start, data08_len) = parse_datablock(field_info['payload'])
         print("Field Type 128 - Data Block 08 (???)")
         print("    data starts at byte %d"%(data08_idx_start))
         print("    data length is %d bytes"%(data08_len))
     if field_info['type']==129:
-        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
-        data09_idx_start = out_uints[0]
-        data09_len = out_uints[1]
+        (data09_idx_start, data09_len) = parse_datablock(field_info['payload'])
         print("Field Type 129 - Data Block 09 (???)")
         print("    data starts at byte %d"%(data09_idx_start))
         print("    data length is %d bytes"%(data09_len))
     if field_info['type']==130:
-        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
-        img_data_idx_start = out_uints[0]
-        img_data_len = out_uints[1]
+        (img_data_idx_start, img_data_len) = parse_datablock(field_info['payload'])
         print("Field Type 130 - Data Block 10 (Image Data)")
         print("    data starts at byte %d"%(img_data_idx_start))
         print("    data length is %d bytes"%(img_data_len))
@@ -1069,41 +1087,24 @@ while( byte_idx < len(in_bytes) ):
         break
 
 # parse data blocks
-data07_idx_start = out_uints[0]
-data07_len = out_uints[1]
 
+# Data Block 7
+print_datablock(data07_idx_start, data07_len, "7")
 
-#    if field_info['type']==0x81:
-#        print("Code Found")
-#        (out_uints, _) = debug_uints(
-#                field_info['payload'], field_start+8, "uints")
-#        interesting_field_start = field_start
-#        interesting1 = out_uints[0]
-#        #break
-#
-## jump to image 59946 - 783785 (last byte of file)
-## jump of 28=0x1c
-#byte_idx = jump_idx(59918, 59946, field_start, byte_idx)
-#
-#(out_ushorts, _) = debug_ushorts(
-#        in_bytes[59946:len(in_bytes)],
-#        59946, "img_data")
-#
-#print("interesting1 = "+repr(interesting1))
-#print("interesting_field_start = "+repr(interesting_field_start))
-#print("interesting1 - 8161 = "+repr(interesting1-8161))
-#
-#if (interesting1 - 8161) > 0:
-#    byte_idx = interesting1 - 8161
-#    print("byte_idx = "+repr(byte_idx))
-#
-#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scanner Name")
-#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Number of Pixels")
-#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Image Area")
-#    (byte_idx, field_info) = read_field(in_bytes, byte_idx, "Scan Memory Size")
+# Data Block 8
+print_datablock(data08_idx_start, data08_len, "8")
 
+# Data Block 9
+print_datablock(data09_idx_start, data09_len, "9")
+
+# Data Block 10 - Image Data
+#print_datablock(img_data_idx_start, img_data_len, "10")
+
+# byte_idx_start = img_data_idx_start
+# byte_idx_end = img_data_idx_start + img_data_len
 #(img_ushorts, _) = debug_ushorts(
-#        in_bytes[59918:len(in_bytes)], 59918, "ushorts", quiet=True)
-
+#        in_bytes[byte_idx_start:byte_idx_end],
+#        byte_idx_start, "img_data")
+#
 #for img_ushort in img_ushorts:
 #    print(img_ushort)
