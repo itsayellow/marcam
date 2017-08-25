@@ -277,6 +277,12 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
                 note_str=note_str,
                 field_data=field_data
                 )
+    elif field_type==130:
+        return_vals = read_field_type130(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
     elif field_type==131:
         return_vals = read_field_type131(
                 in_bytes, byte_idx,
@@ -375,8 +381,6 @@ def read_field_type0(in_bytes, byte_idx, note_str="??"):
     print("Field Header:")
     (out_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
     field_type = out_ushorts[0]
     field_len = out_ushorts[1]
 
@@ -385,7 +389,7 @@ def read_field_type0(in_bytes, byte_idx, note_str="??"):
     print("field_type= %d"%field_type)
     print("field_len = %d"%field_len)
 
-    print("Experimental Jump")
+    print("\n**** JUMP FIELD ****\n")
     # experimental jump
     #   used to only do this for field_len==8, but it seems to work for
     #   field_len==0 also!!
@@ -396,20 +400,22 @@ def read_field_type0(in_bytes, byte_idx, note_str="??"):
     test_byte_idx_start = byte_idx
     all_zeros = True
     while( True ):
+        # do the next 7 shorts start with a '0' value? if so keep looping
         (test_ushorts, _) = debug_ushorts(
                 in_bytes[byte_idx:byte_idx+14],
                 byte_idx,
                 "ushorts",
                 quiet=True)
         if test_ushorts[0]!=0:
-            print("next ushort was not 0")
+            # next ushort was not 0, so it is valid field_type
             break
         if test_ushorts.count(0)==len(test_ushorts) and all_zeros==True:
             pass
         elif test_ushorts.count(0)!=len(test_ushorts) and all_zeros==True:
             all_zeros = False
             if byte_idx > test_byte_idx_start:
-                print("All zeros (0) from bytes %d-%d"%(test_byte_idx_start,byte_idx))
+                print("%6d-%6d:"%(test_byte_idx_start,byte_idx-1))
+                print("\tAll zeros %d*(0,)"%(byte_idx-test_byte_idx_start))
             (out_ushorts, _) = debug_ushorts(
                     in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts")
         else:
@@ -591,6 +597,51 @@ def read_field_type102(in_bytes, byte_idx, note_str="??", field_data={}):
     # parse out_uints into data dict with keys of data_id
     for i in range(len(out_uints)//4):
         field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
+def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={}):
+    """
+    field_type==130 contains the pointer to the start of the image data
+    """
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # TODO: what is the format of this??
+    #for i in range(len(out_uints)//4):
+    #    field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -832,50 +883,59 @@ codeFound = False
 # field_data is data from last field_type=100 field, to be used in
 #   following field_type=16 fields
 field_data = {}
+img_data_idx_start = 0xffffffff
 while( byte_idx < len(in_bytes) ):
     codeFound = False
     field_start = byte_idx
     (byte_idx, field_info) = read_field(in_bytes, byte_idx, field_data=field_data)
     if 'data' in field_info:
         field_data = field_info['data']
+    if field_info['type']==130:
+        (out_uints, _) = debug_uints(field_info['payload'], 0, "", quiet=True)
+        img_data_idx_start = out_uints[0]
+        img_data_len = out_uints[1]
+        print("Field Type 130")
+        print("    img_data starts at byte %d"%(img_data_idx_start))
+        print("    img_data length is %d bytes"%(img_data_len))
 
-    # restart after garbage
-    # jump of 3768=0xeb8
-    byte_idx = jump_idx(380, 4148, field_start, byte_idx)
+    # THESE JUMPS ARE OBSOLETE WITH field_type==0 JUMP LOGIC
+    ## restart after garbage
+    ## jump of 3768=0xeb8
+    #byte_idx = jump_idx(380, 4148, field_start, byte_idx)
 
-    # jump of 118=0x76
-    byte_idx = jump_idx(7659, 7777, field_start, byte_idx)
-    # or:
-    # maybe wrong? field_type=0 with field_len=102 seems invalid
-    #byte_idx = jump_idx(7659, 7699, field_start, byte_idx)
+    ## jump of 118=0x76
+    #byte_idx = jump_idx(7659, 7777, field_start, byte_idx)
+    ## or:
+    ## maybe wrong? field_type=0 with field_len=102 seems invalid
+    ##byte_idx = jump_idx(7659, 7699, field_start, byte_idx)
 
-    # jump of 64=0x40
-    byte_idx = jump_idx(22710, 22774, field_start, byte_idx)
-    # jump of 36=0x24
-    byte_idx = jump_idx(23157, 23193, field_start, byte_idx)
-    # jump of 64=0x40
-    byte_idx = jump_idx(41995, 42059, field_start, byte_idx)
+    ## jump of 64=0x40
+    #byte_idx = jump_idx(22710, 22774, field_start, byte_idx)
+    ## jump of 36=0x24
+    #byte_idx = jump_idx(23157, 23193, field_start, byte_idx)
+    ## jump of 64=0x40
+    #byte_idx = jump_idx(41995, 42059, field_start, byte_idx)
 
-    # jump of 106=0x6a
-    byte_idx = jump_idx(43570, 43676, field_start, byte_idx)
-    # or:
-    # maybe wrong?: field_type=29160, odd field_type
-    #byte_idx = jump_idx(43570, 44192, field_start, byte_idx) # may not be right
+    ## jump of 106=0x6a
+    #byte_idx = jump_idx(43570, 43676, field_start, byte_idx)
+    ## or:
+    ## maybe wrong?: field_type=29160, odd field_type
+    ##byte_idx = jump_idx(43570, 44192, field_start, byte_idx) # may not be right
 
-    # jump of 64=0x40
-    byte_idx = jump_idx(49848, 49912, field_start, byte_idx)
-    # or:
-    #byte_idx = jump_idx(49848, 50050, field_start, byte_idx)
-    #byte_idx = jump_idx(49848, 50154, field_start, byte_idx)
+    ## jump of 64=0x40
+    #byte_idx = jump_idx(49848, 49912, field_start, byte_idx)
+    ## or:
+    ##byte_idx = jump_idx(49848, 50050, field_start, byte_idx)
+    ##byte_idx = jump_idx(49848, 50154, field_start, byte_idx)
 
-    # jump of 120=0x78
-    byte_idx = jump_idx(50924, 51044, field_start, byte_idx)
-    # or:
-    ## jump of 132=0x84
-    #byte_idx = jump_idx(50924, 51056, field_start, byte_idx)
+    ## jump of 120=0x78
+    #byte_idx = jump_idx(50924, 51044, field_start, byte_idx)
+    ## or:
+    ### jump of 132=0x84
+    ##byte_idx = jump_idx(50924, 51056, field_start, byte_idx)
 
-    # jump of 64=0x40
-    byte_idx = jump_idx(58329, 58393, field_start, byte_idx)
+    ## jump of 64=0x40
+    #byte_idx = jump_idx(58329, 58393, field_start, byte_idx)
 
     # NOTES:
     # image starts somewhere around 59946 in test.1sc
@@ -884,6 +944,12 @@ while( byte_idx < len(in_bytes) ):
     # break if we still aren't advancing
     if byte_idx==field_start:
         print("BREAK!!!!")
+        print("--------------------------------------------------------------")
+        break
+
+    if byte_idx > img_data_idx_start:
+        print("--------------------------------------------------------------")
+        print("We passed the img data, so BREAK!!")
         print("--------------------------------------------------------------")
         break
 
