@@ -146,6 +146,14 @@ def print_list(byte_list, bits=8, dec_not_hex=True):
     print("]")
 
 
+def str_safe_bytes(byte_stream):
+    table_from = bytes(range(256))
+    table_to = b'\x20' + b'\xff'*31 + bytes(range(32,127)) + b'\xff'*129
+    trans_table = byte_stream.maketrans( table_from, table_to )
+    out_byte_stream = byte_stream.translate(trans_table)
+    return out_byte_stream
+    
+
 def debug_generic(byte_stream, byte_start, note_str, format_str, quiet=False):
     bytes_per = struct.calcsize(format_str)
     num_shorts = len(byte_stream)//(bytes_per)
@@ -182,17 +190,28 @@ def debug_bytes(byte_stream, byte_start, note_str, quiet=False):
             byte_stream, byte_start, note_str, "B", quiet=quiet)
     return (out_bytes, byte_idx)
 
-
 def debug_string(byte_stream, byte_start, note_str, quiet=False):
-    out_string = byte_stream.decode("utf-8","ignore")
+    chars_in_line = 30
+    out_string = byte_stream.decode("utf-8","replace")
     byte_idx = byte_start + len(byte_stream)
     if not quiet:
         print("%6d-%6d"%(byte_start,byte_idx - 1), end="")
         print("\t"+note_str+":")
-        if len(out_string)>0 and out_string[-1]=='\x00':
-            print("\t"+out_string[:-1])
+        if len(byte_stream) > chars_in_line:
+            for i in range(len(byte_stream)//chars_in_line):
+                byte_substream = byte_stream[i*chars_in_line:(i+1)*chars_in_line]
+                byte_substring = str_safe_bytes(byte_substream)
+                out_substring = byte_substring.decode("utf-8","replace")
+                print("    %5d: "%(byte_start+i*chars_in_line), end="")
+                for char in out_substring:
+                    print(" %s"%(char),end="")
+                print()
+                print("           "+byte_substream.hex())
         else:
-            print("\t"+out_string)
+            if len(out_string)>0 and out_string[-1]=='\x00':
+                print("\t"+out_string[:-1])
+            else:
+                print("\t"+out_string)
     return (out_string, byte_idx)
 
 
@@ -214,18 +233,79 @@ def is_valid_string(byte_stream):
     return True
 
 
-def read_field(in_bytes, byte_idx, note_str="??"):
+def read_field(in_bytes, byte_idx, note_str="??", field_data={}):
+    # field types:
+    # may be zero-padding and not real field type
+    # 0, 2,
+    # string to go with data via id_tag
+    # 16,
+    # data for future field_type=16
+    # 100, 101, 102,
+    # 126, 127, 128, 129, 130, 131, 132, 133,
+    # 140, 141, 142, 143,
+    # 1000, 1007, 1008, 1010, 1011, 1015, 1020, 1022, 1024, 1030, 1040
+    
     (out_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
     field_type = out_ushorts[0]
     if field_type==0:
-        return_vals = read_field_type0(in_bytes, byte_idx, note_str=note_str)
+        return_vals = read_field_type0(
+                in_bytes, byte_idx,
+                note_str=note_str
+                )
     elif field_type==16:
-        return_vals = read_field_type16(in_bytes, byte_idx, note_str=note_str)
+        return_vals = read_field_type16(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
     elif field_type==100:
-        return_vals = read_field_type100(in_bytes, byte_idx, note_str=note_str)
+        return_vals = read_field_type100(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
+    elif field_type==101:
+        return_vals = read_field_type101(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
+    elif field_type==102:
+        return_vals = read_field_type102(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
+    elif field_type==131:
+        return_vals = read_field_type131(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
+    elif field_type==1000:
+        return_vals = read_field_type1000(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
+    elif field_type==1007:
+        return_vals = read_field_type1007(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
+    elif field_type==1022:
+        return_vals = read_field_type1022(
+                in_bytes, byte_idx,
+                note_str=note_str,
+                field_data=field_data
+                )
     else:
-        return_vals = read_field_generic(in_bytes, byte_idx, note_str=note_str)
+        return_vals = read_field_generic(
+                in_bytes, byte_idx,
+                note_str=note_str
+                )
     
     return return_vals
 
@@ -278,6 +358,15 @@ def read_field_generic(in_bytes, byte_idx, note_str="??"):
 
 
 def read_field_type0(in_bytes, byte_idx, note_str="??"):
+    # EXPERIMENTAL ALGORITHM FOR FINDING END OF JUMP
+    # READ:
+    #   ushort field_type=0
+    #   ushort 8
+    #   ushort 0
+    #   ushort 0
+    #   4*ushort
+    #   ushort A
+    #   if A==0 read 6*ushort, goto prev else exit, return this idx
     field_info = {}
     print("---------------------------------------------------------------")
     print("byte_idx = "+repr(byte_idx))
@@ -291,18 +380,51 @@ def read_field_type0(in_bytes, byte_idx, note_str="??"):
     field_type = out_ushorts[0]
     field_len = out_ushorts[1]
 
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
+    # field_type = 0 has either field_len=0 or field_len=8
 
     print("field_type= %d"%field_type)
     print("field_len = %d"%field_len)
 
+    print("Experimental Jump")
+    # experimental jump
+    #   used to only do this for field_len==8, but it seems to work for
+    #   field_len==0 also!!
+    byte_idx = byte_idx + 8
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    byte_idx = byte_idx + 8
+    test_byte_idx_start = byte_idx
+    all_zeros = True
+    while( True ):
+        (test_ushorts, _) = debug_ushorts(
+                in_bytes[byte_idx:byte_idx+14],
+                byte_idx,
+                "ushorts",
+                quiet=True)
+        if test_ushorts[0]!=0:
+            print("next ushort was not 0")
+            break
+        if test_ushorts.count(0)==len(test_ushorts) and all_zeros==True:
+            pass
+        elif test_ushorts.count(0)!=len(test_ushorts) and all_zeros==True:
+            all_zeros = False
+            if byte_idx > test_byte_idx_start:
+                print("All zeros (0) from bytes %d-%d"%(test_byte_idx_start,byte_idx))
+            (out_ushorts, _) = debug_ushorts(
+                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts")
+        else:
+            (out_ushorts, _) = debug_ushorts(
+                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts")
+        byte_idx = byte_idx + 14
+        
     field_info['type'] = field_type
-    return (byte_idx+field_len, field_info)
+    if field_len==8:
+        return (byte_idx, field_info)
+    else:
+        return (byte_idx+field_len, field_info)
 
 
-def read_field_type16(in_bytes, byte_idx, note_str="??"):
+def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={}):
     field_info = {}
     print("---------------------------------------------------------------")
     print("byte_idx = "+repr(byte_idx))
@@ -338,13 +460,19 @@ def read_field_type16(in_bytes, byte_idx, note_str="??"):
         print("invalid string")
         (out_bytes, _) = debug_bytes(
                 field_payload, byte_idx+8, "bytes")
+    if field_len !=0:
+        if data_tag in field_data:
+            print_list(field_data[data_tag], bits=32, dec_not_hex=True)
+            print_list(field_data[data_tag], bits=32, dec_not_hex=False)
+        else:
+            print("DATA NOT FOUND")
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
     return (byte_idx+field_len, field_info)
 
 
-def read_field_type100(in_bytes, byte_idx, note_str="??"):
+def read_field_type100(in_bytes, byte_idx, note_str="??", field_data={}):
     field_info = {}
     print("---------------------------------------------------------------")
     print("byte_idx = "+repr(byte_idx))
@@ -376,11 +504,273 @@ def read_field_type100(in_bytes, byte_idx, note_str="??"):
         (out_ints, _) = debug_ints(
                 field_payload, byte_idx+8, "ints")
 
-    # TODO: parse out_uints or out_ints into data dict with keys of data_id
+    # parse out_uints into data dict with keys of data_id
+    for i in range(len(out_uints)//9):
+        field_data[out_uints[i*9+3]] = out_uints[i*9:i*9+9]
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
-    field_info['data'] = out_uints
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
+def read_field_type101(in_bytes, byte_idx, note_str="??", field_data={}):
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # parse out_uints into data dict with keys of data_id
+    for i in range(len(out_uints)//5):
+        field_data[out_uints[i*5+4]] = out_uints[i*5:i*5+5]
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
+def read_field_type102(in_bytes, byte_idx, note_str="??", field_data={}):
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # parse out_uints into data dict with keys of data_id
+    for i in range(len(out_uints)//4):
+        field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
+def read_field_type131(in_bytes, byte_idx, note_str="??", field_data={}):
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # TODO: what is the format of this??
+    #for i in range(len(out_uints)//4):
+    #    field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
+def read_field_type1000(in_bytes, byte_idx, note_str="??", field_data={}):
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+4], byte_idx, "type, len")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+
+    (out_ushorts, _) = debug_bytes(
+            in_bytes[byte_idx+4:byte_idx+8], byte_idx, "bytes")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx+4:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx+4:byte_idx+8], byte_idx, "uints")
+
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_string, _) = debug_string(
+            field_payload, byte_idx+8, "string")
+    (out_ushorts, _) = debug_ushorts(
+            field_payload, byte_idx+8, "ushorts")
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # TODO: what is the format of this??
+    #for i in range(len(out_uints)//4):
+    #    field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
+def read_field_type1022(in_bytes, byte_idx, note_str="??", field_data={}):
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # TODO: what is the format of this??
+    #for i in range(len(out_uints)//4):
+    #    field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
+    return (byte_idx+field_len, field_info)
+
+
+def read_field_type1007(in_bytes, byte_idx, note_str="??", field_data={}):
+    field_info = {}
+    print("---------------------------------------------------------------")
+    print("byte_idx = "+repr(byte_idx))
+
+    # read header
+    print("Field Header:")
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts")
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints")
+    field_type = out_ushorts[0]
+    field_len = out_ushorts[1]
+
+    # field_len of 1 or 2 means field_len=20
+    if field_len==1 or field_len==2:
+        field_len = 20
+
+    print("field_type= %d"%field_type)
+    print("field_len = %d"%field_len)
+    print()
+    print("Field Payload:")
+
+    # read payload 
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_uints, _) = debug_uints(
+            field_payload, byte_idx+8, "uints")
+    if any([x>0x7FFFFFFF for x in out_uints]):
+        (out_ints, _) = debug_ints(
+                field_payload, byte_idx+8, "ints")
+
+    # TODO: what is the format of this??
+    #for i in range(len(out_uints)//4):
+    #    field_data[out_uints[i*4+3]] = out_uints[i*4:i*4+4]
+
+    field_info['type'] = field_type
+    field_info['payload'] = field_payload
+    field_info['data'] = field_data
     return (byte_idx+field_len, field_info)
 
 
@@ -388,6 +778,15 @@ def jump_idx(jump_from, jump_to, chk_field_start, chk_byte_idx):
     if chk_field_start==jump_from and chk_byte_idx==jump_from:
         print("---------------------------------------------------------")
         print("jump of delta {0:d}=0x{0:x}".format(jump_to-jump_from))
+
+        # find how many zeros:
+        test_byte_stream = in_bytes[jump_from:jump_to].lstrip(b'\x00')
+        num_zeros = len(in_bytes[jump_from:jump_to])-len(test_byte_stream)
+        if num_zeros > 0:
+            print("%6d-%6d"%(jump_from,jump_from+num_zeros-1), end="")
+            print("   All Zeros %d*(0,)"%(num_zeros))
+            jump_from = jump_from+num_zeros
+
         #(out_bytes, _) = debug_bytes(
         #        in_bytes[jump_from:jump_to], jump_from, "jumped bytes")
         (out_shorts, _) = debug_ushorts(
@@ -430,10 +829,15 @@ codeFound = False
 #search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
 #exit()
 
+# field_data is data from last field_type=100 field, to be used in
+#   following field_type=16 fields
+field_data = {}
 while( byte_idx < len(in_bytes) ):
     codeFound = False
     field_start = byte_idx
-    (byte_idx, field_info) = read_field(in_bytes, byte_idx )
+    (byte_idx, field_info) = read_field(in_bytes, byte_idx, field_data=field_data)
+    if 'data' in field_info:
+        field_data = field_info['data']
 
     # restart after garbage
     # jump of 3768=0xeb8
