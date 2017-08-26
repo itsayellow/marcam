@@ -629,7 +629,20 @@ def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
                 field_payload, byte_idx+8, "bytes", file=file)
     if field_len !=0:
         if data_tag in field_data:
+            #(out_uints, _) = debug_uints(
+            #        field_data[data_tag], byte_idx+8, "bytes", quiet=True)
             print_list(field_data[data_tag], bits=32, file=file)
+            if len(field_data[data_tag])==9:
+                # uint0: ??
+                # uint1: num_words in future data field
+                # uint2: data_offset in future data field
+                # uint5: bytes_per_word
+                print("data_offset=%d"%field_data[data_tag][2],
+                        file=file)
+                print("bytes_per_word=%d"%field_data[data_tag][5],
+                        file=file)
+                print("num_words=%d"%field_data[data_tag][1],
+                        file=file)
         else:
             print("DATA NOT FOUND", file=file)
 
