@@ -476,28 +476,6 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={},
 
 
 def print_field_header(in_bytes, byte_idx, file=sys.stdout):
-    """
-    byte_idx = 22774
-    Field Header:
-     22774- 22777	type, len:
-                  1000,   228,
-                0x03e8,0x00e4,
-
-    field_type= 1000
-    field_len = 228
-    field_payload_len = 220
-     22778- 22781	bytes:
-                  72,  32,   4,  16,
-                0x48,0x20,0x04,0x10,
-
-     22778- 22781	ushorts:
-                  8264,  4100,
-                0x2048,0x1004,
-
-     22778- 22781	uints:
-                 268705864,
-                0x10042048,
-    """
     print("---------------------------------------------------------------", file=file)
     print("byte_idx = "+repr(byte_idx), file=file)
 
@@ -508,6 +486,7 @@ def print_field_header(in_bytes, byte_idx, file=sys.stdout):
             in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", quiet=True)
     field_type = header_ushorts[0]
     field_len = header_ushorts[1]
+    field_id = header_uints[1]
 
     # field_len of 1 or 2 means field_len=20
     if field_len==1 or field_len==2:
@@ -518,14 +497,15 @@ def print_field_header(in_bytes, byte_idx, file=sys.stdout):
     (out_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx:byte_idx+4], byte_idx, "type, len", file=file)
     print(file=file)
-    (out_bytes, _) = debug_bytes(
-            in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "bytes", file=file)
+    #(out_bytes, _) = debug_bytes(
+    #        in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "bytes", file=file)
     (out_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "ushorts", file=file)
     (out_uints, _) = debug_uints(
             in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "uints", file=file)
     print(file=file)
     print("field_type= %d"%field_type, file=file)
+    print("field_id = 0x{0:08x} ({0:d})".format(field_id), file=file)
     print("field_len = %d"%field_len, file=file)
     print("field_payload_len = %d"%(field_len-8), file=file)
     print(file=file)
@@ -534,12 +514,11 @@ def print_field_header(in_bytes, byte_idx, file=sys.stdout):
     #print("\t[{:6d}, {:6d}, {:10d}]".format(field_type, field_len, data_tag), file=file)
     #print("\t[0x{:04x}, 0x{:04x}, 0x{:08x}]".format(field_type, field_len, data_tag), file=file)
 
-
     return (field_type, field_len, header_ushorts, header_uints)
 
 def read_field_generic(in_bytes, byte_idx, note_str="??", file=sys.stdout):
     field_info = {}
-
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -638,6 +617,7 @@ def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
 def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
     data_tag = header_uints[1]
@@ -654,40 +634,41 @@ def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
         print("invalid string", file=file)
         (out_bytes, _) = debug_bytes(
                 field_payload, byte_idx+8, "bytes", file=file)
-    if field_len !=0:
-        if data_tag in field_data:
-            #(out_uints, _) = debug_uints(
-            #        field_data[data_tag], byte_idx+8, "bytes", quiet=True)
-            (field_bytes, _) = debug_string(
-                    field_data[data_tag][0], 0, "bytes", multiline=True,
-                    file=file)
-            (field_ushorts, _) = debug_ushorts(
-                    field_data[data_tag][0], 0, "ushorts",
-                    file=file)
-            from_field_type = field_data[data_tag][1]
-            from_field_at = field_data[data_tag][2]
-            from_field_at2 = field_data[data_tag][3]
-            print(file=file)
-            print("from_field=%d @ %d + %d"%(from_field_type,from_field_at,from_field_at2-from_field_at),
-                    file=file)
-            if from_field_type==100:
-                # uint0: ??
-                # uint1: num_words in future data field
-                # uint2: data_offset in future data field
-                # uint5: bytes_per_word
-                data_start = field_ushorts[4]
-                bytes_per_word = field_ushorts[10]
-                num_words = field_ushorts[2]
-                data_end = data_start + num_words*bytes_per_word - 1
-                print("data_start=%d"%data_start, file=file)
-                print("bytes_per_word=%d"%bytes_per_word, file=file)
-                print("num_words=%d"%num_words, file=file)
-                print("data_end=%d"%data_end, file=file)
-            if from_field_type==131:
-                # only unique value is ushort[4]
-                print("unique ushort=%d"%field_ushorts[4], file=file)
-        else:
-            print("DATA NOT FOUND", file=file)
+    #
+    #if field_len !=0:
+    #    if data_tag in field_data:
+    #        #(out_uints, _) = debug_uints(
+    #        #        field_data[data_tag], byte_idx+8, "bytes", quiet=True)
+    #        (field_bytes, _) = debug_string(
+    #                field_data[data_tag][0], 0, "bytes", multiline=True,
+    #                file=file)
+    #        (field_ushorts, _) = debug_ushorts(
+    #                field_data[data_tag][0], 0, "ushorts",
+    #                file=file)
+    #        from_field_type = field_data[data_tag][1]
+    #        from_field_at = field_data[data_tag][2]
+    #        from_field_at2 = field_data[data_tag][3]
+    #        print(file=file)
+    #        print("from_field=%d @ %d + %d"%(from_field_type,from_field_at,from_field_at2-from_field_at),
+    #                file=file)
+    #        if from_field_type==100:
+    #            # uint0: ??
+    #            # uint1: num_words in future data field
+    #            # uint2: data_offset in future data field
+    #            # uint5: bytes_per_word
+    #            data_start = field_ushorts[4]
+    #            bytes_per_word = field_ushorts[10]
+    #            num_words = field_ushorts[2]
+    #            data_end = data_start + num_words*bytes_per_word - 1
+    #            print("data_start=%d"%data_start, file=file)
+    #            print("bytes_per_word=%d"%bytes_per_word, file=file)
+    #            print("num_words=%d"%num_words, file=file)
+    #            print("data_end=%d"%data_end, file=file)
+    #        if from_field_type==131:
+    #            # only unique value is ushort[4]
+    #            print("unique ushort=%d"%field_ushorts[4], file=file)
+    #    else:
+    #        print("DATA NOT FOUND", file=file)
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -726,6 +707,7 @@ def get_payload_chunks(field_payload, byte_idx, field_type,
 def read_field_type100(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -751,6 +733,7 @@ def read_field_type100(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type101(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -776,6 +759,7 @@ def read_field_type101(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type102(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -805,6 +789,7 @@ def read_field_type129(in_bytes, byte_idx, note_str="??", field_data={},
     before the image data
     """
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -834,6 +819,7 @@ def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={},
     field_type==130 contains the pointer to the start of the image data
     """
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -860,6 +846,7 @@ def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type131(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -886,6 +873,7 @@ def read_field_type1000(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     # TODO: extract data for future field_type=16
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -919,6 +907,7 @@ def read_field_type1007(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     # TODO: extract data for future field_type=16
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
@@ -947,6 +936,7 @@ def read_field_type1007(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type1022(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
+    # read header
     (field_type, field_len, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
