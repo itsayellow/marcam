@@ -201,7 +201,6 @@ def debug_generic(byte_stream, byte_start, note_str, format_str, quiet=False,
                 address=byte_start,
                 file=file
                 )
-        print(file=file)
     return (out_shorts, byte_idx)
 
 
@@ -281,6 +280,67 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={},
     # 2     nop field - payload is all 0's, otherwise normal header
     # 1004  nop field - payload is all 0's, otherwise normal header
 
+    # 126   Data Block 6 Info
+    #       1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
+    #       right before field_type=102, data corresponding to text label
+    #       "Audit Trail"
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=140's data block
+    # 127   Data Block 7 Info
+    #       1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
+    #       right before field_type=1000 with "Audit Trail" text inside
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=126's data block
+    # 128   Data Block 8 Info
+    #       1st uint a pointer to byte val=7293 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=127's data block
+    # 129   Data Block 9 Info
+    #       1st uint a pointer to byte val=1533 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=128's data block
+    # 130   Data Block 10 - Image Data Info
+    #       1st uint a pointer to byte val=68 4 uints before end of Jump Field,
+    #       right at IMAGE DATA START
+    #       ends at end of image data (could be end of file)
+    #       Image data pointer
+    #       uint[0] = img data start, uint[1] = img data length
+    #       this starts after end of field_type=129's data block
+    # 132   Data Block 2 Info
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=143's data block
+    # 133   Data Block 3 Info
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=132's data block
+    # 140   Data Block 5 Info
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=141's data block
+    # 141   Data Block 4 Info
+    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=133's data block
+    # 142   Data Block 0 Info
+    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of long zero fill after 160-380 fields
+    # 143   Data Block 1 Info
+    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+    #       ends at another spot 4 uints before end of Jump Field
+    #       uint[0] = data block start, uint[1] = data length
+    #       this starts after end of field_type=142's data block
+
     # 16    String field - text label assigned to previous data through data_id
     #       Last 4 bytes of field header of this field is data_id that matches
     #       data_id uint in field_type=100 payload
@@ -305,79 +365,18 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={},
     #       data_id uints in this field payload
     #       Every 12 bytes is data item
     #       Bytes 4-7 are uint data_id tag
-    # 1000  Not fully understood - Irregular data block
-    #       Sometimes for field_type= 16, sometimes not (??)
-    #       Is format fixed based on which data block?
-    # 1007  Not fully understood - Irregular data block
-    #       Is format fixed based on which data block?
     # 1022  No data items, only data_id tags?
     #       4 uints in payload, first 3 uints are data_id tags
     #       Every 4 bytes is data item, last 4 bytes are not used (??)
     #       Bytes 0-3 are uint data_id tag
 
-
-    # 126   Data Block 6
-    #       1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
-    #       right before field_type=102, data corresponding to text label
-    #       "Audit Trail"
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=140's data block
-    # 127   Data Block 7
-    #       1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
-    #       right before field_type=1000 with "Audit Trail" text inside
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=126's data block
-    # 128   Data Block 8
-    #       1st uint a pointer to byte val=7293 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=127's data block
-    # 129   Data Block 9
-    #       1st uint a pointer to byte val=1533 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=128's data block
-    # 130   Data Block 10 - Image Data
-    #       1st uint a pointer to byte val=68 4 uints before end of Jump Field,
-    #       right at IMAGE DATA START
-    #       ends at end of image data (could be end of file)
-    #       Image data pointer
-    #       uint[0] = img data start, uint[1] = img data length
-    #       this starts after end of field_type=129's data block
-    # 132   Data Block 2
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=143's data block
-    # 133   Data Block 3
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=132's data block
-    # 140   Data Block 5
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=141's data block
-    # 141   Data Block 4
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=133's data block
-    # 142   Data Block 0
-    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of long zero fill after 160-380 fields
-    # 143   Data Block 1
-    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=142's data block
+    # 1000  pointed from data in 100 (and other types?)
+    #       Sometimes for field_type= 16, sometimes not (??)
+    #       Is format fixed based on which data block?
 
     # Not understood yet:
+    # 1007  Not fully understood - Irregular data block
+    #       Is format fixed based on which data block?
     # 1008
     # 1010
     # 1011
@@ -475,32 +474,77 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={},
     
     return return_vals
 
-def read_field_generic(in_bytes, byte_idx, note_str="??", file=sys.stdout):
-    field_info = {}
+
+def print_field_header(in_bytes, byte_idx, file=sys.stdout):
+    """
+    byte_idx = 22774
+    Field Header:
+     22774- 22777	type, len:
+                  1000,   228,
+                0x03e8,0x00e4,
+
+    field_type= 1000
+    field_len = 228
+    field_payload_len = 220
+     22778- 22781	bytes:
+                  72,  32,   4,  16,
+                0x48,0x20,0x04,0x10,
+
+     22778- 22781	ushorts:
+                  8264,  4100,
+                0x2048,0x1004,
+
+     22778- 22781	uints:
+                 268705864,
+                0x10042048,
+    """
     print("---------------------------------------------------------------", file=file)
     print("byte_idx = "+repr(byte_idx), file=file)
 
     # read header
-    print("Field Header:", file=file)
-    #(out_bytes, _) = debug_bytes(
-    #        in_bytes[byte_idx:byte_idx+8], byte_idx, "bytes", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
+    (header_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
+    (header_uints, _) = debug_uints(
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", quiet=True)
+    field_type = header_ushorts[0]
+    field_len = header_ushorts[1]
 
     # field_len of 1 or 2 means field_len=20
     if field_len==1 or field_len==2:
         field_len = 20
 
+    # print header
+    print("Field Header:", file=file)
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx:byte_idx+4], byte_idx, "type, len", file=file)
+    print(file=file)
+    (out_bytes, _) = debug_bytes(
+            in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "bytes", file=file)
+    (out_ushorts, _) = debug_ushorts(
+            in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "ushorts", file=file)
+    (out_uints, _) = debug_uints(
+            in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "uints", file=file)
+    print(file=file)
     print("field_type= %d"%field_type, file=file)
     print("field_len = %d"%field_len, file=file)
+    print("field_payload_len = %d"%(field_len-8), file=file)
     print(file=file)
-    print("Field Payload:", file=file)
+
+    #print("Field Header:", file=file)
+    #print("\t[{:6d}, {:6d}, {:10d}]".format(field_type, field_len, data_tag), file=file)
+    #print("\t[0x{:04x}, 0x{:04x}, 0x{:08x}]".format(field_type, field_len, data_tag), file=file)
+
+
+    return (field_type, field_len, header_ushorts, header_uints)
+
+def read_field_generic(in_bytes, byte_idx, note_str="??", file=sys.stdout):
+    field_info = {}
+
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     (out_string, _) = debug_string(
@@ -548,6 +592,7 @@ def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
 
     print("field_type= %d"%field_type, file=file)
     print("field_len = %d"%field_len, file=file)
+    print("field_payload_len = %d"%(field_len-8), file=file)
 
     print("\n**** JUMP FIELD ****\n", file=file)
     # experimental jump
@@ -593,35 +638,17 @@ def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
 def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", quiet=True)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-    data_tag = out_uints[1]
-    print("Field Header:", file=file)
-    print("\t[{:6d}, {:6d}, {:10d}]".format(field_type, field_len, data_tag), file=file)
-    print("\t[0x{:04x}, 0x{:04x}, 0x{:08x}]".format(field_type, field_len, data_tag), file=file)
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
+    data_tag = header_uints[1]
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     (out_string, _) = debug_string(
             field_payload, byte_idx+8, "string", file=file)
+    print(file=file)
     if not is_valid_string(field_payload):
         # some byte does not resolve to valid utf-8 character
         print("invalid string", file=file)
@@ -631,18 +658,34 @@ def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
         if data_tag in field_data:
             #(out_uints, _) = debug_uints(
             #        field_data[data_tag], byte_idx+8, "bytes", quiet=True)
-            print_list(field_data[data_tag], bits=32, file=file)
-            if len(field_data[data_tag])==9:
+            (field_bytes, _) = debug_string(
+                    field_data[data_tag][0], 0, "bytes", multiline=True,
+                    file=file)
+            (field_ushorts, _) = debug_ushorts(
+                    field_data[data_tag][0], 0, "ushorts",
+                    file=file)
+            from_field_type = field_data[data_tag][1]
+            from_field_at = field_data[data_tag][2]
+            from_field_at2 = field_data[data_tag][3]
+            print(file=file)
+            print("from_field=%d @ %d + %d"%(from_field_type,from_field_at,from_field_at2-from_field_at),
+                    file=file)
+            if from_field_type==100:
                 # uint0: ??
                 # uint1: num_words in future data field
                 # uint2: data_offset in future data field
                 # uint5: bytes_per_word
-                print("data_offset=%d"%field_data[data_tag][2],
-                        file=file)
-                print("bytes_per_word=%d"%field_data[data_tag][5],
-                        file=file)
-                print("num_words=%d"%field_data[data_tag][1],
-                        file=file)
+                data_start = field_ushorts[4]
+                bytes_per_word = field_ushorts[10]
+                num_words = field_ushorts[2]
+                data_end = data_start + num_words*bytes_per_word - 1
+                print("data_start=%d"%data_start, file=file)
+                print("bytes_per_word=%d"%bytes_per_word, file=file)
+                print("num_words=%d"%num_words, file=file)
+                print("data_end=%d"%data_end, file=file)
+            if from_field_type==131:
+                # only unique value is ushort[4]
+                print("unique ushort=%d"%field_ushorts[4], file=file)
         else:
             print("DATA NOT FOUND", file=file)
 
@@ -651,42 +694,53 @@ def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
     return (byte_idx+field_len, field_info)
 
 
+def get_payload_chunks(field_payload, byte_idx, field_type,
+        chunk_size, data_id_byte, file=sys.stdout):
+    for i in range(len(field_payload)//chunk_size):
+        (out_ushorts, _) = debug_ushorts(
+                field_payload[i*chunk_size:(i+1)*chunk_size],
+                byte_idx + 8 + i*chunk_size,
+                "ushorts",
+                file=file)
+        (out_uints, _) = debug_uints(
+                field_payload[i*chunk_size:(i+1)*chunk_size],
+                byte_idx + 8 + i*chunk_size,
+                "uints",
+                file=file,
+                quiet=True)
+        if any([x>0x7FFFFFFF for x in out_uints]):
+            (out_ints, _) = debug_ints(
+                    field_payload, byte_idx+8, "ints", file=file)
+
+        # parse out_uints into data dict with keys of data_id
+        # every chunk_size bytes, uint[bytes[12:15]] is key
+        field_data[out_uints[data_id_byte]] = [
+                field_payload[i*chunk_size:(i+1)*chunk_size],
+                field_type,
+                byte_idx,
+                byte_idx + 8 + i*chunk_size
+                ]
+    return field_data
+
+
 def read_field_type100(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
-    (out_uints, _) = debug_uints(
-            field_payload, byte_idx+8, "uints", file=file)
-    if any([x>0x7FFFFFFF for x in out_uints]):
-        (out_ints, _) = debug_ints(
-                field_payload, byte_idx+8, "ints", file=file)
-
-    # parse out_uints into data dict with keys of data_id
-    for i in range(len(out_uints)//9):
-        field_data[out_uints[i*9+3]] = out_uints[i*9:(i+1)*9]
+    #chunk_size = 36
+    #data_id_byte = 3
+    new_field_data = get_payload_chunks(
+            field_payload, byte_idx, 100,
+            36, 3,
+            file=file
+            )
+    field_data.update(new_field_data)
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -697,39 +751,21 @@ def read_field_type100(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type101(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
-    (out_uints, _) = debug_uints(
-            field_payload, byte_idx+8, "uints", file=file)
-    if any([x>0x7FFFFFFF for x in out_uints]):
-        (out_ints, _) = debug_ints(
-                field_payload, byte_idx+8, "ints", file=file)
-
-    # parse out_uints into data dict with keys of data_id
-    for i in range(len(out_uints)//5):
-        field_data[out_uints[i*5+4]] = out_uints[i*5:(i+1)*5]
+    #chunk_size = 20
+    #data_id_byte = 4
+    new_field_data = get_payload_chunks(
+            field_payload, byte_idx, 101,
+            20, 4,
+            file=file
+            )
+    field_data.update(new_field_data)
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -740,39 +776,21 @@ def read_field_type101(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type102(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
-    (out_uints, _) = debug_uints(
-            field_payload, byte_idx+8, "uints", file=file)
-    if any([x>0x7FFFFFFF for x in out_uints]):
-        (out_ints, _) = debug_ints(
-                field_payload, byte_idx+8, "ints", file=file)
-
-    # parse out_uints into data dict with keys of data_id
-    for i in range(len(out_uints)//4):
-        field_data[out_uints[i*4+3]] = out_uints[i*4:(i+1)*4]
+    #chunk_size = 16
+    #data_id_byte = 3
+    new_field_data = get_payload_chunks(
+            field_payload, byte_idx, 102,
+            16, 3,
+            file=file
+            )
+    field_data.update(new_field_data)
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -787,28 +805,11 @@ def read_field_type129(in_bytes, byte_idx, note_str="??", field_data={},
     before the image data
     """
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     (out_uints, _) = debug_uints(
@@ -833,28 +834,11 @@ def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={},
     field_type==130 contains the pointer to the start of the image data
     """
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     (out_uints, _) = debug_uints(
@@ -876,39 +860,21 @@ def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type131(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
-    (out_uints, _) = debug_uints(
-            field_payload, byte_idx+8, "uints", file=file)
-    if any([x>0x7FFFFFFF for x in out_uints]):
-        (out_ints, _) = debug_ints(
-                field_payload, byte_idx+8, "ints", file=file)
-
-    # parse out_uints into data dict with keys of data_id
-    for i in range(len(out_uints)//3):
-        field_data[out_uints[i*3+1]] = out_uints[i*3:(i+1)*3]
+    #chunk_size = 12
+    #data_id_byte = 1
+    new_field_data = get_payload_chunks(
+            field_payload, byte_idx, 131,
+            12, 1,
+            file=file
+            )
+    field_data.update(new_field_data)
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
@@ -920,36 +886,17 @@ def read_field_type1000(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     # TODO: extract data for future field_type=16
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+4], byte_idx, "type, len", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-
-    (out_ushorts, _) = debug_bytes(
-            in_bytes[byte_idx+4:byte_idx+8], byte_idx, "bytes", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx+4:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx+4:byte_idx+8], byte_idx, "uints", file=file)
-
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     (out_string, _) = debug_string(
-            field_payload, byte_idx+8, "string", multiline=True, file=file)
+            field_payload, 0, "string", multiline=True, file=file)
+    #(out_string, _) = debug_string(
+    #        field_payload, byte_idx+8, "string", multiline=True, file=file)
     (out_ushorts, _) = debug_ushorts(
             field_payload, byte_idx+8, "ushorts", file=file)
     (out_uints, _) = debug_uints(
@@ -972,30 +919,15 @@ def read_field_type1007(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     # TODO: extract data for future field_type=16
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
+    (out_string, _) = debug_string(
+            field_payload, 0, "string", multiline=True, file=file)
     (out_uints, _) = debug_uints(
             field_payload, byte_idx+8, "uints", file=file)
     if any([x>0x7FFFFFFF for x in out_uints]):
@@ -1015,30 +947,15 @@ def read_field_type1007(in_bytes, byte_idx, note_str="??", field_data={},
 def read_field_type1022(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "uints", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_len of 1 or 2 means field_len=20
-    if field_len==1 or field_len==2:
-        field_len = 20
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print(file=file)
-    print("Field Payload:", file=file)
+    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file)
 
     # read payload 
+    print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
+    (out_string, _) = debug_string(
+            field_payload, 0, "string", multiline=True, file=file)
     (out_uints, _) = debug_uints(
             field_payload, byte_idx+8, "uints", file=file)
     if any([x>0x7FFFFFFF for x in out_uints]):
@@ -1046,9 +963,9 @@ def read_field_type1022(in_bytes, byte_idx, note_str="??", field_data={},
                 field_payload, byte_idx+8, "ints", file=file)
 
     # first three uints are data_id tags, no associated data
-    field_data[out_uints[0]] = []
-    field_data[out_uints[1]] = []
-    field_data[out_uints[2]] = []
+    field_data[out_uints[0]] = [b'', 1022, byte_idx, byte_idx+8]
+    field_data[out_uints[1]] = [b'', 1022, byte_idx, byte_idx+8+4]
+    field_data[out_uints[2]] = [b'', 1022, byte_idx, byte_idx+8+8]
 
     field_info['type'] = field_type
     field_info['payload'] = field_payload
