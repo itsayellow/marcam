@@ -487,18 +487,24 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}, field_ids={},
             header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file, quiet=quiet)
 
-    # read/report payload 
-    if not quiet:
-        print("Field Payload:", file=file)
+    # get field_len if jump field
+    if field_type==0:
+        field_len = process_payload_type0(in_bytes, byte_idx+8, quiet=True)
+
+    # get payload bytes
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
-    if field_type==0:
-        field_len = process_payload_type0(in_bytes, byte_idx+8, file=file)
-    elif field_type==16:
-        process_payload_type16(field_payload, byte_idx+8, file=file)
-    else:
-        process_payload_generic(field_payload, byte_idx+8, note_str,
-                file=file, quiet=quiet)
+    # report payload if not quiet
+    if not quiet:
+        print("Field Payload:", file=file)
+
+        if field_type==0:
+            field_len = process_payload_type0(in_bytes, byte_idx+8, file=file)
+        elif field_type==16:
+            process_payload_type16(field_payload, byte_idx+8, file=file)
+        else:
+            process_payload_generic(field_payload, byte_idx+8, note_str,
+                    file=file)
 
     field_info['type'] = field_type
     field_info['id'] = field_id
@@ -527,7 +533,7 @@ def process_payload_generic(field_payload, payload_idx, note_str,
                     file=file, quiet=quiet)
 
 
-def process_payload_type0(in_bytes, payload_idx, file=sys.stdout):
+def process_payload_type0(in_bytes, payload_idx, file=sys.stdout, quiet=False):
     # Finding the end of the jump algorithm
     # READ:
     #   ushort field_type=0
@@ -538,12 +544,13 @@ def process_payload_type0(in_bytes, payload_idx, file=sys.stdout):
     #   ushort A
     #   if A==0 read 6*ushort, goto prev else exit, return this idx
 
-    print("\n**** JUMP FIELD ****\n", file=file)
+    if not quiet:
+        print("\n**** JUMP FIELD ****\n", file=file)
     # used to only do this for field_len==8, but it seems to work for
     #   field_len==0 also!!
     byte_idx = payload_idx
     (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
+            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file, quiet=quiet)
     byte_idx = byte_idx + 8
     test_byte_idx_start = byte_idx
     all_zeros = True
@@ -562,14 +569,20 @@ def process_payload_type0(in_bytes, payload_idx, file=sys.stdout):
         elif test_ushorts.count(0)!=len(test_ushorts) and all_zeros==True:
             all_zeros = False
             if byte_idx > test_byte_idx_start:
-                print("%6d-%6d:"%(test_byte_idx_start,byte_idx-1), file=file)
-                print("\tAll zeros %d*(0,)"%(byte_idx-test_byte_idx_start), file=file)
+                if not quiet:
+                    print("%6d-%6d:"%(test_byte_idx_start,byte_idx-1),
+                            file=file)
+                    print("\tAll zeros %d*(0,)"%(byte_idx-test_byte_idx_start),
+                            file=file)
             (out_ushorts, _) = debug_ushorts(
-                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts", file=file)
+                    in_bytes[byte_idx:byte_idx+14], byte_idx,
+                    "ushorts", file=file, quiet=quiet)
         else:
             (out_ushorts, _) = debug_ushorts(
-                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts", file=file)
+                    in_bytes[byte_idx:byte_idx+14], byte_idx,
+                    "ushorts", file=file, quiet=quiet)
         byte_idx = byte_idx + 14
+
     field_len = byte_idx - (payload_idx - 8)
     return field_len
 
@@ -674,174 +687,6 @@ def process_payload_type16(field_payload, payload_idx, file=sys.stdout):
 #                )
 #    
 #    return return_vals
-
-
-def read_field_generic(in_bytes, byte_idx, note_str="??", file=sys.stdout,
-        quiet=False):
-    field_info = {}
-    # read header
-    (field_type, field_len, field_id,
-            header_ushorts, header_uints) = print_field_header(
-            in_bytes, byte_idx, file=file, quiet=quiet)
-
-    # read payload 
-    if not quiet:
-        print("Field Payload:", file=file)
-    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
-
-    (out_string, _) = debug_string(
-            field_payload, byte_idx+8, note_str, multiline=True,
-            file=file, quiet=quiet)
-    (out_bytes, _) = debug_bytes(
-            field_payload, byte_idx+8, "bytes",
-            file=file, quiet=quiet)
-    if len(field_payload)%2 == 0:
-        (out_ushorts, _) = debug_ushorts(
-                field_payload, byte_idx+8, "ushorts",
-                file=file, quiet=quiet)
-    if len(field_payload)%4 == 0:
-        (out_uints, _) = debug_uints(
-                field_payload, byte_idx+8, "uints",
-                file=file, quiet=quiet)
-        if any([x>0x7FFFFFFF for x in out_uints]):
-            # only print signed integers if one is different than uint
-            (out_ints, _) = debug_ints(
-                    field_payload, byte_idx+8, "ints",
-                    file=file, quiet=quiet)
-
-    field_info['type'] = field_type
-    field_info['id'] = field_id
-    field_info['payload'] = field_payload
-    return (byte_idx+field_len, field_info)
-
-
-#def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
-#    # Finding the end of the jump algorithm
-#    # READ:
-#    #   ushort field_type=0
-#    #   ushort 8
-#    #   ushort 0
-#    #   ushort 0
-#    #   4*ushort
-#    #   ushort A
-#    #   if A==0 read 6*ushort, goto prev else exit, return this idx
-#    field_info = {}
-#    print("---------------------------------------------------------------", file=file)
-#    print("byte_idx = "+repr(byte_idx), file=file)
-#
-#    # read header
-#    print("Field Header:", file=file)
-#    (out_ushorts, _) = debug_ushorts(
-#            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-#    field_type = out_ushorts[0]
-#    field_len = out_ushorts[1]
-#
-#    # field_type = 0 has either field_len=0 or field_len=8
-#
-#    print("field_type= %d"%field_type, file=file)
-#    print("field_len = %d"%field_len, file=file)
-#    print("field_payload_len = %d"%(field_len-8), file=file)
-#
-#    print("\n**** JUMP FIELD ****\n", file=file)
-#    # experimental jump
-#    #   used to only do this for field_len==8, but it seems to work for
-#    #   field_len==0 also!!
-#    byte_idx = byte_idx + 8
-#    (out_ushorts, _) = debug_ushorts(
-#            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-#    byte_idx = byte_idx + 8
-#    test_byte_idx_start = byte_idx
-#    all_zeros = True
-#    while( True ):
-#        # do the next 7 shorts start with a '0' value? if so keep looping
-#        (test_ushorts, _) = debug_ushorts(
-#                in_bytes[byte_idx:byte_idx+14],
-#                byte_idx,
-#                "ushorts",
-#                quiet=True)
-#        if test_ushorts[0]!=0:
-#            # next ushort was not 0, so it is valid field_type
-#            break
-#        if test_ushorts.count(0)==len(test_ushorts) and all_zeros==True:
-#            pass
-#        elif test_ushorts.count(0)!=len(test_ushorts) and all_zeros==True:
-#            all_zeros = False
-#            if byte_idx > test_byte_idx_start:
-#                print("%6d-%6d:"%(test_byte_idx_start,byte_idx-1), file=file)
-#                print("\tAll zeros %d*(0,)"%(byte_idx-test_byte_idx_start), file=file)
-#            (out_ushorts, _) = debug_ushorts(
-#                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts", file=file)
-#        else:
-#            (out_ushorts, _) = debug_ushorts(
-#                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts", file=file)
-#        byte_idx = byte_idx + 14
-#        
-#    field_info['type'] = field_type
-#    if field_len==8:
-#        return (byte_idx, field_info)
-#    else:
-#        return (byte_idx+field_len, field_info)
-
-
-#def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
-#        file=sys.stdout):
-#    field_info = {}
-#    # read header
-#    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
-#            in_bytes, byte_idx, file=file)
-#    data_tag = header_uints[1]
-#
-#    # read payload 
-#    print("Field Payload:", file=file)
-#    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
-#
-#    (out_string, _) = debug_string(
-#            field_payload, byte_idx+8, "string", file=file)
-#    print(file=file)
-#    if not is_valid_string(field_payload):
-#        # some byte does not resolve to valid utf-8 character
-#        print("invalid string", file=file)
-#        (out_bytes, _) = debug_bytes(
-#                field_payload, byte_idx+8, "bytes", file=file)
-#    #
-#    #if field_len !=0:
-#    #    if data_tag in field_data:
-#    #        #(out_uints, _) = debug_uints(
-#    #        #        field_data[data_tag], byte_idx+8, "bytes", quiet=True)
-#    #        (field_bytes, _) = debug_string(
-#    #                field_data[data_tag][0], 0, "bytes", multiline=True,
-#    #                file=file)
-#    #        (field_ushorts, _) = debug_ushorts(
-#    #                field_data[data_tag][0], 0, "ushorts",
-#    #                file=file)
-#    #        from_field_type = field_data[data_tag][1]
-#    #        from_field_at = field_data[data_tag][2]
-#    #        from_field_at2 = field_data[data_tag][3]
-#    #        print(file=file)
-#    #        print("from_field=%d @ %d + %d"%(from_field_type,from_field_at,from_field_at2-from_field_at),
-#    #                file=file)
-#    #        if from_field_type==100:
-#    #            # uint0: ??
-#    #            # uint1: num_words in future data field
-#    #            # uint2: data_offset in future data field
-#    #            # uint5: bytes_per_word
-#    #            data_start = field_ushorts[4]
-#    #            bytes_per_word = field_ushorts[10]
-#    #            num_words = field_ushorts[2]
-#    #            data_end = data_start + num_words*bytes_per_word - 1
-#    #            print("data_start=%d"%data_start, file=file)
-#    #            print("bytes_per_word=%d"%bytes_per_word, file=file)
-#    #            print("num_words=%d"%num_words, file=file)
-#    #            print("data_end=%d"%data_end, file=file)
-#    #        if from_field_type==131:
-#    #            # only unique value is ushort[4]
-#    #            print("unique ushort=%d"%field_ushorts[4], file=file)
-#    #    else:
-#    #        print("DATA NOT FOUND", file=file)
-#
-#    field_info['type'] = field_type
-#    field_info['payload'] = field_payload
-#    return (byte_idx+field_len, field_info)
 
 
 def get_payload_chunks(field_payload, byte_idx, field_type,
@@ -1274,11 +1119,12 @@ def parse_file(filename):
     while byte_idx < len(in_bytes):
         field_start = byte_idx
 
-        (byte_idx, field_info) = read_field_generic(
+        (byte_idx, field_info) = read_field(
                 in_bytes, byte_idx,
                 note_str="",
                 quiet=True
                 )
+
         field_ids[field_info['id']] = field_info['payload']
 
         # break if we still aren't advancing
