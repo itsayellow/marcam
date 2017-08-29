@@ -18,36 +18,204 @@ NOTES:
 Header
     <2-byte field_type>
     <2-byte byte length of entire field (len(Header) + len(Payload))>
-    <4-byte possible index or other>
+    <4-byte uint field_id>
 Payload
     <bytes or ushort or int or uint until end of field>
 
---------
-field_type=0=0x0
-    end of data, beginning of 0 fill (control field)
-    always field_len=8
-    header only
-    header contains only 0's except for field_len=8
-    jump after this field type
-field_type=100=0x64
-    data (int or uint)
-    inside data, uint (or int) matches field names in field_type=16=0x10
-    comes BEFORE data_field_names block
-field_type=16=0x10
-    data_field_names (string)
-    last 4 bytes of header (uint or int) matches number in field_type=100
-    data field_payload
-    comes AFTER field_type=100 data
-field_type=1000=0x03e8
-    has date and scanner name in text, amongst binary
+--------------------------
+0     Jump Field - nop filler data
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      Around data block boundaries
+      Contains info about data block, at end and beginning of data block
 
-fiel_type>999 may have negative-valued ints (or it may be other data)
+--------------------------
+126   Data Block 6 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
+      right before field_type=102, data corresponding to text label
+      "Audit Trail"
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=140's data block
 
-After 380, all zeros, ending in bytes:
-    0xbf,0x0d,0x00,0x00,0x04,0x00,0x00,0x00
-    0x00000dbf, 0x00000004
+127   Data Block 7 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
+      right before field_type=1000 with "Audit Trail" text inside
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=126's data block
 
---------
+128   Data Block 8 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=7293 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=127's data block
+
+129   Data Block 9 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=1533 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=128's data block
+
+130   Data Block 10 - Image Data Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=68 4 uints before end of Jump Field,
+      right at IMAGE DATA START
+      ends at end of image data (could be end of file)
+      Image data pointer
+      uint[0] = img data start, uint[1] = img data length
+      this starts after end of field_type=129's data block
+
+132   Data Block 2 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=143's data block
+
+133   Data Block 3 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=132's data block
+
+140   Data Block 5 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=141's data block
+
+141   Data Block 4 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=133's data block
+
+142   Data Block 0 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of long zero fill after 160-380 fields
+
+143   Data Block 1 Info
+      NO references to other fields
+      NOT referenced by other field
+      field_id = 0
+      field_len = 20 (header_ushorts[1] = 1)
+      1st uint a pointer to byte val=40 4 uints before end of Jump Field,
+      ends at another spot 4 uints before end of Jump Field
+      uint[0] = data block start, uint[1] = data length
+      this starts after end of field_type=142's data block
+
+--------------------------
+16    String field - text label assigned to previous data through data_id
+      NO references to other fields
+      YES referenced by: 100, 101, 
+      field_id: MSShort: one of {0x0085, 0x0086, 0x0087, 0x0088, 0x008a, 0x014a,
+        0x014c, 0x014d, 0x0919, 0x091b, 0x1004, 0x1043, 0x1045, 0x107b, 0x107d,
+        0x1083, 0x1097, 0x1099, 0x10b9, 0x10d9, 0x11e4, 0x1289, 0x1441}
+
+--------------------------
+2     nop field? - payload is all 0's, otherwise normal header
+      NO references to other fields
+      YES referenced by: 1015
+      field_id = one of { 0x1099c4a8, 0x10b9d4a8, 0x10d9e4a8, 0x11e4a4a8,
+        0x128944a8, 0x144144a8}
+      field_len = 208
+
+100   Data field - contains multiple data assigned to future text labels
+      Last 4 bytes of field headers of field_type=16 is data_id that match
+      data_id uints in this field payload
+      Every 36 bytes is data item
+      Bytes 12-15 are uint data_id tag
+
+101   Data field - contains multiple data assigned to future text labels
+      Last 4 bytes of field headers of field_type=16 is data_id that match
+      data_id uints in this field payload
+      Every 20 bytes is data item
+      Bytes 16-19 are uint data_id tag
+
+102   Data field - contains multiple data assigned to future text labels
+      Last 4 bytes of field headers of field_type=16 is data_id that match
+      data_id uints in this field payload
+      Every 16 bytes is data item
+      Bytes 12-15 are uint data_id tag
+
+131   Data field - contains multiple data assigned to future text labels
+      Last 4 bytes of field headers of field_type=16 is data_id that match
+      data_id uints in this field payload
+      Every 12 bytes is data item
+      Bytes 4-7 are uint data_id tag
+
+1000  pointed from data in 100 (and other types?)
+      Sometimes for field_type= 16, sometimes not (??)
+      Is format fixed based on which data block?
+
+1004  nop field? - payload is all 0's, otherwise normal header
+
+1007  Not fully understood - Irregular data block
+      Is format fixed based on which data block?
+
+1008
+
+1010
+
+1011
+
+1015
+
+1020
+
+1022  No data items, only data_id tags?
+      4 uints in payload, first 3 uints are data_id tags
+      Every 4 bytes is data item, last 4 bytes are not used (??)
+      Bytes 0-3 are uint data_id tag
+
+1024
+
+1030
+
+1040
+--------------------------
 bio-formats.java:
     codeFound == 0x81 (field_type)
     baseFP = <byte_idx of start of payload of field_type=0x81> + 2
@@ -274,118 +442,6 @@ def is_valid_string(byte_stream):
 
 def read_field(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
-    # 0     Jump Field - nop filler data
-    #       Around data block boundaries
-    #       Contains info about data block, at end and beginning of data block
-    # 2     nop field - payload is all 0's, otherwise normal header
-    # 1004  nop field - payload is all 0's, otherwise normal header
-
-    # 126   Data Block 6 Info
-    #       1st uint a pointer to byte val=6180 4 uints before end of Jump Field,
-    #       right before field_type=102, data corresponding to text label
-    #       "Audit Trail"
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=140's data block
-    # 127   Data Block 7 Info
-    #       1st uint a pointer to byte val=1020 4 uints before end of Jump Field,
-    #       right before field_type=1000 with "Audit Trail" text inside
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=126's data block
-    # 128   Data Block 8 Info
-    #       1st uint a pointer to byte val=7293 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=127's data block
-    # 129   Data Block 9 Info
-    #       1st uint a pointer to byte val=1533 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=128's data block
-    # 130   Data Block 10 - Image Data Info
-    #       1st uint a pointer to byte val=68 4 uints before end of Jump Field,
-    #       right at IMAGE DATA START
-    #       ends at end of image data (could be end of file)
-    #       Image data pointer
-    #       uint[0] = img data start, uint[1] = img data length
-    #       this starts after end of field_type=129's data block
-    # 132   Data Block 2 Info
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=143's data block
-    # 133   Data Block 3 Info
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=132's data block
-    # 140   Data Block 5 Info
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=141's data block
-    # 141   Data Block 4 Info
-    #       1st uint a pointer to byte val=?? 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=133's data block
-    # 142   Data Block 0 Info
-    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of long zero fill after 160-380 fields
-    # 143   Data Block 1 Info
-    #       1st uint a pointer to byte val=40 4 uints before end of Jump Field,
-    #       ends at another spot 4 uints before end of Jump Field
-    #       uint[0] = data block start, uint[1] = data length
-    #       this starts after end of field_type=142's data block
-
-    # 16    String field - text label assigned to previous data through data_id
-    #       Last 4 bytes of field header of this field is data_id that matches
-    #       data_id uint in field_type=100 payload
-
-    # 100   Data field - contains multiple data assigned to future text labels
-    #       Last 4 bytes of field headers of field_type=16 is data_id that match
-    #       data_id uints in this field payload
-    #       Every 36 bytes is data item
-    #       Bytes 12-15 are uint data_id tag
-    # 101   Data field - contains multiple data assigned to future text labels
-    #       Last 4 bytes of field headers of field_type=16 is data_id that match
-    #       data_id uints in this field payload
-    #       Every 20 bytes is data item
-    #       Bytes 16-19 are uint data_id tag
-    # 102   Data field - contains multiple data assigned to future text labels
-    #       Last 4 bytes of field headers of field_type=16 is data_id that match
-    #       data_id uints in this field payload
-    #       Every 16 bytes is data item
-    #       Bytes 12-15 are uint data_id tag
-    # 131   Data field - contains multiple data assigned to future text labels
-    #       Last 4 bytes of field headers of field_type=16 is data_id that match
-    #       data_id uints in this field payload
-    #       Every 12 bytes is data item
-    #       Bytes 4-7 are uint data_id tag
-    # 1022  No data items, only data_id tags?
-    #       4 uints in payload, first 3 uints are data_id tags
-    #       Every 4 bytes is data item, last 4 bytes are not used (??)
-    #       Bytes 0-3 are uint data_id tag
-
-    # 1000  pointed from data in 100 (and other types?)
-    #       Sometimes for field_type= 16, sometimes not (??)
-    #       Is format fixed based on which data block?
-
-    # Not understood yet:
-    # 1007  Not fully understood - Irregular data block
-    #       Is format fixed based on which data block?
-    # 1008
-    # 1010
-    # 1011
-    # 1015
-    # 1020
-    # 1024
-    # 1030
-    # 1040
-    
     (out_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
     field_type = out_ushorts[0]
@@ -504,10 +560,10 @@ def print_field_header(in_bytes, byte_idx, file=sys.stdout):
     (out_uints, _) = debug_uints(
             in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "uints", file=file)
     print(file=file)
-    print("field_type= %d"%field_type, file=file)
+    print("field_type= %4d"%field_type, file=file)
     print("field_id = 0x{0:08x} ({0:d})".format(field_id), file=file)
-    print("field_len = %d"%field_len, file=file)
-    print("field_payload_len = %d"%(field_len-8), file=file)
+    print("field_len = %4d"%field_len, file=file)
+    print("field_payload_len = %4d"%(field_len-8), file=file)
     print(file=file)
 
     #print("Field Header:", file=file)
@@ -677,6 +733,7 @@ def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
 
 def get_payload_chunks(field_payload, byte_idx, field_type,
         chunk_size, data_id_byte, file=sys.stdout):
+    field_data = {}
     for i in range(len(field_payload)//chunk_size):
         (out_ushorts, _) = debug_ushorts(
                 field_payload[i*chunk_size:(i+1)*chunk_size],
@@ -1015,7 +1072,7 @@ def parse_datablock(field_payload):
     return(data_start, data_len)
 
 
-def print_datablock(data_start, data_len, block_name, file=sys.stdout):
+def print_datablock(in_bytes, byte_idx, data_start, data_len, block_name, file=sys.stdout):
     print("=====================================================================",
             file=file)
     print("DATA BLOCK %s"%block_name, file=file)
@@ -1033,124 +1090,146 @@ def print_datablock(data_start, data_len, block_name, file=sys.stdout):
     print("Length of data block (minus this block header): %d bytes"%out_uints[0],
             file=file
             )
-    print("Number of non-type-16 data fields): %d"%out_uints[2],
+    # TODO: is this correct?
+    print("Number of non-type-16 data fields: %d"%out_uints[2],
             file=file
             )
 
     field_data = {}
-    while( byte_idx < data_start + data_len ):
-        field_start = byte_idx
+    while( byte_idx < data_start + data_len):
+        (out_ushorts, _) = debug_ushorts(in_bytes[byte_idx:byte_idx+2],
+                byte_idx, "", quiet=True)
+        # if we get to the field_type=0 field, we're at end of block
+        if out_ushorts[0] == 0:
+            break
+
         (byte_idx, field_info) = read_field(in_bytes, byte_idx,
                 field_data=field_data, file=file)
         if 'data' in field_info:
             field_data = field_info['data']
 
+    print("--------------------------------------------------------------",
+            file=file)
+    print("Data Block %s Footer"%block_name, file=file)
 
-filename = os.path.realpath(sys.argv[1])
+    (out_ushorts, byte_idx) = debug_ushorts(in_bytes[byte_idx:byte_idx+8],
+            byte_idx,
+            "",
+            file=file
+            )
+    while (byte_idx < data_start + data_len):
+        (out_ushorts, byte_idx) = debug_ushorts(in_bytes[byte_idx:byte_idx+14],
+                byte_idx,
+                "",
+                file=file
+                )
 
-try:
-    out_fh = open("dump.txt","w")
-except:
-    print("Error opening dump.txt")
+def main(args):
+    for filename in args:
+        print(filename)
 
-print(filename, file=out_fh)
+        filename = os.path.realpath(filename)
+        filedir = os.path.dirname(filename)
 
-with open(filename, 'rb') as in_fh:
-    in_bytes = in_fh.read()
+        try:
+            out_fh = open(os.path.join(filedir,"dump.txt"),"w")
+        except:
+            print("Error opening dump.txt")
 
-byte_idx = 160
+        print(filename, file=out_fh)
 
-#SEARCH DEBUG
-#search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
-#exit()
+        with open(filename, 'rb') as in_fh:
+            in_bytes = in_fh.read()
 
-# field_data is data from last field_type=100 field, to be used in
-#   following field_type=16 fields
-field_data = {}
-data_start = {}
-data_len = {}
+        byte_idx = 160
 
-# init img data start at max 32-bit value
-data_start[10] = 0xffffffff
+        #SEARCH DEBUG
+        #search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
+        #exit()
 
-while( byte_idx < len(in_bytes) ):
-    field_start = byte_idx
-    (byte_idx, field_info) = read_field(in_bytes, byte_idx, field_data=field_data,
-            file=out_fh)
-    if 'data' in field_info:
-        field_data = field_info['data']
-    block_ptr_types = {
-            142: 0,
-            143: 1,
-            132: 2,
-            133: 3,
-            141: 4,
-            140: 5,
-            126: 6,
-            127: 7,
-            128: 8,
-            129: 9,
-            130: 10,
-            }
-    if field_info['type'] in block_ptr_types:
-        block_num = block_ptr_types[field_info['type']]
+        # field_data is data from last field_type=100 field, to be used in
+        #   following field_type=16 fields
+        field_data = {}
+        data_start = {}
+        data_len = {}
 
-        (data_start[block_num], data_len[block_num]) = parse_datablock(
-            field_info['payload'])
+        # init img data start at max 32-bit value
+        data_start[10] = 0xffffffff
 
-        print("Field Type %d - Data Block %02d"%(field_info['type'],block_num),
+        while( byte_idx < len(in_bytes) ):
+            field_start = byte_idx
+            (byte_idx, field_info) = read_field(
+                    in_bytes, byte_idx, field_data=field_data,
+                    file=out_fh)
+            if 'data' in field_info:
+                field_data = field_info['data']
+
+            block_ptr_types = { 142:0, 143:1, 132:2, 133:3, 141:4,
+                    140:5, 126:6, 127:7, 128:8, 129:9, 130:10, }
+            if field_info['type'] in block_ptr_types:
+                block_num = block_ptr_types[field_info['type']]
+
+                (data_start[block_num], data_len[block_num]) = parse_datablock(
+                    field_info['payload'])
+
+                print("Field Type %d - Data Block %02d"%(field_info['type'],block_num),
+                        file=out_fh)
+                print("    data starts at byte %d"%(data_start[block_num]),
+                        file=out_fh)
+                print("    data length is %d bytes"%(data_len[block_num]),
+                        file=out_fh)
+
+            # break if we still aren't advancing
+            if byte_idx==field_start:
+                print("ERROR BREAK!!!!", file=out_fh)
+                print("--------------------------------------------------------------",
+                        file=out_fh)
+                break
+
+            if byte_idx > data_start[10]:
+                print("--------------------------------------------------------------",
+                        file=out_fh)
+                print("We passed the start of img data, so BREAK!!",
+                        file=out_fh)
+                print("--------------------------------------------------------------",
+                        file=out_fh)
+                break
+
+        out_fh.close()
+
+        # parse data blocks 0-9
+
+        for i in range(0,10):
+            # Data Block
+            try:
+                out_fh = open(os.path.join(filedir,"data%02d.txt"%i),"w")
+            except:
+                print("Error opening dump.txt", file=sys.stderr)
+            print_datablock(in_bytes, byte_idx, data_start[i], data_len[i], "%d"%i, file=out_fh)
+            out_fh.close()
+
+        # Data Block 10 - Image Data
+        try:
+            out_fh = open(os.path.join(filedir,"data10_img.txt"),"w")
+        except:
+            print("Error opening dump.txt")
+        print("=====================================================================",
                 file=out_fh)
-        print("    data starts at byte %d"%(data_start[block_num]),
-                file=out_fh)
-        print("    data length is %d bytes"%(data_len[block_num]),
-                file=out_fh)
+        print("IMAGE DATA BLOCK", file=out_fh)
+        print(file=out_fh)
+        #print_datablock(data_start[10], data_len[10], "10", file=out_fh)
+        data_end = data_start[10] + data_len[10]
+        print("Image Data: (%d-%d)"%(data_start[10],data_end-1), file=out_fh)
+        #(img_ushorts, _) = debug_ushorts(
+        #        in_bytes[data_start[10]:data_end],
+        #        data_start[10], "img_data", file=out_fh)
+        #for img_ushort in img_ushorts:
+        #    print(img_ushort, file=out_fh)
+        print(file=out_fh)
+        print(file=out_fh)
+        out_fh.close()
 
-    # break if we still aren't advancing
-    if byte_idx==field_start:
-        print("ERROR BREAK!!!!", file=out_fh)
-        print("--------------------------------------------------------------",
-                file=out_fh)
-        break
 
-    if byte_idx > data_start[10]:
-        print("--------------------------------------------------------------",
-                file=out_fh)
-        print("We passed the start of img data, so BREAK!!",
-                file=out_fh)
-        print("--------------------------------------------------------------",
-                file=out_fh)
-        break
-
-out_fh.close()
-
-# parse data blocks -9
-
-for i in range(0,10):
-    # Data Block
-    try:
-        out_fh = open("data%02d.txt"%i,"w")
-    except:
-        print("Error opening dump.txt", file=sys.stderr)
-    print_datablock(data_start[i], data_len[i], "%d"%i, file=out_fh)
-    out_fh.close()
-
-# Data Block 10 - Image Data
-try:
-    out_fh = open("data10_img.txt","w")
-except:
-    print("Error opening dump.txt")
-print("=====================================================================",
-        file=out_fh)
-print("IMAGE DATA BLOCK", file=out_fh)
-print(file=out_fh)
-#print_datablock(data_start[10], data_len[10], "10", file=out_fh)
-data_end = data_start[10] + data_len[10]
-print("Image Data: (%d-%d)"%(data_start[10],data_end-1), file=out_fh)
-#(img_ushorts, _) = debug_ushorts(
-#        in_bytes[data_start[10]:data_end],
-#        data_start[10], "img_data", file=out_fh)
-#for img_ushort in img_ushorts:
-#    print(img_ushort, file=out_fh)
-print(file=out_fh)
-print(file=out_fh)
-out_fh.close()
+if __name__ == "__main__":
+    main(sys.argv[1:])
+    exit(0)
