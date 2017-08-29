@@ -440,101 +440,7 @@ def is_valid_string(byte_stream):
     return True
 
 
-def read_field(in_bytes, byte_idx, note_str="??", field_data={},
-        file=sys.stdout):
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
-    field_type = out_ushorts[0]
-    if field_type==0:
-        return_vals = read_field_type0(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                file=file
-                )
-    elif field_type==16:
-        return_vals = read_field_type16(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==100:
-        return_vals = read_field_type100(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==101:
-        return_vals = read_field_type101(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==102:
-        return_vals = read_field_type102(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==129:
-        return_vals = read_field_type129(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==130:
-        return_vals = read_field_type130(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==131:
-        return_vals = read_field_type131(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==1000:
-        return_vals = read_field_type1000(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==1007:
-        return_vals = read_field_type1007(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    elif field_type==1022:
-        return_vals = read_field_type1022(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                field_data=field_data,
-                file=file
-                )
-    else:
-        return_vals = read_field_generic(
-                in_bytes, byte_idx,
-                note_str=note_str,
-                file=file
-                )
-    
-    return return_vals
-
-
-def print_field_header(in_bytes, byte_idx, file=sys.stdout):
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
+def print_field_header(in_bytes, byte_idx, file=sys.stdout, quiet=False):
     # read header
     (header_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
@@ -548,61 +454,80 @@ def print_field_header(in_bytes, byte_idx, file=sys.stdout):
     if field_len==1 or field_len==2:
         field_len = 20
 
-    # print header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+4], byte_idx, "type, len", file=file)
-    print(file=file)
-    #(out_bytes, _) = debug_bytes(
-    #        in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "bytes", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "ushorts", file=file)
-    (out_uints, _) = debug_uints(
-            in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "uints", file=file)
-    print(file=file)
-    print("field_type= %4d"%field_type, file=file)
-    print("field_id = 0x{0:08x} ({0:d})".format(field_id), file=file)
-    print("field_len = %4d"%field_len, file=file)
-    print("field_payload_len = %4d"%(field_len-8), file=file)
-    print(file=file)
+    # print header (unless quiet)
+    if not quiet:
+        print("---------------------------------------------------------------",
+                file=file)
+        print("byte_idx = "+repr(byte_idx), file=file)
+        print("Field Header:", file=file)
+        (out_ushorts, _) = debug_ushorts(
+                in_bytes[byte_idx:byte_idx+4], byte_idx, "type, len", file=file)
+        print(file=file)
+        #(out_bytes, _) = debug_bytes(
+        #        in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "bytes", file=file)
+        (out_ushorts, _) = debug_ushorts(
+                in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "ushorts", file=file)
+        (out_uints, _) = debug_uints(
+                in_bytes[byte_idx+4:byte_idx+8], byte_idx+4, "uints", file=file)
+        print(file=file)
+        print("field_type= %4d"%field_type, file=file)
+        print("field_id = 0x{0:08x} ({0:d})".format(field_id), file=file)
+        print("field_len = %4d"%field_len, file=file)
+        print("field_payload_len = %4d"%(field_len-8), file=file)
+        print(file=file)
 
-    #print("Field Header:", file=file)
-    #print("\t[{:6d}, {:6d}, {:10d}]".format(field_type, field_len, data_tag), file=file)
-    #print("\t[0x{:04x}, 0x{:04x}, 0x{:08x}]".format(field_type, field_len, data_tag), file=file)
+    return (field_type, field_len, field_id, header_ushorts, header_uints)
 
-    return (field_type, field_len, header_ushorts, header_uints)
 
-def read_field_generic(in_bytes, byte_idx, note_str="??", file=sys.stdout):
+def read_field(in_bytes, byte_idx, note_str="??", field_data={}, field_ids={},
+        file=sys.stdout, quiet=False):
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
-            in_bytes, byte_idx, file=file)
+    (field_type, field_len, field_id,
+            header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file, quiet=quiet)
 
-    # read payload 
-    print("Field Payload:", file=file)
+    # read/report payload 
+    if not quiet:
+        print("Field Payload:", file=file)
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
-    (out_string, _) = debug_string(
-            field_payload, byte_idx+8, note_str, multiline=True, file=file)
-    (out_bytes, _) = debug_bytes(
-            field_payload, byte_idx+8, "bytes", file=file)
-    if len(field_payload)%2 == 0:
-        (out_ushorts, _) = debug_ushorts(
-                field_payload, byte_idx+8, "ushorts", file=file)
-    if len(field_payload)%4 == 0:
-        (out_uints, _) = debug_uints(
-                field_payload, byte_idx+8, "uints", file=file)
-        if any([x>0x7FFFFFFF for x in out_uints]):
-            # only print signed integers if one is different than uint
-            (out_ints, _) = debug_ints(
-                    field_payload, byte_idx+8, "ints", file=file)
+    if field_type==0:
+        field_len = process_payload_type0(in_bytes, byte_idx+8, file=file)
+    elif field_type==16:
+        process_payload_type16(field_payload, byte_idx+8, file=file)
+    else:
+        process_payload_generic(field_payload, byte_idx+8, note_str,
+                file=file, quiet=quiet)
 
     field_info['type'] = field_type
+    field_info['id'] = field_id
     field_info['payload'] = field_payload
     return (byte_idx+field_len, field_info)
 
 
-def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
+def process_payload_generic(field_payload, payload_idx, note_str,
+        file=sys.stdout, quiet=False):
+    # string also shows bytes in hex
+    (out_string, _) = debug_string(
+            field_payload, payload_idx, note_str, multiline=True,
+            file=file, quiet=quiet)
+    if len(field_payload)%2 == 0:
+        (out_ushorts, _) = debug_ushorts(
+                field_payload, payload_idx, "ushorts",
+                file=file, quiet=quiet)
+    if len(field_payload)%4 == 0:
+        (out_uints, _) = debug_uints(
+                field_payload, payload_idx, "uints",
+                file=file, quiet=quiet)
+        if any([x>0x7FFFFFFF for x in out_uints]):
+            # only print signed integers if one is different than uint
+            (out_ints, _) = debug_ints(
+                    field_payload, payload_idx, "ints",
+                    file=file, quiet=quiet)
+
+
+def process_payload_type0(in_bytes, payload_idx, file=sys.stdout):
     # Finding the end of the jump algorithm
     # READ:
     #   ushort field_type=0
@@ -612,28 +537,11 @@ def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
     #   4*ushort
     #   ushort A
     #   if A==0 read 6*ushort, goto prev else exit, return this idx
-    field_info = {}
-    print("---------------------------------------------------------------", file=file)
-    print("byte_idx = "+repr(byte_idx), file=file)
-
-    # read header
-    print("Field Header:", file=file)
-    (out_ushorts, _) = debug_ushorts(
-            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
-    field_type = out_ushorts[0]
-    field_len = out_ushorts[1]
-
-    # field_type = 0 has either field_len=0 or field_len=8
-
-    print("field_type= %d"%field_type, file=file)
-    print("field_len = %d"%field_len, file=file)
-    print("field_payload_len = %d"%(field_len-8), file=file)
 
     print("\n**** JUMP FIELD ****\n", file=file)
-    # experimental jump
-    #   used to only do this for field_len==8, but it seems to work for
+    # used to only do this for field_len==8, but it seems to work for
     #   field_len==0 also!!
-    byte_idx = byte_idx + 8
+    byte_idx = payload_idx
     (out_ushorts, _) = debug_ushorts(
             in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
     byte_idx = byte_idx + 8
@@ -662,73 +570,278 @@ def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
             (out_ushorts, _) = debug_ushorts(
                     in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts", file=file)
         byte_idx = byte_idx + 14
-        
-    field_info['type'] = field_type
-    if field_len==8:
-        return (byte_idx, field_info)
-    else:
-        return (byte_idx+field_len, field_info)
+    field_len = byte_idx - (payload_idx - 8)
+    return field_len
 
 
-def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
-        file=sys.stdout):
-    field_info = {}
-    # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
-            in_bytes, byte_idx, file=file)
-    data_tag = header_uints[1]
-
-    # read payload 
-    print("Field Payload:", file=file)
-    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
-
+def process_payload_type16(field_payload, payload_idx, file=sys.stdout):
     (out_string, _) = debug_string(
-            field_payload, byte_idx+8, "string", file=file)
+            field_payload, payload_idx, "string", file=file)
     print(file=file)
     if not is_valid_string(field_payload):
         # some byte does not resolve to valid utf-8 character
         print("invalid string", file=file)
         (out_bytes, _) = debug_bytes(
-                field_payload, byte_idx+8, "bytes", file=file)
-    #
-    #if field_len !=0:
-    #    if data_tag in field_data:
-    #        #(out_uints, _) = debug_uints(
-    #        #        field_data[data_tag], byte_idx+8, "bytes", quiet=True)
-    #        (field_bytes, _) = debug_string(
-    #                field_data[data_tag][0], 0, "bytes", multiline=True,
-    #                file=file)
-    #        (field_ushorts, _) = debug_ushorts(
-    #                field_data[data_tag][0], 0, "ushorts",
-    #                file=file)
-    #        from_field_type = field_data[data_tag][1]
-    #        from_field_at = field_data[data_tag][2]
-    #        from_field_at2 = field_data[data_tag][3]
-    #        print(file=file)
-    #        print("from_field=%d @ %d + %d"%(from_field_type,from_field_at,from_field_at2-from_field_at),
-    #                file=file)
-    #        if from_field_type==100:
-    #            # uint0: ??
-    #            # uint1: num_words in future data field
-    #            # uint2: data_offset in future data field
-    #            # uint5: bytes_per_word
-    #            data_start = field_ushorts[4]
-    #            bytes_per_word = field_ushorts[10]
-    #            num_words = field_ushorts[2]
-    #            data_end = data_start + num_words*bytes_per_word - 1
-    #            print("data_start=%d"%data_start, file=file)
-    #            print("bytes_per_word=%d"%bytes_per_word, file=file)
-    #            print("num_words=%d"%num_words, file=file)
-    #            print("data_end=%d"%data_end, file=file)
-    #        if from_field_type==131:
-    #            # only unique value is ushort[4]
-    #            print("unique ushort=%d"%field_ushorts[4], file=file)
-    #    else:
-    #        print("DATA NOT FOUND", file=file)
+                field_payload, payload_idx, "bytes", file=file)
+
+
+#def read_field(in_bytes, byte_idx, note_str="??", field_data={}, field_ids={},
+#        file=sys.stdout):
+#    (out_ushorts, _) = debug_ushorts(
+#            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", quiet=True)
+#    field_type = out_ushorts[0]
+#    if field_type==0:
+#        return_vals = read_field_type0(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                file=file
+#                )
+#    elif field_type==16:
+#        return_vals = read_field_type16(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==100:
+#        return_vals = read_field_type100(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==101:
+#        return_vals = read_field_type101(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==102:
+#        return_vals = read_field_type102(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==129:
+#        return_vals = read_field_type129(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==130:
+#        return_vals = read_field_type130(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==131:
+#        return_vals = read_field_type131(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==1000:
+#        return_vals = read_field_type1000(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==1007:
+#        return_vals = read_field_type1007(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    elif field_type==1022:
+#        return_vals = read_field_type1022(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                field_data=field_data,
+#                file=file
+#                )
+#    else:
+#        return_vals = read_field_generic(
+#                in_bytes, byte_idx,
+#                note_str=note_str,
+#                file=file
+#                )
+#    
+#    return return_vals
+
+
+def read_field_generic(in_bytes, byte_idx, note_str="??", file=sys.stdout,
+        quiet=False):
+    field_info = {}
+    # read header
+    (field_type, field_len, field_id,
+            header_ushorts, header_uints) = print_field_header(
+            in_bytes, byte_idx, file=file, quiet=quiet)
+
+    # read payload 
+    if not quiet:
+        print("Field Payload:", file=file)
+    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    (out_string, _) = debug_string(
+            field_payload, byte_idx+8, note_str, multiline=True,
+            file=file, quiet=quiet)
+    (out_bytes, _) = debug_bytes(
+            field_payload, byte_idx+8, "bytes",
+            file=file, quiet=quiet)
+    if len(field_payload)%2 == 0:
+        (out_ushorts, _) = debug_ushorts(
+                field_payload, byte_idx+8, "ushorts",
+                file=file, quiet=quiet)
+    if len(field_payload)%4 == 0:
+        (out_uints, _) = debug_uints(
+                field_payload, byte_idx+8, "uints",
+                file=file, quiet=quiet)
+        if any([x>0x7FFFFFFF for x in out_uints]):
+            # only print signed integers if one is different than uint
+            (out_ints, _) = debug_ints(
+                    field_payload, byte_idx+8, "ints",
+                    file=file, quiet=quiet)
 
     field_info['type'] = field_type
+    field_info['id'] = field_id
     field_info['payload'] = field_payload
     return (byte_idx+field_len, field_info)
+
+
+#def read_field_type0(in_bytes, byte_idx, note_str="??", file=sys.stdout):
+#    # Finding the end of the jump algorithm
+#    # READ:
+#    #   ushort field_type=0
+#    #   ushort 8
+#    #   ushort 0
+#    #   ushort 0
+#    #   4*ushort
+#    #   ushort A
+#    #   if A==0 read 6*ushort, goto prev else exit, return this idx
+#    field_info = {}
+#    print("---------------------------------------------------------------", file=file)
+#    print("byte_idx = "+repr(byte_idx), file=file)
+#
+#    # read header
+#    print("Field Header:", file=file)
+#    (out_ushorts, _) = debug_ushorts(
+#            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
+#    field_type = out_ushorts[0]
+#    field_len = out_ushorts[1]
+#
+#    # field_type = 0 has either field_len=0 or field_len=8
+#
+#    print("field_type= %d"%field_type, file=file)
+#    print("field_len = %d"%field_len, file=file)
+#    print("field_payload_len = %d"%(field_len-8), file=file)
+#
+#    print("\n**** JUMP FIELD ****\n", file=file)
+#    # experimental jump
+#    #   used to only do this for field_len==8, but it seems to work for
+#    #   field_len==0 also!!
+#    byte_idx = byte_idx + 8
+#    (out_ushorts, _) = debug_ushorts(
+#            in_bytes[byte_idx:byte_idx+8], byte_idx, "ushorts", file=file)
+#    byte_idx = byte_idx + 8
+#    test_byte_idx_start = byte_idx
+#    all_zeros = True
+#    while( True ):
+#        # do the next 7 shorts start with a '0' value? if so keep looping
+#        (test_ushorts, _) = debug_ushorts(
+#                in_bytes[byte_idx:byte_idx+14],
+#                byte_idx,
+#                "ushorts",
+#                quiet=True)
+#        if test_ushorts[0]!=0:
+#            # next ushort was not 0, so it is valid field_type
+#            break
+#        if test_ushorts.count(0)==len(test_ushorts) and all_zeros==True:
+#            pass
+#        elif test_ushorts.count(0)!=len(test_ushorts) and all_zeros==True:
+#            all_zeros = False
+#            if byte_idx > test_byte_idx_start:
+#                print("%6d-%6d:"%(test_byte_idx_start,byte_idx-1), file=file)
+#                print("\tAll zeros %d*(0,)"%(byte_idx-test_byte_idx_start), file=file)
+#            (out_ushorts, _) = debug_ushorts(
+#                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts", file=file)
+#        else:
+#            (out_ushorts, _) = debug_ushorts(
+#                    in_bytes[byte_idx:byte_idx+14], byte_idx, "ushorts", file=file)
+#        byte_idx = byte_idx + 14
+#        
+#    field_info['type'] = field_type
+#    if field_len==8:
+#        return (byte_idx, field_info)
+#    else:
+#        return (byte_idx+field_len, field_info)
+
+
+#def read_field_type16(in_bytes, byte_idx, note_str="??", field_data={},
+#        file=sys.stdout):
+#    field_info = {}
+#    # read header
+#    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
+#            in_bytes, byte_idx, file=file)
+#    data_tag = header_uints[1]
+#
+#    # read payload 
+#    print("Field Payload:", file=file)
+#    field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+#
+#    (out_string, _) = debug_string(
+#            field_payload, byte_idx+8, "string", file=file)
+#    print(file=file)
+#    if not is_valid_string(field_payload):
+#        # some byte does not resolve to valid utf-8 character
+#        print("invalid string", file=file)
+#        (out_bytes, _) = debug_bytes(
+#                field_payload, byte_idx+8, "bytes", file=file)
+#    #
+#    #if field_len !=0:
+#    #    if data_tag in field_data:
+#    #        #(out_uints, _) = debug_uints(
+#    #        #        field_data[data_tag], byte_idx+8, "bytes", quiet=True)
+#    #        (field_bytes, _) = debug_string(
+#    #                field_data[data_tag][0], 0, "bytes", multiline=True,
+#    #                file=file)
+#    #        (field_ushorts, _) = debug_ushorts(
+#    #                field_data[data_tag][0], 0, "ushorts",
+#    #                file=file)
+#    #        from_field_type = field_data[data_tag][1]
+#    #        from_field_at = field_data[data_tag][2]
+#    #        from_field_at2 = field_data[data_tag][3]
+#    #        print(file=file)
+#    #        print("from_field=%d @ %d + %d"%(from_field_type,from_field_at,from_field_at2-from_field_at),
+#    #                file=file)
+#    #        if from_field_type==100:
+#    #            # uint0: ??
+#    #            # uint1: num_words in future data field
+#    #            # uint2: data_offset in future data field
+#    #            # uint5: bytes_per_word
+#    #            data_start = field_ushorts[4]
+#    #            bytes_per_word = field_ushorts[10]
+#    #            num_words = field_ushorts[2]
+#    #            data_end = data_start + num_words*bytes_per_word - 1
+#    #            print("data_start=%d"%data_start, file=file)
+#    #            print("bytes_per_word=%d"%bytes_per_word, file=file)
+#    #            print("num_words=%d"%num_words, file=file)
+#    #            print("data_end=%d"%data_end, file=file)
+#    #        if from_field_type==131:
+#    #            # only unique value is ushort[4]
+#    #            print("unique ushort=%d"%field_ushorts[4], file=file)
+#    #    else:
+#    #        print("DATA NOT FOUND", file=file)
+#
+#    field_info['type'] = field_type
+#    field_info['payload'] = field_payload
+#    return (byte_idx+field_len, field_info)
 
 
 def get_payload_chunks(field_payload, byte_idx, field_type,
@@ -765,7 +878,7 @@ def read_field_type100(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -791,7 +904,7 @@ def read_field_type101(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -817,7 +930,7 @@ def read_field_type102(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -847,7 +960,7 @@ def read_field_type129(in_bytes, byte_idx, note_str="??", field_data={},
     """
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -877,7 +990,7 @@ def read_field_type130(in_bytes, byte_idx, note_str="??", field_data={},
     """
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -904,7 +1017,7 @@ def read_field_type131(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -931,7 +1044,7 @@ def read_field_type1000(in_bytes, byte_idx, note_str="??", field_data={},
     # TODO: extract data for future field_type=16
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -965,7 +1078,7 @@ def read_field_type1007(in_bytes, byte_idx, note_str="??", field_data={},
     # TODO: extract data for future field_type=16
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -994,7 +1107,7 @@ def read_field_type1022(in_bytes, byte_idx, note_str="??", field_data={},
         file=sys.stdout):
     field_info = {}
     # read header
-    (field_type, field_len, header_ushorts, header_uints) = print_field_header(
+    (field_type, field_len, field_id, header_ushorts, header_uints) = print_field_header(
             in_bytes, byte_idx, file=file)
 
     # read payload 
@@ -1124,110 +1237,146 @@ def print_datablock(in_bytes, byte_idx, data_start, data_len, block_name, file=s
                 file=file
                 )
 
+def parse_file(filename):
+    print(filename)
+
+    filename = os.path.realpath(filename)
+    filedir = os.path.dirname(filename)
+
+    try:
+        out_fh = open(os.path.join(filedir,"dump.txt"),"w")
+    except:
+        print("Error opening dump.txt")
+
+    print(filename, file=out_fh)
+
+    with open(filename, 'rb') as in_fh:
+        in_bytes = in_fh.read()
+
+    byte_idx = 160
+
+    #SEARCH DEBUG
+    #search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
+    #exit()
+
+    # dict of keys: field_ids, items: field_payloads
+    field_ids = {}
+
+    # PASS 1
+    #   get all fields, field_ids, field_data
+    byte_idx = 160
+    field_data = {}
+    data_start = {}
+    data_len = {}
+    # init img data start at max 32-bit value
+    data_start[10] = 0xffffffff
+
+    while byte_idx < len(in_bytes):
+        field_start = byte_idx
+
+        (byte_idx, field_info) = read_field_generic(
+                in_bytes, byte_idx,
+                note_str="",
+                quiet=True
+                )
+        field_ids[field_info['id']] = field_info['payload']
+
+        # break if we still aren't advancing
+        if byte_idx==field_start:
+            break
+
+        if byte_idx > data_start[10]:
+            break
+
+    # PASS 2
+    #   parse everything
+
+    # field_data is data from last field_type=100 field, to be used in
+    #   following field_type=16 fields
+    byte_idx = 160
+    field_data = {}
+    data_start = {}
+    data_len = {}
+    # init img data start at max 32-bit value
+    data_start[10] = 0xffffffff
+
+    while byte_idx < len(in_bytes):
+        field_start = byte_idx
+        (byte_idx, field_info) = read_field(
+                in_bytes, byte_idx, field_data=field_data, field_ids=field_ids,
+                file=out_fh)
+
+        # record blocks start, end
+        block_ptr_types = { 142:0, 143:1, 132:2, 133:3, 141:4,
+                140:5, 126:6, 127:7, 128:8, 129:9, 130:10, }
+        if field_info['type'] in block_ptr_types:
+            block_num = block_ptr_types[field_info['type']]
+
+            (data_start[block_num], data_len[block_num]) = parse_datablock(
+                field_info['payload'])
+
+            print("Field Type %d - Data Block %02d"%(field_info['type'],block_num),
+                    file=out_fh)
+            print("    data starts at byte %d"%(data_start[block_num]),
+                    file=out_fh)
+            print("    data length is %d bytes"%(data_len[block_num]),
+                    file=out_fh)
+
+        # break if we still aren't advancing
+        if byte_idx==field_start:
+            print("ERROR BREAK!!!!", file=out_fh)
+            print("-----------------------------------------------------------",
+                    file=out_fh)
+            break
+
+        if byte_idx > data_start[10]:
+            print("-----------------------------------------------------------",
+                    file=out_fh)
+            print("We passed the start of img data, so BREAK!!",
+                    file=out_fh)
+            print("-----------------------------------------------------------",
+                    file=out_fh)
+            break
+
+    out_fh.close()
+
+    # parse data blocks 0-9
+    for i in range(0,10):
+        # Data Block
+        try:
+            out_fh = open(os.path.join(filedir,"data%02d.txt"%i),"w")
+        except:
+            print("Error opening dump.txt", file=sys.stderr)
+        print_datablock(
+                in_bytes, byte_idx,
+                data_start[i], data_len[i], "%d"%i, file=out_fh)
+        out_fh.close()
+
+    # Data Block 10 - Image Data
+    try:
+        out_fh = open(os.path.join(filedir,"data10_img.txt"),"w")
+    except:
+        print("Error opening dump.txt")
+    print("===================================================================",
+            file=out_fh)
+    print("IMAGE DATA BLOCK", file=out_fh)
+    print(file=out_fh)
+    #print_datablock(data_start[10], data_len[10], "10", file=out_fh)
+    data_end = data_start[10] + data_len[10]
+    print("Image Data: (%d-%d)"%(data_start[10],data_end-1), file=out_fh)
+    #(img_ushorts, _) = debug_ushorts(
+    #        in_bytes[data_start[10]:data_end],
+    #        data_start[10], "img_data", file=out_fh)
+    #for img_ushort in img_ushorts:
+    #    print(img_ushort, file=out_fh)
+    print(file=out_fh)
+    print(file=out_fh)
+    out_fh.close()
+
+
 def main(args):
     for filename in args:
-        print(filename)
-
-        filename = os.path.realpath(filename)
-        filedir = os.path.dirname(filename)
-
-        try:
-            out_fh = open(os.path.join(filedir,"dump.txt"),"w")
-        except:
-            print("Error opening dump.txt")
-
-        print(filename, file=out_fh)
-
-        with open(filename, 'rb') as in_fh:
-            in_bytes = in_fh.read()
-
-        byte_idx = 160
-
-        #SEARCH DEBUG
-        #search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
-        #exit()
-
-        # field_data is data from last field_type=100 field, to be used in
-        #   following field_type=16 fields
-        field_data = {}
-        data_start = {}
-        data_len = {}
-
-        # init img data start at max 32-bit value
-        data_start[10] = 0xffffffff
-
-        while( byte_idx < len(in_bytes) ):
-            field_start = byte_idx
-            (byte_idx, field_info) = read_field(
-                    in_bytes, byte_idx, field_data=field_data,
-                    file=out_fh)
-            if 'data' in field_info:
-                field_data = field_info['data']
-
-            block_ptr_types = { 142:0, 143:1, 132:2, 133:3, 141:4,
-                    140:5, 126:6, 127:7, 128:8, 129:9, 130:10, }
-            if field_info['type'] in block_ptr_types:
-                block_num = block_ptr_types[field_info['type']]
-
-                (data_start[block_num], data_len[block_num]) = parse_datablock(
-                    field_info['payload'])
-
-                print("Field Type %d - Data Block %02d"%(field_info['type'],block_num),
-                        file=out_fh)
-                print("    data starts at byte %d"%(data_start[block_num]),
-                        file=out_fh)
-                print("    data length is %d bytes"%(data_len[block_num]),
-                        file=out_fh)
-
-            # break if we still aren't advancing
-            if byte_idx==field_start:
-                print("ERROR BREAK!!!!", file=out_fh)
-                print("--------------------------------------------------------------",
-                        file=out_fh)
-                break
-
-            if byte_idx > data_start[10]:
-                print("--------------------------------------------------------------",
-                        file=out_fh)
-                print("We passed the start of img data, so BREAK!!",
-                        file=out_fh)
-                print("--------------------------------------------------------------",
-                        file=out_fh)
-                break
-
-        out_fh.close()
-
-        # parse data blocks 0-9
-
-        for i in range(0,10):
-            # Data Block
-            try:
-                out_fh = open(os.path.join(filedir,"data%02d.txt"%i),"w")
-            except:
-                print("Error opening dump.txt", file=sys.stderr)
-            print_datablock(in_bytes, byte_idx, data_start[i], data_len[i], "%d"%i, file=out_fh)
-            out_fh.close()
-
-        # Data Block 10 - Image Data
-        try:
-            out_fh = open(os.path.join(filedir,"data10_img.txt"),"w")
-        except:
-            print("Error opening dump.txt")
-        print("=====================================================================",
-                file=out_fh)
-        print("IMAGE DATA BLOCK", file=out_fh)
-        print(file=out_fh)
-        #print_datablock(data_start[10], data_len[10], "10", file=out_fh)
-        data_end = data_start[10] + data_len[10]
-        print("Image Data: (%d-%d)"%(data_start[10],data_end-1), file=out_fh)
-        #(img_ushorts, _) = debug_ushorts(
-        #        in_bytes[data_start[10]:data_end],
-        #        data_start[10], "img_data", file=out_fh)
-        #for img_ushort in img_ushorts:
-        #    print(img_ushort, file=out_fh)
-        print(file=out_fh)
-        print(file=out_fh)
-        out_fh.close()
+        parse_file(filename)
 
 
 if __name__ == "__main__":
