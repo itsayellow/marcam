@@ -8,11 +8,6 @@ import os.path
 import struct
 
 """
-Directly cited by field_type=16
-    Need format of type=1000
-    Need format of type=1007
-    Need format of type=1022
-
 NOTES:
 --------
 Header
@@ -20,7 +15,24 @@ Header
     <2-byte byte length of entire field (len(Header) + len(Payload))>
     <4-byte uint field_id>
 Payload
-    <bytes or ushort or int or uint until end of field>
+    <bytes or ushort or uint until end of field>
+
+--------------------------
+102  ->  101 ->  100 ->  16
+    \->  16 \->  16
+
+1015 -> 1008 -> 1007 -> 16
+    \-> 1024 -> 1022 -> 16
+    \-> 2
+
+1000 -> 1020 -> 1011 -> 1010 -> 1040 -> 131  -> 16
+    |       |               |       |       \-> 1000 -> ...
+    |       |               |       \-> 1000 -> ...
+    |       |               \-> 1000 -> ...
+    |       \-> 1000 -> ...
+    \-> 1030
+    \-> 1000 -> ...
+    \-> 16
 
 --------------------------
 0     Jump Field - nop filler data
