@@ -540,6 +540,7 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}, field_ids={},
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
 
     # check for references
+    references = []
     if len(field_payload) % 4 == 0:
         (out_uints, _) = debug_uints( field_payload, byte_idx+8, "", quiet=True)
         references = [x for x in out_uints if x in field_ids]
@@ -565,6 +566,8 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}, field_ids={},
     field_info['type'] = field_type
     field_info['id'] = field_id
     field_info['payload'] = field_payload
+    field_info['references'] = references
+
     return (byte_idx+field_len, field_info)
 
 
@@ -1086,7 +1089,8 @@ def parse_datablock(field_payload):
     return(data_start, data_len)
 
 
-def print_datablock(in_bytes, byte_idx, data_start, data_len, block_name, file=sys.stdout):
+def print_datablock(in_bytes, data_start, data_len, block_name, field_ids={},
+        file=sys.stdout):
     print("=====================================================================",
             file=file)
     print("DATA BLOCK %s"%block_name, file=file)
@@ -1118,7 +1122,7 @@ def print_datablock(in_bytes, byte_idx, data_start, data_len, block_name, file=s
             break
 
         (byte_idx, field_info) = read_field(in_bytes, byte_idx,
-                field_data=field_data, file=file)
+                field_data=field_data, field_ids=field_ids, file=file)
         if 'data' in field_info:
             field_data = field_info['data']
 
@@ -1138,61 +1142,14 @@ def print_datablock(in_bytes, byte_idx, data_start, data_len, block_name, file=s
                 file=file
                 )
 
-def parse_file(filename):
-    print(filename)
 
-    filename = os.path.realpath(filename)
-    filedir = os.path.dirname(filename)
-
+def report_whole_file(in_bytes, field_ids, filedir, filename):
     try:
         out_fh = open(os.path.join(filedir,"dump.txt"),"w")
     except:
         print("Error opening dump.txt")
 
     print(filename, file=out_fh)
-
-    with open(filename, 'rb') as in_fh:
-        in_bytes = in_fh.read()
-
-    byte_idx = 160
-
-    #SEARCH DEBUG
-    #search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
-    #exit()
-
-    # dict of keys: field_ids, items: field_payloads
-    field_ids = {}
-
-    # PASS 1
-    #   get all fields, field_ids, field_data
-    byte_idx = 160
-    field_data = {}
-    data_start = {}
-    data_len = {}
-    # init img data start at max 32-bit value
-    data_start[10] = 0xffffffff
-
-    while byte_idx < len(in_bytes):
-        field_start = byte_idx
-
-        (byte_idx, field_info) = read_field(
-                in_bytes, byte_idx,
-                note_str="",
-                quiet=True
-                )
-
-        if field_info['id'] != 0:
-            field_ids[field_info['id']] = field_info
-
-        # break if we still aren't advancing
-        if byte_idx==field_start:
-            break
-
-        if byte_idx > data_start[10]:
-            break
-
-    # PASS 2
-    #   parse everything
 
     # field_data is data from last field_type=100 field, to be used in
     #   following field_type=16 fields
@@ -1243,23 +1200,27 @@ def parse_file(filename):
 
     out_fh.close()
 
+
+def report_datablocks(in_bytes, data_start, data_len, field_ids, filedir):
     # parse data blocks 0-9
     for i in range(0,10):
         # Data Block
         try:
             out_fh = open(os.path.join(filedir,"data%02d.txt"%i),"w")
         except:
-            print("Error opening dump.txt", file=sys.stderr)
+            print("Error opening data%02d.txt"%i, file=sys.stderr)
+            raise
         print_datablock(
-                in_bytes, byte_idx,
-                data_start[i], data_len[i], "%d"%i, file=out_fh)
+                in_bytes,
+                data_start[i], data_len[i], "%d"%i,
+                field_ids=field_ids, file=out_fh)
         out_fh.close()
 
     # Data Block 10 - Image Data
     try:
         out_fh = open(os.path.join(filedir,"data10_img.txt"),"w")
     except:
-        print("Error opening dump.txt")
+        print("Error opening data10_img.txt")
     print("===================================================================",
             file=out_fh)
     print("IMAGE DATA BLOCK", file=out_fh)
@@ -1274,8 +1235,77 @@ def parse_file(filename):
     #    print(img_ushort, file=out_fh)
     print(file=out_fh)
     print(file=out_fh)
-    out_fh.close()
 
+
+def parse_file(filename):
+    print(filename)
+
+    filename = os.path.realpath(filename)
+    filedir = os.path.dirname(filename)
+
+    with open(filename, 'rb') as in_fh:
+        in_bytes = in_fh.read()
+
+    byte_idx = 160
+
+    #SEARCH DEBUG
+    #search_backwards(in_bytes, len(in_bytes)-1, min_search_idx=59881)
+    #exit()
+
+    # dict of keys: field_ids, items: field_payloads
+    field_ids = {}
+
+    # PASS 1
+    #   get all fields, field_ids, field_data
+    byte_idx = 160
+    field_data = {}
+    data_start = {}
+    data_len = {}
+    # init img data start at max 32-bit value
+    data_start[10] = 0xffffffff
+
+    # keep track of all fields that were referenced
+    is_referenced = {}
+
+    while byte_idx < len(in_bytes):
+        field_start = byte_idx
+
+        (byte_idx, field_info) = read_field(
+                in_bytes, byte_idx,
+                note_str="",
+                quiet=True
+                )
+
+        if field_info['id'] != 0:
+            field_ids[field_info['id']] = field_info
+            for ref in field_info['references']:
+                is_referenced[ref] = True
+
+        # record data blocks start, end
+        block_ptr_types = { 142:0, 143:1, 132:2, 133:3, 141:4,
+                140:5, 126:6, 127:7, 128:8, 129:9, 130:10, }
+        if field_info['type'] in block_ptr_types:
+            block_num = block_ptr_types[field_info['type']]
+            (data_start[block_num], data_len[block_num]) = parse_datablock(
+                field_info['payload'])
+
+        # break if we still aren't advancing
+        if byte_idx==field_start:
+            break
+
+        if byte_idx > data_start[10]:
+            break
+
+    # PASS 2
+    #   report on whole file to dump.txt
+    report_whole_file(in_bytes, field_ids, filedir, filename)
+
+    # PASS 3
+    #   report data blocks in separate files
+    report_datablocks(in_bytes, data_start, data_len, field_ids, filedir)
+
+    # PASS 4
+    #   report on hierarchy
 
 def main(args):
     for filename in args:
