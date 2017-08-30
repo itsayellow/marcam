@@ -149,7 +149,7 @@ Payload
 --------------------------
 16    String field - text label assigned to previous data through data_id
       NO references to other fields
-      YES referenced by: 100, 101, 
+      YES referenced by: 100, 101, 102, 131, 1000
       field_id: MSShort: one of {0x0085, 0x0086, 0x0087, 0x0088, 0x008a, 0x014a,
         0x014c, 0x014d, 0x0919, 0x091b, 0x1004, 0x1043, 0x1045, 0x107b, 0x107d,
         0x1083, 0x1097, 0x1099, 0x10b9, 0x10d9, 0x11e4, 0x1289, 0x1441}
@@ -163,58 +163,90 @@ Payload
       field_len = 208
 
 100   Data field - contains multiple data assigned to future text labels
+      YES references to: 16,
+      YES referenced by: 101,
       Last 4 bytes of field headers of field_type=16 is data_id that match
       data_id uints in this field payload
       Every 36 bytes is data item
       Bytes 12-15 are uint data_id tag
 
 101   Data field - contains multiple data assigned to future text labels
+      YES references to: 16, 100
+      YES referenced by: 102
       Last 4 bytes of field headers of field_type=16 is data_id that match
       data_id uints in this field payload
       Every 20 bytes is data item
       Bytes 16-19 are uint data_id tag
 
 102   Data field - contains multiple data assigned to future text labels
+      YES references to: 16, 101
+      NOT referenced by other field
       Last 4 bytes of field headers of field_type=16 is data_id that match
       data_id uints in this field payload
       Every 16 bytes is data item
       Bytes 12-15 are uint data_id tag
 
 131   Data field - contains multiple data assigned to future text labels
+      YES references to: 16, 1000
+      YES referenced by: 1040
       Last 4 bytes of field headers of field_type=16 is data_id that match
       data_id uints in this field payload
       Every 12 bytes is data item
       Bytes 4-7 are uint data_id tag
 
 1000  pointed from data in 100 (and other types?)
+      YES references to: 16, 1000, 1020, 1030
+      YES referenced by: 131, 1000, 1010, 1020, 1030, 1040,
       Sometimes for field_type= 16, sometimes not (??)
       Is format fixed based on which data block?
 
 1004  nop field? - payload is all 0's, otherwise normal header
+      NO references to other fields
+      NOT referenced by other field
 
 1007  Not fully understood - Irregular data block
+      YES references to: 16
+      YES referenced by: 1008
       Is format fixed based on which data block?
 
 1008
+      YES references to: 1007
+      YES referenced by: 1015
 
 1010
+      YES references to: 1000, 1040
+      YES referenced by: 1011
 
 1011
+      YES references to: 1010
+      YES referenced by: 1020
 
 1015
+      YES references to: 1008, 1024, 2
+      NOT referenced by other field
 
 1020
+      YES references to: 1000, 1011
+      YES referenced by: 1000
 
 1022  No data items, only data_id tags?
+      YES references to: 16
+      YES referenced by: 1024
       4 uints in payload, first 3 uints are data_id tags
       Every 4 bytes is data item, last 4 bytes are not used (??)
       Bytes 0-3 are uint data_id tag
 
 1024
+      YES references to: 1022
+      YES referenced by: 1015
 
 1030
+      YES references to: 1000, 1040
+      YES referenced by: 1000
 
 1040
+      YES references to: 131, 1000
+      YES referenced by: 1010, 1030
 --------------------------
 bio-formats.java:
     codeFound == 0x81 (field_type)
@@ -493,6 +525,17 @@ def read_field(in_bytes, byte_idx, note_str="??", field_data={}, field_ids={},
 
     # get payload bytes
     field_payload = in_bytes[byte_idx+8:byte_idx+field_len]
+
+    # check for references
+    if len(field_payload) % 4 == 0:
+        (out_uints, _) = debug_uints( field_payload, byte_idx+8, "", quiet=True)
+        references = [x for x in out_uints if x in field_ids]
+        if references and not quiet:
+            print("Links to: ", end="", file=file )
+            for ref in references:
+                print("%d (type %d),"%(ref,field_ids[ref]['type']),
+                        end="", file=file )
+            print("\n", file=file)
 
     # report payload if not quiet
     if not quiet:
@@ -1125,7 +1168,8 @@ def parse_file(filename):
                 quiet=True
                 )
 
-        field_ids[field_info['id']] = field_info['payload']
+        if field_info['id'] != 0:
+            field_ids[field_info['id']] = field_info
 
         # break if we still aren't advancing
         if byte_idx==field_start:
