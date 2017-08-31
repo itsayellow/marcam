@@ -406,8 +406,7 @@ def debug_generic(byte_stream, byte_start, note_str, format_str, quiet=False,
     out_shorts = struct.unpack("<"+format_str*num_shorts, byte_stream)
     byte_idx = byte_start + len(byte_stream)
     if not quiet:
-        print("%6d-%6d"%(byte_start,byte_idx-1), end="", file=file)
-        print("\t"+note_str+":", file=file)
+        print("%6d-%6d: %s"%(byte_start,byte_idx-1, note_str), file=file)
         print_list(
                 out_shorts,
                 bits=bytes_per*8,
@@ -1237,14 +1236,41 @@ def report_datablocks(in_bytes, data_start, data_len, field_ids, filedir):
     print(file=out_fh)
 
 
+def indent(recurse_level, file=sys.stdout):
+    print("  "*recurse_level, end="", file=file)
+
+
 def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
     this_field = field_ids[field_id]
-    print("  "*recurse_level, end="", file=file)
+    this_payload = this_field['payload']
+    print(file=file)
+    indent(recurse_level, file=file)
     print("field_type= %4d"%this_field['type'], file=file)
-    print("  "*recurse_level, end="", file=file)
+    indent(recurse_level, file=file)
     print("field_id = 0x{0:08x} ({0:d})".format(this_field['id']), file=file)
-    for ref in this_field['references']:
-        recurse_fields(ref, field_ids, recurse_level+1, file=file)
+    if this_field.get('references',None):
+        if len(this_payload)%4 == 0:
+            (out_uints, _) = debug_uints(this_payload, 0, "", quiet=True)
+
+            last_i = 0
+            for (i,x) in enumerate(out_uints):
+                if x in this_field['references']:
+                    if last_i<i*4:
+                        debug_ushorts(this_payload[last_i:i*4], last_i, "", file=file)
+                    ref = x
+                    last_i = (i+1)*4
+                    indent(recurse_level, file=file)
+                    print("%d-%d"%(i*4,i*4+3), end="", file=file)
+                    recurse_fields(ref, field_ids, recurse_level+1, file=file)
+            if last_i<len(this_payload):
+                debug_ushorts(this_payload[last_i:], last_i, "", file=file)
+        else:
+            raise(Exception("references, but payload not a multiple of 4!!"))
+    else:
+        if this_field['type'] == 16:
+            indent(recurse_level, file=file)
+            print(this_payload[:-1].decode('utf-8','ignore'), file=file)
+
 
 def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
     try:
