@@ -1237,6 +1237,32 @@ def report_datablocks(in_bytes, data_start, data_len, field_ids, filedir):
     print(file=out_fh)
 
 
+def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
+    this_field = field_ids[field_id]
+    print("  "*recurse_level, end="", file=file)
+    print("field_type= %4d"%this_field['type'], file=file)
+    print("  "*recurse_level, end="", file=file)
+    print("field_id = 0x{0:08x} ({0:d})".format(this_field['id']), file=file)
+    for ref in this_field['references']:
+        recurse_fields(ref, field_ids, recurse_level+1, file=file)
+
+def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
+    try:
+        out_fh = open(os.path.join(filedir,"hierarchy.txt"),"w")
+    except:
+        print("Error opening hierarchy.txt")
+        raise
+
+    field_ids_norefs = [x for x in field_ids if not is_referenced.get(x,False)]
+    field_ids_norefs = [x for x in field_ids_norefs if field_ids[x]['type'] != 16]
+    field_ids_norefs.sort()
+    for field_id in field_ids_norefs:
+        recurse_fields(field_id, field_ids, 0, file=out_fh)
+        print(file=out_fh)
+
+    out_fh.close()
+
+
 def parse_file(filename):
     print(filename)
 
@@ -1257,15 +1283,13 @@ def parse_file(filename):
 
     # PASS 1
     #   get all fields, field_ids, field_data
+
+    # reset loop variables
     byte_idx = 160
-    field_data = {}
     data_start = {}
     data_len = {}
     # init img data start at max 32-bit value
     data_start[10] = 0xffffffff
-
-    # keep track of all fields that were referenced
-    is_referenced = {}
 
     while byte_idx < len(in_bytes):
         field_start = byte_idx
@@ -1276,11 +1300,6 @@ def parse_file(filename):
                 quiet=True
                 )
 
-        if field_info['id'] != 0:
-            field_ids[field_info['id']] = field_info
-            for ref in field_info['references']:
-                is_referenced[ref] = True
-
         # record data blocks start, end
         block_ptr_types = { 142:0, 143:1, 132:2, 133:3, 141:4,
                 140:5, 126:6, 127:7, 128:8, 129:9, 130:10, }
@@ -1288,6 +1307,40 @@ def parse_file(filename):
             block_num = block_ptr_types[field_info['type']]
             (data_start[block_num], data_len[block_num]) = parse_datablock(
                 field_info['payload'])
+
+        if field_info['id'] != 0:
+            field_ids[field_info['id']] = field_info
+
+        # break if we still aren't advancing
+        if byte_idx==field_start:
+            break
+
+        if byte_idx > data_start[10]:
+            break
+
+    # reset byte_idx
+    byte_idx = 160
+
+    # keep track of all fields that were referenced
+    is_referenced = {}
+
+    # now that we know all data_ids, find all references
+    while byte_idx < len(in_bytes):
+        field_start = byte_idx
+
+        (byte_idx, field_info) = read_field(
+                in_bytes, byte_idx,
+                note_str="",
+                quiet=True,
+                field_ids=field_ids
+                )
+
+        if field_info['id'] != 0:
+            # update references field using field_info
+            field_ids[field_info['id']] = field_info
+
+            for ref in field_info['references']:
+                is_referenced[ref] = True
 
         # break if we still aren't advancing
         if byte_idx==field_start:
@@ -1306,6 +1359,8 @@ def parse_file(filename):
 
     # PASS 4
     #   report on hierarchy
+    report_hierarchy(field_ids, is_referenced, filedir)
+
 
 def main(args):
     for filename in args:
