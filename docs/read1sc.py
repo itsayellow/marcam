@@ -1295,6 +1295,7 @@ def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
 
 def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
     # roots types: 102, 1000, 1004, 1015
+    # type 1000 hierarchy may have loops!
     try:
         out_fh = open(os.path.join(filedir,"hierarchy.txt"),"w")
     except:
