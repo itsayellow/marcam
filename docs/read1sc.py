@@ -19,7 +19,9 @@ Payload
 
 --------------------------
 root types: 102, 1000, 1004, 1015
+type 16 can be repeatedly referenced
 
+--------------------------
 102  ->  101 ->  100 ->  16
     \->  16 \->  16
 
@@ -1257,13 +1259,26 @@ def indent_str(recurse_level):
     return "    "*recurse_level
 
 
-def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
+def recurse_fields(field_id, field_ids, recurse_level, found_ids,
+        file=sys.stdout):
     this_field = field_ids[field_id]
     this_payload = this_field['payload']
+
     ind = indent_str(recurse_level)
     print("%sfield_type=%4d"%(ind, this_field['type']), end="", file=file)
     print("  field_id=0x{0:08x} ({0:d})".format(this_field['id']),
             file=file)
+
+    if field_id not in found_ids:
+        found_ids.append(field_id)
+    else:
+        # prevent loops and return of not just text
+        print("repeated ID: %d, type %d"%(field_id,this_field['type']))
+        print("  payload: %s"%(this_field['payload'].decode("utf-8","ignore")))
+        if this_field['type'] != 16:
+            print("%sRepeated ID (loop)"%ind, file=file)
+            return
+
     if this_field.get('references',None):
         if len(this_payload)%4 == 0:
             (out_uints, _) = debug_uints(this_payload, 0, "", quiet=True)
@@ -1278,7 +1293,8 @@ def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
                     ref = x
                     last_i = (i+1)*4
                     print("%s%d-%d:"%(ind, i*4,i*4+3), file=file)
-                    recurse_fields(ref, field_ids, recurse_level+1, file=file)
+                    recurse_fields(ref, field_ids, recurse_level+1, found_ids,
+                            file=file)
             if last_i<len(this_payload):
                 debug_ushorts(this_payload[last_i:], last_i, "", var_tab=ind,
                         file=file)
@@ -1302,15 +1318,27 @@ def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
         print("Error opening hierarchy.txt")
         raise
 
+    found_ids = []
+    missed_ids = [x for x in field_ids]
+
     field_ids_norefs = [x for x in field_ids if not is_referenced.get(x,False)]
     field_ids_norefs = [x for x in field_ids_norefs if field_ids[x]['type'] != 16]
     field_ids_norefs.sort()
-    for field_id in field_ids_norefs:
+    root_ids = field_ids_norefs
+
+    root_types = [102,1000,1004,1015]
+    root_ids = [x for x in field_ids if field_ids[x]['type'] in root_types]
+
+    for field_id in root_ids:
         print("-------------------------------------------------------------",
                 file=out_fh)
-        recurse_fields(field_id, field_ids, 0, file=out_fh)
+        recurse_fields(field_id, field_ids, 0, found_ids, file=out_fh)
     print("-------------------------------------------------------------",
             file=out_fh)
+
+    for id in found_ids:
+        missed_ids.remove(id)
+    print(missed_ids, file=out_fh)
 
     out_fh.close()
 
