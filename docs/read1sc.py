@@ -18,6 +18,8 @@ Payload
     <bytes or ushort or uint until end of field>
 
 --------------------------
+root types: 102, 1000, 1004, 1015
+
 102  ->  101 ->  100 ->  16
     \->  16 \->  16
 
@@ -1285,10 +1287,14 @@ def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
     else:
         if this_field['type'] == 16:
             print(ind+this_payload[:-1].decode('utf-8','ignore'), file=file)
-    print(file=file)
+        else:
+            debug_ushorts(this_payload, 0, "", var_tab=ind,
+                    file=file)
+    #print(file=file)
 
 
 def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
+    # roots types: 102, 1000, 1004, 1015
     try:
         out_fh = open(os.path.join(filedir,"hierarchy.txt"),"w")
     except:
@@ -1299,8 +1305,11 @@ def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
     field_ids_norefs = [x for x in field_ids_norefs if field_ids[x]['type'] != 16]
     field_ids_norefs.sort()
     for field_id in field_ids_norefs:
+        print("-------------------------------------------------------------",
+                file=out_fh)
         recurse_fields(field_id, field_ids, 0, file=out_fh)
-        print(file=out_fh)
+    print("-------------------------------------------------------------",
+            file=out_fh)
 
     out_fh.close()
 
