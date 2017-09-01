@@ -330,7 +330,7 @@ test.1sc:
 
 """
 def print_list(byte_list, bits=8, dec_not_hex=True, address=None,
-        file=sys.stdout):
+        var_tab=False, file=sys.stdout):
     """
     TODO: is this doing proper little-endian?
     """
@@ -375,16 +375,25 @@ def print_list(byte_list, bits=8, dec_not_hex=True, address=None,
         for (i,byte_group) in enumerate(byte_groups):
             # print address start
             if len(byte_groups) > 1:
-                print("    %6d: "%(address+i*items*bits/8), end="", file=file)
+                if var_tab is False:
+                    print("    %6d: "%(address+i*items*bits/8), end="", file=file)
+                else:
+                    print("%s%4d: "%(var_tab,address+i*items*bits/8), end="", file=file)
             else:
-                print("            ", end="", file=file)
+                if var_tab is False:
+                    print("            ", end="", file=file)
+                else:
+                    print("%s      "%(var_tab), end="", file=file)
             # print decimal words
             for byte in byte_list[byte_group[0]:byte_group[1]]:
                 print(pr_str.format(byte), end="", file=file)
             print(file=file)
 
             # print spacer
-            print("            ", end="", file=file)
+            if var_tab is False:
+                print("            ", end="", file=file)
+            else:
+                print("%s      "%(var_tab), end="", file=file)
             # print hex words
             for byte in byte_list[byte_group[0]:byte_group[1]]:
                 print(pr_str_hex.format(byte), end="", file=file)
@@ -399,18 +408,23 @@ def str_safe_bytes(byte_stream):
     return safe_byte_stream
     
 
-def debug_generic(byte_stream, byte_start, note_str, format_str, quiet=False,
-        file=sys.stdout):
+def debug_generic(byte_stream, byte_start, note_str, format_str,
+        var_tab=False, quiet=False, file=sys.stdout):
     bytes_per = struct.calcsize(format_str)
     num_shorts = len(byte_stream)//(bytes_per)
     out_shorts = struct.unpack("<"+format_str*num_shorts, byte_stream)
     byte_idx = byte_start + len(byte_stream)
     if not quiet:
-        print("%6d-%6d: %s"%(byte_start,byte_idx-1, note_str), file=file)
+        if var_tab is not False:
+            print("%s%d-%d: %s"%(var_tab, byte_start, byte_idx-1, note_str),
+                    file=file)
+        else:
+            print("%6d-%6d: %s"%(byte_start, byte_idx-1, note_str), file=file)
         print_list(
                 out_shorts,
                 bits=bytes_per*8,
                 address=byte_start,
+                var_tab=var_tab,
                 file=file
                 )
     return (out_shorts, byte_idx)
@@ -428,9 +442,11 @@ def debug_uints(byte_stream, byte_start, note_str, quiet=False, file=sys.stdout)
     return (out_uints, byte_idx)
 
 
-def debug_ushorts(byte_stream, byte_start, note_str, quiet=False, file=sys.stdout):
+def debug_ushorts(byte_stream, byte_start, note_str, var_tab=False,
+        quiet=False, file=sys.stdout):
     (out_shorts, byte_idx) = debug_generic(
-            byte_stream, byte_start, note_str, "H", quiet=quiet, file=file)
+            byte_stream, byte_start, note_str, "H", var_tab=var_tab,
+            quiet=quiet, file=file)
     return (out_shorts, byte_idx)
 
 
@@ -445,8 +461,7 @@ def debug_string(byte_stream, byte_start, note_str, multiline=False,
     out_string = byte_stream.decode("utf-8","replace")
     byte_idx = byte_start + len(byte_stream)
     if not quiet:
-        print("%6d-%6d"%(byte_start,byte_idx - 1), end="", file=file)
-        print("\t"+note_str+":", file=file)
+        print("%6d-%6d: %s"%(byte_start,byte_idx - 1,note_str), file=file)
         if multiline:
             for i in range(1+len(byte_stream)//chars_in_line):
                 byte_substream = byte_stream[i*chars_in_line:(i+1)*chars_in_line]
@@ -1236,18 +1251,17 @@ def report_datablocks(in_bytes, data_start, data_len, field_ids, filedir):
     print(file=out_fh)
 
 
-def indent(recurse_level, file=sys.stdout):
-    print("  "*recurse_level, end="", file=file)
+def indent_str(recurse_level):
+    return "    "*recurse_level
 
 
 def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
     this_field = field_ids[field_id]
     this_payload = this_field['payload']
-    print(file=file)
-    indent(recurse_level, file=file)
-    print("field_type= %4d"%this_field['type'], file=file)
-    indent(recurse_level, file=file)
-    print("field_id = 0x{0:08x} ({0:d})".format(this_field['id']), file=file)
+    ind = indent_str(recurse_level)
+    print("%sfield_type=%4d"%(ind, this_field['type']), end="", file=file)
+    print("  field_id=0x{0:08x} ({0:d})".format(this_field['id']),
+            file=file)
     if this_field.get('references',None):
         if len(this_payload)%4 == 0:
             (out_uints, _) = debug_uints(this_payload, 0, "", quiet=True)
@@ -1256,20 +1270,22 @@ def recurse_fields(field_id, field_ids, recurse_level, file=sys.stdout):
             for (i,x) in enumerate(out_uints):
                 if x in this_field['references']:
                     if last_i<i*4:
-                        debug_ushorts(this_payload[last_i:i*4], last_i, "", file=file)
+                        debug_ushorts(
+                                this_payload[last_i:i*4], last_i, "",
+                                var_tab=ind, file=file)
                     ref = x
                     last_i = (i+1)*4
-                    indent(recurse_level, file=file)
-                    print("%d-%d"%(i*4,i*4+3), end="", file=file)
+                    print("%s%d-%d:"%(ind, i*4,i*4+3), file=file)
                     recurse_fields(ref, field_ids, recurse_level+1, file=file)
             if last_i<len(this_payload):
-                debug_ushorts(this_payload[last_i:], last_i, "", file=file)
+                debug_ushorts(this_payload[last_i:], last_i, "", var_tab=ind,
+                        file=file)
         else:
             raise(Exception("references, but payload not a multiple of 4!!"))
     else:
         if this_field['type'] == 16:
-            indent(recurse_level, file=file)
-            print(this_payload[:-1].decode('utf-8','ignore'), file=file)
+            print(ind+this_payload[:-1].decode('utf-8','ignore'), file=file)
+    print(file=file)
 
 
 def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
