@@ -1281,23 +1281,36 @@ def recurse_fields(field_id, field_ids, recurse_level, found_ids,
 
     if this_field.get('references',None):
         if len(this_payload)%4 == 0:
-            (out_uints, _) = debug_uints(this_payload, 0, "", quiet=True)
+            if this_field['type'] == 100:
+                i=0
+                while(i<len(this_payload)):
+                    (out_ushorts, _) = debug_ushorts(this_payload[i:i+12], i,
+                            "", var_tab=ind, file=file)
+                    (out_uints, _) = debug_uints(this_payload[i+12:i+16], i+12,
+                            "", quiet=True)
+                    recurse_fields(out_uints[0], field_ids, recurse_level+1,
+                            found_ids, file=file)
+                    (out_ushorts, _) = debug_ushorts(this_payload[i+16:i+36],
+                            i+16, "", var_tab=ind, file=file)
+                    i=i+36
+            else:
+                (out_uints, _) = debug_uints(this_payload, 0, "", quiet=True)
 
-            last_i = 0
-            for (i,x) in enumerate(out_uints):
-                if x in this_field['references']:
-                    if last_i<i*4:
-                        debug_ushorts(
-                                this_payload[last_i:i*4], last_i, "",
-                                var_tab=ind, file=file)
-                    ref = x
-                    last_i = (i+1)*4
-                    print("%s%d-%d:"%(ind, i*4,i*4+3), file=file)
-                    recurse_fields(ref, field_ids, recurse_level+1, found_ids,
+                last_i = 0
+                for (i,x) in enumerate(out_uints):
+                    if x in this_field['references']:
+                        if last_i<i*4:
+                            debug_ushorts(
+                                    this_payload[last_i:i*4], last_i, "",
+                                    var_tab=ind, file=file)
+                        ref = x
+                        last_i = (i+1)*4
+                        print("%s%d-%d:"%(ind, i*4,i*4+3), file=file)
+                        recurse_fields(ref, field_ids, recurse_level+1, found_ids,
+                                file=file)
+                if last_i<len(this_payload):
+                    debug_ushorts(this_payload[last_i:], last_i, "", var_tab=ind,
                             file=file)
-            if last_i<len(this_payload):
-                debug_ushorts(this_payload[last_i:], last_i, "", var_tab=ind,
-                        file=file)
         else:
             raise(Exception("references, but payload not a multiple of 4!!"))
     else:
@@ -1338,6 +1351,7 @@ def report_hierarchy(field_ids, is_referenced, filedir, file=sys.stdout):
 
     for id in found_ids:
         missed_ids.remove(id)
+    print("missed_ids:", end="", file=out_fh)
     print(missed_ids, file=out_fh)
 
     out_fh.close()
