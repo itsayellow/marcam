@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+import biorad1sc_reader
+
+reader1sc = biorad1sc_reader.Reader("test.1sc")
+
+img_meta = reader1sc.get_img_metadata()
+print(img_meta)
+
+(img_x, img_y, img_data) = reader1sc.get_img_data()
+
+print(img_x)
+print(img_y)
+
+print(len(img_data))
+print(img_data[1:10])
