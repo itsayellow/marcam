@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 
 import biorad1sc_reader
+from PIL import Image
+import struct
+
+def convert_to_pil(in16bit):
+    """
+    PIL interprets binary data internally as u32
+    PIL asks for externally i32
+    So to give PIL what will be u32 inside, we need to convert
+    number -> binary u32, interpret binary u32 as i32
+    """
+    # in16bit       min  0     mid 2**15    max 2**16-1
+    #               0x0000        0x8000         0xffff
+    # outcrap  min       0   mid 2**31-1         max -1
+    #          0x0000_0000   0x8000_0000    0xffff_ffff
+    in32bit = [x*(2**16-1) for x in in16bit]
+    in32uint = [struct.pack("<I",x) for x in in32bit]
+    outpil = [struct.unpack("<i",x)[0] for x in in32uint]
+    return outpil
 
 reader1sc = biorad1sc_reader.Reader("test.1sc")
 
@@ -8,9 +26,29 @@ img_meta = reader1sc.get_img_metadata()
 print(img_meta)
 
 (img_x, img_y, img_data) = reader1sc.get_img_data()
-
 print(img_x)
 print(img_y)
-
 print(len(img_data))
-print(img_data[1:10])
+print(min(img_data))
+print(max(img_data))
+
+# output image data as 16-bit tiff
+img_data_max = max(img_data)
+img_data = [int(x/img_data_max*2**16) for x in img_data]
+img_data = convert_to_pil(img_data)
+img_out = Image.new('I',(img_x,img_y))
+img_out.putdata(img_data)
+img_out.save("test1sc.tif")
+
+# output 16-bit tiff test gradient
+gradx = 1000
+grady = 1000
+img_data=[]
+min_ = 0
+max_ = 2**16
+for i in range(gradx*grady):
+    img_data.append(int(i/(gradx*grady)*(max_-min_) + min_))
+img_data = convert_to_pil(img_data)
+img_out = Image.new('I',(gradx,grady))
+img_out.putdata(img_data)
+img_out.save("gradient.tif")
