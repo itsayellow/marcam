@@ -40,6 +40,9 @@ img_out = Image.new('I',(img_x,img_y))
 img_out.putdata(img_data)
 img_out.save("test1sc.tif")
 
+# use internal tiff in reader
+reader1sc.save_img_as_tiff("test1sc2.tif")
+
 # output 16-bit tiff test gradient
 gradx = 1000
 grady = 1000
