@@ -3,6 +3,7 @@
 import sys
 import os
 import struct
+import time
 import biorad1sc_reader
 from PIL import Image
 
@@ -25,48 +26,61 @@ def convert_to_pil(in16bit):
 
 
 def convert_file(filename):
+    # get full path to filename, and its dir
     filename = os.path.realpath(filename)
     filedir = os.path.dirname(filename)
+
+    # open output text file to write info
+    try:
+        out_fh = open(os.path.join(filedir,"dump.txt"),"w")
+    except:
+        print("Error opening dump.txt", file=sys.stderr)
+        raise
 
     # new reader object
     reader1sc = biorad1sc_reader.Reader(filename)
 
     img_meta = reader1sc.get_img_metadata()
-    print(img_meta)
+    print(img_meta, file=out_fh)
 
-    (img_x, img_y, img_data) = reader1sc.get_img_data()
-    print(img_x)
-    print(img_y)
-    print(len(img_data))
-    print(min(img_data))
-    print(max(img_data))
+    (img_x, img_y, img_data) = reader1sc.get_img_data(invert=True)
+    print(img_x, file=out_fh)
+    print(img_y, file=out_fh)
+    print(len(img_data), file=out_fh)
+    print(min(img_data), file=out_fh)
+    print(max(img_data), file=out_fh)
 
     # output plain tiff
     reader1sc.save_img_as_tiff(
-            os.path.join(filedir, "test1.tif")
+            os.path.join(filedir, "test1.tif"),
+            invert=True
             )
 
     # output scaled tiff
     reader1sc.save_img_as_tiff_sc(
-            os.path.join(filedir, "test1sc1.0.tif")
+            os.path.join(filedir, "test1sc1.0.tif"),
+            invert=True
             )
 
     # output scaled tiff
     reader1sc.save_img_as_tiff_sc(
             os.path.join(filedir, "test1sc0.6.tif"),
-            imgsc=0.6
+            imgsc=0.6,
+            invert=True
             )
 
     # output scaled tiff
     reader1sc.save_img_as_tiff_sc(
             os.path.join(filedir, "test1sc0.4.tif"),
-            imgsc=0.4
+            imgsc=0.4,
+            invert=True
             )
 
     # output scaled tiff
     reader1sc.save_img_as_tiff_sc(
             os.path.join(filedir, "test1sc0.2.tif"),
-            imgsc=0.2
+            imgsc=0.2,
+            invert=True
             )
 
     # output 16-bit tiff test gradient
