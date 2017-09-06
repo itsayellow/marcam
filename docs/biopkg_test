@@ -32,16 +32,20 @@ print(len(img_data))
 print(min(img_data))
 print(max(img_data))
 
-# output image data as 16-bit tiff
-img_data_max = max(img_data)
-img_data = [int(x/img_data_max*2**16) for x in img_data]
-img_data = convert_to_pil(img_data)
-img_out = Image.new('I',(img_x,img_y))
-img_out.putdata(img_data)
-img_out.save("test1sc.tif")
+# output plain tiff
+reader1sc.save_img_as_tiff("test1.tif")
 
-# use internal tiff in reader
-reader1sc.save_img_as_tiff("test1sc2.tif")
+# output scaled tiff
+reader1sc.save_img_as_tiff_sc("test1sc1.0.tif")
+
+# output scaled tiff
+reader1sc.save_img_as_tiff_sc("test1sc0.6.tif", imgsc=0.6)
+
+# output scaled tiff
+reader1sc.save_img_as_tiff_sc("test1sc0.4.tif", imgsc=0.4)
+
+# output scaled tiff
+reader1sc.save_img_as_tiff_sc("test1sc0.2.tif", imgsc=0.2)
 
 # output 16-bit tiff test gradient
 gradx = 1000
