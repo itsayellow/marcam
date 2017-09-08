@@ -35,18 +35,21 @@ def convert_file(filename):
     print(max(img_data), file=out_fh)
 
     # output plain tiff
+    print("test1.tif", file=sys.stderr)
     reader1sc.save_img_as_tiff(
             os.path.join(filedir, "test1.tif"),
             invert=True
             )
 
     # output scaled tiff
+    print("test1sc1.0.tif", file=sys.stderr)
     reader1sc.save_img_as_tiff_sc(
             os.path.join(filedir, "test1sc1.0.tif"),
             invert=True
             )
 
     # output scaled tiff
+    print("test1sc0.6.tif", file=sys.stderr)
     reader1sc.save_img_as_tiff_sc(
             os.path.join(filedir, "test1sc0.6.tif"),
             imgsc=0.6,
@@ -54,6 +57,7 @@ def convert_file(filename):
             )
 
     # output scaled tiff
+    print("test1sc0.4.tif", file=sys.stderr)
     reader1sc.save_img_as_tiff_sc(
             os.path.join(filedir, "test1sc0.4.tif"),
             imgsc=0.4,
@@ -61,6 +65,7 @@ def convert_file(filename):
             )
 
     # output scaled tiff
+    print("test1sc0.2.tif", file=sys.stderr)
     reader1sc.save_img_as_tiff_sc(
             os.path.join(filedir, "test1sc0.2.tif"),
             imgsc=0.2,
