@@ -30,7 +30,10 @@ def convert_file(filename):
 
     img_meta2 = reader1sc.get_img_metadata2()
     print("get_img_metadata2:", file=out_fh)
-    print(img_meta2, file=out_fh)
+    for collection in img_meta2:
+        print("\nCollection", file=out_fh)
+        print(collection, file=out_fh)
+        print(img_meta2[collection], file=out_fh)
 
     (img_x, img_y, img_data) = reader1sc.get_img_data(invert=True)
     print("get_img_data:", file=out_fh)
