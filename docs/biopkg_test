@@ -25,9 +25,15 @@ def convert_file(filename):
     reader1sc = biorad1sc_reader.Reader(filename)
 
     img_meta = reader1sc.get_img_metadata()
+    print("get_img_metadata:", file=out_fh)
     print(img_meta, file=out_fh)
 
+    img_meta2 = reader1sc.get_img_metadata2()
+    print("get_img_metadata2:", file=out_fh)
+    print(img_meta2, file=out_fh)
+
     (img_x, img_y, img_data) = reader1sc.get_img_data(invert=True)
+    print("get_img_data:", file=out_fh)
     print(img_x, file=out_fh)
     print(img_y, file=out_fh)
     print(len(img_data), file=out_fh)
