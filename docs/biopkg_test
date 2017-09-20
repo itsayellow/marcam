@@ -12,19 +12,23 @@ import biorad1sc_reader
 def recurse_report(coll_item, tablevel, file):
     tab = " "*4*tablevel
     for region in coll_item:
-        print(tab + "Region: %s"%region, file=file)
+        print(tab + "Region: %s (%s)"%(region, coll_item[region]['type']),
+                file=file)
+        data_raw = coll_item[region]['raw']
         data_proc = coll_item[region]['proc']
         data_interp = coll_item[region]['interp']
+        print(tab + " type_num: " + repr(coll_item[region]['type_num']),
+                file=file)
         if data_proc is not None:
-            print(tab + repr(data_proc), file=file)
+            print(tab + " data_proc: " + repr(data_proc), file=file)
         if type(data_interp) is dict:
-            print("data_interp is dict")
-            #print(tab + repr(data_interp), file=file)
             recurse_report(data_interp, tablevel+1, file)
         elif data_interp is not None:
-            print(tab + repr(data_interp), file=file)
+            print(tab + " data_interp: " + repr(data_interp), file=file)
         else:
             pass
+        if data_proc is None and data_interp is None:
+            print(tab + " data_raw: " + repr(data_raw), file=file)
 
 
 def convert_file(filename):
