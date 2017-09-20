@@ -9,6 +9,24 @@ from PIL import Image
 import biorad1sc_reader
 
 
+def recurse_report(coll_item, tablevel, file):
+    tab = " "*4*tablevel
+    for region in coll_item:
+        print(tab + "Region: %s"%region, file=file)
+        data_proc = coll_item[region]['proc']
+        data_interp = coll_item[region]['interp']
+        if data_proc is not None:
+            print(tab + repr(data_proc), file=file)
+        if type(data_interp) is dict:
+            print("data_interp is dict")
+            #print(tab + repr(data_interp), file=file)
+            recurse_report(data_interp, tablevel+1, file)
+        elif data_interp is not None:
+            print(tab + repr(data_interp), file=file)
+        else:
+            pass
+
+
 def convert_file(filename):
     # get full path to filename, and its dir
     filename = os.path.realpath(filename)
@@ -36,9 +54,7 @@ def convert_file(filename):
         for item in coll:
             print(" "*4 + "Item: %s"%item, file=out_fh)
             coll_item = coll[item]
-            for region in coll_item:
-                print(" "*8 + "Region: %s"%region, file=out_fh)
-                print(" "*8 + repr(coll_item[region]), file=out_fh)
+            recurse_report(coll_item, 2, out_fh)
 
     (img_x, img_y, img_data) = reader1sc.get_img_data(invert=True)
     print("get_img_data:", file=out_fh)
