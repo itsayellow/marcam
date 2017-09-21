@@ -46,15 +46,15 @@ def convert_file(filename):
     # new reader object
     reader1sc = biorad1sc_reader.Reader(filename)
 
-    img_meta = reader1sc.get_img_metadata()
-    print("get_img_metadata:", file=out_fh)
-    print(img_meta, file=out_fh)
+    img_summary = reader1sc.get_img_summary()
+    print("get_img_summary:", file=out_fh)
+    print(img_summary, file=out_fh)
 
-    img_meta2 = reader1sc.get_img_metadata2()
-    print("get_img_metadata2:", file=out_fh)
-    for collection in img_meta2:
+    file_metadata = reader1sc.get_metadata()
+    print("get_metadata:", file=out_fh)
+    for collection in file_metadata:
         print("\nCollection: %s"%collection, file=out_fh)
-        coll = img_meta2[collection]
+        coll = file_metadata[collection]
         for item in coll:
             print(" "*4 + "Item: %s"%item, file=out_fh)
             coll_item = coll[item]
