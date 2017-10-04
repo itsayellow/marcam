@@ -3,11 +3,13 @@
 # Gui for displaying an image and counting cells
 
 import sys
+import time
 import argparse
+import biorad1sc_reader
 import wx
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
-import time
+
 
 # OR'able debug values
 DEBUG_FXN_ENTRY = 1
@@ -343,6 +345,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def init_image_from_file(self, img_path):
         self.img_path = img_path
+
+        # TODO: check for 1sc files and get image data to send to Image
+
         self.img = wx.Image(img_path)
 
         img_ok = self.img.IsOk()
@@ -696,9 +701,13 @@ class MainWindow(wx.Frame):
         #        return
 
         # else: proceed asking to the user the new file to open
+
+        # create wildcard for Image files, and for *.1sc files (Bio-Rad)
+        wildcard = wx.Image.GetImageExtWildcard()
+        wildcard = "Image Files " + wildcard + "|Bio-Rad 1sc Files|*.1sc"
         open_file_dialog = wx.FileDialog(self,
                 "Open image file",
-                wildcard=wx.Image.GetImageExtWildcard(),
+                wildcard=wildcard,
                 style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 
         if open_file_dialog.ShowModal() == wx.ID_CANCEL:
