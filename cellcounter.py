@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 #
-# Gui for displaying an image and counting cells
+# GUI for displaying an image and counting cells
 
 import sys
 import time
 import argparse
+import os.path
+import numpy as np
 import biorad1sc_reader
 import wx
 import wx.lib.statbmp
@@ -346,9 +348,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def init_image_from_file(self, img_path):
         self.img_path = img_path
 
-        # TODO: check for 1sc files and get image data to send to Image
-
-        self.img = wx.Image(img_path)
+        # check for 1sc files and get image data to send to Image
+        (imgfile_base, imgfile_ext) = os.path.splitext(img_path)
+        if imgfile_ext == ".1sc":
+            read1sc = biorad1sc_reader.Reader(img_path)
+            (img_x, img_y, img_data) = read1sc.get_img_data()
+            # TODO: wx.Image is probably only 8-bits each color channel
+            #   yet we have 16-bit images
+            # wx.Image wants img_x * img_y * 3
+            # TODO: this is super slow
+            img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
+            img_data_rgb[0::3] = img_data//256
+            img_data_rgb[1::3] = img_data//256
+            img_data_rgb[2::3] = img_data//256
+            self.img = wx.Image(img_x, img_y, bytes(img_data_rgb))
+        else:
+            self.img = wx.Image(img_path)
 
         img_ok = self.img.IsOk()
         if img_ok:
