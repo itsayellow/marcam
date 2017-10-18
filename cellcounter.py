@@ -351,12 +351,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # check for 1sc files and get image data to send to Image
         (imgfile_base, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".1sc":
-            read1sc = biorad1sc_reader.Reader(img_path)
+            try:
+                read1sc = biorad1sc_reader.Reader(img_path)
+            except:
+                # img_ok is false if 1sc is not valid 1sc file
+                return False
+
             (img_x, img_y, img_data) = read1sc.get_img_data()
+
             # TODO: wx.Image is probably only 8-bits each color channel
             #   yet we have 16-bit images
             # wx.Image wants img_x * img_y * 3
-            # TODO: this is super slow
+            # TODO: shadow data with full 16-bit info
             img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
             img_data_rgb[0::3] = img_data//256
             img_data_rgb[1::3] = img_data//256
@@ -572,6 +578,26 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.get_img_wincenter()
 
 
+class DropTarget(wx.FileDropTarget):
+    """DropTarget Facilitating dragging file into window to open
+    """
+    def __init__(self, window_target, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.window_target = window_target
+
+    def OnDropFiles(self, x, y, filenames):
+        filename = filenames[0]
+        if DEBUG & DEBUG_MISC:
+            print("MSC:", end="")
+            print("Drag and Drop filename:")
+            print("    "+repr(filename))
+        self.window_target.init_image_from_file(filename)
+
+        # TODO: which one of these??
+        #return wx.DragCopy
+        return True
+
+
 class MainWindow(wx.Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -614,6 +640,9 @@ class MainWindow(wx.Frame):
 
         # ImageScrolledCanvas is the cleanest, probably most portable
         self.img_panel = ImageScrolledCanvas(self)
+
+        # make ImageScrolledCanvas Drag and Drop Target
+        self.img_panel.SetDropTarget(DropTarget(self.img_panel))
 
         mybox.Add(self.img_panel, 1, wx.EXPAND)
         self.SetSizer(mybox)
