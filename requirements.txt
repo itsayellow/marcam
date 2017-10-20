@@ -1,0 +1,6 @@
+biorad1sc-reader==0.5
+numpy==1.13.3
+olefile==0.44
+Pillow==4.3.0
+six==1.11.0
+wxPython==4.0.0b2
