@@ -12,6 +12,7 @@ import wx
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
+ICON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
 
 # OR'able debug values
 DEBUG_FXN_ENTRY = 1
@@ -623,7 +624,10 @@ class MainWindow(wx.Frame):
 
         # toolbar stuff
         toolbar = self.CreateToolBar()
-        otool = toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap('topen32.png'))
+        if DEBUG & DEBUG_MISC:
+            print( "MSC:ICON_DIR=%s"%(ICON_DIR ))
+        obmp = os.path.join(ICON_DIR,'topen32.png')
+        otool = toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
         toolbar.Realize()
 
         # status bar stuff
