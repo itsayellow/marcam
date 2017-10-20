@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# e.g.:
+# makeref test1
+
+inputfile="$1_imglab_analysis.tif"
+out_ref_inv="$1_ref_inv.tif"
+out_ref="$1_ref.tif"
+out_ref_inv_sc="$1_ref_inv_sc.tif"
+out_ref_sc="$1_ref_sc.tif"
+
+
+if [ -e $inputfile ]
+then
+    echo $inputfile
+
+    # exported file from Image Lab is inverted
+    # convert to grayscale colorspace and call this the _ref_inv
+    gm convert -colorspace gray $inputfile $out_ref_inv
+    echo "    -> $out_ref"
+
+    # invert _ref_inv to get _ref
+    gm convert -negate $out_ref_inv $out_ref
+    echo "    -> $out_ref_inv"
+
+    # scale from min to max brightness _ref
+    gm convert -set histogram-threshold 0 -normalize $out_ref $out_ref_sc
+    echo "    -> $out_ref_sc"
+
+    # scale from min to max brightness _ref_inv
+    gm convert -set histogram-threshold 0 -normalize $out_ref_inv $out_ref_inv_sc
+    echo "    -> $out_ref_inv_sc"
+else
+    echo "Error: $inputfile doesn't exist"
+fi
