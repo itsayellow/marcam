@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -e virt ]; then
+    echo "Directory 'virt' already exists.  Remove it before running this script"
+    exit 1
+fi
+
 # make dir to hold virtual environment
 mkdir virt
 # python3 native venv
