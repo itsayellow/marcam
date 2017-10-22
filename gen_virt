@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# make dir to hold virtual environment
+mkdir virt
+# python3 native venv
+python3 -m venv virt
+# activate virtual environment
+source virt/bin/activate
+# install required python packages into virtual environment
+pip3 install -r requirements.txt
