@@ -14,3 +14,5 @@ dist/Cellcounter.app: cellcounter/* virt
 
 dist/Cellcounter.dmg: dist/Cellcounter.app
 	./gen_dmg
+
+# vim: nowrap noexpandtab sw=8
