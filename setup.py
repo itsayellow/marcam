@@ -23,6 +23,7 @@ OPTIONS = {
             'CFBundleVersion':VERSION,
             'CFBundleShortVersionString':VERSION,
             'CFBundleDocumentTypes':[],
+            'NSHumanReadableCopyright': u"Copyright © 2017, Matthew A. Clapp, All Rights Reserved"
             },
         }
 
