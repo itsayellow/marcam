@@ -12,7 +12,8 @@ import wx
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
-ICON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
+#ICON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
+ICON_DIR = "."
 
 # OR'able debug values
 DEBUG_FXN_ENTRY = 1
