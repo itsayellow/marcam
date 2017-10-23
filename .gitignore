@@ -6,3 +6,6 @@
 .*.swp
 # virtual environment for python
 virt/
+# build dirs
+build/
+dist/
