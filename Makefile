@@ -6,7 +6,8 @@ app: dist/Cellcounter.app
 
 dmg: dist/Cellcounter.dmg
 
-virt:
+virt: requirements.txt
+	rm -rf virt
 	./gen_virt
 
 dist/Cellcounter.app: cellcounter/* virt
