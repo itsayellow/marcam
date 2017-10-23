@@ -1,0 +1,16 @@
+#!/bin/bash
+
+thispwd=`pwd -P`
+
+if [ -e dist/Applications ]; then
+    echo "Alias to /Applications already exists"
+else
+    echo "Creating alias to /Applications"
+osascript <<END_OSASCRIPT
+tell application "Finder"
+    make alias file to folder (posix file "/Applications") at (posix file "$thispwd/dist") with properties {name:"Applications"}
+end tell
+END_OSASCRIPT
+fi
+
+hdiutil create Cellcounter.dmg -volname "Cellcounter" -srcfolder dist
