@@ -5,5 +5,5 @@ clean:
 virt:
 	./gen_virt
 
-dist/Cellcounter.app: cellcounter/* virt
+dist/Cellcounter.app: cellcounter/% virt
 	./gen_app
