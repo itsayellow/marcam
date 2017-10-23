@@ -9,3 +9,10 @@ virt/
 # build dirs
 build/
 dist/
+
+#----------------
+# RANDOM
+
+# local alias to dir with all scfiles known
+# scfiles_all@ -> /Users/mclapp/Google Drive/Project Bio Manu/scfiles_all
+scfiles_all
