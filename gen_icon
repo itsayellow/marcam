@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# For creation of Mac icon from source image file
+# Source image file should be 1024x1024 or larger, preferably PNG with
+#   alpha channel.
+# from starting image file, create iconset dir and icns file
+#
+# usage: gen_icon <src_image_file>
+#
+# requires graphicsmagick
+
+srcfile=$1
+srcfile_info=(`gm identify $1`)
+srcdir=`dirname $srcfile`
+srcfile_size=${srcfile_info[2]}
+iconset_dir=$srcdir/Icon.iconset
+
+echo "File:      $srcfile"
+echo "Size:      $srcfile_size"
+echo "Directory: $srcdir"
+
+mkdir $iconset_dir
+
+if [ $srcfile_size = "1024x1024+0+0" ]; then
+    echo "Size is what we expect, 1024x1024"
+    cp $srcfile $iconset_dir/icon_512x512@2x.png
+else
+    echo "Size is $srcfile_size, converting to 1024x1024"
+    gm convert $srcfile -resize 1024x1024 $iconset_dir/icon_512x512@2x.png
+fi
+
+# create two 512x512 versions of image
+gm convert $srcfile -resize 512x512 $iconset_dir/icon_512x512.png
+cp $iconset_dir/icon_512x512.png $iconset_dir/icon_256x256@2x.png
+
+# create two 256x256 versions of image
+gm convert $srcfile -resize 256x256 $iconset_dir/icon_256x256.png
+cp $iconset_dir/icon_256x256.png $iconset_dir/icon_128x128@2x.png
+
+# create 128x128 version of image
+gm convert $srcfile -resize 128x128 $iconset_dir/icon_128x128.png
+
+# create 64x64 version of image
+gm convert $srcfile -resize 64x64 $iconset_dir/icon_32x32@2x.png
+
+# create two 32x32 versions of image
+gm convert $srcfile -resize 32x32 $iconset_dir/icon_32x32.png
+cp $iconset_dir/icon_32x32.png $iconset_dir/icon_16x16@2x.png
+
+# create 16x16 version of image
+gm convert $srcfile -resize 16x16 $iconset_dir/icon_16x16.png
+
+# convert iconset to icns file
+iconutil -c icns $iconset_dir
