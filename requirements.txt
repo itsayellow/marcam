@@ -1,6 +1,10 @@
+altgraph==0.14
 biorad1sc-reader==0.5
+macholib==1.8
+modulegraph==0.15
 numpy==1.13.3
 olefile==0.44
 Pillow==4.3.0
+py2app==0.14
 six==1.11.0
 wxPython==4.0.0b2
