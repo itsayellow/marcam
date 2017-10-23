@@ -4,3 +4,5 @@
 .DS_Store
 # vim swap files
 .*.swp
+# virtual environment for python
+virt/
