@@ -13,8 +13,8 @@ Building
 
 #. ``make clean`` to remove all build directories and files.
 #. ``make app`` to make the Mac application
-#. ``make dmg`` to make the .dmg bundle containing application and Applications
-   alias
+#. ``make dmg`` to make the Mac .dmg bundle containing application and
+   Applications alias
 
 References
 ----------
