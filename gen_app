@@ -1,2 +1,3 @@
 #!/bin/bash
-python setup.py py2app
+source virt/bin/activate
+python3 setup.py py2app
