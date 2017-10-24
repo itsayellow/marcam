@@ -113,6 +113,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_SCROLLWIN, self.on_scroll)
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
 
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
@@ -160,6 +161,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_down(self, evt):
+        """Mark image where user left-clicks
+
+        Args:
+            evt (wx.MouseEvent): todo.
+        """
         # point coordinate returned seems:
         #   * be only absolute coordinates of where in window was clicked
         #   * not to depend on which img_dc we supply
@@ -172,6 +178,31 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("(%d, %d)"%(img_x, img_y))
 
         self.draw_at_point(img_x, img_y)
+
+        # continue processing click, for example shifting focus to app
+        evt.Skip()
+
+    @debug_fxn
+    def on_right_down(self, evt):
+        """Set image center where user right-clicks
+
+        Args:
+            evt (wx.MouseEvent): todo.
+        """
+        # point coordinate returned seems:
+        #   * be only absolute coordinates of where in window was clicked
+        #   * not to depend on which img_dc we supply
+        #   * not to depend on zoom or pan
+        point = evt.GetLogicalPosition(self.img_dc)
+        (img_x, img_y) = self.img_coord_from_win_coord(point.x, point.y)
+
+        if DEBUG & DEBUG_MISC:
+            print("MSC:left click at img", end="")
+            print("(%d, %d)"%(img_x, img_y))
+
+        self.img_at_wincenter_x = img_x
+        self.img_at_wincenter_y = img_y
+        self.scroll_to_img_at_wincenter()
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
