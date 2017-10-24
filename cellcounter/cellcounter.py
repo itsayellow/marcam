@@ -77,12 +77,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_idx = None
         self.zoom_list = None
 
-        # 10,10 is default, but 5,5 is a good maximum (less is more precise)
+        # 10,10 is default
         # we set this to be as small as possible (1,1) so that positioning
         #   the scroll position during zoom can be as fine as possible.
-        #   This avoids the image appearing to "jump around" during scroll in
-        #   and scroll out due to subsampling the position.
-        # This affects speed of panning and scrolling
+        #   This avoids the image appearing to "jump around" during zoom in
+        #   and zoom out due to subsampling the position.
+        # This affects magnitude of panning and scrolling, so we multiply
+        #   panning and scrolling manually in those event handlers
         self.SetScrollRate(1, 1)
 
         # init parent pointer
@@ -104,11 +105,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.blank_img()
 
         # setup handlers
-        # TODO: EVT_DROPFILES to process dragndrop files into window
-        #   see: SetDropTarget, FileDropTarget
         self.Bind(wx.EVT_PAINT, self.OnPaintRegion)
         self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_SCROLLWIN, self.on_scroll)
+        self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
 
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
@@ -159,6 +159,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     "(%.3f,%.3f)"%(img_zoom_wincenter_x, img_zoom_wincenter_y))
             print("MSC:origin = (%.3f,%.3f)"%(origin_x, origin_y))
             print("MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y))
+
+    @debug_fxn
+    def on_left_down(self, evt):
+        point = evt.GetLogicalPosition(self.img_dc)
+        if DEBUG & DEBUG_MISC:
+            print("MSC:left click at ", end="")
+            print("(%d, %d)"%(point.x, point.y))
+        # continue processing click, for example shifting focus to app
+        evt.Skip()
 
     @debug_fxn
     def on_scroll(self, evt):
@@ -400,6 +409,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_bmp = wx.Bitmap(self.img)
             self.img_dc = wx.MemoryDC()
             self.img_dc.SelectObject(img_bmp)
+            # TEST
+            mypen = wx.Pen(wx.Colour(255,0,0))
+            self.img_dc.SetPen(mypen)
+            self.img_dc.DrawLine(0,0,10,10)
 
             # half-size static DC
             img_bmp = wx.Bitmap(
@@ -407,6 +420,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
             self.img_dc_div2 = wx.MemoryDC()
             self.img_dc_div2.SelectObject(img_bmp)
+            # TEST
+            self.img_dc_div2.SetPen(mypen)
+            self.img_dc_div2.DrawLine(0,0,10,10)
 
             # quarter-size static DC
             img_bmp = wx.Bitmap(
@@ -414,6 +430,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
             self.img_dc_div4 = wx.MemoryDC()
             self.img_dc_div4.SelectObject(img_bmp)
+            # TEST
+            self.img_dc_div4.SetPen(mypen)
+            self.img_dc_div4.DrawLine(0,0,10,10)
 
             if DEBUG & DEBUG_TIMING:
                 staticdc_eltime = time.time() - staticdc_start
