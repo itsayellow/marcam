@@ -13,7 +13,7 @@ import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
 ICON_DIR = os.path.dirname(os.path.realpath(__file__))
-#ICON_DIR = "."
+print(ICON_DIR)
 
 # OR'able debug values
 DEBUG_FXN_ENTRY = 1
@@ -25,6 +25,10 @@ DEBUG_MISC = 1024
 DEBUG = 0
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
+
+if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
+    # if we're being executed from inside a Mac app, turn off DEBUG
+    DEBUG = 0
 
 
 # debug decorator that announces function call/entry and lists args
