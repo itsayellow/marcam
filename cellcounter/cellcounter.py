@@ -125,17 +125,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def get_img_wincenter(self):
         # find client size (visible image)
         (win_size_x, win_size_y) = self.GetClientSize()
+
         # translate client center to zoomed image center coords
-        (img_zoom_wincenter_x,
-                img_zoom_wincenter_y
-                ) = self.CalcUnscrolledPosition(win_size_x/2, win_size_y/2)
+        (self.img_at_wincenter_x, self.img_at_wincenter_y
+                ) = self.img_coord_from_win_coord(win_size_x/2, win_size_y/2)
 
-        # self.img_coord_xlation_{x,y} is in window coordinates
-        self.img_at_wincenter_x = (img_zoom_wincenter_x - self.img_coord_xlation_x) / self.zoom
-        self.img_at_wincenter_y = (img_zoom_wincenter_y - self.img_coord_xlation_y) / self.zoom
-
-        # self.img_coord_xlation_{x,y} is in window coordinates
-        #   divide by zoom, divide by div_scale to get to img coordinates
         if DEBUG & DEBUG_MISC:
             print(
                     "MSC:self.img_at_wincenter=(%.3f,%.3f)"%(
@@ -382,9 +376,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def img_coord_from_win_coord(self, win_x, win_y):
-        # image translation consists of:
-        #   img_coord_xlation_{x,y} - 0 unless window is bigger than image
-        #       in which case this is non-zero translation of left,top padding
+        # img_coord_xlation_{x,y} = 0 unless window is bigger than image
+        #   in which case this is non-zero translation of left,top padding
+        # self.img_coord_xlation_{x,y} is in window coordinates
+        #   divide by zoom to get to img coordinates
 
         (img_unscroll_x, img_unscroll_y) = self.CalcUnscrolledPosition(win_x, win_y)
         img_x = (img_unscroll_x - self.img_coord_xlation_x) / self.zoom
