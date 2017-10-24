@@ -12,8 +12,8 @@ import wx
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
-#ICON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
-ICON_DIR = "."
+ICON_DIR = os.path.dirname(os.path.realpath(__file__))
+#ICON_DIR = "."
 
 # OR'able debug values
 DEBUG_FXN_ENTRY = 1
@@ -74,10 +74,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_list = None
 
         # 10,10 is default, but 5,5 is a good maximum (less is more precise)
-        # TODO: can we use 1,1 for 1-pixel scroll precision, and then somehow
-        #   handle the scroll events ourselves to do multiple scroll units
-        #   for each mouse/key event?
-        self.SetScrollRate(5, 5)
+        # we set this to be as small as possible (1,1) so that positioning
+        #   the scroll position during zoom can be as fine as possible.
+        #   This avoids the image appearing to "jump around" during scroll in
+        #   and scroll out due to subsampling the position.
+        # This affects speed of panning and scrolling
+        self.SetScrollRate(1, 1)
 
         # init parent pointer
         self.parent = parent
@@ -156,13 +158,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_scroll(self, evt):
-        # old hacky way
-        #wx.CallLater(1, self.get_position)
-
+        EventType = evt.GetEventType()
+        Orientation = evt.GetOrientation()
         if DEBUG & DEBUG_MISC:
             print("MSC:")
-            EventType = evt.GetEventType()
-            Orientation = evt.GetOrientation()
             if Orientation == wx.HORIZONTAL:
                 print("    wx.HORIZONTAL")
             elif Orientation == wx.VERTICAL:
@@ -170,35 +169,46 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             else:
                 print("    Orientation="+repr(Orientation))
 
-            if evt.GetEventType() == wx.wxEVT_SCROLLWIN_TOP:
+            if EventType == wx.wxEVT_SCROLLWIN_TOP:
                 print("    wx.wxEVT_SCROLLWIN_TOP")
-            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_BOTTOM:
+            elif EventType == wx.wxEVT_SCROLLWIN_BOTTOM:
                 print("    wx.wxEVT_SCROLLWIN_BOTTOM")
-            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_LINEUP:
+            elif EventType == wx.wxEVT_SCROLLWIN_LINEUP:
                 print("    wx.wxEVT_SCROLLWIN_LINEUP")
-            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_LINEDOWN:
+            elif EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
                 print("    wx.wxEVT_SCROLLWIN_LINEDOWN")
-            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_PAGEUP:
+            elif EventType == wx.wxEVT_SCROLLWIN_PAGEUP:
                 print("    wx.wxEVT_SCROLLWIN_PAGEUP")
-            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_PAGEDOWN:
+            elif EventType == wx.wxEVT_SCROLLWIN_PAGEDOWN:
                 print("    wx.wxEVT_SCROLLWIN_PAGEDOWN")
-            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_THUMBTRACK:
+            elif EventType == wx.wxEVT_SCROLLWIN_THUMBTRACK:
                 print("    wx.wxEVT_SCROLLWIN_THUMBTRACK")
-            elif evt.GetEventType() == wx.wxEVT_SCROLLWIN_THUMBRELEASE:
+            elif EventType == wx.wxEVT_SCROLLWIN_THUMBRELEASE:
                 print("    wx.wxEVT_SCROLLWIN_THUMBRELEASE")
             else:
                 print("    EventType="+repr(EventType))
 
 
         # set a position check for after this event is processed (after moved)
+        #   useful in case event handled by default handler with evt.Skip()
+
         # NOTE: by setting position only on scroll (and not on zoom) we
         #   preserve position on zoom out/zoom back in even if the image gets
         #   temporarily centered during zoom out.  That way when we zoom back
         #   in, we will find the same position again unless we scroll.
         wx.CallAfter(self.get_img_wincenter)
 
-        # continue processing with default handler(s)
-        evt.Skip()
+        if Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
+            self.pan_left(2)
+        elif Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
+            self.pan_right(2)
+        elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
+            self.pan_up(2)
+        elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
+            self.pan_down(2)
+        else:
+            # process with default handler(s)
+            evt.Skip()
 
     @debug_fxn
     def blank_img(self):
@@ -513,6 +523,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def pan_down(self, pan_amt):
+        """Scroll the current viewport so we see an area below
+
+        Args:
+            pan_amt (float): amount to pan in pixels of the image
+
+        Returns:
+            None
+        """
         # NOTE: if we wanted to automatically implement panning, we could
         #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
@@ -530,6 +548,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def pan_up(self, pan_amt):
+        """Scroll the current viewport so we see an area above
+
+        Args:
+            pan_amt (float): amount to pan in pixels of the image
+
+        Returns:
+            None
+        """
         # NOTE: if we wanted to automatically implement panning, we could
         #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
@@ -547,6 +573,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def pan_right(self, pan_amt):
+        """Scroll the current viewport so we see an area to the right
+
+        Args:
+            pan_amt (float): amount to pan in pixels of the image
+
+        Returns:
+            None
+        """
         # NOTE: if we wanted to automatically implement panning, we could
         #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
@@ -564,6 +598,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def pan_left(self, pan_amt):
+        """Scroll the current viewport so we see an area to the left
+
+        Args:
+            pan_amt (float): amount to pan in pixels of the image
+
+        Returns:
+            None
+        """
         # NOTE: if we wanted to automatically implement panning, we could
         #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
