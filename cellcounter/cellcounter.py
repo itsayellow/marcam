@@ -25,10 +25,14 @@ DEBUG_MISC = 1024
 DEBUG = 0
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
+DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
 if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     # if we're being executed from inside a Mac app, turn off DEBUG
     DEBUG = 0
+    #DEBUG_FILE = os.path.join(os.path.expanduser("~"),'cellcounter.log')
+    #with open(DEBUG_FILE, 'w') as out_fh:
+    #    print("Turning off debug.", file=out_fh)
 
 
 # debug decorator that announces function call/entry and lists args
@@ -162,10 +166,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_down(self, evt):
+        # point coordinate returned seems:
+        #   * be only absolute coordinates of where in window was clicked
+        #   * not to depend on which img_dc we supply
+        #   * not to depend on zoom or pan
         point = evt.GetLogicalPosition(self.img_dc)
+        (img_x, img_y) = self.img_coord_from_win_coord(point.x, point.y)
+
         if DEBUG & DEBUG_MISC:
-            print("MSC:left click at ", end="")
-            print("(%d, %d)"%(point.x, point.y))
+            print("MSC:left click at img", end="")
+            print("(%d, %d)"%(img_x, img_y))
+
         # continue processing click, for example shifting focus to app
         evt.Skip()
 
@@ -368,6 +379,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
                 )
+
+    @debug_fxn
+    def img_coord_from_win_coord(self, win_x, win_y):
+        # image translation consists of:
+        #   img_coord_xlation_{x,y} - 0 unless window is bigger than image
+        #       in which case this is non-zero translation of left,top padding
+
+        (img_unscroll_x, img_unscroll_y) = self.CalcUnscrolledPosition(win_x, win_y)
+        img_x = (img_unscroll_x - self.img_coord_xlation_x) / self.zoom
+        img_y = (img_unscroll_y - self.img_coord_xlation_y) / self.zoom
+
+        return (img_x, img_y)
 
     @debug_fxn
     def init_image_from_file(self, img_path):
