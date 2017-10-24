@@ -15,6 +15,7 @@ DATA_FILES = [
         ]
 OPTIONS = {
         'iconfile':'cellcounter/cellcounter.icns',
+        'optimize':1, # try one level of optimization?
         'plist':{
             'CFBundleName':APP_NAME,
             'CFBundleDisplayName':APP_NAME,
