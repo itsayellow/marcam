@@ -171,8 +171,33 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("MSC:left click at img", end="")
             print("(%d, %d)"%(img_x, img_y))
 
+        self.draw_at_point(img_x, img_y)
+
         # continue processing click, for example shifting focus to app
         evt.Skip()
+
+    @debug_fxn
+    def draw_at_point(self, point_x, point_y):
+        #self.img_dc.DrawLine(0,0,10,10)
+
+        # get red pen
+        mypen = wx.Pen(wx.Colour(255,0,0))
+
+        # set pen and draw point on img_dc
+        self.img_dc.SetPen(mypen)
+        self.img_dc.DrawPoint(point_x, point_y)
+
+        # set pen and draw point on img_dc_div2
+        self.img_dc_div2.SetPen(mypen)
+        self.img_dc_div2.DrawPoint(point_x/2, point_y/2)
+
+        # set pen and draw point on img_dc_div4
+        self.img_dc_div4.SetPen(mypen)
+        self.img_dc_div4.DrawPoint(point_x/4, point_y/4)
+
+        # force a paint event with Refresh and Update
+        self.Refresh()
+        self.Update()
 
     @debug_fxn
     def on_scroll(self, evt):
@@ -427,10 +452,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_bmp = wx.Bitmap(self.img)
             self.img_dc = wx.MemoryDC()
             self.img_dc.SelectObject(img_bmp)
-            # TEST
-            mypen = wx.Pen(wx.Colour(255,0,0))
-            self.img_dc.SetPen(mypen)
-            self.img_dc.DrawLine(0,0,10,10)
 
             # half-size static DC
             img_bmp = wx.Bitmap(
@@ -438,9 +459,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
             self.img_dc_div2 = wx.MemoryDC()
             self.img_dc_div2.SelectObject(img_bmp)
-            # TEST
-            self.img_dc_div2.SetPen(mypen)
-            self.img_dc_div2.DrawLine(0,0,10,10)
 
             # quarter-size static DC
             img_bmp = wx.Bitmap(
@@ -448,9 +466,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
             self.img_dc_div4 = wx.MemoryDC()
             self.img_dc_div4.SelectObject(img_bmp)
-            # TEST
-            self.img_dc_div4.SetPen(mypen)
-            self.img_dc_div4.DrawLine(0,0,10,10)
 
             if DEBUG & DEBUG_TIMING:
                 staticdc_eltime = time.time() - staticdc_start
