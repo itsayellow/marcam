@@ -796,16 +796,16 @@ class MainWindow(wx.Frame):
         #   just evt.Skip in the following if statements
         if KeyCode == 314:
             # left key
-            self.img_panel.pan_left(10)
+            self.img_panel.pan_left(20)
         if KeyCode == 315:
             # up key
-            self.img_panel.pan_up(10)
+            self.img_panel.pan_up(20)
         if KeyCode == 316:
             # right key
-            self.img_panel.pan_right(10)
+            self.img_panel.pan_right(20)
         if KeyCode == 317:
             # down key
-            self.img_panel.pan_down(10)
+            self.img_panel.pan_down(20)
 
         if KeyCode == 366:
             # PAGE UP
