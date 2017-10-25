@@ -12,6 +12,8 @@ import wx
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
+# NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
+
 ICON_DIR = os.path.dirname(os.path.realpath(__file__))
 print(ICON_DIR)
 
@@ -26,6 +28,37 @@ DEBUG = 0
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
+
+# red cross, 5px x 5px
+CROSS_BMP = wx.Bitmap.FromBufferRGBA(
+        5, 5,
+        b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\xff' + \
+                b'\xff\x00\x00\x00' + \
+                b'\xff\x00\x00\x00'
+        )
+
 
 if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     # if we're being executed from inside a Mac app, turn off DEBUG
@@ -77,6 +110,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_x = None
         self.img_size_y = None
         self.parent = None
+        self.points_record = []
         self.zoom = None
         self.zoom_idx = None
         self.zoom_list = None
@@ -209,22 +243,30 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def draw_at_point(self, point_x, point_y):
-        #self.img_dc.DrawLine(0,0,10,10)
 
-        # get red pen
-        mypen = wx.Pen(wx.Colour(255,0,0))
+        point_x = int(point_x-0.5)
+        point_y = int(point_y-0.5)
 
-        # set pen and draw point on img_dc
-        self.img_dc.SetPen(mypen)
-        self.img_dc.DrawPoint(point_x, point_y)
+        self.points_record.append((point_x,point_y))
+        print(self.points_record)
 
-        # set pen and draw point on img_dc_div2
-        self.img_dc_div2.SetPen(mypen)
-        self.img_dc_div2.DrawPoint(point_x/2, point_y/2)
+        # TODO: try drawing crosses after the fact in PaintRect, not here
+        #   here, just record all locations
 
-        # set pen and draw point on img_dc_div4
-        self.img_dc_div4.SetPen(mypen)
-        self.img_dc_div4.DrawPoint(point_x/4, point_y/4)
+        self.img_dc.DrawBitmap(
+                CROSS_BMP,
+                point_x-2, point_y-2
+                )
+
+        self.img_dc_div2.DrawBitmap(
+                CROSS_BMP,
+                (point_x-2)/2, (point_y-2)/2
+                )
+
+        self.img_dc_div4.DrawBitmap(
+                CROSS_BMP,
+                (point_x-2)/4, (point_y-2)/4
+                )
 
         # force a paint event with Refresh and Update
         self.Refresh()
@@ -262,14 +304,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             else:
                 print("    EventType="+repr(EventType))
 
-
-        # set a position check for after this event is processed (after moved)
-        #   useful in case event handled by default handler with evt.Skip()
-
         # NOTE: by setting position only on scroll (and not on zoom) we
         #   preserve position on zoom out/zoom back in even if the image gets
         #   temporarily centered during zoom out.  That way when we zoom back
         #   in, we will find the same position again unless we scroll.
+
+        # set a position check for after this event is processed (after moved)
+        #   useful in case event handled by default handler with evt.Skip()
         wx.CallAfter(self.get_img_wincenter)
 
         if Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
@@ -618,8 +659,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
-        # NOTE: if we wanted to automatically implement panning, we could
-        #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
@@ -643,8 +682,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
-        # NOTE: if we wanted to automatically implement panning, we could
-        #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
@@ -668,8 +705,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
-        # NOTE: if we wanted to automatically implement panning, we could
-        #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
@@ -693,8 +728,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
-        # NOTE: if we wanted to automatically implement panning, we could
-        #   just evt.Skip in if: keystroke="up" in key event handler
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
