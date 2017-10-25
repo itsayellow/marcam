@@ -1,5 +1,8 @@
-.PHONY: clean app dmg
+.PHONY: clean clean_all app dmg
 clean:
+	rm -rf build dist
+
+clean_all:
 	rm -rf build dist virt
 
 app: dist/Cellcounter.app
