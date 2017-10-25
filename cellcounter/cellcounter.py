@@ -13,7 +13,7 @@ import wx.adv
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
-import constants
+import const
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
@@ -32,35 +32,35 @@ DEBUG = DEBUG_FXN_ENTRY | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
-# red cross, 5px x 5px
-CROSS_BMP = wx.Bitmap.FromBufferRGBA(
-        5, 5,
-        b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\xff' + \
-                b'\xff\x00\x00\x00' + \
-                b'\xff\x00\x00\x00'
-        )
+## red cross, 5px x 5px
+#CROSS_BMP = wx.Bitmap.FromBufferRGBA(
+#        5, 5,
+#        b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\xff' + \
+#                b'\xff\x00\x00\x00' + \
+#                b'\xff\x00\x00\x00'
+#        )
 
 
 if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
@@ -258,17 +258,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   here, just record all locations
 
         self.img_dc.DrawBitmap(
-                CROSS_BMP,
+                const.CROSS_BMP,
                 point_x-2, point_y-2
                 )
 
         self.img_dc_div2.DrawBitmap(
-                CROSS_BMP,
+                const.CROSS_BMP,
                 (point_x-2)/2, (point_y-2)/2
                 )
 
         self.img_dc_div4.DrawBitmap(
-                CROSS_BMP,
+                const.CROSS_BMP,
                 (point_x-2)/4, (point_y-2)/4
                 )
 
@@ -986,10 +986,10 @@ def process_command_line(argv):
 
     # specifying nargs= puts outputs of parser in list (even if nargs=1)
 
-    # required arguments
-    #parser.add_argument('srcdir',
-    #        help="Source directory (recursively searched)."
-    #        )
+    # positional arguments
+    parser.add_argument('srcfile', nargs='*',
+            help="Source directory (recursively searched)."
+            )
 
     # switches/options:
     #parser.add_argument(
@@ -1004,6 +1004,8 @@ def process_command_line(argv):
 
 def main(argv=None):
     # process command line if started from there
+    # Also, py2app sends file(s) to open via argv if file is dragged on top
+    #   of the application icon to start the icon
     args = process_command_line(argv)
 
     # setup main wx event loop
