@@ -14,54 +14,15 @@ import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
 import const
+from const import (
+        DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
+        )
+
+# DEBUG sets global debug message verbosity
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
 ICON_DIR = os.path.dirname(os.path.realpath(__file__))
-print(ICON_DIR)
-
-# OR'able debug values
-DEBUG_FXN_ENTRY = 1
-DEBUG_KEYPRESS = 2
-DEBUG_TIMING = 4
-DEBUG_MISC = 1024
-
-# global debug level
-DEBUG = 0
-DEBUG = DEBUG_FXN_ENTRY | DEBUG_TIMING | DEBUG_MISC
-DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
-DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
-
-## red cross, 5px x 5px
-#CROSS_BMP = wx.Bitmap.FromBufferRGBA(
-#        5, 5,
-#        b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\xff' + \
-#                b'\xff\x00\x00\x00' + \
-#                b'\xff\x00\x00\x00'
-#        )
-
 
 if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     # if we're being executed from inside a Mac app, turn off DEBUG
