@@ -14,6 +14,7 @@ DATA_FILES = [
         'cellcounter/topen32.png'
         ]
 OPTIONS = {
+        'argv_emulation':True,
         'iconfile':'cellcounter/cellcounter.icns',
         'optimize':1, # try one level of optimization?
         'plist':{
