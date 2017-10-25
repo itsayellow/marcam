@@ -23,3 +23,5 @@ END_OSASCRIPT
 fi
 
 hdiutil create dist/Cellcounter.dmg -volname "Cellcounter" -srcfolder dist/dmg_dir
+
+rm -rf dist/dmg_dir
