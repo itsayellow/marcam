@@ -9,8 +9,11 @@ import os.path
 import numpy as np
 import biorad1sc_reader
 import wx
+import wx.adv
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
+
+import constants
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
@@ -115,13 +118,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_idx = None
         self.zoom_list = None
 
-        # 10,10 is default
+        # ScrollRate of (10,10) is default
         # we set this to be as small as possible (1,1) so that positioning
         #   the scroll position during zoom can be as fine as possible.
         #   This avoids the image appearing to "jump around" during zoom in
         #   and zoom out due to subsampling the position.
         # This affects magnitude of panning and scrolling, so we multiply
         #   panning and scrolling manually in those event handlers
+        # By default, pixels per unit scroll is (1,1)
         self.SetScrollRate(1, 1)
 
         # init parent pointer
@@ -352,6 +356,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def set_virt_size_with_min(self):
+        """Set size of unscrolled canvas for image_size, making virtual size
+        same as image if image is zoomed larger than window, or as large as
+        window if image is smaller than window in order to be able to center
+        image in window.
+        """
+        # TODO: we can SetVirtualSize as a multiple of image in order to
+        #   increase scrolling accuracy to sub-image-pixel resolution
+        #   In that case we also need to scale image using scale_dc in 
+        #   PaintRect
+        #   Also need to adjust zoom settings
         (win_size_x, win_size_y) = self.GetClientSize()
         virt_size_x = max([self.img_size_x * self.zoom, win_size_x])
         virt_size_y = max([self.img_size_y * self.zoom, win_size_y])
@@ -775,6 +789,7 @@ class MainWindow(wx.Frame):
 
         # menu bar stuff
         menubar = wx.MenuBar()
+        # File
         file_menu = wx.Menu()
         fitem = file_menu.Append(wx.ID_EXIT,
                 'Quit', 'Quit application\tCtrl+Q')
@@ -783,6 +798,11 @@ class MainWindow(wx.Frame):
         satem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...', 'Save image file and associated data')
         menubar.Append(file_menu, '&File')
+        # Help
+        help_menu = wx.Menu()
+        aboutitem = help_menu.Append(wx.ID_ABOUT, "&About Cellcounter")
+        menubar.Append(help_menu, "&Help")
+
         self.SetMenuBar(menubar)
 
         # toolbar stuff
@@ -818,6 +838,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
+        self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
 
         # finally render app
         self.SetSize((800, 600))
@@ -935,6 +956,16 @@ class MainWindow(wx.Frame):
             self.statusbar.SetStatusText(
                     "Image " + img_path + " loading ERROR."
                     )
+
+    @debug_fxn
+    def on_about(self, evt):
+        info = wx.adv.AboutDialogInfo()
+        info.SetName("Cellcounter")
+        info.SetVersion("0.1.0")
+        info.SetDescription("Counting cells in biological images.")
+        info.SetCopyright("(C) 2017 Matthew A. Clapp")
+
+        wx.adv.AboutBox(info)
 
 
 def process_command_line(argv):
