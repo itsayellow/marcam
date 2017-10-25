@@ -16,6 +16,11 @@ Building
 #. ``make dmg`` to make the Mac .dmg bundle containing application and
    Applications alias
 
+To generate a new requirements.txt::
+
+    source virt/bin/activate
+    pip3 freeze --all > requirements.txt
+
 References
 ----------
 
