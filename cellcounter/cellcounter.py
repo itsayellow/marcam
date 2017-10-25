@@ -174,7 +174,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         if DEBUG & DEBUG_MISC:
             print("MSC:left click at img", end="")
-            print("(%d, %d)"%(img_x, img_y))
+            print("(%.2f, %.2f)"%(img_x, img_y))
 
         self.draw_at_point(img_x, img_y)
 
@@ -197,7 +197,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         if DEBUG & DEBUG_MISC:
             print("MSC:left click at img", end="")
-            print("(%d, %d)"%(img_x, img_y))
+            print("(%.2f, %.2f)"%(img_x, img_y))
 
         self.img_at_wincenter_x = img_x
         self.img_at_wincenter_y = img_y
@@ -207,13 +207,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         evt.Skip()
 
     @debug_fxn
-    def draw_at_point(self, point_x, point_y):
+    def draw_at_point(self, pt_x, pt_y):
 
-        point_x = int(point_x-0.5)
-        point_y = int(point_y-0.5)
+        point_x = int(pt_x-0.5)
+        point_y = int(pt_y-0.5)
+
+        if DEBUG & DEBUG_MISC:
+            print("MSC: point", end="")
+            print("(%d, %d)"%(point_x, point_y))
 
         self.points_record.append((point_x,point_y))
-        print(self.points_record)
 
         # TODO: try drawing crosses after the fact in PaintRect, not here
         #   here, just record all locations
@@ -454,8 +457,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   divide by zoom to get to img coordinates
 
         (img_unscroll_x, img_unscroll_y) = self.CalcUnscrolledPosition(win_x, win_y)
+
         img_x = (img_unscroll_x - self.img_coord_xlation_x) / self.zoom
         img_y = (img_unscroll_y - self.img_coord_xlation_y) / self.zoom
+
+        # DEBUG DELETEME
+        print("win: (%.2f,%.2f)"%(win_x,win_y))
+        print("unscrolled: (%.2f,%.2f)"%(img_unscroll_x,img_unscroll_y))
+        print("img: (%.2f,%.2f)"%(img_x,img_y))
 
         return (img_x, img_y)
 
