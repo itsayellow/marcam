@@ -429,14 +429,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         src_size_x = rect_size_x / scale_dc / self.zoom
         src_size_y = rect_size_y / scale_dc / self.zoom
 
-        src_pos_x = rect_pos_x / self.zoom / scale_dc
-        src_pos_y = rect_pos_y / self.zoom / scale_dc
-
         # adjust image pos if smaller than window (center in window)
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom, divide by div_scale to get to img coordinates
-        src_pos_x = src_pos_x - self.img_coord_xlation_x / self.zoom / scale_dc
-        src_pos_y = src_pos_y - self.img_coord_xlation_y / self.zoom / scale_dc
+        src_pos_x = (rect_pos_x - self.img_coord_xlation_x) / self.zoom / scale_dc
+        src_pos_y = (rect_pos_y - self.img_coord_xlation_y) / self.zoom / scale_dc
 
         # NOTE: Blit shows no performance advantage over StretchBlit
 
