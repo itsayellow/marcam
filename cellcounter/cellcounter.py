@@ -432,9 +432,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             scale_dc = 4
 
         # TODO: need exact slop factor verified
-        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
-        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
-
+        #src_size_x = int(rect_size_x / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
+        #src_size_y = int(rect_size_y / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
+        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 3
+        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 3
         # multiply back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # TODO: only do this for self.zoom > 1 ?
@@ -450,7 +451,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         src_pos_y = int(
                 (unscroll_pos_y - self.img_coord_xlation_y) / self.zoom / scale_dc
                 )
-
         # multiply back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # TODO: only do this for self.zoom > 1 ?
@@ -486,8 +486,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     # add half pixel so cross is in center of pixel when zoomed
                     # TODO: some sort of quantization error in zoom affects
                     #   placement at different zoom values??
-                    x_win = (x + 0.5) * self.zoom + self.img_coord_xlation_x
-                    y_win = (y + 0.5) * self.zoom + self.img_coord_xlation_y
+                    x_win = x * self.zoom + self.img_coord_xlation_x
+                    y_win = y * self.zoom + self.img_coord_xlation_y
                     pts_in_box.append((x_win, y_win))
                     dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 5 , y_win - 5)
         print("pts_in_box: ",end="")
