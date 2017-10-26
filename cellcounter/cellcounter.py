@@ -222,17 +222,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   here, just record all locations
 
         self.img_dc.DrawBitmap(
-                const.CROSS_BMP,
+                const.CROSS_BMP_5x5,
                 point_x-2, point_y-2
                 )
 
         self.img_dc_div2.DrawBitmap(
-                const.CROSS_BMP,
+                const.CROSS_BMP_5x5,
                 (point_x-2)/2, (point_y-2)/2
                 )
 
         self.img_dc_div4.DrawBitmap(
-                const.CROSS_BMP,
+                const.CROSS_BMP_5x5,
                 (point_x-2)/4, (point_y-2)/4
                 )
 
@@ -448,8 +448,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # TEST
         dc.DrawBitmap(
-                const.CROSS_BMP,
-                rect_pos_x + rect_size_x/2, rect_pos_y + rect_size_y/2
+                const.CROSS_BMP_9x9,
+                rect_pos_x + rect_size_x/2 - 4 , rect_pos_y + rect_size_y/2 - 4
                 )
 
     @debug_fxn
