@@ -219,22 +219,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
             self.points_record.append((point_x,point_y))
 
-            # TODO: try drawing crosses after the fact in PaintRect, not here
-            #   here, just record all locations
-
+            # TEST: DELETEME: draw yellow pixel here just for sanity check,
+            #   really draw crosses after the fact in PaintRect
             self.img_dc.DrawBitmap(
-                    const.CROSS_BMP_5x5,
-                    point_x-2, point_y-2
+                    const.YELLOW_PIX_BMP,
+                    point_x, point_y
                     )
-
             self.img_dc_div2.DrawBitmap(
-                    const.CROSS_BMP_5x5,
-                    (point_x-2)/2, (point_y-2)/2
+                    const.YELLOW_PIX_BMP,
+                    point_x/2, point_y/2
                     )
-
             self.img_dc_div4.DrawBitmap(
-                    const.CROSS_BMP_5x5,
-                    (point_x-2)/4, (point_y-2)/4
+                    const.YELLOW_PIX_BMP,
+                    point_x/4, point_y/4
                     )
 
             # force a paint event with Refresh and Update
@@ -477,11 +474,24 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 src_size_x, src_size_y,
                 )
 
-        # TEST
-        dc.DrawBitmap(
-                const.CROSS_BMP_11x11,
-                rect_pos_x + rect_size_x/2 - 5 , rect_pos_y + rect_size_y/2 - 5
-                )
+        self.draw_crosses(dc, src_pos_x, src_pos_y, src_size_x, src_size_y)
+
+    @debug_fxn
+    def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
+        pts_in_box = []
+        for (x,y) in self.points_record:
+            if (src_pos_x < x < src_pos_x + src_size_x and
+                    src_pos_y < y < src_pos_y + src_size_y):
+                if (x,y) not in pts_in_box:
+                    # add half pixel so cross is in center of pixel when zoomed
+                    # TODO: some sort of quantization error in zoom affects
+                    #   placement at different zoom values??
+                    x_win = (x + 0.5) * self.zoom + self.img_coord_xlation_x
+                    y_win = (y + 0.5) * self.zoom + self.img_coord_xlation_y
+                    pts_in_box.append((x_win, y_win))
+                    dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 5 , y_win - 5)
+        print("pts_in_box: ",end="")
+        print(pts_in_box)
 
     @debug_fxn
     def img_coord_from_win_coord(self, win_x, win_y):
