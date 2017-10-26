@@ -210,8 +210,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def draw_at_point(self, pt_x, pt_y):
         # assumes img_dc_div2 not None implies no loaded file
         if self.img_dc_div2 is not None:
-            point_x = int(pt_x-0.5)
-            point_y = int(pt_y-0.5)
+            point_x = int(pt_x)
+            point_y = int(pt_y)
 
             if DEBUG & DEBUG_MISC:
                 print("MSC: point", end="")
@@ -482,15 +482,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         for (x,y) in self.points_record:
             if (src_pos_x < x < src_pos_x + src_size_x and
                     src_pos_y < y < src_pos_y + src_size_y):
-                if (x,y) not in pts_in_box:
-                    # add half pixel so cross is in center of pixel when zoomed
-                    # TODO: some sort of quantization error in zoom affects
-                    #   placement at different zoom values??
-                    x_win = x * self.zoom + self.img_coord_xlation_x
-                    y_win = y * self.zoom + self.img_coord_xlation_y
+                # add half pixel so cross is in center of pixel when zoomed
+                # TODO: some sort of quantization error in zoom affects
+                #   placement at different zoom values??
+                x_win = (x + 0.5) * self.zoom + self.img_coord_xlation_x
+                y_win = (y + 0.5) * self.zoom + self.img_coord_xlation_y
+                if (x_win,y_win) not in pts_in_box:
                     pts_in_box.append((x_win, y_win))
                     dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 5 , y_win - 5)
-        print("pts_in_box: ",end="")
         print(pts_in_box)
 
     @debug_fxn
