@@ -208,37 +208,38 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def draw_at_point(self, pt_x, pt_y):
+        # assumes img_dc_div2 not None implies no loaded file
+        if self.img_dc_div2 is not None:
+            point_x = int(pt_x-0.5)
+            point_y = int(pt_y-0.5)
 
-        point_x = int(pt_x-0.5)
-        point_y = int(pt_y-0.5)
+            if DEBUG & DEBUG_MISC:
+                print("MSC: point", end="")
+                print("(%d, %d)"%(point_x, point_y))
 
-        if DEBUG & DEBUG_MISC:
-            print("MSC: point", end="")
-            print("(%d, %d)"%(point_x, point_y))
+            self.points_record.append((point_x,point_y))
 
-        self.points_record.append((point_x,point_y))
+            # TODO: try drawing crosses after the fact in PaintRect, not here
+            #   here, just record all locations
 
-        # TODO: try drawing crosses after the fact in PaintRect, not here
-        #   here, just record all locations
+            self.img_dc.DrawBitmap(
+                    const.CROSS_BMP_5x5,
+                    point_x-2, point_y-2
+                    )
 
-        self.img_dc.DrawBitmap(
-                const.CROSS_BMP_5x5,
-                point_x-2, point_y-2
-                )
+            self.img_dc_div2.DrawBitmap(
+                    const.CROSS_BMP_5x5,
+                    (point_x-2)/2, (point_y-2)/2
+                    )
 
-        self.img_dc_div2.DrawBitmap(
-                const.CROSS_BMP_5x5,
-                (point_x-2)/2, (point_y-2)/2
-                )
+            self.img_dc_div4.DrawBitmap(
+                    const.CROSS_BMP_5x5,
+                    (point_x-2)/4, (point_y-2)/4
+                    )
 
-        self.img_dc_div4.DrawBitmap(
-                const.CROSS_BMP_5x5,
-                (point_x-2)/4, (point_y-2)/4
-                )
-
-        # force a paint event with Refresh and Update
-        self.Refresh()
-        self.Update()
+            # force a paint event with Refresh and Update
+            self.Refresh()
+            self.Update()
 
     @debug_fxn
     def on_scroll(self, evt):
@@ -448,8 +449,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # TEST
         dc.DrawBitmap(
-                const.CROSS_BMP_9x9,
-                rect_pos_x + rect_size_x/2 - 4 , rect_pos_y + rect_size_y/2 - 4
+                const.CROSS_BMP_11x11,
+                rect_pos_x + rect_size_x/2 - 5 , rect_pos_y + rect_size_y/2 - 5
                 )
 
     @debug_fxn
