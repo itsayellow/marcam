@@ -408,11 +408,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def PaintRect(self, dc, rect):
+        """Given a rect needing a refresh in window PaintDC, Blit the image
+        to fill that rect.
+
+        Args:
+            dc (wx.PaintDC): Device Context to Blit into
+            rect (tuple): coordinates to refresh (window coordinates)
+        """
         # break out rect details into variables
         (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
 
         # get rect coord origin translation based on scroll position
-        (rect_pos_x, rect_pos_y) = self.CalcUnscrolledPosition(
+        (unscroll_pos_x, unscroll_pos_y) = self.CalcUnscrolledPosition(
                 rect_pos_x, rect_pos_y
                 )
 
@@ -427,21 +434,44 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_dc_src = self.img_dc_div4
             scale_dc = 4
 
-        src_size_x = rect_size_x / scale_dc / self.zoom
-        src_size_y = rect_size_y / scale_dc / self.zoom
+        # TODO: need exact slop factor verified
+        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
+        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
+
+        # multiply back out to get slightly off-window but
+        #   on src-pixel-boundary coords for dest
+        # TODO: only do this for self.zoom > 1 ?
+        dest_size_x = src_size_x * scale_dc * self.zoom
+        dest_size_y = src_size_y * scale_dc * self.zoom
 
         # adjust image pos if smaller than window (center in window)
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom, divide by div_scale to get to img coordinates
-        src_pos_x = (rect_pos_x - self.img_coord_xlation_x) / self.zoom / scale_dc
-        src_pos_y = (rect_pos_y - self.img_coord_xlation_y) / self.zoom / scale_dc
+        src_pos_x = int(
+                (unscroll_pos_x - self.img_coord_xlation_x) / self.zoom / scale_dc
+                )
+        src_pos_y = int(
+                (unscroll_pos_y - self.img_coord_xlation_y) / self.zoom / scale_dc
+                )
+
+        # multiply back out to get slightly off-window but
+        #   on src-pixel-boundary coords for dest
+        # TODO: only do this for self.zoom > 1 ?
+        dest_pos_x = src_pos_x * self.zoom * scale_dc + self.img_coord_xlation_x
+        dest_pos_y = src_pos_y * self.zoom * scale_dc + self.img_coord_xlation_y
 
         # NOTE: Blit shows no performance advantage over StretchBlit
+        # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
+        #   This means to center and zoom accurately (sub-src-pixel) we need to
+        #   refresh an area that INCLUDES the region needed, NOT ONLY that
+        #   dest region.  This way we can zoom and position accurately, while
+        #   employing the clipping mask behavior of PaintDC to make sure we
+        #   only display in the area of the window
 
         # copy region from self.img_dc into dc with possible stretching
         dc.StretchBlit(
-                rect_pos_x, rect_pos_y,
-                rect_size_x, rect_size_y,
+                dest_pos_x, dest_pos_y,
+                dest_size_x, dest_size_y,
                 img_dc_src,
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
