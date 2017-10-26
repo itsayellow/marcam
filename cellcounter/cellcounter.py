@@ -446,6 +446,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 src_size_x, src_size_y,
                 )
 
+        # TEST
+        dc.DrawBitmap(
+                const.CROSS_BMP,
+                rect_pos_x + rect_size_x/2, rect_pos_y + rect_size_y/2
+                )
+
     @debug_fxn
     def img_coord_from_win_coord(self, win_x, win_y):
         # img_coord_xlation_{x,y} = 0 unless window is bigger than image
