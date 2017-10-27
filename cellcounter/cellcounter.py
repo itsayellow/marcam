@@ -13,6 +13,7 @@ import wx
 import wx.adv
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
+
 import const
 from const import (
         DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
@@ -883,10 +884,9 @@ class DropTarget(wx.FileDropTarget):
 
 
 class MainWindow(wx.Frame):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, srcfiles, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.init_ui()
-        srcfiles = []
         if srcfiles:
             # TODO: are we able to load more than one file?
             self.load_image_from_path(srcfiles[0])
@@ -1119,7 +1119,7 @@ def main(argv=None):
 
     # setup main wx event loop
     myapp = wx.App()
-    main_win = MainWindow(None)
+    main_win = MainWindow(args.srcfiles, None)
     # binding to App is surest way to catch keys accurately, not having
     #   to worry about focus
     # binding to a panel can end up it not having focus, just donk, donk, donk,
