@@ -222,13 +222,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #self.img_at_wincenter_x = img_x
         #self.img_at_wincenter_y = img_y
         #self.scroll_to_img_at_wincenter()
-        self.panimate3(img_x, img_y, 1000)
+        self.panimate(img_x, img_y, 1000)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
 
     @debug_fxn
-    def panimate3(self, img_x_end, img_y_end, max_speed):
+    def panimate(self, img_x_end, img_y_end, max_speed):
         """Animate a pan from current scroll position to destination position
 
         Args:
@@ -257,7 +257,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         img_x_vals = list(np.linspace(img_x_start, img_x_end, steps))
         img_y_vals = list(np.linspace(img_y_start, img_y_end, steps))
 
-        # quick accel / decel
+        # accel / decel at 0.1*speed/sec
+        #   replace first 2 points with 3 new ones
+        #   [0.0, 0.5, 1.0, 1.5, ...]
+        #   becomes
+        #   [0.1, 0.3, 0.6, 1.0, 1.5 ...]
+        # don't include orig point (it's where we are)
         img_x_prevals = [
                 0.1*img_x_vals[2]+0.9*img_x_vals[0],
                 0.3*img_x_vals[2]+0.7*img_x_vals[0],
@@ -286,127 +291,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         print(img_x_start)
         print(img_x_end)
         print(img_x_vals)
-
-        wx.CallLater(
-                const.PANIMATE_STEP_MS,
-                self.panimate_step, img_x_vals, img_y_vals
-                )
-
-    @debug_fxn
-    def panimate2(self, img_x_end, img_y_end, accel, max_speed):
-        """Animate a pan from current scroll position to destination position
-
-        Args:
-            img_x_end (int): destination x pan location in img coordinates
-            img_y_end (int): destination y pan location in img coordinates
-            accel (float): in win pixels/sec/sec - how fast to accelerate at
-                start and decelerate at end
-            max_speed (float): maximum speed of pan in win pixels/sec
-        """
-        accel = max([accel, 1])
-        max_speed = max([max_speed, 1])
-        img_max_speed = max_speed / self.zoom
-        img_accel = accel / self.zoom
-
-        (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
-
-        # clip values for end coordinates to max zoom area
-        img_x_end = max([min([img_x_end, xmax]),xmin])
-        img_y_end = max([min([img_y_end, ymax]),ymin])
-
-        img_x_start = self.img_at_wincenter_x
-        img_y_start = self.img_at_wincenter_y
-
-        img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
-
-        steps = max(img_dist / img_max_speed / (const.PANIMATE_STEP_MS * 1e-3), 2)
-
-        img_x_vals = list(np.linspace(img_x_start, img_x_end, steps))
-        img_y_vals = list(np.linspace(img_y_start, img_y_end, steps))
-
-        wx.CallLater(
-                const.PANIMATE_STEP_MS,
-                self.panimate_step, img_x_vals, img_y_vals
-                )
-
-    @debug_fxn
-    def panimate(self, img_x_end, img_y_end, accel, max_speed):
-        """Animate a pan from current scroll position to destination position
-
-        Args:
-            img_x_end (int): destination x pan location in img coordinates
-            img_y_end (int): destination y pan location in img coordinates
-            accel (float): in win pixels/sec/sec - how fast to accelerate at
-                start and decelerate at end
-            max_speed (float): maximum speed of pan in win pixels/sec
-        """
-        accel = max([accel, 1])
-        max_speed = max([max_speed, 1])
-
-        (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
-
-        # clip values for end coordinates to max zoom area
-        img_x_end = max([min([img_x_end, xmax]),xmin])
-        img_y_end = max([min([img_y_end, ymax]),ymin])
-
-        img_x_start = self.img_at_wincenter_x
-        img_y_start = self.img_at_wincenter_y
-
-        img_x_sgn = np.sign(img_x_end - img_x_start)
-        img_y_sgn = np.sign(img_y_end - img_y_start)
-
-        if img_x_end == img_x_start:
-            #slope = infinity
-            cos_theta = 0
-            sin_theta = img_y_sgn
-        elif img_y_end == img_y_start:
-            #slope = 0
-            cos_theta = img_x_sgn
-            sin_theta = 0
-        else:
-            slope = (img_y_end - img_y_start) / (img_x_end - img_x_start)
-            cos_theta = img_x_sgn / np.sqrt(1+slope**2)
-            sin_theta = img_y_sgn / np.sqrt(1+1/(slope**2))
-
-        img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
-        win_dist = img_dist * self.zoom
-
-        img_max_speed = max_speed / self.zoom
-        img_accel = accel / self.zoom
-
-        img_x_vals = [img_x_start,]
-        img_y_vals = [img_y_start,]
-        img_x_xlat = []
-        img_y_xlat = []
-        img_dist_now = 0
-        img_speed = 0
-        while img_dist_now < img_dist / 2:
-            img_speed = img_speed + img_accel * const.PANIMATE_STEP_MS*1e-3
-            img_speed = min([img_speed, img_max_speed])
-
-            img_dist_this = img_speed * const.PANIMATE_STEP_MS*1e-3
-
-            img_x_xlat_this = cos_theta * img_dist_this
-            img_y_xlat_this = sin_theta * img_dist_this
-
-            img_x_xlat.append(img_x_xlat_this)
-            img_y_xlat.append(img_y_xlat_this)
-
-            img_x_vals.append(img_x_vals[-1] + img_x_xlat_this)
-            img_y_vals.append(img_y_vals[-1] + img_y_xlat_this)
-
-            img_dist_now = np.sqrt((img_x_vals[-1]-img_x_start)**2 + (img_y_vals[-1]-img_y_start)**2 )
-        
-        img_x_xlat.pop()
-        img_y_xlat.pop()
-        img_x_vals.pop()
-        img_y_vals.pop()
-        for i in range(len(img_x_xlat)-1,-1,-1):
-            img_x_vals.append(img_x_vals[-1] + img_x_xlat[i])
-            img_y_vals.append(img_y_vals[-1] + img_y_xlat[i])
-
-        img_x_vals[-1] = img_x_end
-        img_y_vals[-1] = img_y_end
 
         wx.CallLater(
                 const.PANIMATE_STEP_MS,
