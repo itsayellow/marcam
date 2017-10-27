@@ -4,6 +4,7 @@
 
 import sys
 import time
+import math
 import argparse
 import os.path
 import numpy as np
@@ -444,11 +445,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_dc_src = self.img_dc_div4
             scale_dc = 4
 
-        # TODO: need exact slop factor verified
-        #src_size_x = int(rect_size_x / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
-        #src_size_y = int(rect_size_y / scale_dc / self.zoom) + 2*int(1/self.zoom + 0.5)
-        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 3
-        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 3
+        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 3*math.ceil(1/self.zoom)
+        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 3*math.ceil(1/self.zoom)
         # multiply back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # TODO: only do this for self.zoom > 1 ?
@@ -495,15 +493,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         for (x,y) in self.points_record:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
-                # add half pixel so cross is in center of pixel when zoomed
+                # add half pixel so cross is in center of pix square when zoomed
                 # TODO: some sort of quantization error in zoom affects
                 #   placement at different zoom values??
                 x_win = (x + 0.5) * self.zoom + self.img_coord_xlation_x
                 y_win = (y + 0.5) * self.zoom + self.img_coord_xlation_y
                 if (x_win,y_win) not in pts_in_box:
+                    # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
                     dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 5 , y_win - 5)
-        print(pts_in_box)
 
     @debug_fxn
     def img_coord_from_win_coord(self, win_x, win_y):
