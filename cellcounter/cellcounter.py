@@ -207,6 +207,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         evt.Skip()
 
     @debug_fxn
+    def panimate(self, dest_x, dest_y, accel, max_speed):
+        """Animate a pan from current scroll position to destination position
+
+        Args:
+            dest_x (int): destination x pan location in image coordinates
+            dest_y (int): destination y pan location in image coordinates
+            accel (float): how fast to accelerate at start and decelerate
+                at end
+            max_speed (float): maximum speed of pan
+        """
+            
+
+    @debug_fxn
     def draw_at_point(self, pt_x, pt_y):
         # assumes img_dc_div2 not None implies no loaded file
         if self.img_dc_div2 is not None:
@@ -480,8 +493,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
         pts_in_box = []
         for (x,y) in self.points_record:
-            if (src_pos_x < x < src_pos_x + src_size_x and
-                    src_pos_y < y < src_pos_y + src_size_y):
+            if (src_pos_x <= x <= src_pos_x + src_size_x and
+                    src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pixel when zoomed
                 # TODO: some sort of quantization error in zoom affects
                 #   placement at different zoom values??
