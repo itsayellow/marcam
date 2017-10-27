@@ -368,13 +368,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         wx.CallAfter(self.get_img_wincenter)
 
         if Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
-            self.pan_left(2)
+            self.pan_left(const.SCROLL_WHEEL_SPEED)
         elif Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
-            self.pan_right(2)
+            self.pan_right(const.SCROLL_WHEEL_SPEED)
         elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
-            self.pan_up(2)
+            self.pan_up(const.SCROLL_WHEEL_SPEED)
         elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
-            self.pan_down(2)
+            self.pan_down(const.SCROLL_WHEEL_SPEED)
         else:
             # process with default handler(s)
             evt.Skip()
@@ -997,16 +997,16 @@ class MainWindow(wx.Frame):
         #   just evt.Skip in the following if statements
         if KeyCode == 314:
             # left key
-            self.img_panel.pan_left(20)
+            self.img_panel.pan_left(const.SCROLL_KEY_SPEED)
         if KeyCode == 315:
             # up key
-            self.img_panel.pan_up(20)
+            self.img_panel.pan_up(const.SCROLL_KEY_SPEED)
         if KeyCode == 316:
             # right key
-            self.img_panel.pan_right(20)
+            self.img_panel.pan_right(const.SCROLL_KEY_SPEED)
         if KeyCode == 317:
             # down key
-            self.img_panel.pan_down(20)
+            self.img_panel.pan_down(const.SCROLL_KEY_SPEED)
 
         if KeyCode == 366:
             # PAGE UP

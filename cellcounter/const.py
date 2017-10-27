@@ -16,7 +16,16 @@ DEBUG = DEBUG_FXN_ENTRY | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
+# how much to scroll for an EVT_SROLLWIN_* 
+SCROLL_WHEEL_SPEED = 2
+# how much to scroll for an keypress
+SCROLL_KEY_SPEED = 20
+
+# how long in ms is a frame during an animated pan (right-click)
 PANIMATE_STEP_MS = 30
+
+
+# BITMAPS
 
 # useful for bitmaps below
 pix_clear = b'\x00\x00\x00\x00'
