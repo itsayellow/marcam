@@ -2,8 +2,6 @@
 
 import wx 
 
-print("Loading const.py")
-
 # OR'able debug values
 DEBUG_FXN_ENTRY = 1
 DEBUG_KEYPRESS = 2
