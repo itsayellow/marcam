@@ -222,13 +222,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #self.img_at_wincenter_x = img_x
         #self.img_at_wincenter_y = img_y
         #self.scroll_to_img_at_wincenter()
-        self.panimate2(img_x, img_y, 200, 800)
+        self.panimate3(img_x, img_y, 1000)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
 
     @debug_fxn
-    def panimate3(self, img_x_end, img_y_end, accel, max_speed):
+    def panimate3(self, img_x_end, img_y_end, max_speed):
         """Animate a pan from current scroll position to destination position
 
         Args:
@@ -238,10 +238,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 start and decelerate at end
             max_speed (float): maximum speed of pan in win pixels/sec
         """
-        accel = max([accel, 1])
         max_speed = max([max_speed, 1])
         img_max_speed = max_speed / self.zoom
-        img_accel = accel / self.zoom
 
         (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
 
@@ -254,16 +252,40 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
 
-        steps = max(img_dist / img_max_speed / (const.PANIMATE_STEP_MS * 1e-3), 3)
+        steps = max(img_dist / img_max_speed / (const.PANIMATE_STEP_MS * 1e-3), 5)
 
         img_x_vals = list(np.linspace(img_x_start, img_x_end, steps))
         img_y_vals = list(np.linspace(img_y_start, img_y_end, steps))
 
         # quick accel / decel
-        img_x_vals.insert(1, (1/3)*img_x_vals[1] + (2/3)*img_x_vals[0])
-        img_y_vals.insert(1, (1/3)*img_y_vals[1] + (2/3)*img_y_vals[0])
-        img_x_vals.insert(-1, (1/3)*img_x_vals[-2] + (2/3)*img_x_vals[-1])
-        img_y_vals.insert(-1, (1/3)*img_y_vals[-2] + (2/3)*img_y_vals[-1])
+        img_x_prevals = [
+                0.1*img_x_vals[2]+0.9*img_x_vals[0],
+                0.3*img_x_vals[2]+0.7*img_x_vals[0],
+                0.6*img_x_vals[2]+0.4*img_x_vals[0],
+                ]
+        img_x_postvals = [
+                0.6*img_x_vals[-3]+0.4*img_x_vals[-1],
+                0.3*img_x_vals[-3]+0.7*img_x_vals[-1],
+                0.1*img_x_vals[-3]+0.9*img_x_vals[-1],
+                img_x_vals[-1]
+                ]
+        img_x_vals = img_x_prevals + img_x_vals[2:-2] + img_x_postvals
+        img_y_prevals = [
+                0.1*img_y_vals[2]+0.9*img_y_vals[0],
+                0.3*img_y_vals[2]+0.7*img_y_vals[0],
+                0.6*img_y_vals[2]+0.4*img_y_vals[0],
+                ]
+        img_y_postvals = [
+                0.6*img_y_vals[-3]+0.4*img_y_vals[-1],
+                0.3*img_y_vals[-3]+0.7*img_y_vals[-1],
+                0.1*img_y_vals[-3]+0.9*img_y_vals[-1],
+                img_y_vals[-1]
+                ]
+        img_y_vals = img_y_prevals + img_y_vals[2:-2] + img_y_postvals
+
+        print(img_x_start)
+        print(img_x_end)
+        print(img_x_vals)
 
         wx.CallLater(
                 const.PANIMATE_STEP_MS,
