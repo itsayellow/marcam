@@ -222,10 +222,90 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #self.img_at_wincenter_x = img_x
         #self.img_at_wincenter_y = img_y
         #self.scroll_to_img_at_wincenter()
-        self.panimate(img_x, img_y, 100, 500)
+        self.panimate2(img_x, img_y, 200, 800)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
+
+    @debug_fxn
+    def panimate3(self, img_x_end, img_y_end, accel, max_speed):
+        """Animate a pan from current scroll position to destination position
+
+        Args:
+            img_x_end (int): destination x pan location in img coordinates
+            img_y_end (int): destination y pan location in img coordinates
+            accel (float): in win pixels/sec/sec - how fast to accelerate at
+                start and decelerate at end
+            max_speed (float): maximum speed of pan in win pixels/sec
+        """
+        accel = max([accel, 1])
+        max_speed = max([max_speed, 1])
+        img_max_speed = max_speed / self.zoom
+        img_accel = accel / self.zoom
+
+        (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
+
+        # clip values for end coordinates to max zoom area
+        img_x_end = max([min([img_x_end, xmax]),xmin])
+        img_y_end = max([min([img_y_end, ymax]),ymin])
+
+        img_x_start = self.img_at_wincenter_x
+        img_y_start = self.img_at_wincenter_y
+
+        img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
+
+        steps = max(img_dist / img_max_speed / (const.PANIMATE_STEP_MS * 1e-3), 3)
+
+        img_x_vals = list(np.linspace(img_x_start, img_x_end, steps))
+        img_y_vals = list(np.linspace(img_y_start, img_y_end, steps))
+
+        # quick accel / decel
+        img_x_vals.insert(1, (1/3)*img_x_vals[1] + (2/3)*img_x_vals[0])
+        img_y_vals.insert(1, (1/3)*img_y_vals[1] + (2/3)*img_y_vals[0])
+        img_x_vals.insert(-1, (1/3)*img_x_vals[-2] + (2/3)*img_x_vals[-1])
+        img_y_vals.insert(-1, (1/3)*img_y_vals[-2] + (2/3)*img_y_vals[-1])
+
+        wx.CallLater(
+                const.PANIMATE_STEP_MS,
+                self.panimate_step, img_x_vals, img_y_vals
+                )
+
+    @debug_fxn
+    def panimate2(self, img_x_end, img_y_end, accel, max_speed):
+        """Animate a pan from current scroll position to destination position
+
+        Args:
+            img_x_end (int): destination x pan location in img coordinates
+            img_y_end (int): destination y pan location in img coordinates
+            accel (float): in win pixels/sec/sec - how fast to accelerate at
+                start and decelerate at end
+            max_speed (float): maximum speed of pan in win pixels/sec
+        """
+        accel = max([accel, 1])
+        max_speed = max([max_speed, 1])
+        img_max_speed = max_speed / self.zoom
+        img_accel = accel / self.zoom
+
+        (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
+
+        # clip values for end coordinates to max zoom area
+        img_x_end = max([min([img_x_end, xmax]),xmin])
+        img_y_end = max([min([img_y_end, ymax]),ymin])
+
+        img_x_start = self.img_at_wincenter_x
+        img_y_start = self.img_at_wincenter_y
+
+        img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
+
+        steps = max(img_dist / img_max_speed / (const.PANIMATE_STEP_MS * 1e-3), 2)
+
+        img_x_vals = list(np.linspace(img_x_start, img_x_end, steps))
+        img_y_vals = list(np.linspace(img_y_start, img_y_end, steps))
+
+        wx.CallLater(
+                const.PANIMATE_STEP_MS,
+                self.panimate_step, img_x_vals, img_y_vals
+                )
 
     @debug_fxn
     def panimate(self, img_x_end, img_y_end, accel, max_speed):
@@ -250,8 +330,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         img_x_start = self.img_at_wincenter_x
         img_y_start = self.img_at_wincenter_y
 
-        img_x_sgn = img_x_end - img_x_start
-        img_y_sgn = img_y_end - img_y_start
+        img_x_sgn = np.sign(img_x_end - img_x_start)
+        img_y_sgn = np.sign(img_y_end - img_y_start)
 
         if img_x_end == img_x_start:
             #slope = infinity
@@ -618,11 +698,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         img_x = (img_unscroll_x - self.img_coord_xlation_x) / self.zoom
         img_y = (img_unscroll_y - self.img_coord_xlation_y) / self.zoom
-
-        # DEBUG DELETEME
-        print("win: (%.2f,%.2f)"%(win_x,win_y))
-        print("unscrolled: (%.2f,%.2f)"%(img_unscroll_x,img_unscroll_y))
-        print("img: (%.2f,%.2f)"%(img_x,img_y))
 
         return (img_x, img_y)
 
@@ -1137,7 +1212,6 @@ def main(argv=None):
     # Also, py2app sends file(s) to open via argv if file is dragged on top
     #   of the application icon to start the icon
     args = process_command_line(argv)
-    print(args.srcfiles)
 
     # setup main wx event loop
     myapp = wx.App()
