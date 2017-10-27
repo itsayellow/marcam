@@ -8,6 +8,7 @@ import argparse
 import os.path
 import numpy as np
 import biorad1sc_reader
+from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 import wx
 import wx.adv
 import wx.lib.statbmp
@@ -234,8 +235,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             img_x_end (int): destination x pan location in img coordinates
             img_y_end (int): destination y pan location in img coordinates
-            accel (float): in win pixels/sec/sec - how fast to accelerate at
-                start and decelerate at end
             max_speed (float): maximum speed of pan in win pixels/sec
         """
         max_speed = max([max_speed, 1])
@@ -244,8 +243,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
 
         # clip values for end coordinates to max zoom area
-        img_x_end = max([min([img_x_end, xmax]),xmin])
-        img_y_end = max([min([img_y_end, ymax]),ymin])
+        img_x_end = max([min([img_x_end, xmax]), xmin])
+        img_y_end = max([min([img_y_end, ymax]), ymin])
 
         img_x_start = self.img_at_wincenter_x
         img_y_start = self.img_at_wincenter_y
@@ -321,7 +320,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 print("MSC: point", end="")
                 print("(%d, %d)"%(point_x, point_y))
 
-            self.points_record.append((point_x,point_y))
+            self.points_record.append((point_x, point_y))
 
             # TEST: DELETEME: draw yellow pixel here just for sanity check,
             #   really draw crosses after the fact in PaintRect
@@ -429,7 +428,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # TODO: we can SetVirtualSize as a multiple of image in order to
         #   increase scrolling accuracy to sub-image-pixel resolution
-        #   In that case we also need to scale image using scale_dc in 
+        #   In that case we also need to scale image using scale_dc in
         #   PaintRect
         #   Also need to adjust zoom settings
         (win_size_x, win_size_y) = self.GetClientSize()
@@ -580,7 +579,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
         pts_in_box = []
-        for (x,y) in self.points_record:
+        for (x, y) in self.points_record:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
@@ -588,10 +587,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 #   placement at different zoom values??
                 x_win = (x + 0.5) * self.zoom + self.img_coord_xlation_x
                 y_win = (y + 0.5) * self.zoom + self.img_coord_xlation_y
-                if (x_win,y_win) not in pts_in_box:
+                if (x_win, y_win) not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
-                    dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 5 , y_win - 5)
+                    dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 5, y_win - 5)
 
     @debug_fxn
     def img_coord_from_win_coord(self, win_x, win_y):
@@ -616,7 +615,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if imgfile_ext == ".1sc":
             try:
                 read1sc = biorad1sc_reader.Reader(img_path)
-            except:
+            except (BioRadInvalidFileError, BioRadParsingError):
                 # img_ok is false if 1sc is not valid 1sc file
                 return False
 
@@ -916,8 +915,8 @@ class MainWindow(wx.Frame):
         # toolbar stuff
         toolbar = self.CreateToolBar()
         if DEBUG & DEBUG_MISC:
-            print( "MSC:ICON_DIR=%s"%(ICON_DIR ))
-        obmp = os.path.join(ICON_DIR,'topen32.png')
+            print("MSC:ICON_DIR=%s"%(ICON_DIR))
+        obmp = os.path.join(ICON_DIR, 'topen32.png')
         otool = toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
         toolbar.Realize()
 
