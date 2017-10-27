@@ -322,21 +322,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
             self.points_record.append((point_x, point_y))
 
-            # TEST: DELETEME: draw yellow pixel here just for sanity check,
-            #   really draw crosses after the fact in PaintRect
-            self.img_dc.DrawBitmap(
-                    const.YELLOW_PIX_BMP,
-                    point_x, point_y
-                    )
-            self.img_dc_div2.DrawBitmap(
-                    const.YELLOW_PIX_BMP,
-                    point_x/2, point_y/2
-                    )
-            self.img_dc_div4.DrawBitmap(
-                    const.YELLOW_PIX_BMP,
-                    point_x/4, point_y/4
-                    )
-
             # force a paint event with Refresh and Update
             self.Refresh()
             self.Update()
@@ -594,6 +579,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def img_coord_from_win_coord(self, win_x, win_y):
+        """Given plain window coordinates, return unscrolled image coordinates
+
+        Args:
+            win_x (int): todo
+            win_y (int): todo
+
+        Returns:
+            tuple: (img_x, img_y)
+        """
         # img_coord_xlation_{x,y} = 0 unless window is bigger than image
         #   in which case this is non-zero translation of left,top padding
         # self.img_coord_xlation_{x,y} is in window coordinates
@@ -608,10 +602,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def init_image_from_file(self, img_path):
+        """Load and initialize image given its full path
+
+        Args:
+            img_path (str): full path to image to load into app
+        """
         self.img_path = img_path
 
         # check for 1sc files and get image data to send to Image
-        (imgfile_base, imgfile_ext) = os.path.splitext(img_path)
+        (_, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".1sc":
             try:
                 read1sc = biorad1sc_reader.Reader(img_path)
