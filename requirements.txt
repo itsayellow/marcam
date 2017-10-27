@@ -1,5 +1,5 @@
 altgraph==0.14
-biorad1sc-reader==0.5
+biorad1sc-reader==0.5.1
 macholib==1.8
 modulegraph==0.15
 numpy==1.13.3
