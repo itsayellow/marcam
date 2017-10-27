@@ -4,7 +4,6 @@
 
 import sys
 import time
-import math
 import argparse
 import os.path
 import numpy as np
@@ -141,6 +140,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def scroll_to_img_at_wincenter(self):
+        """
+        Scroll window so center of window is at
+        (self.img_at_wincenter_x, self.img_at_wincenter_y)
+        """
         (win_size_x, win_size_y) = self.GetClientSize()
         (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
 
@@ -158,6 +161,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     "(%.3f,%.3f)"%(img_zoom_wincenter_x, img_zoom_wincenter_y))
             print("MSC:origin = (%.3f,%.3f)"%(origin_x, origin_y))
             print("MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y))
+
+    def wincenter_scroll_limits(self):
+        """
+        get min, max coordinates that can lie in center of window
+
+        Returns:
+            tuple: (win_x_min, win_y_min, win_x_max, win_y_max)
+        """
+        (win_size_x, win_size_y) = self.GetClientSize()
+
+        img_x_min = win_size_x / 2 / self.zoom
+        img_y_min = win_size_y / 2 / self.zoom
+        img_x_max = self.img_size_x - (win_size_x / 2 / self.zoom)
+        img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom)
+
+        return (img_x_min, img_y_min, img_x_max, img_y_max)
 
     @debug_fxn
     def on_left_down(self, evt):
@@ -200,25 +219,110 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("MSC:left click at img", end="")
             print("(%.2f, %.2f)"%(img_x, img_y))
 
-        self.img_at_wincenter_x = img_x
-        self.img_at_wincenter_y = img_y
-        self.scroll_to_img_at_wincenter()
+        #self.img_at_wincenter_x = img_x
+        #self.img_at_wincenter_y = img_y
+        #self.scroll_to_img_at_wincenter()
+        self.panimate(img_x, img_y, 100, 500)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
 
     @debug_fxn
-    def panimate(self, dest_x, dest_y, accel, max_speed):
+    def panimate(self, img_x_end, img_y_end, accel, max_speed):
         """Animate a pan from current scroll position to destination position
 
         Args:
-            dest_x (int): destination x pan location in image coordinates
-            dest_y (int): destination y pan location in image coordinates
-            accel (float): how fast to accelerate at start and decelerate
-                at end
-            max_speed (float): maximum speed of pan
+            img_x_end (int): destination x pan location in img coordinates
+            img_y_end (int): destination y pan location in img coordinates
+            accel (float): in win pixels/sec/sec - how fast to accelerate at
+                start and decelerate at end
+            max_speed (float): maximum speed of pan in win pixels/sec
         """
-            
+        accel = max([accel, 1])
+        max_speed = max([max_speed, 1])
+
+        (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
+
+        # clip values for end coordinates to max zoom area
+        img_x_end = max([min([img_x_end, xmax]),xmin])
+        img_y_end = max([min([img_y_end, ymax]),ymin])
+
+        img_x_start = self.img_at_wincenter_x
+        img_y_start = self.img_at_wincenter_y
+
+        img_x_sgn = img_x_end - img_x_start
+        img_y_sgn = img_y_end - img_y_start
+
+        if img_x_end == img_x_start:
+            #slope = infinity
+            cos_theta = 0
+            sin_theta = img_y_sgn
+        elif img_y_end == img_y_start:
+            #slope = 0
+            cos_theta = img_x_sgn
+            sin_theta = 0
+        else:
+            slope = (img_y_end - img_y_start) / (img_x_end - img_x_start)
+            cos_theta = img_x_sgn / np.sqrt(1+slope**2)
+            sin_theta = img_y_sgn / np.sqrt(1+1/(slope**2))
+
+        img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
+        win_dist = img_dist * self.zoom
+
+        img_max_speed = max_speed / self.zoom
+        img_accel = accel / self.zoom
+
+        img_x_vals = [img_x_start,]
+        img_y_vals = [img_y_start,]
+        img_x_xlat = []
+        img_y_xlat = []
+        img_dist_now = 0
+        img_speed = 0
+        while img_dist_now < img_dist / 2:
+            img_speed = img_speed + img_accel * const.PANIMATE_STEP_MS*1e-3
+            img_speed = min([img_speed, img_max_speed])
+
+            img_dist_this = img_speed * const.PANIMATE_STEP_MS*1e-3
+
+            img_x_xlat_this = cos_theta * img_dist_this
+            img_y_xlat_this = sin_theta * img_dist_this
+
+            img_x_xlat.append(img_x_xlat_this)
+            img_y_xlat.append(img_y_xlat_this)
+
+            img_x_vals.append(img_x_vals[-1] + img_x_xlat_this)
+            img_y_vals.append(img_y_vals[-1] + img_y_xlat_this)
+
+            img_dist_now = np.sqrt((img_x_vals[-1]-img_x_start)**2 + (img_y_vals[-1]-img_y_start)**2 )
+        
+        img_x_xlat.pop()
+        img_y_xlat.pop()
+        img_x_vals.pop()
+        img_y_vals.pop()
+        for i in range(len(img_x_xlat)-1,-1,-1):
+            img_x_vals.append(img_x_vals[-1] + img_x_xlat[i])
+            img_y_vals.append(img_y_vals[-1] + img_y_xlat[i])
+
+        img_x_vals[-1] = img_x_end
+        img_y_vals[-1] = img_y_end
+
+        wx.CallLater(
+                const.PANIMATE_STEP_MS,
+                self.panimate_step, img_x_vals, img_y_vals
+                )
+
+    @debug_fxn
+    def panimate_step(self, x_vals, y_vals):
+        self.img_at_wincenter_x = x_vals.pop(0)
+        self.img_at_wincenter_y = y_vals.pop(0)
+        self.scroll_to_img_at_wincenter()
+        if x_vals:
+            wx.CallLater(
+                    const.PANIMATE_STEP_MS,
+                    self.panimate_step, x_vals, y_vals
+                    )
+        else:
+            wx.CallAfter(self.get_img_wincenter)
 
     @debug_fxn
     def draw_at_point(self, pt_x, pt_y):
@@ -445,8 +549,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_dc_src = self.img_dc_div4
             scale_dc = 4
 
-        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 3*math.ceil(1/self.zoom)
-        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 3*math.ceil(1/self.zoom)
+        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 3*np.ceil(1/self.zoom)
+        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 3*np.ceil(1/self.zoom)
         # multiply back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # TODO: only do this for self.zoom > 1 ?
@@ -805,14 +909,11 @@ class MainWindow(wx.Frame):
         super().__init__(*args, **kwargs)
         self.init_ui()
         if srcfiles:
+            # TODO: are we able to load more than one file?
             self.load_image_from_path(srcfiles[0])
 
     @debug_fxn
     def init_ui(self):
-        # Add image handlers for wx (necessary?)
-        #wx.Image.AddHandler(wx.PNGHandler)
-        #wx.Image.AddHandler(wx.TIFFHandler)
-
         # menu bar stuff
         menubar = wx.MenuBar()
         # File
