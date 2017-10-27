@@ -801,9 +801,11 @@ class DropTarget(wx.FileDropTarget):
 
 
 class MainWindow(wx.Frame):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, srcfiles, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.init_ui()
+        if srcfiles:
+            self.load_image_from_path(srcfiles[0])
 
     @debug_fxn
     def init_ui(self):
@@ -972,8 +974,11 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
-        img_ok = self.img_panel.init_image_from_file(img_path)
+        self.load_image_from_path(img_path)
 
+    @debug_fxn
+    def load_image_from_path(self, img_path):
+        img_ok = self.img_panel.init_image_from_file(img_path)
         if img_ok:
             self.statusbar.SetStatusText("Image " + img_path + " loaded OK.")
         else:
@@ -1011,8 +1016,8 @@ def process_command_line(argv):
     # specifying nargs= puts outputs of parser in list (even if nargs=1)
 
     # positional arguments
-    parser.add_argument('srcfile', nargs='*',
-            help="Source directory (recursively searched)."
+    parser.add_argument('srcfiles', nargs='*',
+            help="Source files to open on startup."
             )
 
     # switches/options:
@@ -1031,10 +1036,11 @@ def main(argv=None):
     # Also, py2app sends file(s) to open via argv if file is dragged on top
     #   of the application icon to start the icon
     args = process_command_line(argv)
+    print(args.srcfiles)
 
     # setup main wx event loop
     myapp = wx.App()
-    main_win = MainWindow(None)
+    main_win = MainWindow(args.srcfiles, None)
     # binding to App is surest way to catch keys accurately, not having
     #   to worry about focus
     # binding to a panel can end up it not having focus, just donk, donk, donk,
