@@ -47,6 +47,12 @@ OPTIONS = {
                     'LSHandlerRank': "Alternate",
                     'LSItemContentTypes': ["public.png"],
                     },
+                {
+                    'CFBundleTypeName':'JPEG Image',
+                    'CFBundleTypeRole':'Viewer',
+                    'LSHandlerRank': "Alternate",
+                    'LSItemContentTypes': ["public.jpeg"],
+                    },
                 ],
             'UTExportedTypeDeclarations': [{
                 'UTTypeConformsTo': ["public.data"],
