@@ -29,6 +29,7 @@ OPTIONS = {
                 {
                     'CFBundleTypeName':'Bio-Rad Gel File',
                     'CFBundleTypeRole':'Viewer',
+                    #'CFBundleTypeIconFile':'.icns',
                     'LSHandlerRank': "Alternate",
                     'LSItemContentTypes': ["com.itsayellow.1sc"],
                     },
