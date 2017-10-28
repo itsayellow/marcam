@@ -565,17 +565,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 src_size_x, src_size_y,
                 )
 
-        self.draw_crosses(dc, scale_dc, src_pos_x, src_pos_y, src_size_x, src_size_y)
+        # need to multiply by scale_dc to get back to div1 image coordinates
+        self.draw_crosses(
+                dc,
+                src_pos_x*scale_dc, src_pos_y*scale_dc,
+                src_size_x*scale_dc, src_size_y*scale_dc)
 
     @debug_fxn
-    def draw_crosses(self, dc, scale_dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
+    def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
+        print("%d %d %d %d"%(src_pos_x, src_pos_y, src_size_x, src_size_y))
         pts_in_box = []
         for (x, y) in self.points_record:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
-                # TODO: some sort of quantization error in zoom affects
-                #   placement at different zoom values??
                 x_win = (x + 0.5) * self.zoom + self.img_coord_xlation_x
                 y_win = (y + 0.5) * self.zoom + self.img_coord_xlation_y
                 if (x_win, y_win) not in pts_in_box:
