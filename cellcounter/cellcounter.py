@@ -573,7 +573,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
-        print("%d %d %d %d"%(src_pos_x, src_pos_y, src_size_x, src_size_y))
         pts_in_box = []
         for (x, y) in self.points_record:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
