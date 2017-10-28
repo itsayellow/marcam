@@ -24,8 +24,21 @@ OPTIONS = {
             'CFBundleIdentifier':'com.itsayellow.osx.cellcounter',
             'CFBundleVersion':VERSION,
             'CFBundleShortVersionString':VERSION,
-            'CFBundleDocumentTypes':[],
-            'NSHumanReadableCopyright': u"Copyright © 2017, Matthew A. Clapp, All Rights Reserved"
+            'NSHumanReadableCopyright': u"Copyright © 2017, Matthew A. Clapp, All Rights Reserved",
+            'CFBundleDocumentTypes':[
+                {
+                    'CFBundleTypeName':'Bio-Rad Gel File',
+                    'CFBundleTypeRole':'Viewer',
+                    'LSHandlerRank': "Alternate",
+                    'LSItemContentTypes': ["com.itsayellow.1sc"],
+                    },
+                ],
+            'UTExportedTypeDeclarations': [{
+                'UTTypeConformsTo': ["public.data"],
+                'UTTypeIdentifier': "com.itsayellow.1sc",
+                'UTTypeDescription': "Bio-Rad Gel File",
+                'UTTypeTagSpecification': {'public.filename-extension': "1sc"}
+            }],
             },
         }
 
