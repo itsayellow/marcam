@@ -198,13 +198,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("MSC:left click at img", end="")
             print("(%.2f, %.2f)"%(img_x, img_y))
 
-        if self.mark_mode:
-            self.draw_at_point(img_x, img_y)
-        else:
-            # TODO: select mode selects nearby mark (possibly to delete)
-            #   selecting with no mark nearby deselects
-            # TEST: DELETEME
-            print("Not in Mark Mode")
+        if (0 <= img_x <= self.img_size_x and
+                0 <= img_y <= self.img_size_y):
+            if self.mark_mode:
+                self.draw_at_point(img_x, img_y)
+            else:
+                # TODO: select mode selects nearby mark (possibly to delete)
+                #   selecting with no mark nearby deselects
+                # TEST: DELETEME
+                print("Not in Mark Mode")
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -563,10 +565,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 src_size_x, src_size_y,
                 )
 
-        self.draw_crosses(dc, src_pos_x, src_pos_y, src_size_x, src_size_y)
+        self.draw_crosses(dc, scale_dc, src_pos_x, src_pos_y, src_size_x, src_size_y)
 
     @debug_fxn
-    def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
+    def draw_crosses(self, dc, scale_dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
         pts_in_box = []
         for (x, y) in self.points_record:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
