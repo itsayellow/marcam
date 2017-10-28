@@ -11,7 +11,8 @@ APP = ['cellcounter/cellcounter.py']
 APP_NAME = 'Cellcounter'
 VERSION = '0.1.0'
 DATA_FILES = [
-        'cellcounter/topen32.png'
+        'cellcounter/topen32.png',
+        'cellcounter/marktool32.png'
         ]
 OPTIONS = {
         'argv_emulation':True,
@@ -32,6 +33,12 @@ OPTIONS = {
                     #'CFBundleTypeIconFile':'.icns',
                     'LSHandlerRank': "Alternate",
                     'LSItemContentTypes': ["com.itsayellow.1sc"],
+                    },
+                {
+                    'CFBundleTypeName':'TIFF Image',
+                    'CFBundleTypeRole':'Viewer',
+                    'LSHandlerRank': "Alternate",
+                    'LSItemContentTypes': ["public.tiff"],
                     },
                 ],
             'UTExportedTypeDeclarations': [{

@@ -917,6 +917,12 @@ class MainWindow(wx.Frame):
             print("MSC:ICON_DIR=%s"%(ICON_DIR))
         obmp = os.path.join(ICON_DIR, 'topen32.png')
         otool = toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
+        markbmp = os.path.join(ICON_DIR, 'marktool32.png')
+        marktool = toolbar.AddCheckTool(
+                wx.ID_ANY,
+                'Point/Mark',
+                wx.Bitmap(markbmp),
+                )
         toolbar.Realize()
 
         # status bar stuff
@@ -942,6 +948,7 @@ class MainWindow(wx.Frame):
 
         # setup event handlers for toolbar, menus
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
+        self.Bind(wx.EVT_TOOL, self.on_mark_toggle, marktool)
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
@@ -1028,6 +1035,10 @@ class MainWindow(wx.Frame):
         if KeyCode == 32:
             # Space Bar
             pass
+
+    @debug_fxn
+    def on_mark_toggle(self, evt):
+        print("TOGGLE MARK")
 
     @debug_fxn
     def on_open(self, evt):
