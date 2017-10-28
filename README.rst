@@ -21,6 +21,12 @@ To generate a new requirements.txt::
     source virt/bin/activate
     pip3 freeze --all > requirements.txt
 
+To make a new icon
+
+* create a photoshop psd document at 512x512
+* export to png
+* read in png file and then downsize to 32x32 and save as png
+
 References
 ----------
 
