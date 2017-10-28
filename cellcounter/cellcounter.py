@@ -74,6 +74,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_path = None
         self.img_size_x = None
         self.img_size_y = None
+        self.mark_mode = False
         self.parent = None
         self.points_record = []
         self.zoom = None
@@ -197,7 +198,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("MSC:left click at img", end="")
             print("(%.2f, %.2f)"%(img_x, img_y))
 
-        self.draw_at_point(img_x, img_y)
+        if self.mark_mode:
+            self.draw_at_point(img_x, img_y)
+        else:
+            # TODO: select mode selects nearby mark (possibly to delete)
+            #   selecting with no mark nearby deselects
+            # TEST: DELETEME
+            print("Not in Mark Mode")
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -287,10 +294,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 ]
         img_y_vals = img_y_prevals + img_y_vals[2:-2] + img_y_postvals
 
-        print(img_x_start)
-        print(img_x_end)
-        print(img_x_vals)
-
         wx.CallLater(
                 const.PANIMATE_STEP_MS,
                 self.panimate_step, img_x_vals, img_y_vals
@@ -323,6 +326,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.points_record.append((point_x, point_y))
 
             # force a paint event with Refresh and Update
+            #   to force PaintRect to paint new cross
             self.Refresh()
             self.Update()
 
@@ -886,6 +890,9 @@ class DropTarget(wx.FileDropTarget):
 class MainWindow(wx.Frame):
     def __init__(self, srcfiles, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.marktool = None
+
         self.init_ui()
         if srcfiles:
             # TODO: are we able to load more than one file?
@@ -918,7 +925,7 @@ class MainWindow(wx.Frame):
         obmp = os.path.join(ICON_DIR, 'topen32.png')
         otool = toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
         markbmp = os.path.join(ICON_DIR, 'marktool32.png')
-        marktool = toolbar.AddCheckTool(
+        self.marktool = toolbar.AddCheckTool(
                 wx.ID_ANY,
                 'Point/Mark',
                 wx.Bitmap(markbmp),
@@ -948,7 +955,7 @@ class MainWindow(wx.Frame):
 
         # setup event handlers for toolbar, menus
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
-        self.Bind(wx.EVT_TOOL, self.on_mark_toggle, marktool)
+        self.Bind(wx.EVT_TOOL, self.on_mark_toggle, self.marktool)
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
@@ -1038,7 +1045,7 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_mark_toggle(self, evt):
-        print("TOGGLE MARK")
+        self.img_panel.mark_mode = self.marktool.IsToggled()
 
     @debug_fxn
     def on_open(self, evt):
