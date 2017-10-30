@@ -169,14 +169,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         get min, max coordinates that can lie in center of window
 
         Returns:
-            tuple: (win_x_min, win_y_min, win_x_max, win_y_max)
+            tuple: (img_x_min, img_y_min, img_x_max, img_y_max)
         """
         (win_size_x, win_size_y) = self.GetClientSize()
 
+        # minimum center (x,y) is 
         img_x_min = win_size_x / 2 / self.zoom
-        img_y_min = win_size_y / 2 / self.zoom
-        img_x_max = self.img_size_x - (win_size_x / 2 / self.zoom)
-        img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom)
+        img_y_min = win_size_y / 2 / self.zoom - self.img_coord_xlation_y
+        img_x_max = (self.img_size_x + self.img_coord_xlation_x) - (win_size_x / 2 / self.zoom)
+        img_y_max = (self.img_size_y + self.img_coord_xlation_y) - (win_size_y / 2 / self.zoom)
+
+        if DEBUG & DEBUG_MISC:
+            print("MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(img_x_min, img_y_min, img_x_max, img_y_max))
 
         return (img_x_min, img_y_min, img_x_max, img_y_max)
 
@@ -226,7 +230,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (img_x, img_y) = self.img_coord_from_win_coord(point.x, point.y)
 
         if DEBUG & DEBUG_MISC:
-            print("MSC:left click at img", end="")
+            print("MSC:right click at img", end="")
             print("(%.2f, %.2f)"%(img_x, img_y))
 
         #self.img_at_wincenter_x = img_x
@@ -257,6 +261,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         img_x_start = self.img_at_wincenter_x
         img_y_start = self.img_at_wincenter_y
+
+        if DEBUG & DEBUG_MISC:
+            print("MSC:panimate: start=(%.2f,%.2f)"%(img_x_start,img_y_start), end="")
+            print("end=(%.2f, %.2f)"%(img_x_end, img_y_end))
 
         img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
 
@@ -556,6 +564,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   employing the clipping mask behavior of PaintDC to make sure we
         #   only display in the area of the window
 
+        # TODO: Windows crashes if src_pos, src_size are out of bounds for the
+        #   src image.  Must enforce bounds
         # copy region from self.img_dc into dc with possible stretching
         dc.StretchBlit(
                 dest_pos_x, dest_pos_y,
