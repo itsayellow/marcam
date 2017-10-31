@@ -130,7 +130,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # translate client center to zoomed image center coords
         (self.img_at_wincenter_x, self.img_at_wincenter_y
-                ) = self.img_coord_from_win_coord(win_size_x/2, win_size_y/2)
+                ) = self.win2img_coord(win_size_x/2, win_size_y/2)
 
         if DEBUG & DEBUG_MISC:
             print(
@@ -173,7 +173,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         (win_size_x, win_size_y) = self.GetClientSize()
 
-        # minimum center (x,y) is 
+        # minimum center (x,y) is
         img_x_min = win_size_x / 2 / self.zoom
         img_y_min = win_size_y / 2 / self.zoom - self.img_coord_xlation_y
         img_x_max = (self.img_size_x + self.img_coord_xlation_x) - (win_size_x / 2 / self.zoom)
@@ -196,7 +196,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   * not to depend on which img_dc we supply
         #   * not to depend on zoom or pan
         point = evt.GetLogicalPosition(self.img_dc)
-        (img_x, img_y) = self.img_coord_from_win_coord(point.x, point.y)
+        (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
         if DEBUG & DEBUG_MISC:
             print("MSC:left click at img", end="")
@@ -227,7 +227,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   * not to depend on which img_dc we supply
         #   * not to depend on zoom or pan
         point = evt.GetLogicalPosition(self.img_dc)
-        (img_x, img_y) = self.img_coord_from_win_coord(point.x, point.y)
+        (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
         if DEBUG & DEBUG_MISC:
             print("MSC:right click at img", end="")
@@ -514,14 +514,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
-        # break out rect details into variables
-        (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
-
-        # get rect coord origin translation based on scroll position
-        (unscroll_pos_x, unscroll_pos_y) = self.CalcUnscrolledPosition(
-                rect_pos_x, rect_pos_y
-                )
-
         # see if we need to use a downscaled version of memdc
         if self.zoom > 0.5:
             img_dc_src = self.img_dc
@@ -533,28 +525,52 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_dc_src = self.img_dc_div4
             scale_dc = 4
 
-        src_size_x = int(rect_size_x / scale_dc / self.zoom) + 3*np.ceil(1/self.zoom)
-        src_size_y = int(rect_size_y / scale_dc / self.zoom) + 3*np.ceil(1/self.zoom)
-        # multiply back out to get slightly off-window but
-        #   on src-pixel-boundary coords for dest
-        # TODO: only do this for self.zoom > 1 ?
-        dest_size_x = src_size_x * scale_dc * self.zoom
-        dest_size_y = src_size_y * scale_dc * self.zoom
+        # break out rect details into variables
+        (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
+        # rect_pos_{x,y} is upper left corner
+        # rect_lr_{x,y} is lower right corner
+        rect_lr_x = rect_pos_x + rect_size_x
+        rect_lr_y = rect_pos_y + rect_size_y
 
-        # adjust image pos if smaller than window (center in window)
-        # self.img_coord_xlation_{x,y} is in window coordinates
-        #   divide by zoom, divide by div_scale to get to img coordinates
-        src_pos_x = int(
-                (unscroll_pos_x - self.img_coord_xlation_x) / self.zoom / scale_dc
+        # img coordinates of upper left corner
+        (src_pos_x, src_pos_y) = self.win2img_coord(
+                rect_pos_x, rect_pos_y,
+                scale_dc=scale_dc
                 )
-        src_pos_y = int(
-                (unscroll_pos_y - self.img_coord_xlation_y) / self.zoom / scale_dc
+        src_pos_x = int(src_pos_x)
+        src_pos_y = int(src_pos_y)
+        # img coordinates of lower right corner
+        (src_lr_x, src_lr_y) = self.win2img_coord(
+                rect_lr_x, rect_lr_y,
+                scale_dc=scale_dc
                 )
-        # multiply back out to get slightly off-window but
+        src_lr_x = np.ceil(src_lr_x) + 1
+        src_lr_y = np.ceil(src_lr_y) + 1
+
+        # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
-        # TODO: only do this for self.zoom > 1 ?
-        dest_pos_x = src_pos_x * self.zoom * scale_dc + self.img_coord_xlation_x
-        dest_pos_y = src_pos_y * self.zoom * scale_dc + self.img_coord_xlation_y
+        # TODO: round to nearest int ?
+        (dest_pos_x, dest_pos_y) = self.img2unscrollwin_coord(
+                src_pos_x, src_pos_y, scale_dc=scale_dc
+               )
+        # multiply size back out to get slightly off-window but
+        #   on src-pixel-boundary coords for dest
+        # TODO: round to nearest int
+        (dest_lr_x, dest_lr_y) = self.img2unscrollwin_coord(
+                src_lr_x, src_lr_y, scale_dc=scale_dc
+                )
+
+        # get src size
+        src_size_x = src_lr_x - src_pos_x
+        src_size_y = src_lr_y - src_pos_y
+        # get dest size
+        dest_size_x = dest_lr_x - dest_pos_x
+        dest_size_y = dest_lr_y - dest_pos_y
+
+        print("src_pos=(%.2f,%.2f)"%(src_pos_x,src_pos_y))
+        print("src_size=(%.2f,%.2f)"%(src_size_x,src_size_y))
+        print("dest_pos=(%.2f,%.2f)"%(dest_pos_x,dest_pos_y))
+        print("dest_size=(%.2f,%.2f)"%(dest_size_x,dest_size_y))
 
         # NOTE: Blit shows no performance advantage over StretchBlit
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -566,6 +582,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # TODO: Windows crashes if src_pos, src_size are out of bounds for the
         #   src image.  Must enforce bounds
+
         # copy region from self.img_dc into dc with possible stretching
         dc.StretchBlit(
                 dest_pos_x, dest_pos_y,
@@ -596,27 +613,34 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 6, y_win - 6)
 
     @debug_fxn
-    def img_coord_from_win_coord(self, win_x, win_y):
+    def win2img_coord(self, win_x, win_y, scale_dc=1):
         """Given plain window coordinates, return unscrolled image coordinates
 
         Args:
-            win_x (int): todo
-            win_y (int): todo
+            win_x (int): position in current window coordinates
+            win_y (int): position in current window coordinates
 
         Returns:
-            tuple: (img_x, img_y)
+            tuple: (img_x (float), img_y (float)) position in src image
+                coordinates
         """
         # img_coord_xlation_{x,y} = 0 unless window is bigger than image
         #   in which case this is non-zero translation of left,top padding
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
 
-        (img_unscroll_x, img_unscroll_y) = self.CalcUnscrolledPosition(win_x, win_y)
+        (win_unscroll_x, win_unscroll_y) = self.CalcUnscrolledPosition(win_x, win_y)
 
-        img_x = (img_unscroll_x - self.img_coord_xlation_x) / self.zoom
-        img_y = (img_unscroll_y - self.img_coord_xlation_y) / self.zoom
+        img_x = (win_unscroll_x - self.img_coord_xlation_x) / self.zoom / scale_dc
+        img_y = (win_unscroll_y - self.img_coord_xlation_y) / self.zoom / scale_dc
 
         return (img_x, img_y)
+
+    @debug_fxn
+    def img2unscrollwin_coord(self, img_x, img_y, scale_dc=1):
+        win_unscroll_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
+        win_unscroll_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
+        return (win_unscroll_x, win_unscroll_y)
 
     @debug_fxn
     def init_image_from_file(self, img_path):
