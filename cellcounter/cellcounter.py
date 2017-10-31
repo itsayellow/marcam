@@ -609,8 +609,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
-                x_win = (x + 0.5) * self.zoom + self.img_coord_xlation_x
-                y_win = (y + 0.5) * self.zoom + self.img_coord_xlation_y
+                (x_win, y_win) = self.img2unscrollwin_coord(x + 0.5, y + 0.5)
                 if (x_win, y_win) not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
