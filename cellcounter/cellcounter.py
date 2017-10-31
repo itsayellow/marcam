@@ -544,8 +544,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 rect_lr_x, rect_lr_y,
                 scale_dc=scale_dc
                 )
-        src_lr_x = np.ceil(src_lr_x) + 1
-        src_lr_y = np.ceil(src_lr_y) + 1
+        src_lr_x = np.ceil(src_lr_x)
+        src_lr_y = np.ceil(src_lr_y)
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
@@ -553,12 +553,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (dest_pos_x, dest_pos_y) = self.img2unscrollwin_coord(
                 src_pos_x, src_pos_y, scale_dc=scale_dc
                )
+        dest_pos_x = round(dest_pos_x)
+        dest_pos_y = round(dest_pos_y)
         # multiply size back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # TODO: round to nearest int
         (dest_lr_x, dest_lr_y) = self.img2unscrollwin_coord(
                 src_lr_x, src_lr_y, scale_dc=scale_dc
                 )
+        dest_lr_x = round(dest_lr_x)
+        dest_lr_y = round(dest_lr_y)
 
         # get src size
         src_size_x = src_lr_x - src_pos_x
