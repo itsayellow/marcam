@@ -473,14 +473,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     # GetSize is size of window including scrollbars
     @debug_fxn
     def OnPaintRegion(self, evt):
-        """
-        TODO:
-            use BufferedPaintDC instead of PaintDC if flicker is a problem
+        """EVT_PAINT event handler to update window area
 
+        Args:
+            evt (wx.PaintEvent): no useful information
         """
         if DEBUG & DEBUG_TIMING:
             start_onpaint = time.time()
 
+        # TODO: flicker is a problem in Windows.
+        #   * use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
+        #   * call wx.Window.SetBackgroundStyle with wx.BG_STYLE_PAINT
         dc = wx.PaintDC(self)
         # for scrolled window
         self.DoPrepareDC(dc)
