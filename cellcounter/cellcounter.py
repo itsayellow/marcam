@@ -537,15 +537,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 rect_pos_x, rect_pos_y,
                 scale_dc=scale_dc
                 )
-        src_pos_x = int(src_pos_x)
-        src_pos_y = int(src_pos_y)
+        # make int and enforce min. val of 0
+        src_pos_x = max([0,int(src_pos_x)])
+        src_pos_y = max([0,int(src_pos_y)])
         # img coordinates of lower right corner
         (src_lr_x, src_lr_y) = self.win2img_coord(
                 rect_lr_x, rect_lr_y,
                 scale_dc=scale_dc
                 )
-        src_lr_x = np.ceil(src_lr_x)
-        src_lr_y = np.ceil(src_lr_y)
+        # make int (via ceil) and enforce max. val of img_dc_src size
+        dc_size = img_dc_src.GetSize()
+        src_lr_x = min([dc_size.x, np.ceil(src_lr_x)])
+        src_lr_y = min([dc_size.y, np.ceil(src_lr_y)])
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
