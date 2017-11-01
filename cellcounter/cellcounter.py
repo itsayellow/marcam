@@ -644,25 +644,27 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         top_gap = clip(dest_pos_y - rect_pos_log_y, 0, None)
         bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
 
-        print("rect_pos_y")
-        print(rect_pos_y)
-        print("top_gap")
-        print(top_gap)
-        print("bottom_gap")
-        print(bottom_gap)
-
-        # TODO: use dc.DrawRectangleList() for speed
-        dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.PENSTYLE_SOLID))
+        dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
         dc.SetBrush(dc.GetBackground())
+        rects_to_draw = []
         if top_gap > 0:
-            dc.DrawRectangle(rect_pos_x, rect_pos_y, rect_size_x, top_gap)
+            rects_to_draw.append(
+                    (rect_pos_x, rect_pos_y, rect_size_x, top_gap)
+                    )
         if bottom_gap > 0:
-            dc.DrawRectangle(rect_pos_x, dest_lr_y, rect_size_x, bottom_gap)
+            rects_to_draw.append(
+                    (rect_pos_x, dest_lr_y, rect_size_x, bottom_gap)
+                    )
         if left_gap > 0:
-            dc.DrawRectangle(rect_pos_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
+            rects_to_draw.append(
+                    (rect_pos_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
+                    )
         if right_gap > 0:
-            dc.DrawRectangle(dest_lr_x, dest_pos_y, right_gap, rect_size_y - top_gap - bottom_gap)
-
+            rects_to_draw.append(
+                    (dest_lr_x, dest_pos_y, right_gap, rect_size_y - top_gap - bottom_gap)
+                    )
+        if rects_to_draw:
+            dc.DrawRectangleList(rects_to_draw)
 
         # DEBUG DELETEME
         if DEBUG & DEBUG_MISC:
