@@ -22,7 +22,7 @@ SCROLL_KEY_SPEED = 20
 # how long in ms is a frame during an animated pan (right-click)
 #   smaller -> smoother animation (30 looks smooth)
 #   larger -> doesn't break with slow computers
-PANIMATE_STEP_MS = 40
+PANIMATE_STEP_MS = 30
 
 
 # BITMAPS

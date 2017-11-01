@@ -33,6 +33,17 @@ if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     #    print("Turning off debug.", file=out_fh)
 
 
+def clip(num, num_min=None, num_max=None):
+    if num_min is not None and num_max is not None:
+        return min(max(num, num_min), num_max)
+    elif num_min is not None:
+        return max(num, num_min)
+    elif num_max is not None:
+        return min(num, num_max)
+    else:
+        return num
+
+
 # debug decorator that announces function call/entry and lists args
 def debug_fxn(func):
     """Function decorator that (if enabled by DEBUG_FXN_ENTRY bit in DEBUG)
@@ -236,7 +247,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #self.img_at_wincenter_x = img_x
         #self.img_at_wincenter_y = img_y
         #self.scroll_to_img_at_wincenter()
-        self.panimate(img_x, img_y, 1000)
+        self.panimate(img_x, img_y, 1250)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -306,18 +317,25 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         wx.CallLater(
                 const.PANIMATE_STEP_MS,
-                self.panimate_step, img_x_vals, img_y_vals
+                self.panimate_step, img_x_vals, img_y_vals, time.time()
                 )
 
     @debug_fxn
-    def panimate_step(self, x_vals, y_vals):
-        self.img_at_wincenter_x = x_vals.pop(0)
-        self.img_at_wincenter_y = y_vals.pop(0)
+    def panimate_step(self, x_vals, y_vals, last_time):
+        # check if time since last panimate step is multiple steps
+        #   and skip ahead if so
+        pop_num = int((time.time()-last_time)/(const.PANIMATE_STEP_MS*1e-3))
+        # 1 <= pop_num <= len(x_vals)
+        pop_num = clip(pop_num, 1, len(x_vals))
+        print("pop_num = %.2f"%pop_num)
+        for i in range(pop_num):
+            self.img_at_wincenter_x = x_vals.pop(0)
+            self.img_at_wincenter_y = y_vals.pop(0)
         self.scroll_to_img_at_wincenter()
         if x_vals:
             wx.CallLater(
                     const.PANIMATE_STEP_MS,
-                    self.panimate_step, x_vals, y_vals
+                    self.panimate_step, x_vals, y_vals, time.time()
                     )
         else:
             wx.CallAfter(self.get_img_wincenter)
