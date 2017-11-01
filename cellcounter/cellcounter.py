@@ -593,6 +593,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # rect_lr_{x,y} is lower right corner
         rect_lr_x = rect_pos_x + rect_size_x
         rect_lr_y = rect_pos_y + rect_size_y
+        (rect_pos_log_x, rect_pos_log_y) = self.CalcUnscrolledPosition(
+                rect_pos_x, rect_pos_y)
+        (rect_lr_log_x, rect_lr_log_y) = self.CalcUnscrolledPosition(
+                rect_lr_x, rect_lr_y)
 
         # img coordinates of upper left corner
         (src_pos_x, src_pos_y) = self.win2img_coord(
@@ -614,14 +618,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
-        (dest_pos_x, dest_pos_y) = self.img2unscrollwin_coord(
+        (dest_pos_x, dest_pos_y) = self.img2logical_coord(
                 src_pos_x, src_pos_y, scale_dc=scale_dc
                )
         dest_pos_x = round(dest_pos_x)
         dest_pos_y = round(dest_pos_y)
         # multiply size back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
-        (dest_lr_x, dest_lr_y) = self.img2unscrollwin_coord(
+        (dest_lr_x, dest_lr_y) = self.img2logical_coord(
                 src_lr_x, src_lr_y, scale_dc=scale_dc
                 )
         dest_lr_x = round(dest_lr_x)
@@ -635,10 +639,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_size_y = dest_lr_y - dest_pos_y
 
         # paint bg rectangles around border if necessary
-        left_gap = clip(dest_pos_x - rect_pos_x, 0, None)
-        right_gap = clip(rect_lr_x - dest_lr_x, 0, None)
-        top_gap = clip(dest_pos_y - rect_pos_y, 0, None)
-        bottom_gap = clip(rect_lr_y - dest_lr_y, 0, None)
+        left_gap = clip(dest_pos_x - rect_pos_log_x, 0, None)
+        right_gap = clip(rect_lr_log_x - dest_lr_x, 0, None)
+        top_gap = clip(dest_pos_y - rect_pos_log_y, 0, None)
+        bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
 
         print("rect_pos_y")
         print(rect_pos_y)
@@ -701,7 +705,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
-                (x_win, y_win) = self.img2unscrollwin_coord(x + 0.5, y + 0.5)
+                (x_win, y_win) = self.img2logical_coord(x + 0.5, y + 0.5)
                 if (x_win, y_win) not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
@@ -712,8 +716,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """Given plain window coordinates, return unscrolled image coordinates
 
         Args:
-            win_x (int): position in current window coordinates
-            win_y (int): position in current window coordinates
+            win_x (int): window device coordinates
+            win_y (int): window device coordinates
 
         Returns:
             tuple: (img_x (float), img_y (float)) position in src image
@@ -732,7 +736,29 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return (img_x, img_y)
 
     @debug_fxn
-    def img2unscrollwin_coord(self, img_x, img_y, scale_dc=1):
+    def logical2img_coord(self, logical_x, logical_y, scale_dc=1):
+        """Given plain window coordinates, return unscrolled image coordinates
+
+        Args:
+            win_x (int): logical canvas (unscrolled) coordinates
+            win_y (int): logical canvas (unscrolled) coordinates
+
+        Returns:
+            tuple: (img_x (float), img_y (float)) position in src image
+                coordinates
+        """
+        # img_coord_xlation_{x,y} = 0 unless window is bigger than image
+        #   in which case this is non-zero translation of left,top padding
+        # self.img_coord_xlation_{x,y} is in window coordinates
+        #   divide by zoom to get to img coordinates
+
+        img_x = (logical_x - self.img_coord_xlation_x) / self.zoom / scale_dc
+        img_y = (logical_y - self.img_coord_xlation_y) / self.zoom / scale_dc
+
+        return (img_x, img_y)
+
+    @debug_fxn
+    def img2logical_coord(self, img_x, img_y, scale_dc=1):
         win_unscroll_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
         win_unscroll_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
         return (win_unscroll_x, win_unscroll_y)
