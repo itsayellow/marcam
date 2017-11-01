@@ -182,13 +182,24 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             tuple: (img_x_min, img_y_min, img_x_max, img_y_max)
         """
+        # GetClientSize returns physical window dimensions, not unscrolled
         (win_size_x, win_size_y) = self.GetClientSize()
+        win_size_img_x = win_size_x / self.zoom
+        win_size_img_y = win_size_y / self.zoom
 
-        # minimum center (x,y) is
-        img_x_min = win_size_x / 2 / self.zoom
-        img_y_min = win_size_y / 2 / self.zoom - self.img_coord_xlation_y
-        img_x_max = (self.img_size_x + self.img_coord_xlation_x) - (win_size_x / 2 / self.zoom)
-        img_y_max = (self.img_size_y + self.img_coord_xlation_y) - (win_size_y / 2 / self.zoom)
+        if win_size_img_x > self.img_size_x:
+            img_x_min = self.img_size_x / 2
+            img_x_max = self.img_size_x / 2
+        else:
+            img_x_min = win_size_x / 2 / self.zoom
+            img_x_max = self.img_size_x - (win_size_x / 2 / self.zoom)
+
+        if win_size_img_y > self.img_size_y:
+            img_y_min = self.img_size_y / 2
+            img_y_max = self.img_size_y / 2
+        else:
+            img_y_min = win_size_y / 2 / self.zoom
+            img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom)
 
         if DEBUG & DEBUG_MISC:
             print("MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(img_x_min, img_y_min, img_x_max, img_y_max))
@@ -261,17 +272,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_y_end (int): destination y pan location in img coordinates
             max_speed (float): maximum speed of pan in win pixels/sec
         """
-        max_speed = max([max_speed, 1])
+        max_speed = clip(max_speed, 1, None)
         img_max_speed = max_speed / self.zoom
 
         (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
 
         # clip values for end coordinates to max zoom area
-        img_x_end = max([min([img_x_end, xmax]), xmin])
-        img_y_end = max([min([img_y_end, ymax]), ymin])
+        img_x_end = clip(img_x_end, xmin, xmax)
+        img_y_end = clip(img_y_end, ymin, ymax)
 
         img_x_start = self.img_at_wincenter_x
         img_y_start = self.img_at_wincenter_y
+
+        # if we're not moving then just return
+        if img_x_end == img_x_start and img_y_end == img_y_start:
+            return
 
         if DEBUG & DEBUG_MISC:
             print("MSC:panimate: start=(%.2f,%.2f)"%(img_x_start,img_y_start), end="")
@@ -279,7 +294,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
 
-        steps = max(img_dist / img_max_speed / (const.PANIMATE_STEP_MS * 1e-3), 5)
+        steps = clip(
+                img_dist / img_max_speed / (const.PANIMATE_STEP_MS * 1e-3),
+                5, None
+                )
 
         img_x_vals = list(np.linspace(img_x_start, img_x_end, steps))
         img_y_vals = list(np.linspace(img_y_start, img_y_end, steps))
