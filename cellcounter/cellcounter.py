@@ -33,6 +33,13 @@ if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     #    print("Turning off debug.", file=out_fh)
 
 
+def ceil(num):
+    if int(num) < num:
+        return int(num) + 1
+    else:
+        return int(num)
+
+
 def clip(num, num_min=None, num_max=None):
     if num_min is not None and num_max is not None:
         return min(max(num, num_min), num_max)
@@ -586,8 +593,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
         # make int (via ceil) and enforce max. val of img_dc_src size
         dc_size = img_dc_src.GetSize()
-        src_lr_x = clip(np.ceil(src_lr_x), None, dc_size.x)
-        src_lr_y = clip(np.ceil(src_lr_y), None, dc_size.y)
+        src_lr_x = clip(ceil(src_lr_x), None, dc_size.x)
+        src_lr_y = clip(ceil(src_lr_y), None, dc_size.y)
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
