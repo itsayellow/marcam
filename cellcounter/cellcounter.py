@@ -238,8 +238,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             else:
                 # TODO: select mode selects nearby mark (possibly to delete)
                 #   selecting with no mark nearby deselects
-                # TEST: DELETEME
-                print("Not in Mark Mode")
+                if DEBUG & DEBUG_MISC:
+                    print("MSC:Not in Mark Mode")
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -352,7 +352,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         pop_num = int((time.time()-last_time)/(const.PANIMATE_STEP_MS*1e-3))
         # 1 <= pop_num <= len(x_vals)
         pop_num = clip(pop_num, 1, len(x_vals))
-        print("pop_num = %.2f"%pop_num)
         for i in range(pop_num):
             self.img_at_wincenter_x = x_vals.pop(0)
             self.img_at_wincenter_y = y_vals.pop(0)
@@ -598,7 +597,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
-        # TODO: round to nearest int ?
         (dest_pos_x, dest_pos_y) = self.img2unscrollwin_coord(
                 src_pos_x, src_pos_y, scale_dc=scale_dc
                )
@@ -606,7 +604,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_pos_y = round(dest_pos_y)
         # multiply size back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
-        # TODO: round to nearest int
         (dest_lr_x, dest_lr_y) = self.img2unscrollwin_coord(
                 src_lr_x, src_lr_y, scale_dc=scale_dc
                 )
@@ -620,6 +617,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_size_x = dest_lr_x - dest_pos_x
         dest_size_y = dest_lr_y - dest_pos_y
 
+        # DEBUG DELETEME
         print("src_pos=(%.2f,%.2f)"%(src_pos_x,src_pos_y))
         print("src_size=(%.2f,%.2f)"%(src_size_x,src_size_y))
         print("dest_pos=(%.2f,%.2f)"%(dest_pos_x,dest_pos_y))
