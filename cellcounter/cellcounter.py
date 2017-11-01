@@ -99,6 +99,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_idx = None
         self.zoom_list = None
 
+        # TODO:
+        # prevent erasing of background before paint events
+        #   we will be responsible for painting entire window, which we
+        #   usually do anyway.
+        #self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         # ScrollRate of (10,10) is default
         # we set this to be as small as possible (1,1) so that positioning
         #   the scroll position during zoom can be as fine as possible.
@@ -238,6 +243,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             else:
                 # TODO: select mode selects nearby mark (possibly to delete)
                 #   selecting with no mark nearby deselects
+                #   find the closest cross to click, as long as it is close
+                #       enough to click
+                #   then color cross yellow and that one will be "selected"
+                #   can be deleted
+                #   clicking far from any crosses deselects all
                 if DEBUG & DEBUG_MISC:
                     print("MSC:Not in Mark Mode")
 
@@ -526,9 +536,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # TODO: flicker is a problem in Windows.
         #   * use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
         #   * call wx.Window.SetBackgroundStyle with wx.BG_STYLE_PAINT
+        #       (also style=wx.BUFFER_VIRTUAL_AREA ?)
         dc = wx.PaintDC(self)
         # for scrolled window
         self.DoPrepareDC(dc)
+
+        # TODO: dc.Clear() to manually erase window?
+        #   or dc.SetBrush brush dc.GetBackground() to get background brush
+        #   and dc.SetPen style=wx.PENSTYLE_TRANSPARENT
+        #   and dc.DrawRectangleList() to draw (setting outline pen and bg brush
+        #           beforehand)
 
         # get the update rect list
         upd = wx.RegionIterator(self.GetUpdateRegion())
@@ -610,18 +627,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_lr_x = round(dest_lr_x)
         dest_lr_y = round(dest_lr_y)
 
-        # get src size
+        # compute src size
         src_size_x = src_lr_x - src_pos_x
         src_size_y = src_lr_y - src_pos_y
-        # get dest size
+        # compute dest size
         dest_size_x = dest_lr_x - dest_pos_x
         dest_size_y = dest_lr_y - dest_pos_y
 
         # DEBUG DELETEME
-        print("src_pos=(%.2f,%.2f)"%(src_pos_x,src_pos_y))
-        print("src_size=(%.2f,%.2f)"%(src_size_x,src_size_y))
-        print("dest_pos=(%.2f,%.2f)"%(dest_pos_x,dest_pos_y))
-        print("dest_size=(%.2f,%.2f)"%(dest_size_x,dest_size_y))
+        if DEBUG & DEBUG_MISC:
+            print("MSC:")
+            print("    src_pos=(%.2f,%.2f)"%(src_pos_x,src_pos_y))
+            print("    src_size=(%.2f,%.2f)"%(src_size_x,src_size_y))
+            print("    dest_pos=(%.2f,%.2f)"%(dest_pos_x,dest_pos_y))
+            print("    dest_size=(%.2f,%.2f)"%(dest_size_x,dest_size_y))
 
         # NOTE: Blit shows no performance advantage over StretchBlit
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -643,6 +662,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 src_size_x, src_size_y,
                 )
 
+        # draw crosses visible in this region
         # need to multiply by scale_dc to get back to div1 image coordinates
         self.draw_crosses(
                 dc,
@@ -1175,7 +1195,7 @@ class MainWindow(wx.Frame):
     def on_about(self, evt):
         info = wx.adv.AboutDialogInfo()
         info.SetName("Cellcounter")
-        info.SetVersion("0.1.0")
+        info.SetVersion(const.VERSION_STR)
         info.SetDescription("Counting cells in biological images.")
         info.SetCopyright("(C) 2017 Matthew A. Clapp")
 
