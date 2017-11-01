@@ -669,12 +669,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # DEBUG DELETEME
         if DEBUG & DEBUG_MISC:
             print("MSC:")
-            print("    rect_pos=(%.2f,%.2f)"%(rect_pos_x,rect_pos_y))
-            print("    rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y))
             print("    src_pos=(%.2f,%.2f)"%(src_pos_x,src_pos_y))
             print("    src_size=(%.2f,%.2f)"%(src_size_x,src_size_y))
             print("    dest_pos=(%.2f,%.2f)"%(dest_pos_x,dest_pos_y))
             print("    dest_size=(%.2f,%.2f)"%(dest_size_x,dest_size_y))
+            print("    rect_pos=(%.2f,%.2f)"%(rect_pos_log_x,rect_pos_log_y))
+            print("    rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y))
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
