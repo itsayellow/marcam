@@ -660,7 +660,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 if (x_win, y_win) not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
-                    dc.DrawBitmap(const.CROSS_11x11_BMP, x_win - 6, y_win - 6)
+                    dc.DrawBitmap(const.CROSS_11x11_RED_BMP, x_win - 6, y_win - 6)
 
     @debug_fxn
     def win2img_coord(self, win_x, win_y, scale_dc=1):
