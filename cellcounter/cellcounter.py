@@ -99,11 +99,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_idx = None
         self.zoom_list = None
 
-        # TODO:
         # prevent erasing of background before paint events
         #   we will be responsible for painting entire window, which we
         #   usually do anyway.
-        #self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+
         # ScrollRate of (10,10) is default
         # we set this to be as small as possible (1,1) so that positioning
         #   the scroll position during zoom can be as fine as possible.
@@ -133,7 +133,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.blank_img()
 
         # setup handlers
-        self.Bind(wx.EVT_PAINT, self.OnPaintRegion)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_SCROLLWIN, self.on_scroll)
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
@@ -524,7 +524,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     # GetClientSize is size of window graphics not including scrollbars
     # GetSize is size of window including scrollbars
     @debug_fxn
-    def OnPaintRegion(self, evt):
+    def OnPaint(self, evt):
         """EVT_PAINT event handler to update window area
 
         Args:
@@ -560,7 +560,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             onpaint_eltime = time.time() - start_onpaint
             panel_size = self.GetSize()
             print(
-                    "TIM:OnPaintRegion: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
+                    "TIM:OnPaint: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
                         onpaint_eltime,
                         self.zoom,
                         panel_size.x, panel_size.y,
@@ -634,24 +634,49 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_size_x = dest_lr_x - dest_pos_x
         dest_size_y = dest_lr_y - dest_pos_y
 
+        # paint bg rectangles around border if necessary
+        left_gap = clip(dest_pos_x - rect_pos_x, 0, None)
+        right_gap = clip(rect_lr_x - dest_lr_x, 0, None)
+        top_gap = clip(dest_pos_y - rect_pos_y, 0, None)
+        bottom_gap = clip(rect_lr_y - dest_lr_y, 0, None)
+
+        print("rect_pos_y")
+        print(rect_pos_y)
+        print("top_gap")
+        print(top_gap)
+        print("bottom_gap")
+        print(bottom_gap)
+
+        # TODO: use dc.DrawRectangleList() for speed
+        dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.PENSTYLE_SOLID))
+        dc.SetBrush(dc.GetBackground())
+        if top_gap > 0:
+            dc.DrawRectangle(rect_pos_x, rect_pos_y, rect_size_x, top_gap)
+        if bottom_gap > 0:
+            dc.DrawRectangle(rect_pos_x, dest_lr_y, rect_size_x, bottom_gap)
+        if left_gap > 0:
+            dc.DrawRectangle(rect_pos_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
+        if right_gap > 0:
+            dc.DrawRectangle(dest_lr_x, dest_pos_y, right_gap, rect_size_y - top_gap - bottom_gap)
+
+
         # DEBUG DELETEME
         if DEBUG & DEBUG_MISC:
             print("MSC:")
+            print("    rect_pos=(%.2f,%.2f)"%(rect_pos_x,rect_pos_y))
+            print("    rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y))
             print("    src_pos=(%.2f,%.2f)"%(src_pos_x,src_pos_y))
             print("    src_size=(%.2f,%.2f)"%(src_size_x,src_size_y))
             print("    dest_pos=(%.2f,%.2f)"%(dest_pos_x,dest_pos_y))
             print("    dest_size=(%.2f,%.2f)"%(dest_size_x,dest_size_y))
 
-        # NOTE: Blit shows no performance advantage over StretchBlit
+        # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
         #   This means to center and zoom accurately (sub-src-pixel) we need to
         #   refresh an area that INCLUDES the region needed, NOT ONLY that
         #   dest region.  This way we can zoom and position accurately, while
         #   employing the clipping mask behavior of PaintDC to make sure we
         #   only display in the area of the window
-
-        # TODO: Windows crashes if src_pos, src_size are out of bounds for the
-        #   src image.  Must enforce bounds
 
         # copy region from self.img_dc into dc with possible stretching
         dc.StretchBlit(
