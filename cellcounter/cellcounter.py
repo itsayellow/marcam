@@ -599,16 +599,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 rect_lr_x, rect_lr_y)
 
         # img coordinates of upper left corner
-        (src_pos_x, src_pos_y) = self.win2img_coord(
-                rect_pos_x, rect_pos_y,
+        (src_pos_x, src_pos_y) = self.logical2img_coord(
+                rect_pos_log_x, rect_pos_log_y,
                 scale_dc=scale_dc
                 )
         # make int and enforce min. val of 0
         src_pos_x = clip(int(src_pos_x), 0, None)
         src_pos_y = clip(int(src_pos_y), 0, None)
         # img coordinates of lower right corner
-        (src_lr_x, src_lr_y) = self.win2img_coord(
-                rect_lr_x, rect_lr_y,
+        (src_lr_x, src_lr_y) = self.logical2img_coord(
+                rect_lr_log_x, rect_lr_log_y,
                 scale_dc=scale_dc
                 )
         # make int (via ceil) and enforce max. val of img_dc_src size
