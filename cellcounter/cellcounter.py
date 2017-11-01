@@ -872,7 +872,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         scroll_y = self.GetScrollPos(wx.VERTICAL)
         (_, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
-        scroll_amt = max([round(pan_amt/scroll_ppu_y), 1])
+        scroll_amt = clip(round(pan_amt/scroll_ppu_y), 1, None)
 
         self.Scroll(wx.DefaultCoord, scroll_y + scroll_amt)
         # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
@@ -895,7 +895,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         scroll_y = self.GetScrollPos(wx.VERTICAL)
         (_, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
-        scroll_amt = max([round(pan_amt/scroll_ppu_y), 1])
+        scroll_amt = clip(round(pan_amt/scroll_ppu_y), 1, None)
 
         self.Scroll(wx.DefaultCoord, scroll_y - scroll_amt)
         # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
@@ -918,7 +918,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         scroll_x = self.GetScrollPos(wx.HORIZONTAL)
         (scroll_ppu_x, _) = self.GetScrollPixelsPerUnit()
-        scroll_amt = max([round(pan_amt/scroll_ppu_x), 1])
+        scroll_amt = clip(round(pan_amt/scroll_ppu_x), 1, None)
 
         self.Scroll(scroll_x + scroll_amt, wx.DefaultCoord)
         # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
@@ -941,7 +941,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         scroll_x = self.GetScrollPos(wx.HORIZONTAL)
         (scroll_ppu_x, _) = self.GetScrollPixelsPerUnit()
-        scroll_amt = max([round(pan_amt/scroll_ppu_x), 1])
+        scroll_amt = clip(round(pan_amt/scroll_ppu_x), 1, None)
 
         self.Scroll(scroll_x - scroll_amt, wx.DefaultCoord)
         # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
