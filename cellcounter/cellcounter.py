@@ -577,8 +577,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 scale_dc=scale_dc
                 )
         # make int and enforce min. val of 0
-        src_pos_x = max([0,int(src_pos_x)])
-        src_pos_y = max([0,int(src_pos_y)])
+        src_pos_x = clip(int(src_pos_x), 0, None)
+        src_pos_y = clip(int(src_pos_y), 0, None)
         # img coordinates of lower right corner
         (src_lr_x, src_lr_y) = self.win2img_coord(
                 rect_lr_x, rect_lr_y,
@@ -586,8 +586,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
         # make int (via ceil) and enforce max. val of img_dc_src size
         dc_size = img_dc_src.GetSize()
-        src_lr_x = min([dc_size.x, np.ceil(src_lr_x)])
-        src_lr_y = min([dc_size.y, np.ceil(src_lr_y)])
+        src_lr_x = clip(np.ceil(src_lr_x), None, dc_size.x)
+        src_lr_y = clip(np.ceil(src_lr_y), None, dc_size.y)
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
@@ -756,10 +756,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             win_size = self.GetSize()
 
             max_zoom = min(
-                    [1.000001,
-                        (win_size.x / self.img_size_x),
-                        (win_size.y / self.img_size_y)
-                        ]
+                    1.000001,
+                    (win_size.x / self.img_size_x),
+                    (win_size.y / self.img_size_y)
                     )
             ok_zooms = [x for x in self.zoom_list if x < max_zoom]
             self.zoom_idx = self.zoom_list.index(max(ok_zooms))
