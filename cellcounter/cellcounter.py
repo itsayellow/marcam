@@ -130,7 +130,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom = self.zoom_list[self.zoom_idx]
 
         # setup blank image area
-        self.blank_img()
+        # DELETEME OBSOLETE
+        #self.blank_img()
 
         # setup handlers
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -220,11 +221,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_down(self, evt):
-        """Mark image where user left-clicks
+        """Handle mouse left-clicks
 
         Args:
             evt (wx.MouseEvent): todo.
         """
+        # return early if no image
+        if self.img_dc is None:
+            wx.CallAfter(evt.Skip)
+            return
+
         # point coordinate returned seems:
         #   * be only absolute coordinates of where in window was clicked
         #   * not to depend on which img_dc we supply
@@ -256,11 +262,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_right_down(self, evt):
-        """Set image center where user right-clicks
+        """Handle mouse right-clicks
 
         Args:
             evt (wx.MouseEvent): todo.
         """
+        # return early if no image
+        if self.img_dc is None:
+            wx.CallAfter(evt.Skip)
+            return
+
         # point coordinate returned seems:
         #   * be only absolute coordinates of where in window was clicked
         #   * not to depend on which img_dc we supply
@@ -376,32 +387,35 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def draw_at_point(self, pt_x, pt_y):
-        # assumes img_dc_div2 not None implies no loaded file
-        if self.img_dc_div2 is not None:
-            point_x = int(pt_x)
-            point_y = int(pt_y)
+        point_x = int(pt_x)
+        point_y = int(pt_y)
 
-            if DEBUG & DEBUG_MISC:
-                print("MSC: point", end="")
-                print("(%d, %d)"%(point_x, point_y))
+        if DEBUG & DEBUG_MISC:
+            print("MSC: point", end="")
+            print("(%d, %d)"%(point_x, point_y))
 
-            self.points_record.append((point_x, point_y))
+        self.points_record.append((point_x, point_y))
 
-            # force a paint event with Refresh and Update
-            #   to force PaintRect to paint new cross
-            (pos_x, pos_y) = self.img2win_coord(point_x + 0.5, point_y + 0.5)
-            # refresh square size should be >= than cross size
-            sq_size = 16
-            self.RefreshRect(
-                    wx.Rect(
-                        pos_x - sq_size/2, pos_y - sq_size/2,
-                        sq_size, sq_size
-                        )
+        # force a paint event with Refresh and Update
+        #   to force PaintRect to paint new cross
+        (pos_x, pos_y) = self.img2win_coord(point_x + 0.5, point_y + 0.5)
+        # refresh square size should be >= than cross size
+        sq_size = 16
+        self.RefreshRect(
+                wx.Rect(
+                    pos_x - sq_size/2, pos_y - sq_size/2,
+                    sq_size, sq_size
                     )
-            self.Update()
+                )
+        self.Update()
 
     @debug_fxn
     def on_scroll(self, evt):
+        # return early if no image
+        if self.img_dc is None:
+            wx.CallAfter(evt.Skip)
+            return
+
         EventType = evt.GetEventType()
         Orientation = evt.GetOrientation()
         if DEBUG & DEBUG_MISC:
@@ -453,30 +467,31 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             # process with default handler(s)
             evt.Skip()
 
-    @debug_fxn
-    def blank_img(self):
-        # Image object currently loaded
-        #   None signals to methods not to pan, zoom, etc
-        self.img = None
-        # image path for current Image
-        self.img_path = None
-        # transparent placeholder img (2px x 2px of tranparent black)
-        # will be bitmap corresponding to image
-        img_bmp = wx.Bitmap.FromRGBA(2, 2, 0, 0, 0, 0)
-        # store image data into a static DC
-        self.img_dc = wx.MemoryDC()
-        self.img_dc.SelectObject(img_bmp)
-        # current position of image center
-        #   start w/ 2px x 2px anchored with 1,1 at wincenter
-        self.img_at_wincenter_x = 1
-        self.img_at_wincenter_y = 1
-        # size of image
-        self.img_size_y = 2
-        self.img_size_x = 2
-        self.zoom = 1.0
+    # DELETEME OBSOLETE
+    #@debug_fxn
+    #def blank_img(self):
+    #    # Image object currently loaded
+    #    #   None signals to methods not to pan, zoom, etc
+    #    self.img = None
+    #    # image path for current Image
+    #    self.img_path = None
+    #    # transparent placeholder img (2px x 2px of tranparent black)
+    #    # will be bitmap corresponding to image
+    #    img_bmp = wx.Bitmap.FromRGBA(2, 2, 0, 0, 0, 0)
+    #    # store image data into a static DC
+    #    self.img_dc = wx.MemoryDC()
+    #    self.img_dc.SelectObject(img_bmp)
+    #    # current position of image center
+    #    #   start w/ 2px x 2px anchored with 1,1 at wincenter
+    #    self.img_at_wincenter_x = 1
+    #    self.img_at_wincenter_y = 1
+    #    # size of image
+    #    self.img_size_y = 2
+    #    self.img_size_x = 2
+    #    self.zoom = 1.0
 
-        self.SetVirtualSize(2, 2)
-        self.set_virt_size_with_min()
+    #    self.SetVirtualSize(2, 2)
+    #    self.set_virt_size_with_min()
 
     @debug_fxn
     def set_virt_size_with_min(self):
@@ -524,6 +539,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   divide by zoom, divide by div_scale to get to img coordinates
 
     def on_size(self, evt):
+        # return early if no image
+        if self.img_dc is None:
+            return
+
         self.set_virt_size_with_min()
 
         # scroll so center of image at same point it used to be
@@ -548,12 +567,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dc = wx.PaintDC(self)
         # for scrolled window
         self.DoPrepareDC(dc)
-
-        # TODO: dc.Clear() to manually erase window?
-        #   or dc.SetBrush brush dc.GetBackground() to get background brush
-        #   and dc.SetPen style=wx.PENSTYLE_TRANSPARENT
-        #   and dc.DrawRectangleList() to draw (setting outline pen and bg brush
-        #           beforehand)
 
         # get the update rect list
         upd = wx.RegionIterator(self.GetUpdateRegion())
@@ -584,6 +597,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
+        # break out rect details into variables
+        (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
+
+        # if no image, fill area with background color
+        if self.img_dc is None:
+            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            dc.SetBrush(dc.GetBackground())
+            dc.DrawRectangle(rect_pos_x, rect_pos_y, rect_size_x, rect_size_y)
+            # DONE
+            return
+
         # see if we need to use a downscaled version of memdc
         if self.zoom > 0.5:
             img_dc_src = self.img_dc
@@ -595,8 +619,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_dc_src = self.img_dc_div4
             scale_dc = 4
 
-        # break out rect details into variables
-        (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
         # rect_pos_{x,y} is upper left corner
         # rect_lr_{x,y} is lower right corner
         rect_lr_x = rect_pos_x + rect_size_x
@@ -725,11 +747,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def win2img_coord(self, win_x, win_y, scale_dc=1):
-        """Given plain window coordinates, return unscrolled image coordinates
+        """Given plain window coordinates, return image coordinates
 
         Args:
-            win_x (int): window device coordinates
-            win_y (int): window device coordinates
+            win_x (float): window device coordinates
+            win_y (float): window device coordinates
 
         Returns:
             tuple: (img_x (float), img_y (float)) position in src image
@@ -749,11 +771,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def logical2img_coord(self, logical_x, logical_y, scale_dc=1):
-        """Given plain window coordinates, return unscrolled image coordinates
+        """Given logical unscrolled canvas coordinates, return image coordinates
 
         Args:
-            win_x (int): logical canvas (unscrolled) coordinates
-            win_y (int): logical canvas (unscrolled) coordinates
+            win_x (float): logical canvas (unscrolled) coordinates
+            win_y (float): logical canvas (unscrolled) coordinates
 
         Returns:
             tuple: (img_x (float), img_y (float)) position in src image
@@ -771,12 +793,32 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def img2logical_coord(self, img_x, img_y, scale_dc=1):
+        """Given image coordinates, return logical unscrolled canvas coordinates
+
+        Args:
+            img_x (float): src image coordinates
+            img_y (float): src image coordinates
+
+        Returns:
+            tuple: (logical_x (float), logical_y (float)) position in
+                logical unscrolled canvas coordinates
+        """
         win_unscroll_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
         win_unscroll_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
         return (win_unscroll_x, win_unscroll_y)
 
     @debug_fxn
     def img2win_coord(self, img_x, img_y, scale_dc=1):
+        """Given image coordinates, return plain window coordinates
+
+        Args:
+            img_x (float): src image coordinates
+            img_y (float): src image coordinates
+
+        Returns:
+            tuple: (win_x (float), win_y (float)) position in device
+                window coordinates
+        """
         win_logical_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
         win_logical_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
         (win_x, win_y) = self.CalcScrolledPosition(win_logical_x, win_logical_y)
@@ -885,8 +927,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             self.zoom (float): resulting zoom ratio (1.00 is 1x zoom)
         """
-        # return early if we're at max
-        if not self.img or self.zoom_idx == len(self.zoom_list)-1:
+        # return early if no image or we're at max
+        if self.img_dc is None or self.zoom_idx == len(self.zoom_list)-1:
             return
 
         self.zoom_idx += zoom_amt
@@ -926,7 +968,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.zoom (float): resulting zoom ratio (1.00 is 1x zoom)
         """
         # return early if no image or we're at max
-        if not self.img or self.zoom_idx == 0:
+        if self.img_dc is None or self.zoom_idx == 0:
             return
 
         self.zoom_idx -= zoom_amt
@@ -961,6 +1003,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
+        # return early if no image
+        if self.img_dc is None:
+            return
+
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
@@ -984,6 +1030,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
+        # return early if no image
+        if self.img_dc is None:
+            return
+
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
@@ -1007,6 +1057,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
+        # return early if no image
+        if self.img_dc is None:
+            return
+
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
@@ -1030,6 +1084,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             None
         """
+        # return early if no image
+        if self.img_dc is None:
+            return
+
         # NOTE: we don't use SetScrollPos here because that requires a
         #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
         #   events either
