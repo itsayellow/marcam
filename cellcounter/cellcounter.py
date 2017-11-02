@@ -643,6 +643,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
+        # dest coordinates are all logical
         (dest_pos_x, dest_pos_y) = self.img2logical_coord(
                 src_pos_x, src_pos_y, scale_dc=scale_dc
                )
@@ -670,19 +671,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
 
         dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+        # debug pen:
+        #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
         dc.SetBrush(dc.GetBackground())
         rects_to_draw = []
         if top_gap > 0:
             rects_to_draw.append(
-                    (rect_pos_x, rect_pos_y, rect_size_x, top_gap)
+                    (rect_pos_log_x, rect_pos_log_y, rect_size_x, top_gap)
                     )
         if bottom_gap > 0:
             rects_to_draw.append(
-                    (rect_pos_x, dest_lr_y, rect_size_x, bottom_gap)
+                    (rect_pos_log_x, dest_lr_y, rect_size_x, bottom_gap)
                     )
         if left_gap > 0:
             rects_to_draw.append(
-                    (rect_pos_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
+                    (rect_pos_log_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
                     )
         if right_gap > 0:
             rects_to_draw.append(
