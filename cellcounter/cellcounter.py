@@ -1336,7 +1336,6 @@ class MainWindow(wx.Frame):
         """
         self.html = HelpFrame(self, id=wx.ID_ANY)
         self.html.Show(True)
-        print("help!")
 
 
 class HelpFrame(wx.Frame):
@@ -1345,6 +1344,8 @@ class HelpFrame(wx.Frame):
     def __init__(self, *args, **kwargs):
         """Constructor"""
         super().__init__(*args, **kwargs)
+        # TODO: consider using wx.html2.WebView if we want to make Help look
+        #   nicer than crummy html4 (e.g. being able to use CSS)
         self.html = wx.html.HtmlWindow(self)
         self.html.SetRelatedFrame(self, "%s")
         self.html.LoadPage(os.path.join(ICON_DIR, 'cellcounter_help.html'))
