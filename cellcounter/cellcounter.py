@@ -389,7 +389,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
             # force a paint event with Refresh and Update
             #   to force PaintRect to paint new cross
-            self.Refresh()
+            (pos_x, pos_y) = self.img2win_coord(point_x + 0.5, point_y + 0.5)
+            # refresh square size should be >= than cross size
+            sq_size = 16
+            self.RefreshRect(
+                    wx.Rect(
+                        pos_x - sq_size/2, pos_y - sq_size/2,
+                        sq_size, sq_size
+                        )
+                    )
             self.Update()
 
     @debug_fxn
@@ -711,6 +719,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 if (x_win, y_win) not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
+                    # NOTE: if you change the size of this bmp, also change
+                    #   the RefreshRect size in self.draw_at_point()
                     dc.DrawBitmap(const.CROSS_11x11_RED_BMP, x_win - 6, y_win - 6)
 
     @debug_fxn
@@ -764,6 +774,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         win_unscroll_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
         win_unscroll_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
         return (win_unscroll_x, win_unscroll_y)
+
+    @debug_fxn
+    def img2win_coord(self, img_x, img_y, scale_dc=1):
+        win_logical_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
+        win_logical_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
+        (win_x, win_y) = self.CalcScrolledPosition(win_logical_x, win_logical_y)
+        return (win_x, win_y)
 
     @debug_fxn
     def init_image_from_file(self, img_path):
