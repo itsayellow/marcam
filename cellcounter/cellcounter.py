@@ -88,11 +88,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
-        self.img_path = None
+        self.img_path = None    # TODO: do we need this?
         self.img_size_x = None
         self.img_size_y = None
         self.mark_mode = False
-        self.parent = None
+        self.parent = None    # TODO: do we need this?
         self.points_record = []
         self.zoom = None
         self.zoom_idx = None
@@ -101,6 +101,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # prevent erasing of background before paint events
         #   we will be responsible for painting entire window, which we
         #   usually do anyway.
+        # TODO: also style=wx.BUFFER_VIRTUAL_AREA for Windows flicker?
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
         # ScrollRate of (10,10) is default
@@ -499,11 +500,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         window if image is smaller than window in order to be able to center
         image in window.
         """
-        # TODO: we can SetVirtualSize as a multiple of image in order to
-        #   increase scrolling accuracy to sub-image-pixel resolution
-        #   In that case we also need to scale image using scale_dc in
-        #   PaintRect
-        #   Also need to adjust zoom settings
         (win_size_x, win_size_y) = self.GetClientSize()
         virt_size_x = max([self.img_size_x * self.zoom, win_size_x])
         virt_size_y = max([self.img_size_y * self.zoom, win_size_y])
