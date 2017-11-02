@@ -12,7 +12,9 @@ APP_NAME = 'Cellcounter'
 VERSION = '0.1.0'
 DATA_FILES = [
         'cellcounter/topen32.png',
-        'cellcounter/marktool32.png'
+        'cellcounter/marktool32.png',
+        'cellcounter/cellcounter_help.html',
+        'cellcounter/cellcounter_help_markmodeoff.png'
         ]
 OPTIONS = {
         'argv_emulation':True,
