@@ -11,6 +11,7 @@ import biorad1sc_reader
 from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 import wx
 import wx.adv
+import wx.html
 import wx.lib.statbmp
 import wx.lib.scrolledpanel
 
@@ -1125,7 +1126,7 @@ class MainWindow(wx.Frame):
         super().__init__(*args, **kwargs)
 
         self.marktool = None
-
+        self.html = None
         self.init_ui()
         if srcfiles:
             # TODO: are we able to load more than one file?
@@ -1147,6 +1148,7 @@ class MainWindow(wx.Frame):
         # Help
         help_menu = wx.Menu()
         aboutitem = help_menu.Append(wx.ID_ABOUT, "&About Cellcounter")
+        helpitem = help_menu.Append(wx.ID_HELP, "&Cellcounter Help")
         menubar.Append(help_menu, "&Help")
 
         self.SetMenuBar(menubar)
@@ -1192,6 +1194,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
+        self.Bind(wx.EVT_MENU, self.on_help, helpitem)
 
         # finally render app
         self.SetSize((800, 600))
@@ -1326,6 +1329,24 @@ class MainWindow(wx.Frame):
         info.SetCopyright("(C) 2017 Matthew A. Clapp")
 
         wx.adv.AboutBox(info)
+
+    @debug_fxn
+    def on_help(self, evt):
+        """Open a brief help window (html)
+        """
+        self.html = HelpFrame(self, id=wx.ID_ANY, title="Cellcounter Help")
+        self.html.Show(True)
+        print("help!")
+
+
+class HelpFrame(wx.Frame):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        """Constructor"""
+        super().__init__(*args, **kwargs)
+        self.html = wx.html.HtmlWindow(self)
+        self.html.LoadPage(os.path.join(ICON_DIR, 'cellcounter_help.html'))
 
 
 def process_command_line(argv):
