@@ -1334,7 +1334,7 @@ class MainWindow(wx.Frame):
     def on_help(self, evt):
         """Open a brief help window (html)
         """
-        self.html = HelpFrame(self, id=wx.ID_ANY, title="Cellcounter Help")
+        self.html = HelpFrame(self, id=wx.ID_ANY)
         self.html.Show(True)
         print("help!")
 
@@ -1346,7 +1346,9 @@ class HelpFrame(wx.Frame):
         """Constructor"""
         super().__init__(*args, **kwargs)
         self.html = wx.html.HtmlWindow(self)
+        self.html.SetRelatedFrame(self, "%s")
         self.html.LoadPage(os.path.join(ICON_DIR, 'cellcounter_help.html'))
+        self.SetSize((400, 600))
 
 
 def process_command_line(argv):
