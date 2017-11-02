@@ -81,7 +81,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # init all properties to None (cause error if accessed before
         #   proper init)
-        self.img = None
         self.img_at_wincenter_x = None
         self.img_at_wincenter_y = None
         self.img_coord_xlation_x = None
@@ -852,34 +851,34 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_data_rgb[0::3] = img_data//256
             img_data_rgb[1::3] = img_data//256
             img_data_rgb[2::3] = img_data//256
-            self.img = wx.Image(img_x, img_y, bytes(img_data_rgb))
+            img = wx.Image(img_x, img_y, bytes(img_data_rgb))
         else:
-            self.img = wx.Image(img_path)
+            img = wx.Image(img_path)
 
-        img_ok = self.img.IsOk()
+        img_ok = img.IsOk()
         if img_ok:
-            self.img_size_y = self.img.GetHeight()
-            self.img_size_x = self.img.GetWidth()
+            self.img_size_y = img.GetHeight()
+            self.img_size_x = img.GetWidth()
 
             if DEBUG & DEBUG_TIMING:
                 staticdc_start = time.time()
 
             # store image data into a static DCs
             # full-size static DC
-            img_bmp = wx.Bitmap(self.img)
+            img_bmp = wx.Bitmap(img)
             self.img_dc = wx.MemoryDC()
             self.img_dc.SelectObject(img_bmp)
 
             # half-size static DC
             img_bmp = wx.Bitmap(
-                    self.img.Scale(self.img_size_x/2, self.img_size_y/2)
+                    img.Scale(self.img_size_x/2, self.img_size_y/2)
                     )
             self.img_dc_div2 = wx.MemoryDC()
             self.img_dc_div2.SelectObject(img_bmp)
 
             # quarter-size static DC
             img_bmp = wx.Bitmap(
-                    self.img.Scale(self.img_size_x/4, self.img_size_y/4)
+                    img.Scale(self.img_size_x/4, self.img_size_y/4)
                     )
             self.img_dc_div4 = wx.MemoryDC()
             self.img_dc_div4.SelectObject(img_bmp)
