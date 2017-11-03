@@ -7,6 +7,7 @@ import time
 import argparse
 import os.path
 import zipfile
+import json
 import numpy as np
 import biorad1sc_reader
 from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
@@ -1314,7 +1315,10 @@ class MainWindow(wx.Frame):
             with zipfile.ZipFile(pathname, 'w') as container_fh:
                 img_filename = os.path.basename(self.img_panel.img_path)
                 container_fh.write(self.img_panel.img_path, arcname=img_filename)
-                container_fh.writestr("marks.txt",repr(self.img_panel.marks))
+                container_fh.writestr(
+                        "marks.txt",
+                        json.dumps(self.img_panel.marks, separators=(',',':'))
+                        )
         except IOError:
             print("Cannot save current data in file '%s'." % pathname)
 
