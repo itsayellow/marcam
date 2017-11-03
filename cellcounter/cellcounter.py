@@ -1117,6 +1117,10 @@ class MainWindow(wx.Frame):
         saitem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S', 'Save image file and associated data')
         menubar.Append(file_menu, '&File')
+        # Tools
+        tools_menu = wx.Menu()
+        self.markmodeitem = tools_menu.Append(wx.ID_ANY, "&Enable Mark Mode\tCtrl+M")
+        menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
         aboutitem = help_menu.Append(wx.ID_ABOUT, "&About Cellcounter")
@@ -1162,11 +1166,12 @@ class MainWindow(wx.Frame):
 
         # setup event handlers for toolbar, menus
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
-        self.Bind(wx.EVT_TOOL, self.on_mark_toggle, self.marktool)
+        self.Bind(wx.EVT_TOOL, self.on_markmode_toggle, self.marktool)
 
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
         self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
+        self.Bind(wx.EVT_MENU, self.on_markmode_toggle, self.markmodeitem)
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
 
@@ -1254,8 +1259,19 @@ class MainWindow(wx.Frame):
             pass
 
     @debug_fxn
-    def on_mark_toggle(self, evt):
-        self.img_panel.mark_mode = self.marktool.IsToggled()
+    def on_markmode_toggle(self, evt):
+        # toggle state
+        self.img_panel.mark_mode = not self.img_panel.mark_mode
+        # update toolbartoolbase
+        # update menu item
+        if self.img_panel.mark_mode:
+            self.markmodeitem.SetItemLabel("Disable &Mark Mode\tCtrl+M")
+            if not self.marktool.IsToggled():
+                self.marktool.Toggle()
+        else:
+            self.markmodeitem.SetItemLabel("Enable &Mark Mode\tCtrl+M")
+            if self.marktool.IsToggled():
+                self.marktool.Toggle()
 
     @debug_fxn
     def on_open(self, evt):
