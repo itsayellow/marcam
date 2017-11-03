@@ -1,0 +1,22 @@
+#!/bin/bash
+
+## add current git hash to VERSION_STR in const.py, saving backup file
+#githash=(`git rev-parse --short HEAD`)
+#cp cellcounter/const.py cellcounter/const.py.bak
+#perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" cellcounter/const.py
+#
+## check if const.py got corrupted
+#syntax_error=(`python3 -m py_compile cellcounter/const.py`)
+#if [ ! -z "$syntax_error" ]; then
+#    echo "gen_app corrupted cellcounter/const.py"
+#    exit 1
+#fi
+
+# activate virtual environment for python
+source virt/Scripts/activate
+
+# build app using py2exe
+python3 setup.py py2exe
+
+# move back original const.py file
+#mv cellcounter/const.py.bak cellcounter/const.py
