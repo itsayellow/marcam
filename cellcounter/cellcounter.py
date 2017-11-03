@@ -1282,7 +1282,13 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
-        self.load_image_from_path(img_path)
+        img_ok = self.img_panel.init_image_from_file(img_path)
+        if img_ok:
+            self.statusbar.SetStatusText("Image " + img_path + " loaded OK.")
+        else:
+            self.statusbar.SetStatusText(
+                    "Image " + img_path + " loading ERROR."
+                    )
 
     @debug_fxn
     def on_saveas(self, evt):
@@ -1323,16 +1329,6 @@ class MainWindow(wx.Frame):
             print("Cannot save current data in file '%s'." % pathname)
 
 
-
-    @debug_fxn
-    def load_image_from_path(self, img_path):
-        img_ok = self.img_panel.init_image_from_file(img_path)
-        if img_ok:
-            self.statusbar.SetStatusText("Image " + img_path + " loaded OK.")
-        else:
-            self.statusbar.SetStatusText(
-                    "Image " + img_path + " loading ERROR."
-                    )
 
     @debug_fxn
     def on_about(self, evt):
