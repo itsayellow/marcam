@@ -6,6 +6,7 @@ import sys
 import time
 import argparse
 import os.path
+import zipfile
 import numpy as np
 import biorad1sc_reader
 from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
@@ -94,7 +95,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_y = None
         self.mark_mode = False
         self.parent = None    # TODO: do we need this?
-        self.points_record = []
+        self.marks = []
         self.zoom = None
         self.zoom_idx = None
         self.zoom_list = None
@@ -391,7 +392,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("MSC: point", end="")
             print("(%d, %d)"%(point_x, point_y))
 
-        self.points_record.append((point_x, point_y))
+        self.marks.append((point_x, point_y))
 
         # force a paint event with Refresh and Update
         #   to force PaintRect to paint new cross
@@ -702,7 +703,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
         pts_in_box = []
-        for (x, y) in self.points_record:
+        for (x, y) in self.marks:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
@@ -1112,8 +1113,8 @@ class MainWindow(wx.Frame):
                 'Quit', 'Quit application\tCtrl+Q')
         oitem = file_menu.Append(wx.ID_OPEN,
                 'Open Image...\tCtrl+O', 'Open image file')
-        satem = file_menu.Append(wx.ID_SAVEAS,
-                'Save Image Data As...', 'Save image file and associated data')
+        saitem = file_menu.Append(wx.ID_SAVEAS,
+                'Save Image Data As...\tShift+Ctrl+S', 'Save image file and associated data')
         menubar.Append(file_menu, '&File')
         # Help
         help_menu = wx.Menu()
@@ -1161,14 +1162,16 @@ class MainWindow(wx.Frame):
         # setup event handlers for toolbar, menus
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
         self.Bind(wx.EVT_TOOL, self.on_mark_toggle, self.marktool)
+
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
+        self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
 
         # finally render app
         self.SetSize((800, 600))
-        self.SetTitle('Cell Counter')
+        self.SetTitle('Cellcounter')
         self.Centre()
 
         #self.img_panel.subpanel.Centre()
@@ -1279,6 +1282,43 @@ class MainWindow(wx.Frame):
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
         self.load_image_from_path(img_path)
+
+    @debug_fxn
+    def on_saveas(self, evt):
+        """Save As... handler for Main Window
+        """
+        (img_path_root, _) = os.path.splitext(
+                os.path.basename(self.img_panel.img_path)
+                )
+        default_save_filename = img_path_root + ".cco"
+
+        with wx.FileDialog(
+                self,
+                "Save CCO file", wildcard="CCO files (*.cco)|*.cco",
+                style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+                defaultFile=default_save_filename,
+                ) as file_dialog:
+
+            if file_dialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+
+            # save the current contents in the file
+            pathname = file_dialog.GetPath()
+            self.save_img_data(pathname)
+
+    @debug_fxn
+    def save_img_data(self, pathname):
+        """Save image and mark locations to zipfile filename
+        """
+        try:
+            with zipfile.ZipFile(pathname, 'w') as container_fh:
+                img_filename = os.path.basename(self.img_panel.img_path)
+                container_fh.write(self.img_panel.img_path, arcname=img_filename)
+                container_fh.writestr("marks.txt",repr(self.img_panel.marks))
+        except IOError:
+            print("Cannot save current data in file '%s'." % pathname)
+
+
 
     @debug_fxn
     def load_image_from_path(self, img_path):
