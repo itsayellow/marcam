@@ -6,7 +6,6 @@ Usage:
 """
 
 import sys
-from setuptools import setup
 
 
 # global
@@ -14,6 +13,7 @@ mainscript = 'cellcounter/cellcounter.py'
 app_name = 'Cellcounter'
 
 if sys.platform == 'darwin':
+    from setuptools import setup
     # Mac and py2app
     version = '0.1.0'
     data_files = [
@@ -77,13 +77,23 @@ if sys.platform == 'darwin':
             setup_requires=['py2app']
             )
 elif sys.platform == 'win32':
+    from distutils.core import setup
+    import py2exe
+    data_files = [
+            'cellcounter/topen32.png',
+            'cellcounter/marktool32.png',
+            'cellcounter/cellcounter_help.html',
+            'cellcounter/cellcounter_help_markmodeoff.png'
+            ]
+    options = {
+            }
     # Windows and py2exe
     # win32 is name of platform even on 64-bit Windows!
     extra_options = dict(
-            app=[mainscript],
-            #data_files=DATA_FILES,
-            #options={'py2exe': OPTIONS},
-            setup_requires=['py2exe']
+            windows=[mainscript],
+            #setup_requires=['py2exe'],
+            data_files=data_files,
+            options={'py2exe': options},
             )
 else:
     # for unix-like platforms to use setup.py install to install main script
