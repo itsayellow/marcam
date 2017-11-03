@@ -130,10 +130,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_idx = self.zoom_list.index(1.0)
         self.zoom = self.zoom_list[self.zoom_idx]
 
-        # setup blank image area
-        # DELETEME OBSOLETE
-        #self.blank_img()
-
         # setup handlers
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.on_size)
@@ -467,32 +463,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         else:
             # process with default handler(s)
             evt.Skip()
-
-    # DELETEME OBSOLETE
-    #@debug_fxn
-    #def blank_img(self):
-    #    # Image object currently loaded
-    #    #   None signals to methods not to pan, zoom, etc
-    #    self.img = None
-    #    # image path for current Image
-    #    self.img_path = None
-    #    # transparent placeholder img (2px x 2px of tranparent black)
-    #    # will be bitmap corresponding to image
-    #    img_bmp = wx.Bitmap.FromRGBA(2, 2, 0, 0, 0, 0)
-    #    # store image data into a static DC
-    #    self.img_dc = wx.MemoryDC()
-    #    self.img_dc.SelectObject(img_bmp)
-    #    # current position of image center
-    #    #   start w/ 2px x 2px anchored with 1,1 at wincenter
-    #    self.img_at_wincenter_x = 1
-    #    self.img_at_wincenter_y = 1
-    #    # size of image
-    #    self.img_size_y = 2
-    #    self.img_size_x = 2
-    #    self.zoom = 1.0
-
-    #    self.SetVirtualSize(2, 2)
-    #    self.set_virt_size_with_min()
 
     @debug_fxn
     def set_virt_size_with_min(self):
