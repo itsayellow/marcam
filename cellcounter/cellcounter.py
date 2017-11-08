@@ -84,16 +84,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # init all properties to None (cause error if accessed before
         #   proper init)
-        self.img_at_wincenter_x = None
-        self.img_at_wincenter_y = None
+        self.img_at_wincenter_x = 0
+        self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
         self.img_coord_xlation_y = None
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
         self.img_path = None    # TODO: do we need this?
-        self.img_size_x = None
-        self.img_size_y = None
+        self.img_size_x = 0
+        self.img_size_y = 0
         self.mark_mode = False
         self.parent = None    # TODO: do we need this?
         self.marks = []
@@ -139,6 +139,34 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
 
+        # force a paint event with Refresh and Update
+        # Refresh Invalidates the window
+        self.Refresh()
+        # Update immediately repaints invalidated areas
+        #   without this, repainting will happen next iteration of event loop
+        self.Update()
+
+    @debug_fxn
+    def set_no_image(self):
+        # TODO: fix canvas size so no scrollbars
+        self.img_at_wincenter_x = 0
+        self.img_at_wincenter_y = 0
+        self.img_coord_xlation_x = None
+        self.img_coord_xlation_y = None
+        self.img_dc = None
+        self.img_dc_div2 = None
+        self.img_dc_div4 = None
+        self.img_path = None    # TODO: do we need this?
+        self.img_size_x = 0
+        self.img_size_y = 0
+        self.mark_mode = False
+        self.marks = []
+        # set zoom_idx to 1.00 scaling
+        self.zoom_idx = self.zoom_list.index(1.0)
+        self.zoom = self.zoom_list[self.zoom_idx]
+
+        # make sure canvas is no larger than window
+        self.set_virt_size_with_min()
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
         self.Refresh()
@@ -506,11 +534,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom, divide by div_scale to get to img coordinates
 
+    @debug_fxn
     def on_size(self, evt):
-        # return early if no image
-        if self.img_dc is None:
-            return
-
         self.set_virt_size_with_min()
 
         # scroll so center of image at same point it used to be
@@ -1099,6 +1124,8 @@ class MainWindow(wx.Frame):
 
         self.marktool = None
         self.html = None
+        self.save_filepath = None
+
         self.init_ui()
         if srcfiles:
             # TODO: are we able to load more than one file?
@@ -1114,6 +1141,10 @@ class MainWindow(wx.Frame):
                 'Quit', 'Quit application\tCtrl+Q')
         oitem = file_menu.Append(wx.ID_OPEN,
                 'Open Image...\tCtrl+O', 'Open image file')
+        citem = file_menu.Append(wx.ID_CLOSE,
+                'Close\tCtrl+W', 'Close image')
+        sitem = file_menu.Append(wx.ID_SAVE,
+                'Save Image Data\tCtrl+S', 'Save image file and associated data')
         saitem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S', 'Save image file and associated data')
         menubar.Append(file_menu, '&File')
@@ -1170,6 +1201,8 @@ class MainWindow(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
+        self.Bind(wx.EVT_MENU, self.on_close, citem)
+        self.Bind(wx.EVT_MENU, self.on_save, sitem)
         self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
         self.Bind(wx.EVT_MENU, self.on_markmode_toggle, self.markmodeitem)
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
@@ -1275,6 +1308,8 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_open(self, evt):
+        """Open Image... menu handler for Main Window
+        """
         #if self.contentNotSaved:
         #    if wx.MessageBox(
         #            "Current content has not been saved! Proceed?",
@@ -1298,17 +1333,41 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
+        # reset img_panel state
+        self.img_panel.set_no_image()
+        # check if img loaded ok
         img_ok = self.img_panel.init_image_from_file(img_path)
         if img_ok:
             self.statusbar.SetStatusText("Image " + img_path + " loaded OK.")
+            # reset filepath for cco file to nothing if we load new image
+            self.save_filepath = None
         else:
             self.statusbar.SetStatusText(
                     "Image " + img_path + " loading ERROR."
                     )
 
     @debug_fxn
+    def on_close(self, evt):
+        """Close Image menu handler for Main Window
+        """
+        # reset filepath for cco file to nothing on close
+        self.save_filepath = None
+        self.img_panel.set_no_image()
+
+    @debug_fxn
+    def on_save(self, evt):
+        """Save menu handler for Main Window
+        """
+        if self.save_filepath == None:
+            # we've never "Save As..." so do that instead
+            self.on_saveas(evt)
+        else:
+            # use current filename/path to save
+            self.save_img_data(self.save_filepath)
+
+    @debug_fxn
     def on_saveas(self, evt):
-        """Save As... handler for Main Window
+        """Save As... menu handler for Main Window
         """
         (img_path_root, _) = os.path.splitext(
                 os.path.basename(self.img_panel.img_path)
@@ -1328,6 +1387,8 @@ class MainWindow(wx.Frame):
             # save the current contents in the file
             pathname = file_dialog.GetPath()
             self.save_img_data(pathname)
+            # TODO check if save_img_data worked before saving save name
+            self.save_filepath = pathname
 
     @debug_fxn
     def save_img_data(self, pathname):
