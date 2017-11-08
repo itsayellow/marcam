@@ -11,17 +11,18 @@ import sys
 # global
 mainscript = 'cellcounter/cellcounter.py'
 app_name = 'Cellcounter'
+data_files = [
+        'cellcounter/topen32.png',
+        'cellcounter/marktool32.png',
+        'cellcounter/cellcounter_help.html',
+        'cellcounter/cellcounter_help_markmodeoff.png'
+        ]
+version = '0.1.0'
+
 
 if sys.platform == 'darwin':
     from setuptools import setup
     # Mac and py2app
-    version = '0.1.0'
-    data_files = [
-            'cellcounter/topen32.png',
-            'cellcounter/marktool32.png',
-            'cellcounter/cellcounter_help.html',
-            'cellcounter/cellcounter_help_markmodeoff.png'
-            ]
     py2app_options = {
             'argv_emulation':True,
             'iconfile':'cellcounter/cellcounter.icns',
@@ -79,12 +80,6 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     from distutils.core import setup
     import py2exe
-    data_files = [
-            'cellcounter/topen32.png',
-            'cellcounter/marktool32.png',
-            'cellcounter/cellcounter_help.html',
-            'cellcounter/cellcounter_help_markmodeoff.png'
-            ]
     options = {
             }
     # Windows and py2exe
