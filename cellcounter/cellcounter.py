@@ -85,6 +85,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # init all properties to None (cause error if accessed before
         #   proper init)
         self.content_saved = True
+        self.history = []
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
@@ -150,6 +151,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def set_no_image(self):
+        self.content_saved = True
+        self.history = []
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
@@ -162,7 +165,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_y = 0
         self.marks = []
         self.marks_selected = []
-        self.content_saved = True
 
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
@@ -267,6 +269,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.MouseEvent): todo.
         """
+        # DEBUG DELETEME
+        mods = evt.GetModifiers()
+        if mods == wx.MOD_NONE:
+            print("No modifier keys")
+        if mods & wx.MOD_CONTROL:
+            print("Control key pressed")
+        if mods & wx.MOD_SHIFT:
+            print("Shift key pressed")
+        if mods & wx.MOD_ALT:
+            print("Alt key pressed")
+        if mods & wx.MOD_META:
+            print("META key pressed")
+        if mods & wx.MOD_RAW_CONTROL:
+            print("RAW_CONTROL key pressed")
+        # wx.MOD_ALL is active if any key is pressed
+
         # return early if no image
         if self.img_dc is None:
             wx.CallAfter(evt.Skip)
@@ -289,14 +307,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if self.mark_mode:
                 self.draw_at_point(img_x, img_y)
             else:
-                self.select_at_point(img_x, img_y)
-                # TODO: select mode selects nearby mark (possibly to delete)
-                #   selecting with no mark nearby deselects
-                #   find the closest cross to click, as long as it is close
-                #       enough to click
-                #   then color cross yellow and that one will be "selected"
-                #   can be deleted
-                #   clicking far from any crosses deselects all
+                # selecting with no mark nearby deselects
+                # find the closest mark to click, as long as it is close
+                #   enough to click
+                # then color mark yellow and that one will be "selected"
+                #   and can be deleted
+                # Shift always adds select, CONTROL toggles select state
+                is_appending = mods & wx.MOD_SHIFT
+                is_toggling = mods & wx.MOD_CONTROL
+                self.select_at_point(img_x, img_y, is_appending, is_toggling)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -451,9 +470,45 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
                 )
         self.Update()
+        self.history.append(['MARK',(img_x, img_y)])
 
     @debug_fxn
-    def select_at_point(self, click_img_x, click_img_y):
+    def deselect_mark(self, desel_pt):
+        self.marks_selected.remove(desel_pt)
+        self.history.append(['DESELECT', desel_pt])
+        # force a paint event with Refresh and Update
+        #   to force PaintRect to paint new selected cross
+        (pos_x, pos_y) = self.img2win_coord(desel_pt[0] + 0.5, desel_pt[1] + 0.5)
+        # refresh square size should be >= than cross size
+        sq_size = 16
+        self.RefreshRect(
+                wx.Rect(
+                    pos_x - sq_size/2, pos_y - sq_size/2,
+                    sq_size, sq_size
+                    )
+                )
+        self.Update()
+
+    @debug_fxn
+    def deselect_all_marks(self):
+        for mark_pt in self.marks_selected:
+            # force a paint event with Refresh and Update
+            #   to force PaintRect to paint new selected cross
+            (pos_x, pos_y) = self.img2win_coord(mark_pt[0] + 0.5, mark_pt[1] + 0.5)
+            # refresh square size should be >= than cross size
+            sq_size = 16
+            self.RefreshRect(
+                    wx.Rect(
+                        pos_x - sq_size/2, pos_y - sq_size/2,
+                        sq_size, sq_size
+                        )
+                    )
+        self.history.append(['DESELECT_LIST', self.marks_selected])
+        self.marks_selected = []
+        self.Update()
+
+    @debug_fxn
+    def select_at_point(self, click_img_x, click_img_y, is_appending, is_toggling=False):
         # how close can click to a mark to say we clicked on it
         prox_img = const.PROXIMITY_PX / self.zoom
         poss_points = []
@@ -473,9 +528,28 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             poss_points.sort(key=lambda pt: pt[2])
             sel_pt = poss_points[0][0:2]
             print(sel_pt)
+
             # TODO: differentiate between click (select only this) and 
-            #       control-click (add this select to prev selects)
-            self.marks_selected.append(sel_pt)
+            #       shift-click (add this select to prev selects)
+            #       control-click (toggle this select)
+
+            if is_appending:
+                # append mark to selected mark
+                self.marks_selected.append(sel_pt)
+                self.history.append(['SELECT_APPEND',sel_pt])
+            elif is_toggling:
+                # toggle selection status of mark
+                if sel_pt in self.marks_selected:
+                    self.deselect_mark(sel_pt)
+                else:
+                    self.marks_selected.append(sel_pt)
+                    self.history.append(['SELECT_APPEND',sel_pt])
+            else:
+                # deselect all currently selected marks,
+                # select this mark
+                self.deselect_all_marks()
+                self.marks_selected = [sel_pt,]
+                self.history.append(['SELECT', sel_pt])
 
             # force a paint event with Refresh and Update
             #   to force PaintRect to paint new selected cross
@@ -489,6 +563,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         )
                     )
             self.Update()
+        else:
+            if not is_appending and not is_toggling:
+                # not selecting any point deselects all points
+                self.deselect_all_marks()
 
     @debug_fxn
     def on_scroll(self, evt):
