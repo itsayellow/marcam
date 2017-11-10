@@ -97,6 +97,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.mark_mode = False
         self.parent = None    # TODO: do we need this?
         self.marks = []
+        self.marks_selected = []
         self.zoom = None
         self.zoom_idx = None
         self.zoom_list = None
@@ -159,6 +160,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_x = 0
         self.img_size_y = 0
         self.marks = []
+        self.marks_selected = []
 
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
@@ -260,6 +262,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # point coordinate returned seems:
         #   * be only absolute coordinates of where in window was clicked
+        #       (unscrolled)
         #   * not to depend on which img_dc we supply
         #   * not to depend on zoom or pan
         point = evt.GetLogicalPosition(self.img_dc)
@@ -274,6 +277,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if self.mark_mode:
                 self.draw_at_point(img_x, img_y)
             else:
+                self.select_at_point(img_x, img_y)
                 # TODO: select mode selects nearby mark (possibly to delete)
                 #   selecting with no mark nearby deselects
                 #   find the closest cross to click, as long as it is close
@@ -281,8 +285,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 #   then color cross yellow and that one will be "selected"
                 #   can be deleted
                 #   clicking far from any crosses deselects all
-                if DEBUG & DEBUG_MISC:
-                    print("MSC:Not in Mark Mode")
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -413,21 +415,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             wx.CallAfter(self.get_img_wincenter)
 
     @debug_fxn
-    def draw_at_point(self, pt_x, pt_y):
-        point_x = int(pt_x)
-        point_y = int(pt_y)
+    def draw_at_point(self, img_float_x, img_float_y):
+        img_x = int(img_float_x)
+        img_y = int(img_float_y)
 
         if DEBUG & DEBUG_MISC:
             print("MSC: point", end="")
-            print("(%d, %d)"%(point_x, point_y))
+            print("(%d, %d)"%(img_x, img_y))
 
-        self.marks.append((point_x, point_y))
+        self.marks.append((img_x, img_y))
         # signal to parent that a new unsaved state has happened
         self.parent.content_saved = False
 
         # force a paint event with Refresh and Update
         #   to force PaintRect to paint new cross
-        (pos_x, pos_y) = self.img2win_coord(point_x + 0.5, point_y + 0.5)
+        (pos_x, pos_y) = self.img2win_coord(img_x + 0.5, img_y + 0.5)
         # refresh square size should be >= than cross size
         sq_size = 16
         self.RefreshRect(
@@ -437,6 +439,42 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
                 )
         self.Update()
+
+    @debug_fxn
+    def select_at_point(self, click_img_x, click_img_y):
+        # how close can click to a mark to say we clicked on it (win pixels)
+        proximity_px = 6
+        prox_img = proximity_px / self.zoom
+        poss_points = []
+        for (x,y) in self.marks:
+            # check if pt is in a 2*prox_img x 2*prox_img box centered
+            #   around click
+            if ((click_img_x - prox_img < x + 0.5 < click_img_x + prox_img) and
+                    (click_img_y - prox_img < y + 0.5 < click_img_y + prox_img)):
+                dist = np.sqrt((click_img_x - x)**2 + (click_img_y - y)**2)
+                poss_points.append((x, y, dist))
+        print(poss_points)
+        # if we're near at least one point, find the closest point to the click
+        if poss_points:
+            poss_points.sort(key=lambda pt: pt[2])
+            sel_pt = poss_points[0][0:2]
+            print(sel_pt)
+            # TODO: differentiate between click (select only this) and 
+            #       control-click (add this select to prev selects)
+            self.marks_selected.append(sel_pt)
+
+            # force a paint event with Refresh and Update
+            #   to force PaintRect to paint new selected cross
+            (pos_x, pos_y) = self.img2win_coord(sel_pt[0] + 0.5, sel_pt[1] + 0.5)
+            # refresh square size should be >= than cross size
+            sq_size = 16
+            self.RefreshRect(
+                    wx.Rect(
+                        pos_x - sq_size/2, pos_y - sq_size/2,
+                        sq_size, sq_size
+                        )
+                    )
+            self.Update()
 
     @debug_fxn
     def on_scroll(self, evt):
@@ -742,6 +780,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size in self.draw_at_point()
                     dc.DrawBitmap(const.CROSS_11x11_RED_BMP, x_win - 6, y_win - 6)
+
+        pts_in_box = []
+        for (x, y) in self.marks_selected:
+            if (src_pos_x <= x <= src_pos_x + src_size_x and
+                    src_pos_y <= y <= src_pos_y + src_size_y):
+                # add half pixel so cross is in center of pix square when zoomed
+                (x_win, y_win) = self.img2logical_coord(x + 0.5, y + 0.5)
+                if (x_win, y_win) not in pts_in_box:
+                    # only draw bitmap if this is not a duplicate
+                    pts_in_box.append((x_win, y_win))
+                    # NOTE: if you change the size of this bmp, also change
+                    #   the RefreshRect size in self.draw_at_point()
+                    dc.DrawBitmap(const.CROSS_11x11_YELLOW_BMP, x_win - 6, y_win - 6)
 
     @debug_fxn
     def win2img_coord(self, win_x, win_y, scale_dc=1):
