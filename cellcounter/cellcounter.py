@@ -442,16 +442,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def select_at_point(self, click_img_x, click_img_y):
-        # how close can click to a mark to say we clicked on it (win pixels)
-        proximity_px = 6
-        prox_img = proximity_px / self.zoom
+        # how close can click to a mark to say we clicked on it
+        prox_img = const.PROXIMITY_PX / self.zoom
         poss_points = []
         for (x,y) in self.marks:
             # check if pt is in a 2*prox_img x 2*prox_img box centered
             #   around click
-            if ((click_img_x - prox_img < x + 0.5 < click_img_x + prox_img) and
-                    (click_img_y - prox_img < y + 0.5 < click_img_y + prox_img)):
-                dist = np.sqrt((click_img_x - x)**2 + (click_img_y - y)**2)
+            dist = np.sqrt(
+                    (click_img_x - (x + 0.5))**2 + (click_img_y - (y + 0.5))**2
+                    )
+            print(dist)
+            if dist < prox_img:
+                print("adding")
                 poss_points.append((x, y, dist))
         print(poss_points)
         # if we're near at least one point, find the closest point to the click

@@ -22,6 +22,9 @@ SCROLL_WHEEL_SPEED = 2
 # how much to scroll for an keypress
 SCROLL_KEY_SPEED = 20
 
+# how close can click to a mark to say we clicked on it (win pixels)
+PROXIMITY_PX = 6
+
 # how long in ms is a frame during an animated pan (right-click)
 #   smaller -> smoother animation (30 looks smooth)
 #   larger -> doesn't break with slow computers
