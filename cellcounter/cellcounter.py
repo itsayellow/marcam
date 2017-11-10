@@ -148,7 +148,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def set_no_image(self):
-        # TODO: fix canvas size so no scrollbars
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
@@ -159,8 +158,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_path = None    # TODO: do we need this?
         self.img_size_x = 0
         self.img_size_y = 0
-        self.mark_mode = False
         self.marks = []
+
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
         self.zoom = self.zoom_list[self.zoom_idx]
@@ -1125,9 +1124,10 @@ class MainWindow(wx.Frame):
     def __init__(self, srcfiles, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.marktool = None
         self.html = None
+        self.mark_id = None
         self.save_filepath = None
+        self.toolbar = None
         # this can be set to false by child by change in state
         self.content_saved = True
 
@@ -1166,18 +1166,19 @@ class MainWindow(wx.Frame):
         self.SetMenuBar(menubar)
 
         # toolbar stuff
-        toolbar = self.CreateToolBar()
+        self.toolbar = self.CreateToolBar()
         if DEBUG & DEBUG_MISC:
             print("MSC:ICON_DIR=%s"%(ICON_DIR))
         obmp = os.path.join(ICON_DIR, 'topen32.png')
-        otool = toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
+        otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
         markbmp = os.path.join(ICON_DIR, 'marktool32.png')
-        self.marktool = toolbar.AddCheckTool(
+        marktool = self.toolbar.AddCheckTool(
                 wx.ID_ANY,
                 'Point/Mark',
                 wx.Bitmap(markbmp),
                 )
-        toolbar.Realize()
+        self.mark_id = marktool.GetId()
+        self.toolbar.Realize()
 
         # status bar stuff
         self.statusbar = self.CreateStatusBar()
@@ -1202,7 +1203,7 @@ class MainWindow(wx.Frame):
 
         # setup event handlers for toolbar, menus
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
-        self.Bind(wx.EVT_TOOL, self.on_markmode_toggle, self.marktool)
+        self.Bind(wx.EVT_TOOL, self.on_markmode_toggle, marktool)
 
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
@@ -1306,12 +1307,12 @@ class MainWindow(wx.Frame):
         # update menu item
         if self.img_panel.mark_mode:
             self.markmodeitem.SetItemLabel("Disable &Mark Mode\tCtrl+M")
-            if not self.marktool.IsToggled():
-                self.marktool.Toggle()
+            self.toolbar.ToggleTool(self.mark_id, True) # works!
+            #self.marktool.Toggle(True) # toggles state but not bitmap!
         else:
             self.markmodeitem.SetItemLabel("Enable &Mark Mode\tCtrl+M")
-            if self.marktool.IsToggled():
-                self.marktool.Toggle()
+            self.toolbar.ToggleTool(self.mark_id, False) # works!
+            #self.marktool.Toggle(False) # toggles state but not bitmap!
 
     @debug_fxn
     def on_open(self, evt):
@@ -1374,6 +1375,7 @@ class MainWindow(wx.Frame):
         self.content_saved = True
         # make scrolled window show no image
         self.img_panel.set_no_image()
+
         return True
 
     @debug_fxn
