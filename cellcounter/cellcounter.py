@@ -167,6 +167,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # make sure canvas is no larger than window
         self.set_virt_size_with_min()
+
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
         self.Refresh()
@@ -422,6 +423,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("(%d, %d)"%(point_x, point_y))
 
         self.marks.append((point_x, point_y))
+        # signal to parent that a new unsaved state has happened
+        self.parent.content_saved = False
 
         # force a paint event with Refresh and Update
         #   to force PaintRect to paint new cross
@@ -1125,6 +1128,8 @@ class MainWindow(wx.Frame):
         self.marktool = None
         self.html = None
         self.save_filepath = None
+        # this can be set to false by child by change in state
+        self.content_saved = True
 
         self.init_ui()
         if srcfiles:
@@ -1224,7 +1229,9 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_quit(self, evt):
-        self.Close()
+        is_closed = self.on_close(None)
+        if is_closed:
+            self.Close()
 
     @debug_fxn
     def on_key_down(self, evt):
@@ -1310,14 +1317,11 @@ class MainWindow(wx.Frame):
     def on_open(self, evt):
         """Open Image... menu handler for Main Window
         """
-        #if self.contentNotSaved:
-        #    if wx.MessageBox(
-        #            "Current content has not been saved! Proceed?",
-        #            "Please confirm",
-        #             wx.ICON_QUESTION | wx.YES_NO, self) == wx.NO:
-        #        return
+        # first close current image (if it exists)
+        is_closed = self.on_close(None)
 
-        # else: proceed asking to the user the new file to open
+        if not is_closed:
+            return
 
         # create wildcard for Image files, and for *.1sc files (Bio-Rad)
         wildcard = wx.Image.GetImageExtWildcard()
@@ -1333,8 +1337,6 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
-        # reset img_panel state
-        self.img_panel.set_no_image()
         # check if img loaded ok
         img_ok = self.img_panel.init_image_from_file(img_path)
         if img_ok:
@@ -1350,9 +1352,29 @@ class MainWindow(wx.Frame):
     def on_close(self, evt):
         """Close Image menu handler for Main Window
         """
+        if not self.content_saved:
+            save_query = wx.MessageDialog(
+                    self,
+                    "",
+                    "Save changes to Image Data before closing this image?",
+                    wx.CANCEL | wx.YES_NO | wx.YES_DEFAULT | wx.ICON_EXCLAMATION,
+                    )
+            save_query.SetYesNoLabels("&Save", "&Don't Save")
+            save_query_response = save_query.ShowModal() 
+            if save_query_response == wx.ID_YES:
+                self.on_save(None)
+            elif save_query_response == wx.ID_CANCEL:
+                return False
+
+        # else: proceed asking to the user the new file to open
+
         # reset filepath for cco file to nothing on close
         self.save_filepath = None
+        # reset content_saved
+        self.content_saved = True
+        # make scrolled window show no image
         self.img_panel.set_no_image()
+        return True
 
     @debug_fxn
     def on_save(self, evt):
@@ -1364,6 +1386,8 @@ class MainWindow(wx.Frame):
         else:
             # use current filename/path to save
             self.save_img_data(self.save_filepath)
+            # signify we have saved content
+            self.content_saved = True
 
     @debug_fxn
     def on_saveas(self, evt):
@@ -1389,6 +1413,8 @@ class MainWindow(wx.Frame):
             self.save_img_data(pathname)
             # TODO check if save_img_data worked before saving save name
             self.save_filepath = pathname
+            # signify we have saved content
+            self.content_saved = True
 
     @debug_fxn
     def save_img_data(self, pathname):
@@ -1414,6 +1440,8 @@ class MainWindow(wx.Frame):
         info.SetVersion(const.VERSION_STR)
         info.SetDescription("Counting cells in biological images.")
         info.SetCopyright("(C) 2017 Matthew A. Clapp")
+
+        print("iblik: Matthew A Clapp")
 
         wx.adv.AboutBox(info)
 
