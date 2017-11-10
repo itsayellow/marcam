@@ -84,6 +84,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # init all properties to None (cause error if accessed before
         #   proper init)
+        self.content_saved = True
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
@@ -161,6 +162,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_y = 0
         self.marks = []
         self.marks_selected = []
+        self.content_saved = True
 
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
@@ -175,6 +177,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # Update immediately repaints invalidated areas
         #   without this, repainting will happen next iteration of event loop
         self.Update()
+
+    @debug_fxn
+    def needs_save(self):
+        # poll self and children to determine if we need to save document
+        return not self.content_saved
+
+    @debug_fxn
+    def save_notify(self):
+        # tell self and children data was saved now
+        self.content_saved = True
 
     @debug_fxn
     def get_img_wincenter(self):
@@ -425,7 +437,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         self.marks.append((img_x, img_y))
         # signal to parent that a new unsaved state has happened
-        self.parent.content_saved = False
+        self.content_saved = False
 
         # force a paint event with Refresh and Update
         #   to force PaintRect to paint new cross
@@ -1177,12 +1189,14 @@ class MainWindow(wx.Frame):
     def __init__(self, srcfiles, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # internal state
+        self.content_saved = True
+        self.save_filepath = None
+
+        # GUI-related
         self.html = None
         self.mark_id = None
-        self.save_filepath = None
         self.toolbar = None
-        # this can be set to false by child by change in state
-        self.content_saved = True
 
         self.init_ui()
         if srcfiles:
@@ -1406,7 +1420,7 @@ class MainWindow(wx.Frame):
     def on_close(self, evt):
         """Close Image menu handler for Main Window
         """
-        if not self.content_saved:
+        if self.needs_save():
             save_query = wx.MessageDialog(
                     self,
                     "",
@@ -1424,7 +1438,7 @@ class MainWindow(wx.Frame):
 
         # reset filepath for cco file to nothing on close
         self.save_filepath = None
-        # reset content_saved
+        # reset content_saved in case user didn't save
         self.content_saved = True
         # make scrolled window show no image
         self.img_panel.set_no_image()
@@ -1442,7 +1456,7 @@ class MainWindow(wx.Frame):
             # use current filename/path to save
             self.save_img_data(self.save_filepath)
             # signify we have saved content
-            self.content_saved = True
+            self.save_notify()
 
     @debug_fxn
     def on_saveas(self, evt):
@@ -1469,7 +1483,18 @@ class MainWindow(wx.Frame):
             # TODO check if save_img_data worked before saving save name
             self.save_filepath = pathname
             # signify we have saved content
-            self.content_saved = True
+            self.save_notify()
+
+    @debug_fxn
+    def save_notify(self):
+        # tell self and children data was saved now
+        self.content_saved = True
+        self.img_panel.save_notify()
+
+    @debug_fxn
+    def needs_save(self):
+        # poll self and children to determine if we need to save document
+        return not self.content_saved or self.img_panel.needs_save()
 
     @debug_fxn
     def save_img_data(self, pathname):
