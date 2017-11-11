@@ -445,7 +445,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   to force PaintRect to paint new selected cross
         (pos_x, pos_y) = self.img2win_coord(mark_pt[0] + 0.5, mark_pt[1] + 0.5)
         # refresh square size should be >= than cross size
-        sq_size = 16
+        sq_size = const.CROSS_REFRESH_SQ_SIZE
         self.RefreshRect(
                 wx.Rect(
                     pos_x - sq_size/2, pos_y - sq_size/2,
@@ -478,8 +478,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def deselect_all_marks(self):
         for mark_pt in self.marks_selected:
-            deselect_mark(self, mark_pt, internal=True)
-
+            self.deselect_mark(mark_pt, internal=True)
         self.marks_selected = []
         self.Update()
 
@@ -499,10 +498,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # so we can loop through copy and still delete from orig
         # also so we have list later on for history
         marks_selected = self.marks_selected.copy()
-
         for mark_pt in marks_selected:
             self.delete_mark(mark_pt, internal=True)
-
         self.history.new(['DELETE_MARK_LIST', marks_selected])
         self.Update()
 
@@ -852,7 +849,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
                     # NOTE: if you change the size of this bmp, also change
-                    #   the RefreshRect size in self.refresh_mark_area()
+                    #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(const.CROSS_11x11_RED_BMP, x_win - 6, y_win - 6)
 
         pts_in_box = []
@@ -865,7 +862,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
                     # NOTE: if you change the size of this bmp, also change
-                    #   the RefreshRect size in self.refresh_mark_area()
+                    #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(const.CROSS_11x11_YELLOW_BMP, x_win - 6, y_win - 6)
 
     @debug_fxn

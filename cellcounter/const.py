@@ -31,6 +31,8 @@ PROXIMITY_PX = 6
 #   larger -> doesn't break with slow computers
 PANIMATE_STEP_MS = 30
 
+# appropriate for 11px x 11px cross
+CROSS_REFRESH_SQ_SIZE = 16
 
 # BITMAPS
 
