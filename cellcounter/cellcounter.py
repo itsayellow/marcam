@@ -36,6 +36,11 @@ if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     #    print("Turning off debug.", file=out_fh)
 
 
+def debugmsg(debug_bit, *args, **kwargs):
+    if DEBUG & debug_bit:
+        print(*args, **kwargs)
+
+
 def ceil(num):
     if int(num) < num:
         return int(num) + 1
@@ -199,8 +204,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (self.img_at_wincenter_x, self.img_at_wincenter_y
                 ) = self.win2img_coord(win_size_x/2, win_size_y/2)
 
-        if DEBUG & DEBUG_MISC:
-            print(
+        debugmsg(DEBUG_MISC,
                     "MSC:self.img_at_wincenter=(%.3f,%.3f)"%(
                         self.img_at_wincenter_x,
                         self.img_at_wincenter_y
@@ -225,11 +229,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         scroll_x = round(origin_x/scroll_ppu_x)
         scroll_y = round(origin_y/scroll_ppu_y)
         self.Scroll(scroll_x, scroll_y)
-        if DEBUG & DEBUG_MISC:
-            print("MSC:img_zoom_wincenter = " \
-                    "(%.3f,%.3f)"%(img_zoom_wincenter_x, img_zoom_wincenter_y))
-            print("MSC:origin = (%.3f,%.3f)"%(origin_x, origin_y))
-            print("MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y))
+        debugmsg(DEBUG_MISC,
+            "MSC:img_zoom_wincenter = " + \
+            "(%.3f,%.3f)\n"%(img_zoom_wincenter_x, img_zoom_wincenter_y) + \
+            "MSC:origin = (%.3f,%.3f)\n"%(origin_x, origin_y) + \
+            "MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y)
+            )
 
     def wincenter_scroll_limits(self):
         """
@@ -257,8 +262,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_y_min = win_size_y / 2 / self.zoom
             img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom)
 
-        if DEBUG & DEBUG_MISC:
-            print("MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(img_x_min, img_y_min, img_x_max, img_y_max))
+        debugmsg(DEBUG_MISC,
+            "MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(
+                img_x_min, img_y_min, img_x_max, img_y_max)
+            )
 
         return (img_x_min, img_y_min, img_x_max, img_y_max)
 
@@ -269,21 +276,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.MouseEvent): todo.
         """
-        # DEBUG DELETEME
         mods = evt.GetModifiers()
-        if mods == wx.MOD_NONE:
-            print("No modifier keys")
-        if mods & wx.MOD_CONTROL:
-            print("Control key pressed")
-        if mods & wx.MOD_SHIFT:
-            print("Shift key pressed")
-        if mods & wx.MOD_ALT:
-            print("Alt key pressed")
-        if mods & wx.MOD_META:
-            print("META key pressed")
-        if mods & wx.MOD_RAW_CONTROL:
-            print("RAW_CONTROL key pressed")
-        # wx.MOD_ALL is active if any key is pressed
 
         # return early if no image
         if self.img_dc is None:
@@ -298,9 +291,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         point = evt.GetLogicalPosition(self.img_dc)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
-        if DEBUG & DEBUG_MISC:
-            print("MSC:left click at img", end="")
-            print("(%.2f, %.2f)"%(img_x, img_y))
+        debugmsg(DEBUG_MISC,
+            "MSC:left click at img (%.2f, %.2f)"%(img_x, img_y)
+            )
 
         if (0 <= img_x <= self.img_size_x and
                 0 <= img_y <= self.img_size_y):
@@ -339,9 +332,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         point = evt.GetLogicalPosition(self.img_dc)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
-        if DEBUG & DEBUG_MISC:
-            print("MSC:right click at img", end="")
-            print("(%.2f, %.2f)"%(img_x, img_y))
+        debugmsg(DEBUG_MISC,
+                "MSC:right click at img (%.2f, %.2f)"%(img_x, img_y)
+                )
 
         #self.img_at_wincenter_x = img_x
         #self.img_at_wincenter_y = img_y
@@ -376,9 +369,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if img_x_end == img_x_start and img_y_end == img_y_start:
             return
 
-        if DEBUG & DEBUG_MISC:
-            print("MSC:panimate: start=(%.2f,%.2f)"%(img_x_start,img_y_start), end="")
-            print("end=(%.2f, %.2f)"%(img_x_end, img_y_end))
+        debugmsg(DEBUG_MISC,
+            "MSC:panimate: start=(%.2f,%.2f) "%(img_x_start,img_y_start) + \
+            "end=(%.2f, %.2f)"%(img_x_end, img_y_end)
+            )
 
         img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
 
@@ -450,9 +444,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         img_x = int(img_float_x)
         img_y = int(img_float_y)
 
-        if DEBUG & DEBUG_MISC:
-            print("MSC: point", end="")
-            print("(%d, %d)"%(img_x, img_y))
+        debugmsg(DEBUG_MISC, "MSC: point (%d, %d)"%(img_x, img_y))
 
         self.marks.append((img_x, img_y))
         # signal to parent that a new unsaved state has happened
@@ -518,21 +510,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dist = np.sqrt(
                     (click_img_x - (x + 0.5))**2 + (click_img_y - (y + 0.5))**2
                     )
-            print(dist)
             if dist < prox_img:
-                print("adding")
                 poss_points.append((x, y, dist))
-        print(poss_points)
         # if we're near at least one point, find the closest point to the click
         if poss_points:
             poss_points.sort(key=lambda pt: pt[2])
             sel_pt = poss_points[0][0:2]
-            print(sel_pt)
 
-            # TODO: differentiate between click (select only this) and 
-            #       shift-click (add this select to prev selects)
-            #       control-click (toggle this select)
-
+            # click: select only this mark (deselect all others)
+            # shift-click: add this mark select to prev selects
+            # control-click: toggle this mark select
             if is_appending:
                 # append mark to selected mark
                 self.marks_selected.append(sel_pt)
@@ -825,14 +812,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dc.DrawRectangleList(rects_to_draw)
 
         # DEBUG DELETEME
-        if DEBUG & DEBUG_MISC:
-            print("MSC:")
-            print("    src_pos=(%.2f,%.2f)"%(src_pos_x,src_pos_y))
-            print("    src_size=(%.2f,%.2f)"%(src_size_x,src_size_y))
-            print("    dest_pos=(%.2f,%.2f)"%(dest_pos_x,dest_pos_y))
-            print("    dest_size=(%.2f,%.2f)"%(dest_size_x,dest_size_y))
-            print("    rect_pos=(%.2f,%.2f)"%(rect_pos_log_x,rect_pos_log_y))
-            print("    rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y))
+        debugmsg(DEBUG_MISC,
+                "MSC:src_pos=(%.2f,%.2f)\n"%(src_pos_x,src_pos_y) + \
+                "    src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
+                "    dest_pos=(%.2f,%.2f)\n"%(dest_pos_x,dest_pos_y) + \
+                "    dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
+                "    rect_pos=(%.2f,%.2f)\n"%(rect_pos_log_x,rect_pos_log_y) + \
+                "    rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
+                )
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -1027,7 +1014,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
             if DEBUG & DEBUG_TIMING:
                 staticdc_eltime = time.time() - staticdc_start
-                print("TIM:Create MemoryDCs: *%.3fs"%staticdc_eltime)
+                print("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
 
             # set zoom_idx to scaling that will fit image in window
             #   or 1.0 if max_zoom > 1.0
@@ -1316,10 +1303,9 @@ class DropTarget(wx.FileDropTarget):
 
     def OnDropFiles(self, x, y, filenames):
         filename = filenames[0]
-        if DEBUG & DEBUG_MISC:
-            print("MSC:", end="")
-            print("Drag and Drop filename:")
-            print("    "+repr(filename))
+        debugmsg(DEBUG_MISC,
+            "MSC:Drag and Drop filename:\n" + "    "+repr(filename)
+            )
         self.window_target.init_image_from_file(filename)
 
         # TODO: which one of these??
@@ -1388,8 +1374,7 @@ class MainWindow(wx.Frame):
 
         # toolbar stuff
         self.toolbar = self.CreateToolBar()
-        if DEBUG & DEBUG_MISC:
-            print("MSC:ICON_DIR=%s"%(ICON_DIR))
+        debugmsg(DEBUG_MISC, "MSC:ICON_DIR=%s"%(ICON_DIR))
         obmp = os.path.join(ICON_DIR, 'topen32.png')
         otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
         markbmp = os.path.join(ICON_DIR, 'marktool32.png')
@@ -1451,10 +1436,10 @@ class MainWindow(wx.Frame):
 
         self.Show(True)
 
-        if DEBUG & DEBUG_MISC:
-            print("MSC:", end="")
-            print("self.img_panel size:")
-            print("    "+repr(self.img_panel.GetClientSize()))
+        debugmsg(DEBUG_MISC,
+                "MSC:self.img_panel size:\n    " + \
+                repr(self.img_panel.GetClientSize())
+                )
 
     @debug_fxn
     def on_quit(self, evt):
@@ -1465,14 +1450,12 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_key_down(self, evt):
         KeyCode = evt.GetKeyCode()
-        if DEBUG & DEBUG_KEYPRESS:
-            print("KEY:Key Down:")
-            print("    KeyCode: ", end="", flush=True)
-            print(KeyCode)
-            print("    RawKeyCode: ", end="", flush=True)
-            print(evt.GetRawKeyCode())
-            print("    Position: ", end="", flush=True)
-            print(evt.GetPosition())
+        debugmsg(DEBUG_KEYPRESS,
+                "KEY:Key Down:\n" + \
+                "    KeyCode: " + KeyCode + "\n" + \
+                "    RawKeyCode: " + evt.GetRawKeyCode() + "\n" + \
+                "    Position: " + evt.GetPosition()
+                )
 
         if KeyCode == 91:
             # [ key
