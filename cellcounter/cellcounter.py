@@ -3,19 +3,16 @@
 # GUI for displaying an image and counting cells
 
 import sys
-import time
 import argparse
 import os.path
 import zipfile
 import json
-import numpy as np
-import biorad1sc_reader
-from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 import wx
 import wx.adv
 import wx.html
-import wx.lib.statbmp
-import wx.lib.scrolledpanel
+import numpy as np
+import biorad1sc_reader
+from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
 from image_scrolled_canvas import ImageScrolledCanvas
 
@@ -41,24 +38,6 @@ if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
 def debugmsg(debug_bit, *args, **kwargs):
     if DEBUG & debug_bit:
         print(*args, **kwargs)
-
-
-def ceil(num):
-    if int(num) < num:
-        return int(num) + 1
-    else:
-        return int(num)
-
-
-def clip(num, num_min=None, num_max=None):
-    if num_min is not None and num_max is not None:
-        return min(max(num, num_min), num_max)
-    elif num_min is not None:
-        return max(num, num_min)
-    elif num_max is not None:
-        return min(num, num_max)
-    else:
-        return num
 
 
 # debug decorator that announces function call/entry and lists args
@@ -408,9 +387,35 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
+
+        # check for 1sc files and get image data to send to Image
+        (_, imgfile_ext) = os.path.splitext(img_path)
+        if imgfile_ext == ".1sc":
+            try:
+                read1sc = biorad1sc_reader.Reader(img_path)
+            except (BioRadInvalidFileError, BioRadParsingError):
+                # img_ok is false if 1sc is not valid 1sc file
+                return False
+
+            (img_x, img_y, img_data) = read1sc.get_img_data()
+
+            # TODO: wx.Image is probably only 8-bits each color channel
+            #   yet we have 16-bit images
+            # wx.Image wants img_x * img_y * 3
+            # TODO: shadow data with full 16-bit info
+            img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
+            img_data_rgb[0::3] = img_data//256
+            img_data_rgb[1::3] = img_data//256
+            img_data_rgb[2::3] = img_data//256
+            img = wx.Image(img_x, img_y, bytes(img_data_rgb))
+        else:
+            img = wx.Image(img_path)
+
         # check if img loaded ok
-        img_ok = self.img_panel.init_image_from_file(img_path)
+        img_ok = img.IsOk()
+
         if img_ok:
+            self.img_panel.init_image(img)
             self.statusbar.SetStatusText("Image " + img_path + " loaded OK.")
             # reset filepath for cco file to nothing if we load new image
             self.save_filepath = None

@@ -4,8 +4,6 @@ import os.path
 import time
 import wx
 import numpy as np
-import biorad1sc_reader
-from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 import const
 from const import (
         DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
@@ -74,7 +72,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
-        self.img_path = None    # TODO: do we need this?
         self.img_size_x = 0
         self.img_size_y = 0
         self.mark_mode = False
@@ -141,7 +138,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
-        self.img_path = None    # TODO: do we need this?
         self.img_size_x = 0
         self.img_size_y = 0
         self.marks = []
@@ -921,93 +917,65 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return (win_x, win_y)
 
     @debug_fxn
-    def init_image_from_file(self, img_path):
+    def init_image(self, img):
         """Load and initialize image given its full path
 
         Args:
-            img_path (str): full path to image to load into app
+            img (wx.Image): wx Image to display in window
         """
-        self.img_path = img_path
+        self.img_size_y = img.GetHeight()
+        self.img_size_x = img.GetWidth()
 
-        # check for 1sc files and get image data to send to Image
-        (_, imgfile_ext) = os.path.splitext(img_path)
-        if imgfile_ext == ".1sc":
-            try:
-                read1sc = biorad1sc_reader.Reader(img_path)
-            except (BioRadInvalidFileError, BioRadParsingError):
-                # img_ok is false if 1sc is not valid 1sc file
-                return False
+        if DEBUG & DEBUG_TIMING:
+            staticdc_start = time.time()
 
-            (img_x, img_y, img_data) = read1sc.get_img_data()
+        # store image data into a static DCs
+        # full-size static DC
+        img_bmp = wx.Bitmap(img)
+        self.img_dc = wx.MemoryDC()
+        self.img_dc.SelectObject(img_bmp)
 
-            # TODO: wx.Image is probably only 8-bits each color channel
-            #   yet we have 16-bit images
-            # wx.Image wants img_x * img_y * 3
-            # TODO: shadow data with full 16-bit info
-            img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
-            img_data_rgb[0::3] = img_data//256
-            img_data_rgb[1::3] = img_data//256
-            img_data_rgb[2::3] = img_data//256
-            img = wx.Image(img_x, img_y, bytes(img_data_rgb))
-        else:
-            img = wx.Image(img_path)
+        # half-size static DC
+        img_bmp = wx.Bitmap(
+                img.Scale(self.img_size_x/2, self.img_size_y/2)
+                )
+        self.img_dc_div2 = wx.MemoryDC()
+        self.img_dc_div2.SelectObject(img_bmp)
 
-        img_ok = img.IsOk()
-        if img_ok:
-            self.img_size_y = img.GetHeight()
-            self.img_size_x = img.GetWidth()
+        # quarter-size static DC
+        img_bmp = wx.Bitmap(
+                img.Scale(self.img_size_x/4, self.img_size_y/4)
+                )
+        self.img_dc_div4 = wx.MemoryDC()
+        self.img_dc_div4.SelectObject(img_bmp)
 
-            if DEBUG & DEBUG_TIMING:
-                staticdc_start = time.time()
+        if DEBUG & DEBUG_TIMING:
+            staticdc_eltime = time.time() - staticdc_start
+            print("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
 
-            # store image data into a static DCs
-            # full-size static DC
-            img_bmp = wx.Bitmap(img)
-            self.img_dc = wx.MemoryDC()
-            self.img_dc.SelectObject(img_bmp)
+        # set zoom_idx to scaling that will fit image in window
+        #   or 1.0 if max_zoom > 1.0
+        win_size = self.GetSize()
 
-            # half-size static DC
-            img_bmp = wx.Bitmap(
-                    img.Scale(self.img_size_x/2, self.img_size_y/2)
-                    )
-            self.img_dc_div2 = wx.MemoryDC()
-            self.img_dc_div2.SelectObject(img_bmp)
+        max_zoom = min(
+                1.000001,
+                (win_size.x / self.img_size_x),
+                (win_size.y / self.img_size_y)
+                )
+        ok_zooms = [x for x in self.zoom_list if x < max_zoom]
+        self.zoom_idx = self.zoom_list.index(max(ok_zooms))
+        self.zoom = self.zoom_list[self.zoom_idx]
 
-            # quarter-size static DC
-            img_bmp = wx.Bitmap(
-                    img.Scale(self.img_size_x/4, self.img_size_y/4)
-                    )
-            self.img_dc_div4 = wx.MemoryDC()
-            self.img_dc_div4.SelectObject(img_bmp)
+        self.set_virt_size_with_min()
 
-            if DEBUG & DEBUG_TIMING:
-                staticdc_eltime = time.time() - staticdc_start
-                print("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
+        # start w/ image center at window center
+        self.img_at_wincenter_x = self.img_size_x/2
+        self.img_at_wincenter_y = self.img_size_y/2
 
-            # set zoom_idx to scaling that will fit image in window
-            #   or 1.0 if max_zoom > 1.0
-            win_size = self.GetSize()
+        # force a paint event with Refresh and Update
+        self.Refresh()
+        self.Update()
 
-            max_zoom = min(
-                    1.000001,
-                    (win_size.x / self.img_size_x),
-                    (win_size.y / self.img_size_y)
-                    )
-            ok_zooms = [x for x in self.zoom_list if x < max_zoom]
-            self.zoom_idx = self.zoom_list.index(max(ok_zooms))
-            self.zoom = self.zoom_list[self.zoom_idx]
-
-            self.set_virt_size_with_min()
-
-            # start w/ image center at window center
-            self.img_at_wincenter_x = self.img_size_x/2
-            self.img_at_wincenter_y = self.img_size_y/2
-
-            # force a paint event with Refresh and Update
-            self.Refresh()
-            self.Update()
-
-        return img_ok
 
     @debug_fxn
     def zoom_in(self, zoom_amt, do_refresh=True):
