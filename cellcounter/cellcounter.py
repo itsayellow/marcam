@@ -440,6 +440,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             wx.CallAfter(self.get_img_wincenter)
 
     @debug_fxn
+    def refresh_mark_area(self, mark_pt):
+        # force a paint event with Refresh and Update
+        #   to force PaintRect to paint new selected cross
+        (pos_x, pos_y) = self.img2win_coord(mark_pt[0] + 0.5, mark_pt[1] + 0.5)
+        # refresh square size should be >= than cross size
+        sq_size = 16
+        self.RefreshRect(
+                wx.Rect(
+                    pos_x - sq_size/2, pos_y - sq_size/2,
+                    sq_size, sq_size
+                    )
+                )
+
+    @debug_fxn
     def draw_at_point(self, img_float_x, img_float_y):
         img_x = int(img_float_x)
         img_y = int(img_float_y)
@@ -450,53 +464,46 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # signal to parent that a new unsaved state has happened
         self.content_saved = False
 
-        # force a paint event with Refresh and Update
-        #   to force PaintRect to paint new cross
-        (pos_x, pos_y) = self.img2win_coord(img_x + 0.5, img_y + 0.5)
-        # refresh square size should be >= than cross size
-        sq_size = 16
-        self.RefreshRect(
-                wx.Rect(
-                    pos_x - sq_size/2, pos_y - sq_size/2,
-                    sq_size, sq_size
-                    )
-                )
+        self.refresh_mark_area((img_x, img_y))
         self.Update()
         self.history.new(['MARK',(img_x, img_y)])
 
     @debug_fxn
-    def deselect_mark(self, desel_pt):
+    def deselect_mark(self, desel_pt, internal=False):
         self.marks_selected.remove(desel_pt)
-        #self.history.new(['DESELECT', desel_pt])
-        # force a paint event with Refresh and Update
-        #   to force PaintRect to paint new selected cross
-        (pos_x, pos_y) = self.img2win_coord(desel_pt[0] + 0.5, desel_pt[1] + 0.5)
-        # refresh square size should be >= than cross size
-        sq_size = 16
-        self.RefreshRect(
-                wx.Rect(
-                    pos_x - sq_size/2, pos_y - sq_size/2,
-                    sq_size, sq_size
-                    )
-                )
-        self.Update()
+        self.refresh_mark_area(desel_pt)
+        if not internal:
+            self.Update()
 
     @debug_fxn
     def deselect_all_marks(self):
         for mark_pt in self.marks_selected:
-            # force a paint event with Refresh and Update
-            #   to force PaintRect to paint new selected cross
-            (pos_x, pos_y) = self.img2win_coord(mark_pt[0] + 0.5, mark_pt[1] + 0.5)
-            # refresh square size should be >= than cross size
-            sq_size = 16
-            self.RefreshRect(
-                    wx.Rect(
-                        pos_x - sq_size/2, pos_y - sq_size/2,
-                        sq_size, sq_size
-                        )
-                    )
-        #self.history.new(['DESELECT_LIST', self.marks_selected])
+            deselect_mark(self, mark_pt, internal=True)
+
         self.marks_selected = []
+        self.Update()
+
+    @debug_fxn
+    def delete_mark(self, mark_pt, internal=False):
+        self.marks_selected.remove(mark_pt)
+        self.marks.remove(mark_pt)
+        self.refresh_mark_area(mark_pt)
+        if not internal:
+            self.history.new(['DELETE_MARK', mark_pt])
+            self.Update()
+
+    @debug_fxn
+    def delete_selected_marks(self):
+        print(self.marks_selected)
+        # make list copy
+        # so we can loop through copy and still delete from orig
+        # also so we have list later on for history
+        marks_selected = self.marks_selected.copy()
+
+        for mark_pt in marks_selected:
+            self.delete_mark(mark_pt, internal=True)
+
+        self.history.new(['DELETE_MARK_LIST', marks_selected])
         self.Update()
 
     @debug_fxn
@@ -523,32 +530,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if is_appending:
                 # append mark to selected mark
                 self.marks_selected.append(sel_pt)
-                #self.history.new(['SELECT_APPEND',sel_pt])
             elif is_toggling:
                 # toggle selection status of mark
                 if sel_pt in self.marks_selected:
                     self.deselect_mark(sel_pt)
                 else:
                     self.marks_selected.append(sel_pt)
-                    #self.history.new(['SELECT_APPEND',sel_pt])
             else:
                 # deselect all currently selected marks,
                 # select this mark
                 self.deselect_all_marks()
                 self.marks_selected = [sel_pt,]
-                #self.history.new(['SELECT', sel_pt])
 
-            # force a paint event with Refresh and Update
-            #   to force PaintRect to paint new selected cross
-            (pos_x, pos_y) = self.img2win_coord(sel_pt[0] + 0.5, sel_pt[1] + 0.5)
-            # refresh square size should be >= than cross size
-            sq_size = 16
-            self.RefreshRect(
-                    wx.Rect(
-                        pos_x - sq_size/2, pos_y - sq_size/2,
-                        sq_size, sq_size
-                        )
-                    )
+            self.refresh_mark_area(sel_pt)
             self.Update()
         else:
             if not is_appending and not is_toggling:
@@ -813,12 +807,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # DEBUG DELETEME
         debugmsg(DEBUG_MISC,
-                "MSC:src_pos=(%.2f,%.2f)\n"%(src_pos_x,src_pos_y) + \
-                "    src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
-                "    dest_pos=(%.2f,%.2f)\n"%(dest_pos_x,dest_pos_y) + \
-                "    dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
-                "    rect_pos=(%.2f,%.2f)\n"%(rect_pos_log_x,rect_pos_log_y) + \
-                "    rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
+                "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
+                "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
+                "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
+                "dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
+                "    rect_pos=(%.2f,%.2f)\t"%(rect_pos_log_x,rect_pos_log_y) + \
+                "rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
                 )
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
@@ -848,7 +842,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
         pts_in_box = []
-        for (x, y) in self.marks:
+        marks_unselected = [x for x in self.marks if x not in self.marks_selected]
+        for (x, y) in marks_unselected:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
@@ -857,7 +852,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
                     # NOTE: if you change the size of this bmp, also change
-                    #   the RefreshRect size in self.draw_at_point()
+                    #   the RefreshRect size in self.refresh_mark_area()
                     dc.DrawBitmap(const.CROSS_11x11_RED_BMP, x_win - 6, y_win - 6)
 
         pts_in_box = []
@@ -870,7 +865,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     # only draw bitmap if this is not a duplicate
                     pts_in_box.append((x_win, y_win))
                     # NOTE: if you change the size of this bmp, also change
-                    #   the RefreshRect size in self.draw_at_point()
+                    #   the RefreshRect size in self.refresh_mark_area()
                     dc.DrawBitmap(const.CROSS_11x11_YELLOW_BMP, x_win - 6, y_win - 6)
 
     @debug_fxn
@@ -1437,7 +1432,7 @@ class MainWindow(wx.Frame):
         self.Show(True)
 
         debugmsg(DEBUG_MISC,
-                "MSC:self.img_panel size:\n    " + \
+                "MSC:self.img_panel size: " + \
                 repr(self.img_panel.GetClientSize())
                 )
 
@@ -1451,10 +1446,10 @@ class MainWindow(wx.Frame):
     def on_key_down(self, evt):
         KeyCode = evt.GetKeyCode()
         debugmsg(DEBUG_KEYPRESS,
-                "KEY:Key Down:\n" + \
-                "    KeyCode: " + KeyCode + "\n" + \
-                "    RawKeyCode: " + evt.GetRawKeyCode() + "\n" + \
-                "    Position: " + evt.GetPosition()
+                "KEY:Key Down" + \
+                "    KeyCode: %d"%KeyCode + \
+                "    RawKeyCode: %d"%(evt.GetRawKeyCode()) + \
+                "    Position: " + repr(evt.GetPosition())
                 )
 
         if KeyCode == 91:
@@ -1488,6 +1483,10 @@ class MainWindow(wx.Frame):
         if KeyCode == 317:
             # down key
             self.img_panel.pan_down(const.SCROLL_KEY_SPEED)
+
+        if KeyCode == 127 or KeyCode == 8:
+            # Delete (127) or Backspace (8)
+            self.img_panel.delete_selected_marks()
 
         if KeyCode == 366:
             # PAGE UP
@@ -1665,6 +1664,7 @@ class MainWindow(wx.Frame):
                         json.dumps(self.img_panel.marks, separators=(',',':'))
                         )
         except IOError:
+            # TODO: need real error dialog
             print("Cannot save current data in file '%s'." % pathname)
 
 
