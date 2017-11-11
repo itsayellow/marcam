@@ -79,13 +79,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     big enough.  If image is smaller than window it is auto-centered
     """
     @debug_fxn
-    def __init__(self, parent, id_=wx.ID_ANY, *args, **kwargs):
+    def __init__(self, parent, app_history, id_=wx.ID_ANY, *args, **kwargs):
         super().__init__(parent, id_, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
         #   proper init)
         self.content_saved = True
-        self.history = []
+        self.history = app_history
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
@@ -152,7 +152,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def set_no_image(self):
         self.content_saved = True
-        self.history = []
+        self.history.reset()
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
@@ -470,12 +470,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
                 )
         self.Update()
-        self.history.append(['MARK',(img_x, img_y)])
+        self.history.new(['MARK',(img_x, img_y)])
 
     @debug_fxn
     def deselect_mark(self, desel_pt):
         self.marks_selected.remove(desel_pt)
-        self.history.append(['DESELECT', desel_pt])
+        self.history.new(['DESELECT', desel_pt])
         # force a paint event with Refresh and Update
         #   to force PaintRect to paint new selected cross
         (pos_x, pos_y) = self.img2win_coord(desel_pt[0] + 0.5, desel_pt[1] + 0.5)
@@ -503,7 +503,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         sq_size, sq_size
                         )
                     )
-        self.history.append(['DESELECT_LIST', self.marks_selected])
+        self.history.new(['DESELECT_LIST', self.marks_selected])
         self.marks_selected = []
         self.Update()
 
@@ -536,20 +536,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if is_appending:
                 # append mark to selected mark
                 self.marks_selected.append(sel_pt)
-                self.history.append(['SELECT_APPEND',sel_pt])
+                self.history.new(['SELECT_APPEND',sel_pt])
             elif is_toggling:
                 # toggle selection status of mark
                 if sel_pt in self.marks_selected:
                     self.deselect_mark(sel_pt)
                 else:
                     self.marks_selected.append(sel_pt)
-                    self.history.append(['SELECT_APPEND',sel_pt])
+                    self.history.new(['SELECT_APPEND',sel_pt])
             else:
                 # deselect all currently selected marks,
                 # select this mark
                 self.deselect_all_marks()
                 self.marks_selected = [sel_pt,]
-                self.history.append(['SELECT', sel_pt])
+                self.history.new(['SELECT', sel_pt])
 
             # force a paint event with Refresh and Update
             #   to force PaintRect to paint new selected cross
@@ -1243,6 +1243,48 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.get_img_wincenter()
 
 
+class EditHistory():
+    """Keeps track of Edit History, undo, redo
+    """
+    def __init__(self):
+        self.history = []
+        self.history_ptr = -1
+
+    def reset(self):
+        self.history = []
+        self.history_ptr = -1
+
+    def new(self, item):
+        # truncate list so current item is last item
+        self.history = self.history[:self.history_ptr + 1]
+        self.history.append(item)
+        self.history_ptr = len(self.history) - 1
+
+    def undo(self):
+        if self.can_undo():
+            undo_action = self.history[self.history_ptr]
+            self.history_ptr -= 1
+        else:
+            undo_action = None
+
+        return undo_action
+
+    def redo(self):
+        if self.can_redo():
+            self.history_ptr += 1
+            redo_action = self.history[self.history_ptr]
+        else:
+            redo_action = None
+
+        return redo_action
+    
+    def can_undo(self):
+        return self.history and self.history_ptr >= 0
+
+    def can_redo(self):
+        return self.history and self.history_ptr < len(self.history) - 1
+
+
 class DropTarget(wx.FileDropTarget):
     """DropTarget Facilitating dragging file into window to open
     """
@@ -1268,6 +1310,7 @@ class MainWindow(wx.Frame):
         super().__init__(*args, **kwargs)
 
         # internal state
+        self.app_history = EditHistory()
         self.content_saved = True
         self.save_filepath = None
 
@@ -1298,6 +1341,12 @@ class MainWindow(wx.Frame):
         saitem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S', 'Save image file and associated data')
         menubar.Append(file_menu, '&File')
+        edit_menu = wx.Menu()
+        undoitem = edit_menu.Append(wx.ID_UNDO,
+                'Undo\tCtrl+Z', 'Undo last action')
+        redoitem = edit_menu.Append(wx.ID_REDO,
+                'Redo\tShift+Ctrl+Z', 'Redo last undone action')
+        menubar.Append(edit_menu, '&Edit')
         # Tools
         tools_menu = wx.Menu()
         self.markmodeitem = tools_menu.Append(wx.ID_ANY, "&Enable Mark Mode\tCtrl+M")
@@ -1338,7 +1387,7 @@ class MainWindow(wx.Frame):
         mybox = wx.BoxSizer(wx.VERTICAL)
 
         # ImageScrolledCanvas is the cleanest, probably most portable
-        self.img_panel = ImageScrolledCanvas(self)
+        self.img_panel = ImageScrolledCanvas(self, self.app_history)
 
         # make ImageScrolledCanvas Drag and Drop Target
         self.img_panel.SetDropTarget(DropTarget(self.img_panel))
@@ -1346,16 +1395,23 @@ class MainWindow(wx.Frame):
         mybox.Add(self.img_panel, 1, wx.EXPAND)
         self.SetSizer(mybox)
 
-        # setup event handlers for toolbar, menus
+        # setup event handlers for toolbar
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
         self.Bind(wx.EVT_TOOL, self.on_markmode_toggle, marktool)
 
+        # setup event handlers for menus
         self.Bind(wx.EVT_MENU, self.on_quit, fitem)
+        # File menu items
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
         self.Bind(wx.EVT_MENU, self.on_close, citem)
         self.Bind(wx.EVT_MENU, self.on_save, sitem)
         self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
+        # Edit menu items
+        self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
+        self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
+        # Tools menu items
         self.Bind(wx.EVT_MENU, self.on_markmode_toggle, self.markmodeitem)
+        # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
 
@@ -1454,6 +1510,8 @@ class MainWindow(wx.Frame):
             self.markmodeitem.SetItemLabel("Disable &Mark Mode\tCtrl+M")
             self.toolbar.ToggleTool(self.mark_id, True) # works!
             #self.marktool.Toggle(True) # toggles state but not bitmap!
+            # exiting select mode so no marks can be selected
+            self.img_panel.deselect_all_marks()
         else:
             self.markmodeitem.SetItemLabel("Enable &Mark Mode\tCtrl+M")
             self.toolbar.ToggleTool(self.mark_id, False) # works!
@@ -1562,6 +1620,16 @@ class MainWindow(wx.Frame):
             self.save_filepath = pathname
             # signify we have saved content
             self.save_notify()
+
+    @debug_fxn
+    def on_undo(self, evt):
+        print("self.app_history.undo()")
+        print(self.app_history.undo())
+
+    @debug_fxn
+    def on_redo(self, evt):
+        print("self.app_history.redo()")
+        print(self.app_history.redo())
 
     @debug_fxn
     def save_notify(self):
