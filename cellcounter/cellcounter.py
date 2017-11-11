@@ -1341,11 +1341,14 @@ class MainWindow(wx.Frame):
         saitem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S', 'Save image file and associated data')
         menubar.Append(file_menu, '&File')
+        # Edit
         edit_menu = wx.Menu()
         undoitem = edit_menu.Append(wx.ID_UNDO,
                 'Undo\tCtrl+Z', 'Undo last action')
         redoitem = edit_menu.Append(wx.ID_REDO,
                 'Redo\tShift+Ctrl+Z', 'Redo last undone action')
+        selallitem = edit_menu.Append(wx.ID_SELECTALL,
+                'Select All\tCtrl+A', 'Select all marks')
         menubar.Append(edit_menu, '&Edit')
         # Tools
         tools_menu = wx.Menu()
@@ -1413,6 +1416,7 @@ class MainWindow(wx.Frame):
         # Edit menu items
         self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
+        self.Bind(wx.EVT_MENU, self.on_select_all, selallitem)
         # Tools menu items
         self.Bind(wx.EVT_MENU, self.on_markmode_toggle, self.markmodeitem)
         # Help menu items
@@ -1629,13 +1633,20 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_undo(self, evt):
+        # TODO
         print("self.app_history.undo()")
         print(self.app_history.undo())
 
     @debug_fxn
     def on_redo(self, evt):
+        # TODO
         print("self.app_history.redo()")
         print(self.app_history.redo())
+
+    @debug_fxn
+    def on_select_all(self, evt):
+        # TODO
+        print("Select ALL")
 
     @debug_fxn
     def save_notify(self):
