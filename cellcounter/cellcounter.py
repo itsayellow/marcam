@@ -475,7 +475,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def deselect_mark(self, desel_pt):
         self.marks_selected.remove(desel_pt)
-        self.history.new(['DESELECT', desel_pt])
+        #self.history.new(['DESELECT', desel_pt])
         # force a paint event with Refresh and Update
         #   to force PaintRect to paint new selected cross
         (pos_x, pos_y) = self.img2win_coord(desel_pt[0] + 0.5, desel_pt[1] + 0.5)
@@ -503,7 +503,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         sq_size, sq_size
                         )
                     )
-        self.history.new(['DESELECT_LIST', self.marks_selected])
+        #self.history.new(['DESELECT_LIST', self.marks_selected])
         self.marks_selected = []
         self.Update()
 
@@ -536,20 +536,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if is_appending:
                 # append mark to selected mark
                 self.marks_selected.append(sel_pt)
-                self.history.new(['SELECT_APPEND',sel_pt])
+                #self.history.new(['SELECT_APPEND',sel_pt])
             elif is_toggling:
                 # toggle selection status of mark
                 if sel_pt in self.marks_selected:
                     self.deselect_mark(sel_pt)
                 else:
                     self.marks_selected.append(sel_pt)
-                    self.history.new(['SELECT_APPEND',sel_pt])
+                    #self.history.new(['SELECT_APPEND',sel_pt])
             else:
                 # deselect all currently selected marks,
                 # select this mark
                 self.deselect_all_marks()
                 self.marks_selected = [sel_pt,]
-                self.history.new(['SELECT', sel_pt])
+                #self.history.new(['SELECT', sel_pt])
 
             # force a paint event with Refresh and Update
             #   to force PaintRect to paint new selected cross
@@ -1247,18 +1247,24 @@ class EditHistory():
     """Keeps track of Edit History, undo, redo
     """
     def __init__(self):
+        self.undo_menu_item = None
+        self.redo_menu_item = None
         self.history = []
         self.history_ptr = -1
+        self.update_menu_items()
 
     def reset(self):
         self.history = []
         self.history_ptr = -1
+        self.update_menu_items()
 
     def new(self, item):
-        # truncate list so current item is last item
+        # truncate list so current item is last item (makes empty list
+        #   if self.history_ptr == -1)
         self.history = self.history[:self.history_ptr + 1]
         self.history.append(item)
         self.history_ptr = len(self.history) - 1
+        self.update_menu_items()
 
     def undo(self):
         if self.can_undo():
@@ -1267,6 +1273,7 @@ class EditHistory():
         else:
             undo_action = None
 
+        self.update_menu_items()
         return undo_action
 
     def redo(self):
@@ -1276,13 +1283,28 @@ class EditHistory():
         else:
             redo_action = None
 
+        self.update_menu_items()
         return redo_action
     
     def can_undo(self):
-        return self.history and self.history_ptr >= 0
+        return (len(self.history) > 0) and (self.history_ptr >= 0)
 
     def can_redo(self):
-        return self.history and self.history_ptr < len(self.history) - 1
+        return (len(self.history) > 0) and (self.history_ptr < len(self.history) - 1)
+
+    def update_menu_items(self):
+        if self.undo_menu_item is not None:
+            self.undo_menu_item.Enable(self.can_undo())
+        if self.redo_menu_item is not None:
+            self.redo_menu_item.Enable(self.can_redo())
+
+    def register_undo_menu_item(self, undo_menu_item):
+        self.undo_menu_item = undo_menu_item
+        self.update_menu_items()
+
+    def register_redo_menu_item(self, redo_menu_item):
+        self.redo_menu_item = redo_menu_item
+        self.update_menu_items()
 
 
 class DropTarget(wx.FileDropTarget):
@@ -1358,6 +1380,11 @@ class MainWindow(wx.Frame):
         menubar.Append(help_menu, "&Help")
 
         self.SetMenuBar(menubar)
+
+        # register Undo, Redo menu items so EditHistory obj can 
+        #   enable or disable them as needed
+        self.app_history.register_undo_menu_item(undoitem)
+        self.app_history.register_redo_menu_item(redoitem)
 
         # toolbar stuff
         self.toolbar = self.CreateToolBar()
