@@ -68,11 +68,13 @@ class EditHistory():
         self.history_ptr = -1
         self.update_menu_items()
 
+    @debug_fxn
     def reset(self):
         self.history = []
         self.history_ptr = -1
         self.update_menu_items()
 
+    @debug_fxn
     def new(self, item):
         # truncate list so current item is last item (makes empty list
         #   if self.history_ptr == -1)
@@ -81,6 +83,7 @@ class EditHistory():
         self.history_ptr = len(self.history) - 1
         self.update_menu_items()
 
+    @debug_fxn
     def undo(self):
         if self.can_undo():
             undo_action = self.history[self.history_ptr]
@@ -91,6 +94,7 @@ class EditHistory():
         self.update_menu_items()
         return undo_action
 
+    @debug_fxn
     def redo(self):
         if self.can_redo():
             self.history_ptr += 1
@@ -101,22 +105,27 @@ class EditHistory():
         self.update_menu_items()
         return redo_action
     
+    @debug_fxn
     def can_undo(self):
         return (len(self.history) > 0) and (self.history_ptr >= 0)
 
+    @debug_fxn
     def can_redo(self):
         return (len(self.history) > 0) and (self.history_ptr < len(self.history) - 1)
 
+    @debug_fxn
     def update_menu_items(self):
         if self.undo_menu_item is not None:
             self.undo_menu_item.Enable(self.can_undo())
         if self.redo_menu_item is not None:
             self.redo_menu_item.Enable(self.can_redo())
 
+    @debug_fxn
     def register_undo_menu_item(self, undo_menu_item):
         self.undo_menu_item = undo_menu_item
         self.update_menu_items()
 
+    @debug_fxn
     def register_redo_menu_item(self, redo_menu_item):
         self.redo_menu_item = redo_menu_item
         self.update_menu_items()
@@ -129,6 +138,7 @@ class DropTarget(wx.FileDropTarget):
         super().__init__(*args, **kwargs)
         self.window_target = window_target
 
+    @debug_fxn
     def OnDropFiles(self, x, y, filenames):
         filename = filenames[0]
         debugmsg(DEBUG_MISC,
@@ -444,6 +454,8 @@ class MainWindow(wx.Frame):
 
         # else: proceed asking to the user the new file to open
 
+        # reset edit history
+        self.app_history.reset()
         # reset filepath for cco file to nothing on close
         self.save_filepath = None
         # reset content_saved in case user didn't save

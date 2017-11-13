@@ -74,7 +74,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_x = 0
         self.img_size_y = 0
         self.mark_mode = False
-        self.parent = None    # TODO: do we need this?
+        self.parent = parent    # TODO: do we need this?
         self.marks = []
         self.marks_selected = []
         self.zoom = None
@@ -97,9 +97,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # By default, pixels per unit scroll is (1,1)
         self.SetScrollRate(1, 1)
 
-        # init parent pointer
-        self.parent = parent
-
         # setup possible magnification list
         mag_frac = 0.1
         mag_len = 69
@@ -113,7 +110,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom = self.zoom_list[self.zoom_idx]
 
         # setup handlers
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_PAINT, self.on_paint)
         self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_SCROLLWIN, self.on_scroll)
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
@@ -413,7 +410,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def refresh_mark_area(self, mark_pt):
         # force a paint event with Refresh and Update
-        #   to force PaintRect to paint new selected cross
+        #   to force paint_rect to paint new selected cross
         (pos_x, pos_y) = self.img2win_coord(mark_pt[0] + 0.5, mark_pt[1] + 0.5)
         # refresh square size should be >= than cross size
         sq_size = const.CROSS_REFRESH_SQ_SIZE
@@ -625,7 +622,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     # GetClientSize is size of window graphics not including scrollbars
     # GetSize is size of window including scrollbars
     @debug_fxn
-    def OnPaint(self, evt):
+    def on_paint(self, evt):
         """EVT_PAINT event handler to update window area
 
         Args:
@@ -648,14 +645,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         while upd.HaveRects():
             rect = upd.GetRect()
             # Repaint this rectangle
-            self.PaintRect(dc, rect)
+            self.paint_rect(dc, rect)
             upd.Next()
 
         if DEBUG & DEBUG_TIMING:
             onpaint_eltime = time.time() - start_onpaint
             panel_size = self.GetSize()
             print(
-                    "TIM:OnPaint: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
+                    "TIM:on_paint: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
                         onpaint_eltime,
                         self.zoom,
                         panel_size.x, panel_size.y,
@@ -663,7 +660,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
 
     @debug_fxn
-    def PaintRect(self, dc, rect):
+    def paint_rect(self, dc, rect):
         """Given a rect needing a refresh in window PaintDC, Blit the image
         to fill that rect.
 
