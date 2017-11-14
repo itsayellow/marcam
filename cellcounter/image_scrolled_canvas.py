@@ -475,7 +475,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def delete_selected_marks(self):
-        print(self.marks_selected)
         # make list copy
         # so we can loop through copy and still delete from orig
         # also so we have list later on for history
