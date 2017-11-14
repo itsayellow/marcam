@@ -9,6 +9,7 @@ import argparse
 import os.path
 import zipfile
 import json
+import traceback
 import wx
 import wx.adv
 import wx.html
@@ -674,7 +675,7 @@ def main(argv=None):
     args = process_command_line(argv)
 
     # log situation before doing anything else
-    debugmsg(0, time.asctime(time.gmtime()) + "UTC")
+    debugmsg(0, time.asctime(time.gmtime()) + " UTC")
     debugmsg(0, "Cellcounter v"+const.VERSION_STR)
     uname_obj = os.uname()
     debugmsg(0, "os.uname")
@@ -715,5 +716,8 @@ if __name__ == "__main__":
         print("Stopped by Keyboard Interrupt", file=sys.stderr)
         # exit error code for Ctrl-C
         status = 130
+    except:
+        debugmsg(0, traceback.format_exc())
+        status = 1
 
     sys.exit(status)
