@@ -2,7 +2,9 @@
 #
 # GUI for displaying an image and counting cells
 
+import os
 import sys
+import time
 import argparse
 import os.path
 import zipfile
@@ -32,14 +34,13 @@ if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     # if we're being executed from inside a Mac app, turn off DEBUG
     logfile = os.path.join(os.path.expanduser("~"),'cellcounter.log')
     out_fh = open(logfile, 'w')
-    print("Hello.", file=out_fh)
 
-    #DEBUG = 0
+    DEBUG = 0
     DEBUG_FILE = out_fh
 
 
 def debugmsg(debug_bit, *args, **kwargs):
-    if DEBUG & debug_bit:
+    if debug_bit == 0 or DEBUG & debug_bit:
         print(*args, **kwargs, file=DEBUG_FILE)
 
 
@@ -608,8 +609,6 @@ class MainWindow(wx.Frame):
         info.SetDescription("Counting cells in biological images.")
         info.SetCopyright("(C) 2017 Matthew A. Clapp")
 
-        print("iblik: Matthew A Clapp")
-
         wx.adv.AboutBox(info)
 
     @debug_fxn
@@ -674,8 +673,20 @@ def main(argv=None):
     #   of the application icon to start the icon
     args = process_command_line(argv)
 
-    debugmsg(DEBUG_MISC, repr(argv))
-    debugmsg(DEBUG_MISC, repr(args))
+    # log situation before doing anything else
+    debugmsg(0, time.asctime(time.gmtime()) + "UTC")
+    debugmsg(0, "Cellcounter v"+const.VERSION_STR)
+    uname_obj = os.uname()
+    debugmsg(0, "os.uname")
+    debugmsg(0, "    sysname:" + uname_obj.sysname)
+    debugmsg(0, "    nodename:" + uname_obj.nodename)
+    debugmsg(0, "    release:" + uname_obj.release)
+    debugmsg(0, "    version:" + uname_obj.version)
+    debugmsg(0, "    machine:" + uname_obj.machine)
+    # see what argv and args are
+    debugmsg(0, repr(argv))
+    debugmsg(0, repr(args))
+
     # setup main wx event loop
     myapp = wx.App()
     main_win = MainWindow(args.srcfiles, None)
