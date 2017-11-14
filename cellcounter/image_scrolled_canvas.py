@@ -467,7 +467,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def deselect_all_marks(self):
-        for mark_pt in self.marks_selected:
+        marks_selected = self.marks_selected.copy()
+        for mark_pt in marks_selected:
             self.deselect_mark(mark_pt, internal=True)
         self.marks_selected = []
         self.Update()
@@ -554,6 +555,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if not is_appending and not is_toggling:
                 # not selecting any point deselects all points
                 self.deselect_all_marks()
+
+    @debug_fxn
+    def select_all_marks(self):
+        marks_unselected = [x for x in self.marks if x not in self.marks_selected]
+        # copy all marks into marks_selected
+        self.marks_selected = self.marks.copy()
+        # set all unselected marks for refresh to allow color change
+        for mark in marks_unselected:
+            self.refresh_mark_area(mark)
+        self.Update()
 
     @debug_fxn
     def on_scroll(self, evt):

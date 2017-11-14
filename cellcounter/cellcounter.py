@@ -198,7 +198,7 @@ class MainWindow(wx.Frame):
                 'Undo\tCtrl+Z', 'Undo last action')
         redoitem = edit_menu.Append(wx.ID_REDO,
                 'Redo\tShift+Ctrl+Z', 'Redo last undone action')
-        selallitem = edit_menu.Append(wx.ID_SELECTALL,
+        self.selallitem = edit_menu.Append(wx.ID_SELECTALL,
                 'Select All\tCtrl+A', 'Select all marks')
         menubar.Append(edit_menu, '&Edit')
         # Tools
@@ -300,7 +300,7 @@ class MainWindow(wx.Frame):
         # Edit menu items
         self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
-        self.Bind(wx.EVT_MENU, self.on_select_all, selallitem)
+        self.Bind(wx.EVT_MENU, self.on_select_all, self.selallitem)
         # Tools menu items
         self.Bind(wx.EVT_MENU, self.on_markmode_toggle, self.markmodeitem)
         # Help menu items
@@ -406,17 +406,21 @@ class MainWindow(wx.Frame):
         # update toolbartoolbase
         # update menu item
         if self.img_panel.mark_mode:
+            # MARK MODE
             self.markmodeitem.SetItemLabel("Disable &Mark Mode\tCtrl+M")
             # NOTE: must use this, can't talk to ToolbarBase item directly
             self.toolbar.ToggleTool(self.mark_id, True) # works!
             # exiting select mode so no marks can be selected
             self.img_panel.deselect_all_marks()
             self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
+            self.selallitem.Enable(False)
         else:
+            # SELECT MODE
             self.markmodeitem.SetItemLabel("Enable &Mark Mode\tCtrl+M")
             # NOTE: must use this, can't talk to ToolbarBase item directly
             self.toolbar.ToggleTool(self.mark_id, False) # works!
             self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_NONE))
+            self.selallitem.Enable(True)
 
     @debug_fxn
     def on_open(self, evt):
@@ -560,8 +564,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_undo(self, evt):
         action = self.app_history.undo()
-        print("self.app_history.undo()")
-        print(action)
+        debugmsg(DEBUG_MISC, "MSC:undo: "+repr(action))
         if action[0]=='MARK':
             self.img_panel.delete_mark(action[1], internal=False)
         if action[0]=='DELETE_MARK_LIST':
@@ -570,8 +573,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_redo(self, evt):
         action = self.app_history.redo()
-        print("self.app_history.redo()")
-        print(action)
+        debugmsg(DEBUG_MISC, "MSC:redo: "+repr(action))
         if action[0]=='MARK':
             self.img_panel.mark_point(action[1])
         if action[0]=='DELETE_MARK_LIST':
@@ -579,8 +581,7 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_select_all(self, evt):
-        # TODO
-        print("Select ALL")
+        self.img_panel.select_all_marks()
 
     @debug_fxn
     def save_notify(self):
@@ -608,8 +609,6 @@ class MainWindow(wx.Frame):
         except IOError:
             # TODO: need real error dialog
             print("Cannot save current data in file '%s'." % pathname)
-
-
 
     @debug_fxn
     def on_about(self, evt):
