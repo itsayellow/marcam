@@ -274,7 +274,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if (0 <= img_x <= self.img_size_x and
                 0 <= img_y <= self.img_size_y):
             if self.mark_mode:
-                self.draw_at_point(img_x, img_y)
+                img_x_int = round(img_x)
+                img_y_int = round(img_y)
+                self.mark_point(img_x_int, img_y_int)
+                self.history.new(['MARK',(img_x_int, img_y_int)])
             else:
                 # selecting with no mark nearby deselects
                 # find the closest mark to click, as long as it is close
@@ -430,10 +433,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
 
     @debug_fxn
-    def draw_at_point(self, img_float_x, img_float_y):
-        img_x = int(img_float_x)
-        img_y = int(img_float_y)
+    def mark_point(self, img_x, img_y):
+        """Mark image coordinates with cross in window
 
+        Args:
+            img_x (int): x in image coordinates mark location
+            img_y (int): y in image coordinates mark location
+        """
         debugmsg(DEBUG_MISC, "MSC: point (%d, %d)"%(img_x, img_y))
 
         self.marks.append((img_x, img_y))
@@ -444,7 +450,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         self.refresh_mark_area((img_x, img_y))
         self.Update()
-        self.history.new(['MARK',(img_x, img_y)])
 
     @debug_fxn
     def deselect_mark(self, desel_pt, internal=False):
@@ -462,15 +467,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def delete_mark(self, mark_pt, internal=False):
-        self.marks_selected.remove(mark_pt)
         self.marks.remove(mark_pt)
+        # deleted mark may or may not be selected
+        try:
+            self.marks_selected.remove(mark_pt)
+        except ValueError:
+            pass
         self.refresh_mark_area(mark_pt)
         # signal to parent that a new unsaved state has happened
         self.content_saved = False
         if not internal:
             # tell parent UI new total marks number
             self.update_mark_total()
-            self.history.new(['DELETE_MARK', mark_pt])
             self.Update()
 
     @debug_fxn
@@ -483,7 +491,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.delete_mark(mark_pt, internal=True)
         # tell parent UI new total marks number
         self.update_mark_total()
-        self.history.new(['DELETE_MARK_LIST', marks_selected])
         self.Update()
 
     @debug_fxn

@@ -376,6 +376,7 @@ class MainWindow(wx.Frame):
         if KeyCode == 127 or KeyCode == 8:
             # Delete (127) or Backspace (8)
             self.img_panel.delete_selected_marks()
+            self.app_history.new(['DELETE_MARK_LIST', marks_selected])
 
         if KeyCode == 366:
             # PAGE UP
@@ -558,15 +559,21 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_undo(self, evt):
-        # TODO
+        action = self.app_history.undo()
         print("self.app_history.undo()")
-        print(self.app_history.undo())
+        print(action)
+        if action[0]=='MARK':
+            self.img_panel.delete_mark(action[1], internal=False)
+        # TODO: DELETE_LIST
 
     @debug_fxn
     def on_redo(self, evt):
         # TODO
+        action = self.app_history.redo()
         print("self.app_history.redo()")
-        print(self.app_history.redo())
+        print(action)
+        if action[0]=='MARK':
+            self.img_panel.mark_point(action[1][0], action[1][1])
 
     @debug_fxn
     def on_select_all(self, evt):
