@@ -25,19 +25,22 @@ from const import (
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
+DEBUG_FILE = sys.stdout
 ICON_DIR = os.path.dirname(os.path.realpath(__file__))
 
 if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     # if we're being executed from inside a Mac app, turn off DEBUG
-    DEBUG = 0
-    #DEBUG_FILE = os.path.join(os.path.expanduser("~"),'cellcounter.log')
-    #with open(DEBUG_FILE, 'w') as out_fh:
-    #    print("Turning off debug.", file=out_fh)
+    logfile = os.path.join(os.path.expanduser("~"),'cellcounter.log')
+    out_fh = open(logfile, 'w')
+    print("Hello.", file=out_fh)
+
+    #DEBUG = 0
+    DEBUG_FILE = out_fh
 
 
 def debugmsg(debug_bit, *args, **kwargs):
     if DEBUG & debug_bit:
-        print(*args, **kwargs)
+        print(*args, **kwargs, file=DEBUG_FILE)
 
 
 # debug decorator that announces function call/entry and lists args
@@ -436,7 +439,14 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
+        self.load_image_from_path(img_path)
 
+    @debug_fxn
+    def load_image_from_path(self, img_path):
+        """Given full img_path, load image into app
+
+        Separate from on_open so we can use this with argv_emulation
+        """
         # check for 1sc files and get image data to send to Image
         (_, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".1sc":
@@ -664,6 +674,8 @@ def main(argv=None):
     #   of the application icon to start the icon
     args = process_command_line(argv)
 
+    debugmsg(DEBUG_MISC, repr(argv))
+    debugmsg(DEBUG_MISC, repr(args))
     # setup main wx event loop
     myapp = wx.App()
     main_win = MainWindow(args.srcfiles, None)
