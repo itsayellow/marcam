@@ -671,7 +671,7 @@ def process_command_line(argv):
 def debug_main():
     # log situation before doing anything else
     debugmsg(0, time.asctime(time.gmtime()) + " UTC")
-    debugmsg(0, "Cellcounter v"+const.VERSION_STR)
+    debugmsg(0, "Cellcounter version "+const.VERSION_STR)
     uname_obj = os.uname()
     debugmsg(0, "os.uname")
     debugmsg(0, "    sysname:" + uname_obj.sysname)
