@@ -57,7 +57,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     big enough.  If image is smaller than window it is auto-centered
     """
     @debug_fxn
-    def __init__(self, parent, app_history, id_=wx.ID_ANY, *args, **kwargs):
+    def __init__(self, parent, app_history, marks_num_update_fxn,
+            id_=wx.ID_ANY, *args, **kwargs):
         super().__init__(parent, id_, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
@@ -76,6 +77,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.mark_mode = False
         self.parent = parent    # TODO: do we need this?
         self.marks = []
+        self.marks_num_update_fxn = marks_num_update_fxn
         self.marks_selected = []
         self.zoom = None
         self.zoom_idx = None
@@ -116,6 +118,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
 
+        # tell parent UI new total marks number (0)
+        self.update_mark_total()
+
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
         self.Refresh()
@@ -145,6 +150,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # make sure canvas is no larger than window
         self.set_virt_size_with_min()
+
+        # tell parent UI new total marks number
+        self.update_mark_total()
 
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
@@ -431,6 +439,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.marks.append((img_x, img_y))
         # signal to parent that a new unsaved state has happened
         self.content_saved = False
+        # tell parent UI new total marks number
+        self.update_mark_total()
 
         self.refresh_mark_area((img_x, img_y))
         self.Update()
@@ -455,7 +465,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.marks_selected.remove(mark_pt)
         self.marks.remove(mark_pt)
         self.refresh_mark_area(mark_pt)
+        # signal to parent that a new unsaved state has happened
+        self.content_saved = False
         if not internal:
+            # tell parent UI new total marks number
+            self.update_mark_total()
             self.history.new(['DELETE_MARK', mark_pt])
             self.Update()
 
@@ -468,8 +482,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         marks_selected = self.marks_selected.copy()
         for mark_pt in marks_selected:
             self.delete_mark(mark_pt, internal=True)
+        # tell parent UI new total marks number
+        self.update_mark_total()
         self.history.new(['DELETE_MARK_LIST', marks_selected])
         self.Update()
+
+    @debug_fxn
+    def update_mark_total(self):
+        # tell parent UI new total marks number
+        if self.marks_num_update_fxn is not None:
+            self.marks_num_update_fxn(len(self.marks))
 
     @debug_fxn
     def select_at_point(self, click_img_x, click_img_y, is_appending, is_toggling=False):

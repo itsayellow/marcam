@@ -216,13 +216,13 @@ class MainWindow(wx.Frame):
         # toolbar stuff
         self.toolbar = self.CreateToolBar()
         debugmsg(DEBUG_MISC, "MSC:ICON_DIR=%s"%(ICON_DIR))
-        obmp = os.path.join(ICON_DIR, 'topen32.png')
-        otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', wx.Bitmap(obmp))
-        markbmp = os.path.join(ICON_DIR, 'marktool32.png')
+        obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
+        otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', obmp)
+        markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'marktool32.png'))
         marktool = self.toolbar.AddCheckTool(
                 wx.ID_ANY,
                 'Point/Mark',
-                wx.Bitmap(markbmp),
+                markbmp,
                 )
         self.mark_id = marktool.GetId()
         self.toolbar.Realize()
@@ -236,16 +236,49 @@ class MainWindow(wx.Frame):
         #   probably with more than one Panel we need to worry about which
         #       has keyboard focus
 
-        # expand img_panel to fill space
-        mybox = wx.BoxSizer(wx.VERTICAL)
+        # init marks_num_display before ImageScrolledCanvas so ISC can
+        #   update number on its init
+        # TODO: find width of "999" text to give to size
+        self.marks_num_display = wx.StaticText(self, wx.ID_ANY, size=wx.Size(30,-1))
 
-        # ImageScrolledCanvas is the cleanest, probably most portable
-        self.img_panel = ImageScrolledCanvas(self, self.app_history)
-
+        # ImageScrolledCanvas is the cleanest, fastest implementation for
+        #   what we need
+        self.img_panel = ImageScrolledCanvas(
+                self,
+                self.app_history,
+                self.marks_num_update
+                )
         # make ImageScrolledCanvas Drag and Drop Target
         self.img_panel.SetDropTarget(DropTarget(self.img_panel))
 
-        mybox.Add(self.img_panel, 1, wx.EXPAND)
+        # Horizontal sizer for home-made toolbar to allow for mark count
+        mytoolbar = wx.BoxSizer(wx.HORIZONTAL)
+        #but1 = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT)
+        #but1.SetBitmap(obmp)
+        #but2 = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT)
+        #but2.SetBitmap(markbmp)
+        #mytoolbar.Add(
+        #        but1,
+        #        proportion=0, flag=0, border=0
+        #        )
+        #mytoolbar.Add(
+        #        but2,
+        #        proportion=0, flag=0, border=0
+        #        )
+        mytoolbar.AddStretchSpacer(1)
+        mytoolbar.Add(
+                wx.StaticText(self, wx.ID_ANY, "Marks:"),
+                proportion=0, flag=0, border=0)
+        mytoolbar.Add(self.marks_num_display, proportion=0, flag=0, border=0)
+
+        # Vertical top-level sizer for main window
+        mybox = wx.BoxSizer(wx.VERTICAL)
+        # Don't stretch vertical of toolbar,
+        #   expand horiz to fill window width
+        mybox.Add(mytoolbar, proportion=0, flag=wx.EXPAND)
+        # Fully stretch vertical of img panel to fill window,
+        #   expand horiz to fill window width
+        mybox.Add(self.img_panel, proportion=1, flag=wx.EXPAND)
         self.SetSizer(mybox)
 
         # setup event handlers for toolbar
@@ -282,6 +315,10 @@ class MainWindow(wx.Frame):
                 "MSC:self.img_panel size: " + \
                 repr(self.img_panel.GetClientSize())
                 )
+
+    @debug_fxn
+    def marks_num_update(self, mark_total):
+        self.marks_num_display.SetLabel("%d"%mark_total)
 
     @debug_fxn
     def on_quit(self, evt):
@@ -364,14 +401,16 @@ class MainWindow(wx.Frame):
         # update menu item
         if self.img_panel.mark_mode:
             self.markmodeitem.SetItemLabel("Disable &Mark Mode\tCtrl+M")
+            # NOTE: must use this, can't talk to ToolbarBase item directly
             self.toolbar.ToggleTool(self.mark_id, True) # works!
-            #self.marktool.Toggle(True) # toggles state but not bitmap!
             # exiting select mode so no marks can be selected
             self.img_panel.deselect_all_marks()
+            self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
         else:
             self.markmodeitem.SetItemLabel("Enable &Mark Mode\tCtrl+M")
+            # NOTE: must use this, can't talk to ToolbarBase item directly
             self.toolbar.ToggleTool(self.mark_id, False) # works!
-            #self.marktool.Toggle(False) # toggles state but not bitmap!
+            self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_NONE))
 
     @debug_fxn
     def on_open(self, evt):
