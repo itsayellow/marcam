@@ -668,12 +668,7 @@ def process_command_line(argv):
 
     return args
 
-def main(argv=None):
-    # process command line if started from there
-    # Also, py2app sends file(s) to open via argv if file is dragged on top
-    #   of the application icon to start the icon
-    args = process_command_line(argv)
-
+def debug_main():
     # log situation before doing anything else
     debugmsg(0, time.asctime(time.gmtime()) + " UTC")
     debugmsg(0, "Cellcounter v"+const.VERSION_STR)
@@ -684,8 +679,16 @@ def main(argv=None):
     debugmsg(0, "    release:" + uname_obj.release)
     debugmsg(0, "    version:" + uname_obj.version)
     debugmsg(0, "    machine:" + uname_obj.machine)
+    debugmsg(0, "sys.argv")
+    debugmsg(0, repr(sys.argv))
+
+def main(argv=None):
+    # process command line if started from there
+    # Also, py2app sends file(s) to open via argv if file is dragged on top
+    #   of the application icon to start the icon
+    args = process_command_line(argv)
+
     # see what argv and args are
-    debugmsg(0, repr(argv))
     debugmsg(0, repr(args))
 
     # setup main wx event loop
@@ -711,12 +714,14 @@ def main(argv=None):
 
 if __name__ == "__main__":
     try:
+        debug_main()
         status = main(sys.argv)
     except KeyboardInterrupt:
         print("Stopped by Keyboard Interrupt", file=sys.stderr)
         # exit error code for Ctrl-C
         status = 130
     except:
+        debugmsg(0, "\nFatal Error")
         debugmsg(0, traceback.format_exc())
         status = 1
 
