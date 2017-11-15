@@ -461,6 +461,8 @@ class MainWindow(wx.Frame):
         img_path = open_file_dialog.GetPath()
         self.load_ccofile_from_path(img_path)
         self.save_filepath = img_path
+        # we just loaded, so have nothing to save
+        self.save_notify()
 
     @debug_fxn
     def load_ccofile_from_path(self, imdata_path):
