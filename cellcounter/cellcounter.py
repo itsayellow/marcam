@@ -7,9 +7,10 @@ import sys
 import time
 import argparse
 import os.path
-import zipfile
 import json
+import tempfile
 import traceback
+import zipfile
 import wx
 import wx.adv
 import wx.html
@@ -163,6 +164,7 @@ class MainWindow(wx.Frame):
         # internal state
         self.app_history = EditHistory()
         self.content_saved = True
+        self.img_path = None
         self.save_filepath = None
 
         # GUI-related
@@ -173,7 +175,7 @@ class MainWindow(wx.Frame):
         self.init_ui()
         if srcfiles:
             # TODO: are we able to load more than one file?
-            self.load_image_from_path(srcfiles[0])
+            self.load_image_from_file(srcfiles[0])
 
     @debug_fxn
     def init_ui(self):
@@ -182,15 +184,26 @@ class MainWindow(wx.Frame):
         # File
         file_menu = wx.Menu()
         fitem = file_menu.Append(wx.ID_EXIT,
-                'Quit', 'Quit application\tCtrl+Q')
+                'Quit', 'Quit application\tCtrl+Q'
+                )
         oitem = file_menu.Append(wx.ID_OPEN,
-                'Open Image...\tCtrl+O', 'Open image file')
+                'Open Image Data...\tCtrl+O', 'Open .cco image and data file'
+                )
         citem = file_menu.Append(wx.ID_CLOSE,
-                'Close\tCtrl+W', 'Close image')
+                'Close\tCtrl+W', 'Close image'
+                )
         sitem = file_menu.Append(wx.ID_SAVE,
-                'Save Image Data\tCtrl+S', 'Save image file and associated data')
+                'Save Image Data\tCtrl+S', 'Save .cco image and data file'
+                )
         saitem = file_menu.Append(wx.ID_SAVEAS,
-                'Save Image Data As...\tShift+Ctrl+S', 'Save image file and associated data')
+                'Save Image Data As...\tShift+Ctrl+S',
+                'Save .cco image and data file'
+                )
+        file_menu.Append(wx.ID_SEPARATOR)
+        importimitem = file_menu.Append(wx.ID_ANY,
+                'Import Image from File...\tCtrl+I',
+                'Import image from various image file formats'
+                )
         menubar.Append(file_menu, '&File')
         # Edit
         edit_menu = wx.Menu()
@@ -297,6 +310,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_close, citem)
         self.Bind(wx.EVT_MENU, self.on_save, sitem)
         self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
+        self.Bind(wx.EVT_MENU, self.on_import_image, importimitem)
         # Edit menu items
         self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
@@ -424,7 +438,74 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_open(self, evt):
-        """Open Image... menu handler for Main Window
+        """Open Image Data... menu handler for Main Window
+        """
+        # first close current image (if it exists)
+        is_closed = self.on_close(None)
+
+        if not is_closed:
+            return
+
+        # create wildcard for Image files, and for *.1sc files (Bio-Rad)
+        wildcard = "Cellcounter Image Data files (*.cco)|*.cco"
+        open_file_dialog = wx.FileDialog(self,
+                "Open Image Data file",
+                wildcard=wildcard,
+                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+
+        if open_file_dialog.ShowModal() == wx.ID_CANCEL:
+            # the user canceled
+            return
+
+        # get filepath and attempt to open image into bitmap
+        img_path = open_file_dialog.GetPath()
+        self.load_ccofile_from_path(img_path)
+        self.save_filepath = img_path
+
+    @debug_fxn
+    def load_ccofile_from_path(self, imdata_path):
+        # first load image from zip
+        try:
+            with zipfile.ZipFile(imdata_path, 'r') as container_fh:
+                namelist = container_fh.namelist()
+                print(namelist)
+                for name in namelist:
+                    if name.startswith("image."):
+                        with container_fh.open(name, 'r') as img_fh:
+                            if name.endswith(".1sc"):
+                                img = self.file1sc_to_Image(img_fh)
+                            else:
+                                img = wx.Image(img_fh)
+                        # check if img loaded ok
+                        img_ok = img.IsOk()
+
+                        if img_ok:
+                            self.img_panel.init_image(img)
+                            # reset filepath for cco file to nothing if we load new image
+                            # self.img_path if from zip is list, zipfile, member_name
+                            self.img_path = [imdata_path,name]
+                            self.save_filepath = None
+                        else:
+                            self.statusbar.SetStatusText(
+                                    "Image " + img_file + " loading ERROR."
+                                    )
+                    if name == "marks.txt":
+                        with container_fh.open(name, 'r') as json_fh:
+                            marks = json.load(json_fh)
+                        marks = [tuple(x) for x in marks]
+                        print(marks)
+                        self.img_panel.mark_point_list(marks)
+            self.statusbar.SetStatusText(
+                    "Image Data " + imdata_path + " loaded OK."
+                    )
+
+        except IOError:
+            # TODO: need real error dialog
+            print("Cannot open data in file '%s'." % imdata_path)
+
+    @debug_fxn
+    def on_import_image(self, evt):
+        """Import Image... menu handler for Main Window
         """
         # first close current image (if it exists)
         is_closed = self.on_close(None)
@@ -436,7 +517,7 @@ class MainWindow(wx.Frame):
         wildcard = wx.Image.GetImageExtWildcard()
         wildcard = "Image Files " + wildcard + "|Bio-Rad 1sc Files|*.1sc"
         open_file_dialog = wx.FileDialog(self,
-                "Open image file",
+                "Import image file",
                 wildcard=wildcard,
                 style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 
@@ -446,48 +527,54 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
-        self.load_image_from_path(img_path)
+        self.load_image_from_file(img_path)
 
     @debug_fxn
-    def load_image_from_path(self, img_path):
-        """Given full img_path, load image into app
+    def file1sc_to_Image(self, file1sc_file):
+        try:
+            read1sc = biorad1sc_reader.Reader(file1sc_file)
+        except (BioRadInvalidFileError, BioRadParsingError):
+            # img_ok is false if 1sc is not valid 1sc file
+            return False
+
+        (img_x, img_y, img_data) = read1sc.get_img_data()
+
+        # TODO: wx.Image is probably only 8-bits each color channel
+        #   yet we have 16-bit images
+        # wx.Image wants img_x * img_y * 3
+        # TODO: shadow data with full 16-bit info
+        img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
+        img_data_rgb[0::3] = img_data//256
+        img_data_rgb[1::3] = img_data//256
+        img_data_rgb[2::3] = img_data//256
+        img = wx.Image(img_x, img_y, bytes(img_data_rgb))
+        return img
+
+    @debug_fxn
+    def load_image_from_file(self, img_file):
+        """Given full img_file, load image into app
 
         Separate from on_open so we can use this with argv_emulation
         """
         # check for 1sc files and get image data to send to Image
-        (_, imgfile_ext) = os.path.splitext(img_path)
+        (_, imgfile_ext) = os.path.splitext(img_file)
         if imgfile_ext == ".1sc":
-            try:
-                read1sc = biorad1sc_reader.Reader(img_path)
-            except (BioRadInvalidFileError, BioRadParsingError):
-                # img_ok is false if 1sc is not valid 1sc file
-                return False
-
-            (img_x, img_y, img_data) = read1sc.get_img_data()
-
-            # TODO: wx.Image is probably only 8-bits each color channel
-            #   yet we have 16-bit images
-            # wx.Image wants img_x * img_y * 3
-            # TODO: shadow data with full 16-bit info
-            img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
-            img_data_rgb[0::3] = img_data//256
-            img_data_rgb[1::3] = img_data//256
-            img_data_rgb[2::3] = img_data//256
-            img = wx.Image(img_x, img_y, bytes(img_data_rgb))
+            img = self.file1sc_to_Image(img_file)
         else:
-            img = wx.Image(img_path)
+            img = wx.Image(img_file)
 
         # check if img loaded ok
         img_ok = img.IsOk()
 
         if img_ok:
             self.img_panel.init_image(img)
-            self.statusbar.SetStatusText("Image " + img_path + " loaded OK.")
+            self.statusbar.SetStatusText("Image " + img_file + " loaded OK.")
             # reset filepath for cco file to nothing if we load new image
+            self.img_path = img_file
             self.save_filepath = None
         else:
             self.statusbar.SetStatusText(
-                    "Image " + img_path + " loading ERROR."
+                    "Image " + img_file + " loading ERROR."
                     )
 
     @debug_fxn
@@ -518,6 +605,8 @@ class MainWindow(wx.Frame):
         self.content_saved = True
         # make scrolled window show no image
         self.img_panel.set_no_image()
+        # update statusbar text
+        self.statusbar.SetStatusText('Ready.')
 
         return True
 
@@ -538,10 +627,13 @@ class MainWindow(wx.Frame):
     def on_saveas(self, evt):
         """Save As... menu handler for Main Window
         """
-        (img_path_root, _) = os.path.splitext(
-                os.path.basename(self.img_panel.img_path)
-                )
-        default_save_filename = img_path_root + ".cco"
+        if self.save_filepath:
+            default_save_filename = self.save_filepath
+        else:
+            (img_path_root, _) = os.path.splitext(
+                    os.path.basename(self.img_path)
+                    )
+            default_save_filename = img_path_root + ".cco"
 
         with wx.FileDialog(
                 self,
@@ -595,20 +687,57 @@ class MainWindow(wx.Frame):
         return not self.content_saved or self.img_panel.needs_save()
 
     @debug_fxn
-    def save_img_data(self, pathname):
+    def save_img_data(self, imdata_path):
         """Save image and mark locations to zipfile filename
         """
+        ## make temp file
+        #temp_img = tempfile.TemporaryFile()
+        ## copy source image into temp file
+        #if isinstance(self.img_path, str):
+        #    # pathname
+        #    with open(self.img_path, 'rb') as img_fh:
+        #        temp_img.write(img_fh.read())
+        #else:
+        #    # zipfile cco file
+        #    with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
+        #        temp_img.write(container_fh.open(self.img_path[1]).read())
+        ## rewind temp_img to read from it
+        #temp_img.seek(0)
+
+        # make temp file
+        (temp_img_fd, temp_img_name) = tempfile.mkstemp()
+        print("temp_img_name")
+        print(temp_img_name)
+        temp_img = os.fdopen(temp_img_fd, mode='wb')
+        # copy source image into temp file
+        if isinstance(self.img_path, str):
+            # pathname
+            with open(self.img_path, 'rb') as img_fh:
+                temp_img.write(img_fh.read())
+        else:
+            # zipfile cco file
+            with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
+                temp_img.write(container_fh.open(self.img_path[1]).read())
+        temp_img.close()
+
+        # get archive name for image in zip
+        if isinstance(self.img_path, str):
+            (_, imgfile_ext) = os.path.splitext(self.img_path)
+            img_arcname = "image" + imgfile_ext
+        else:
+            img_arcname = img_path[1]
+
+        # write new save file 
         try:
-            with zipfile.ZipFile(pathname, 'w') as container_fh:
-                img_filename = os.path.basename(self.img_panel.img_path)
-                container_fh.write(self.img_panel.img_path, arcname=img_filename)
+            with zipfile.ZipFile(imdata_path, 'w') as container_fh:
+                container_fh.write(temp_img_name, arcname=img_arcname)
                 container_fh.writestr(
                         "marks.txt",
                         json.dumps(self.img_panel.marks, separators=(',',':'))
                         )
         except IOError:
             # TODO: need real error dialog
-            print("Cannot save current data in file '%s'." % pathname)
+            print("Cannot save current data in file '%s'." % imdata_path)
 
     @debug_fxn
     def on_about(self, evt):
