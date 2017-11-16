@@ -1,0 +1,30 @@
+Start: Plain blank transparent-background image 1024x1024
+
+Layer 0 (Background)
+Layer 1 (Image)
+    Circular image, size 1000x1000, smaller than 1024x1024 for drop shadow
+        Center horizontally
+        Top of image vertically
+    Drop shadow
+        Blend Mode: Normal
+        Opacity: 75
+        Angle: 90
+        Distance: 16px
+        Spread: 0%
+        Size: 8px
+        Contour: First option, straight diagonal
+        Anti-aliased: True
+        Noise: 0%
+Layer 2 (on top of image):
+    Ellipse tool:
+        true circle, same size as circular image  
+        centered in image, 1000px diameter
+        black outline, black fill
+    Select circle inside of black filled circle, 900px or more
+        centered in black-filled circle
+    Rasterize black-fill circle layer
+    Erase to transparent inside black-fill circle layer
+        leaving circle of width 100px
+    Gradient tool
+        top of black filled circle is 90/255 brightness
+        bottom of black filled circle is 0/255 brightness
