@@ -1,0 +1,868 @@
+in /System/Library/:
+
+./Accounts/UI/GameCenterAccountsUIPlugin.bundle/Contents/Resources/AppIcon.icns
+./Automator/Get Specified Mail Items.action/Contents/Resources/account.icns
+./Automator/Get Specified Mail Items.action/Contents/Resources/mailbox.icns
+./Automator/Get Specified Mail Items.action/Contents/Resources/message.icns
+./Caches/com.apple.bootstamps/DBF3FE52-DD80-32D1-8D73-7400EE226176/:.VolumeIcon.icns
+./ColorSync/Calibrators/Display Calibrator.app/Contents/Resources/Calibrator.icns
+./Components/CoreAudio.component/Contents/Resources/CoreAudio.icns
+./ConfigurationProfiles/PlugIns/xsanplugin.profileDomainPlugin/Contents/Resources/Xsan.icns
+./CoreServices/AddPrinter.app/Contents/PlugIns/SMB.plugin/Contents/Resources/SMBBrowser.icns
+./CoreServices/AddPrinter.app/Contents/Resources/Printer.icns
+./CoreServices/AddPrinter.app/Contents/Resources/PrinterURL.icns
+./CoreServices/AppDownloadLauncher.app/Contents/Resources/appStore.icns
+./CoreServices/AppleScript Utility.app/Contents/Resources/AppleScript Utility.icns
+./CoreServices/Applications/About This Mac.app/Contents/Resources/AppIcon.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-as.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-bin.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-bz.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-bz2.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-bzip2.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-cpgz.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-cpio.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-gz.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-hqx.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-pax.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-tar.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-tbz.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-tbz2.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-tgz.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-txz.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-uu.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-xip.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-xz.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-z.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah-zip.icns
+./CoreServices/Applications/Archive Utility.app/Contents/Resources/bah.icns
+./CoreServices/Applications/Directory Utility.app/Contents/Resources/DirectoryUtility.icns
+./CoreServices/Applications/Feedback Assistant.app/Contents/Resources/AppIcon.icns
+./CoreServices/Applications/Feedback Assistant.app/Contents/Resources/FBA.icns
+./CoreServices/Applications/Feedback Assistant.app/Contents/Resources/State-Warning.icns
+./CoreServices/Applications/Folder Actions Setup.app/Contents/Resources/Folder Actions Setup.icns
+./CoreServices/Applications/Network Utility.app/Contents/Resources/Network Utility.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/Internal.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/RAIDSet0+1.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/RAIDSet0.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/RAIDSet1.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/RAIDSet5.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/RAIDSetEnhancedJBOD.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/RAIDSetJBOD.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/RAIDUtility.icns
+./CoreServices/Applications/RAID Utility.app/Contents/Resources/VolumeIcon.icns
+./CoreServices/Applications/Screen Sharing.app/Contents/Resources/AppIcon.icns
+./CoreServices/Applications/Screen Sharing.app/Contents/Resources/Console.icns
+./CoreServices/Applications/Screen Sharing.app/Contents/Resources/InternetLocationVNC.icns
+./CoreServices/Applications/Screen Sharing.app/Contents/Resources/ssdownload.icns
+./CoreServices/Applications/Storage Management.app/Contents/Resources/AppIcon.icns
+./CoreServices/Applications/System Image Utility.app/Contents/Resources/AppIcon.icns
+./CoreServices/Applications/Wireless Diagnostics.app/Contents/Resources/WirelessDiagnostics.icns
+./CoreServices/Automator Runner.app/Contents/Resources/AutomatorDocument.icns
+./CoreServices/Bluetooth Setup Assistant.app/Contents/Resources/AppIcon.icns
+./CoreServices/BluetoothUIServer.app/Contents/Resources/AppIcon.icns
+./CoreServices/BluetoothUIServer.app/Contents/Resources/ServerBluetoothLogo.icns
+./CoreServices/CalendarFileHandler.app/Contents/Resources/App.icns
+./CoreServices/CalendarFileHandler.app/Contents/Resources/ics.icns
+./CoreServices/Certificate Assistant.app/Contents/Resources/AppIcon.icns
+./CoreServices/Certificate Assistant.app/Contents/Resources/Certificate Assistant.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MacHardwareTypes-3DC57F5C7A.bundle/Contents/Resources/com.apple.macbookpro-13-retina-usbc-silver.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MacHardwareTypes-3DC57F5C7A.bundle/Contents/Resources/com.apple.macbookpro-13-retina-usbc-space-gray.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MacHardwareTypes-BBBAA77A32.bundle/Contents/Resources/com.apple.macbookpro-13-retina-touchid-silver.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MacHardwareTypes-BBBAA77A32.bundle/Contents/Resources/com.apple.macbookpro-13-retina-touchid-space-gray.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MacHardwareTypes-C4EBFEA440.bundle/Contents/Resources/com.apple.macbookpro-15-retina-touchid-silver.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MacHardwareTypes-C4EBFEA440.bundle/Contents/Resources/com.apple.macbookpro-15-retina-touchid-space-gray.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.apple-tv-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.apple-tv-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-2-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-2-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air-99989b.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air2-wifi-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air2-wifi-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air2-wifi-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air2-wwan-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air2-wwan-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-air2-wwan-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini-black-3g.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini-black-wifi.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini-white-3g.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini-white-wifi.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini2-99989b.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini2-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini3-wifi-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini3-wifi-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini3-wifi-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini3-wwan-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini3-wwan-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini3-wwan-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini4-wifi-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini4-wifi-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini4-wifi-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini4-wwan-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini4-wwan-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-mini4-wwan-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wifi-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wifi-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wifi-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wifi-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wwan-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wwan-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wwan-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-10point5-wwan-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wifi-b9b7ba.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wifi-dadcdb.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wifi-e1ccb7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wifi-e4c1b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wwan-b9b7ba.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wwan-dadcdb.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wwan-e1ccb7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-9point7-wwan-e4c1b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-wifi-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-wifi-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-wifi-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-wwan-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-wwan-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad-pro-wwan-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipad.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-3g.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-4-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-4-cdma-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-4-cdma-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-4-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5c-46abe0.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5c-a1e877.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5c-f5f4f7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5c-faf189.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5c-fe767a.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5s-99989b.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5s-d4c5b3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-5s-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6-plus-b4b5b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6-plus-d7d9d8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6-plus-e1ccb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-b9b7ba.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-dadcdb.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-e1ccb7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-e4c1b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-plus-b9b7ba.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-plus-dadcdb.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-plus-e1ccb7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-6s-plus-e4c1b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-6.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-plus-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-plus-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-plus-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-plus-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-plus-5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-7-plus-6.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-8-7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-8-plus-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-se-aeb1b8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-se-d6c8b9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-se-dcdede.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-se-e5bdb5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-x-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone-x-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.iphone.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-4-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-4-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-blue.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-pink.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-red.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-silver.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-slate.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-sparrow.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-5-yellow.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-6-458dce.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-6-6b6a6d.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-6-c6353f.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-6-dadcdb.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-6-e1ccb7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch-6-e75090.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.ipod-touch.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series2-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series2-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series2-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series2-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series2-5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series2-6.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series2-7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series3-11.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-38mm-series3-13.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-8.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-9.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series2-1.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series2-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series2-3.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series2-4.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series2-5.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series2-6.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series2-7.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series3-11.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/MobileDevices.bundle/Contents/Resources/com.apple.watch-42mm-series3-13.icns
+./CoreServices/CoreTypes.bundle/Contents/Library/iLifeMediaBrowserTypes.bundle/Contents/Resources/com.apple.ilmbplugins.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Accounts.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Actions.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/AirDrop.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionBadgeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/AlertStopIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/AliasBadgeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/AllMyFiles.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ApplicationsFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/BackwardArrowIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Bonjour.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/BookmarkIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/BurnableFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/BurningIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/CDAudioVolumeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ClippingPicture.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ClippingSound.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ClippingText.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ClippingUnknown.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Clock.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ColorSyncProfileIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ConnectToIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/DeleteAliasIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/DesktopFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/DeveloperFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/DocumentsFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/DownloadsFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/DropFolderBadgeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/EjectMediaIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ErasingIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Everyone.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/FavoriteItemsIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/FileVaultIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/FinderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ForwardArrowIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/FullTrashIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/General.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericAirDiskIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericDocumentIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericFileServerIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericFontIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericNetworkIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericQuestionMarkIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericSharepoint.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericStationeryIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericTimeMachineDiskIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericURLIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GenericWindowIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GridIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GroupFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GroupIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/GuestUserIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/HelpIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/HomeFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocation.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationAFP.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationFTP.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationFile.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationGeneric.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationHTTP.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationMAILTO.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationNEWS.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/InternetLocationVNC.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/KEXT.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/KeepArrangedIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/LibraryFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/LockedBadgeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/LockedIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/MagnifyingGlassIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/MovieFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/MultipleItemsIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/MusicFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/NetBootVolume.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/NewFolderBadgeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/NoWriteIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/NotLoaded.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Notifications.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/OpenFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/PicturesFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/PrivateFolderBadgeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ProblemReport.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ProfileBackgroundColor.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ProfileFont.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ProfileFontAndColor.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/PublicFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ReadOnlyFolderBadgeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/RecentItemsIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/RightContainerArrowIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ServerApplicationsFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarAirDrop.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarAirportDisk.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarAirportExpress.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarAirportExtreme.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarAirportExtremeTower.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarAllMyFiles.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarApplicationsFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarBonjour.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarBurnFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarDesktopFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarDisplay.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarDocumentsFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarDownloadsFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarDropBoxFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarExternalDisk.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarGenericFile.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarGenericFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarHomeFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarInternalDisk.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarLaptop.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarMacMini.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarMacPro.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarMacProCylinder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarMoviesFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarMusicFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarNetwork.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarOpticalDisk.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarPC.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarPicturesFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarPrefs.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarRecents.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarRemovableDisk.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarServerDrive.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarSmartFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarTimeCapsule.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarTimeMachine.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarUtilitiesFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebarXserve.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebariCloud.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebariDisk.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebariMac.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebariPad.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebariPhone.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SidebariPodTouch.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SitesFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SmartFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/StatusBarCDROMIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/StatusBarTrashIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Sync.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/SystemFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarAdvanced.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarCustomizeIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarDeleteIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarFavoritesIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarInfo.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarLabels.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/TrashIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/UnknownFSObjectIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/UnlockedIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/Unsupported.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/UserIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/UserUnknownIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/UsersFolderIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/UtilitiesFolder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/VCard.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.airport-express.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.airport-extreme-tower.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.airport-extreme.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.apple-tv.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.cinema-display.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.emac.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.ibook-g4-12.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.ibook-g4-14.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-aluminum-20.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-aluminum-24.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-g4-15.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-g4-17.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-g4-20.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-g5-17.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-g5-20.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-iSight-17.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-iSight-20.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-iSight-24.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-unibody-21-no-optical.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-unibody-21.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-unibody-27-no-optical.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.imac-unibody-27.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.ipad.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.iphone-3g.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.iphone-4-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.iphone-4-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.iphone.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.ipod-touch-2.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.ipod-touch-4-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.ipod-touch-4-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.ipod-touch.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.led-cinema-display-24.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.led-cinema-display-27.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-black.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-retina-gold.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-retina-rose-gold.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-retina-silver.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-retina-space-gray.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-unibody-plastic.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-unibody.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbook-white.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookair-11-unibody.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookair-13-unibody.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookair.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-13-retina-display.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-13-unibody.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-15-retina-display.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-15-unibody.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-15.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-17-unibody.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-17.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macmini-server.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macmini-unibody-no-optical.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macmini-unibody.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macmini.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macpro-cylinder.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macpro.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powerbook-g4-12.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powerbook-g4-15.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powerbook-g4-17.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powerbook-g4-titanium.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powermac-g4-graphite.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powermac-g4-mirrored-drive-doors.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powermac-g4-quicksilver.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.powermac-g5.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.time-capsule.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.xserve-g4.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.xserve.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/iDiskGenericIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/iDiskUserIcon.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/public.generic-lcd.icns
+./CoreServices/CoreTypes.bundle/Contents/Resources/public.generic-pc.icns
+./CoreServices/DiskImageMounter.app/Contents/Resources/diskcopy-doc.icns
+./CoreServices/DiskImageMounter.app/Contents/Resources/diskcopy.icns
+./CoreServices/Dock.app/Contents/Resources/DashboardClient.app/Contents/Resources/widget.icns
+./CoreServices/Dock.app/Contents/Resources/Dock.icns
+./CoreServices/Dock.app/Contents/Resources/Widget Installer.app/Contents/Resources/Dashboard.icns
+./CoreServices/Dock.app/Contents/Resources/Widget Installer.app/Contents/Resources/widget.icns
+./CoreServices/Dock.app/Contents/Resources/widget.icns
+./CoreServices/Finder.app/Contents/Applications/AirDrop.app/Contents/Resources/OpenAirDropAppIcon.icns
+./CoreServices/Finder.app/Contents/Applications/All My Files.app/Contents/Resources/OpenAllMyFilesAppIcon.icns
+./CoreServices/Finder.app/Contents/Applications/Computer.app/Contents/Resources/OpenComputerAppIcon.icns
+./CoreServices/Finder.app/Contents/Applications/Network.app/Contents/Resources/OpenNetworkAppIcon.icns
+./CoreServices/Finder.app/Contents/Applications/iCloud Drive.app/Contents/Resources/OpenICloudDriveAppIcon.icns
+./CoreServices/Finder.app/Contents/Resources/Finder.icns
+./CoreServices/Finder.app/Contents/Resources/MyLibraries/myDocuments.cannedSearch/Resources/allMyFiles.icns
+./CoreServices/Games.app/Contents/Resources/AppIcon.icns
+./CoreServices/HelpViewer.app/Contents/Resources/HelpDoc.icns
+./CoreServices/HelpViewer.app/Contents/Resources/HelpViewer.icns
+./CoreServices/Install Command Line Developer Tools.app/Contents/Resources/SoftwareUpdate.icns
+./CoreServices/Install in Progress.app/Contents/Resources/Installer.icns
+./CoreServices/Installer.app/Contents/Resources/Installer.icns
+./CoreServices/Installer.app/Contents/Resources/metapackage.icns
+./CoreServices/Installer.app/Contents/Resources/package.icns
+./CoreServices/Jar Launcher.app/Contents/Resources/CLASS.icns
+./CoreServices/Jar Launcher.app/Contents/Resources/JAR.icns
+./CoreServices/Jar Launcher.app/Contents/Resources/JarLauncher.icns
+./CoreServices/Java Web Start.app/Contents/Resources/WebStart.icns
+./CoreServices/Java Web Start.app/Contents/Resources/jnlp.icns
+./CoreServices/KeyboardSetupAssistant.app/Contents/Resources/Assistant.icns
+./CoreServices/ManagedClient.app/Contents/Resources/GroupsIcon.icns
+./CoreServices/ManagedClient.app/Contents/Resources/UsersIcon.icns
+./CoreServices/Menu Extras/Battery.menu/Contents/Resources/FileVault.icns
+./CoreServices/Menu Extras/Battery.menu/Contents/Resources/InternetPluginIcon.icns
+./CoreServices/Menu Extras/Battery.menu/Contents/Resources/LowBattery.icns
+./CoreServices/NetAuthAgent.app/Contents/Resources/AFPClient.icns
+./CoreServices/NetAuthAgent.app/Contents/Resources/PSPrinter.icns
+./CoreServices/Network Diagnostics.app/Contents/Resources/Network Diagnostics.icns
+./CoreServices/Network Setup Assistant.app/Contents/Resources/Assistant.icns
+./CoreServices/OBEXAgent.app/Contents/Resources/AppIcon.icns
+./CoreServices/ODSAgent.app/Contents/Resources/CD.icns
+./CoreServices/Photo Library Migration Utility.app/Contents/Frameworks/RedRock.framework/Versions/A/Resources/CommandSet.icns
+./CoreServices/Photo Library Migration Utility.app/Contents/Frameworks/RedRock.framework/Versions/A/Resources/Library.icns
+./CoreServices/Photo Library Migration Utility.app/Contents/Frameworks/RedRock.framework/Versions/A/Resources/PlugInBundle.icns
+./CoreServices/Photo Library Migration Utility.app/Contents/Frameworks/RedRock.framework/Versions/A/Resources/Project.icns
+./CoreServices/Photo Library Migration Utility.app/Contents/Frameworks/RedRock.framework/Versions/A/Resources/VaultIcon.icns
+./CoreServices/Problem Reporter.app/Contents/Resources/ProblemReporter.icns
+./CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/RemoteDesktopApp.icns
+./CoreServices/RemoteManagement/ARDAgent.app/Contents/Support/Remote Desktop Message.app/Contents/Resources/RemoteDesktopMessage.icns
+./CoreServices/RemoteManagement/ARDAgent.app/Contents/Support/Shared Screen Viewer.app/Contents/Resources/RemoteDesktopApp.icns
+./CoreServices/RemoteManagement/AppleVNCServer.bundle/Contents/Support/Share Screen Request.app/Contents/Resources/VNCGuest.icns
+./CoreServices/RemoteManagement/ScreensharingAgent.bundle/Contents/Support/SSInvitationAgent.app/Contents/Resources/AppIcon.icns
+./CoreServices/ReportPanic.app/Contents/Resources/Blank.icns
+./CoreServices/ReportPanic.app/Contents/Resources/ProblemReporter.icns
+./CoreServices/SecurityAgentPlugins/FamilyControls.bundle/Contents/Resources/Family.icns
+./CoreServices/SecurityAgentPlugins/KerberosAgent.bundle/Contents/Resources/KerberosApp.icns
+./CoreServices/SecurityAgentPlugins/LocalAuthentication.bundle/Contents/Resources/Passphrase_Smartcard.icns
+./CoreServices/SecurityAgentPlugins/LocalAuthentication.bundle/Contents/Resources/TouchID_TouchId.icns
+./CoreServices/SecurityAgentPlugins/LocalAuthentication.bundle/Contents/Resources/TouchID_TouchId_Gray.icns
+./CoreServices/Setup Assistant.app/Contents/Resources/Assistant.icns
+./CoreServices/Setup Assistant.app/Contents/Resources/Clock.icns
+./CoreServices/Setup Assistant.app/Contents/Resources/Photos.icns
+./CoreServices/Setup Assistant.app/Contents/Resources/Siri.icns
+./CoreServices/Setup Assistant.app/Contents/Resources/iCloudDrive.icns
+./CoreServices/Setup Assistant.app/Contents/Resources/iTunes_color.icns
+./CoreServices/Siri.app/Contents/Resources/AppIcon.icns
+./CoreServices/Software Update.app/Contents/Resources/SoftwareUpdate.icns
+./CoreServices/Spotlight.app/Contents/Resources/AppIcon.icns
+./CoreServices/Stocks.app/Contents/PlugIns/com.apple.ncplugin.stocks.appex/Contents/Resources/Icon.icns
+./CoreServices/Stocks.app/Contents/Resources/AppIcon.icns
+./CoreServices/Ticket Viewer.app/Contents/Resources/TicketViewer.icns
+./CoreServices/Ticket Viewer.app/Contents/Resources/ticket.icns
+./CoreServices/Ticket Viewer.app/Contents/Resources/tickets.icns
+./CoreServices/VoiceOver.app/Contents/Resources/voiceover.icns
+./CoreServices/Weather.app/Contents/PlugIns/com.apple.ncplugin.weather.appex/Contents/Resources/Icon.icns
+./CoreServices/Weather.app/Contents/Resources/AppIcon.icns
+./CoreServices/cloudphotosd.app/Contents/Resources/cloudphotosd.icns
+./CoreServices/cloudphotosd.app/Contents/Resources/iCloud.icns
+./Displays/Contents/Resources/Overrides/DisplayVendorID-1e6d/DisplayProductID-5b10.icns
+./Displays/Contents/Resources/Overrides/DisplayVendorID-1e6d/DisplayProductID-5b11.icns
+./Extensions/AppleRAIDCard.kext/Contents/Resources/RAIDVolume.icns
+./Extensions/AppleStorageDrivers.kext/Contents/PlugIns/AppleXserveRAID.kext/Contents/Resources/XserveRAID.icns
+./Extensions/EAP-RSA.ppp/Contents/Resources/NetworkConnect.icns
+./Extensions/IOATAFamily.kext/Contents/PlugIns/IOATABlockStorage.kext/Contents/Resources/PCCard.icns
+./Extensions/IOBDStorageFamily.kext/Contents/Resources/BD-R.icns
+./Extensions/IOBDStorageFamily.kext/Contents/Resources/BD-RE.icns
+./Extensions/IOBDStorageFamily.kext/Contents/Resources/BD.icns
+./Extensions/IOCDStorageFamily.kext/Contents/Resources/CD-R.icns
+./Extensions/IOCDStorageFamily.kext/Contents/Resources/CD-RW.icns
+./Extensions/IOCDStorageFamily.kext/Contents/Resources/CD.icns
+./Extensions/IODVDStorageFamily.kext/Contents/Resources/DVD+R.icns
+./Extensions/IODVDStorageFamily.kext/Contents/Resources/DVD+RW.icns
+./Extensions/IODVDStorageFamily.kext/Contents/Resources/DVD-R.icns
+./Extensions/IODVDStorageFamily.kext/Contents/Resources/DVD-RAM.icns
+./Extensions/IODVDStorageFamily.kext/Contents/Resources/DVD-RW.icns
+./Extensions/IODVDStorageFamily.kext/Contents/Resources/DVD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/CompactFlash.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/FibreChannelHD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/FireWireHD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/Floppy.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/MagnetoOptical.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/MemoryStick.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/MemoryStickProDuo.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/MiniSD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/Removable.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/SASHD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/SCSIParallelHD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/SD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/SmartMedia.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/SuperDisk.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/TransFlash.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/USBHD.icns
+./Extensions/IOSCSIArchitectureModelFamily.kext/Contents/Resources/XD.icns
+./Extensions/IOStorageFamily.kext/Contents/Resources/External.icns
+./Extensions/IOStorageFamily.kext/Contents/Resources/Internal.icns
+./Extensions/IOStorageFamily.kext/Contents/Resources/Removable.icns
+./Extensions/PPPSerial.ppp/Contents/Resources/NetworkConnect.icns
+./Extensions/acfs.kext/Contents/Resources/Xsan.icns
+./Frameworks/AddressBook.framework/Versions/A/Helpers/AddressBookSync.app/Contents/Resources/Contacts.icns
+./Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/Resources/notification.icns
+./Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/GenericFax.icns
+./Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/GenericInkjetPrinter.icns
+./Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/GenericPostscriptPrinter.icns
+./Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/GenericScanner.icns
+./Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/PrinterPool.icns
+./Frameworks/Automator.framework/Versions/A/Resources/Automator.icns
+./Frameworks/Automator.framework/Versions/A/Resources/DateAndTime.icns
+./Frameworks/Automator.framework/Versions/A/Resources/Speech.icns
+./Frameworks/CalendarStore.framework/Versions/A/Resources/App.icns
+./Frameworks/Carbon.framework/Versions/A/Frameworks/OpenScripting.framework/Versions/A/Resources/applet.icns
+./Frameworks/Carbon.framework/Versions/A/Frameworks/OpenScripting.framework/Versions/A/Resources/droplet.icns
+./Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PMProxy.bundle/Contents/Resources/AlertCautionIcon.icns
+./Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PMProxy.bundle/Contents/Resources/AlertOfflineIcon.icns
+./Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PMProxy.bundle/Contents/Resources/AlertPauseIcon.icns
+./Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PMProxy.bundle/Contents/Resources/AlertStopIcon.icns
+./Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PMProxy.bundle/Contents/Resources/Printer.icns
+./Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Resources/Label.icns
+./Frameworks/CryptoTokenKit.framework/ctkahp.bundle/Contents/Resources/AppIcon.icns
+./Frameworks/CryptoTokenKit.framework/ctkbind.bundle/Contents/Resources/AppIcon.icns
+./Frameworks/IOBluetoothUI.framework/Versions/A/Resources/MightyMouse.icns
+./Frameworks/IOBluetoothUI.framework/Versions/A/Resources/UIBluetoothLogo.icns
+./Frameworks/JavaVM.framework/Versions/A/Resources/GenericApp.icns
+./Frameworks/JavaVM.framework/Versions/A/Resources/WebStart.icns
+./Frameworks/NetworkExtension.framework/Versions/A/Resources/NetworkConnect.icns
+./Frameworks/NotificationCenter.framework/PlugIns/com.apple.ncplugin.FindMyFriends.appex/Contents/Resources/AppIconMacWidget.icns
+./Frameworks/NotificationCenter.framework/PlugIns/com.apple.ncplugin.WorldClock.appex/Contents/Resources/Icon.icns
+./Frameworks/NotificationCenter.framework/PlugIns/com.apple.ncplugin.calculator.appex/Contents/Resources/Icon.icns
+./Frameworks/NotificationCenter.framework/Versions/A/Resources/Widget Simulator.app/Contents/Resources/AppIcon.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/PackageManager/Resources/PackageManager.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/PyObjCLauncher/English.lproj/PythonCompiled.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/PyObjCLauncher/English.lproj/PythonInterpreter.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/PyObjCLauncher/English.lproj/PythonSource.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/PyObjCLauncher/English.lproj/PythonWSource.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/Todo/Icons/ToDoApp.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/Todo/Icons/ToDoDoc.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/AppKit/WebServicesTool/WST.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/EnvironmentPrefs/ShellEnv.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/PDFKit/PDFKitViewer/pdfkitviewer.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/Twisted/WebServicesTool-CocoaBindings/WST.icns
+./Frameworks/Python.framework/Examples/PyObjC/2.5.1/Twisted/WebServicesTool/WST.icns
+./Frameworks/Python.framework/Versions/2.6/Resources/Python.app/Contents/Resources/PythonApplet.icns
+./Frameworks/Python.framework/Versions/2.6/Resources/Python.app/Contents/Resources/PythonInterpreter.icns
+./Frameworks/Python.framework/Versions/2.6/lib/python2.6/idlelib/Icons/idle.icns
+./Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/Resources/PythonApplet.icns
+./Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/Resources/PythonInterpreter.icns
+./Frameworks/Python.framework/Versions/2.7/lib/python2.7/idlelib/Icons/idle.icns
+./Frameworks/Quartz.framework/Versions/A/Frameworks/PDFKit.framework/Versions/A/Resources/PDFKitIBPlugin.ibplugin/Contents/Resources/pdf.icns
+./Frameworks/QuickLook.framework/Versions/A/Resources/quicklookd.app/Contents/Resources/QLIconTest.icns
+./Frameworks/QuickLook.framework/Versions/A/Resources/quicklookd.app/Contents/Resources/qlgenerator.icns
+./Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app/Contents/Resources/ScreenSaverEngine.icns
+./Frameworks/SecurityInterface.framework/Versions/A/Resources/iCloud.icns
+./Frameworks/Social.framework/XPCServices/com.apple.facebook.xpc/Contents/Resources/FacebookIcon.icns
+./Frameworks/Social.framework/XPCServices/com.apple.linkedin.xpc/Contents/Resources/LinkedInIcon.icns
+./Frameworks/Social.framework/XPCServices/com.apple.tencentweibo.xpc/Contents/Resources/TencentWeiboIcon.icns
+./Frameworks/Social.framework/XPCServices/com.apple.twitter.xpc/Contents/Resources/TwitterIcon.icns
+./Frameworks/Social.framework/XPCServices/com.apple.weibo.xpc/Contents/Resources/WeiboIcon.icns
+./Frameworks/SyncServices.framework/Versions/A/Resources/SyncServer.app/Contents/Resources/SyncServer.icns
+./Frameworks/Tk.framework/Versions/8.4/Resources/Wish.app/Contents/Resources/Wish.icns
+./Frameworks/Tk.framework/Versions/8.5/Resources/Tk.icns
+./Frameworks/Tk.framework/Versions/8.5/Resources/Wish.app/Contents/Resources/Wish.icns
+./Image Capture/Automatic Tasks/Build Web Page.app/Contents/Resources/BuildWebPage.icns
+./Image Capture/Automatic Tasks/MakePDF.app/Contents/Resources/MakePDF.icns
+./Image Capture/Devices/AirScanScanner.app/Contents/Resources/GenericAirScanScanner.icns
+./Image Capture/Support/Application/AutoImporter.app/Contents/Resources/AutoDownloader.icns
+./Image Capture/Support/Icons/GenericCamera.icns
+./Image Capture/Support/Icons/GenericScanner.icns
+./Input Methods/DictationIM.app/Contents/Resources/Speech.icns
+./Input Methods/InkServer.app/Contents/Resources/English.lproj/Clear_Disabled.icns
+./Input Methods/InkServer.app/Contents/Resources/English.lproj/Clear_Normal.icns
+./Input Methods/InkServer.app/Contents/Resources/English.lproj/Clear_Press.icns
+./Input Methods/InkServer.app/Contents/Resources/English.lproj/Send_Disabled.icns
+./Input Methods/InkServer.app/Contents/Resources/English.lproj/Send_Normal.icns
+./Input Methods/InkServer.app/Contents/Resources/English.lproj/Send_Press.icns
+./Input Methods/InkServer.app/Contents/Resources/French.lproj/Clear_Disabled.icns
+./Input Methods/InkServer.app/Contents/Resources/French.lproj/Clear_Normal.icns
+./Input Methods/InkServer.app/Contents/Resources/French.lproj/Clear_Press.icns
+./Input Methods/InkServer.app/Contents/Resources/French.lproj/Send_Disabled.icns
+./Input Methods/InkServer.app/Contents/Resources/French.lproj/Send_Normal.icns
+./Input Methods/InkServer.app/Contents/Resources/French.lproj/Send_Press.icns
+./Input Methods/InkServer.app/Contents/Resources/German.lproj/Clear_Disabled.icns
+./Input Methods/InkServer.app/Contents/Resources/German.lproj/Clear_Normal.icns
+./Input Methods/InkServer.app/Contents/Resources/German.lproj/Clear_Press.icns
+./Input Methods/InkServer.app/Contents/Resources/German.lproj/Send_Disabled.icns
+./Input Methods/InkServer.app/Contents/Resources/German.lproj/Send_Normal.icns
+./Input Methods/InkServer.app/Contents/Resources/German.lproj/Send_Press.icns
+./Input Methods/InkServer.app/Contents/Resources/HelpViewer.icns
+./Input Methods/InkServer.app/Contents/Resources/cmd.icns
+./Input Methods/InkServer.app/Contents/Resources/cmd_locked.icns
+./Input Methods/InkServer.app/Contents/Resources/cmd_trans.icns
+./Input Methods/InkServer.app/Contents/Resources/control.icns
+./Input Methods/InkServer.app/Contents/Resources/control_locked.icns
+./Input Methods/InkServer.app/Contents/Resources/control_trans.icns
+./Input Methods/InkServer.app/Contents/Resources/grphOff.icns
+./Input Methods/InkServer.app/Contents/Resources/grphOffPress.icns
+./Input Methods/InkServer.app/Contents/Resources/grphOn.icns
+./Input Methods/InkServer.app/Contents/Resources/grphOnPress.icns
+./Input Methods/InkServer.app/Contents/Resources/inkpad.icns
+./Input Methods/InkServer.app/Contents/Resources/option.icns
+./Input Methods/InkServer.app/Contents/Resources/option_locked.icns
+./Input Methods/InkServer.app/Contents/Resources/option_trans.icns
+./Input Methods/InkServer.app/Contents/Resources/pointer.icns
+./Input Methods/InkServer.app/Contents/Resources/shift.icns
+./Input Methods/InkServer.app/Contents/Resources/shift_locked.icns
+./Input Methods/InkServer.app/Contents/Resources/shift_trans.icns
+./Input Methods/InkServer.app/Contents/Resources/stylus.icns
+./Input Methods/InkServer.app/Contents/Resources/txtOff.icns
+./Input Methods/InkServer.app/Contents/Resources/txtOffPress.icns
+./Input Methods/InkServer.app/Contents/Resources/txtOn.icns
+./Input Methods/InkServer.app/Contents/Resources/txtOnPress.icns
+./Input Methods/JapaneseIM.app/Contents/PlugIns/JapaneseIM.appex/Contents/Resources/icon.icns
+./Input Methods/KoreanIM.app/Contents/PlugIns/KIM_Extension.appex/Contents/Resources/HanjaTool.app/Contents/Resources/HanjaTool.icns
+./Input Methods/SCIM.app/Contents/PlugIns/SCIM_Extension.appex/Contents/Resources/icon.icns
+./Input Methods/Switch Control.app/Contents/Resources/Panel Editor.app/Contents/Resources/PanelCollectionDocumentIcon.icns
+./Input Methods/Switch Control.app/Contents/Resources/Panel Editor.app/Contents/Resources/SwitchControlPanelEditorIcon.icns
+./Input Methods/TCIM.app/Contents/PlugIns/TCIM_Extension.appex/Contents/Resources/icon.icns
+./Input Methods/VietnameseIM.app/Contents/PlugIns/VIM_Extension.appex/Contents/Resources/VietnameseIM.icns
+./Input Methods/VietnameseIM.app/Contents/PlugIns/VIM_Extension.appex/Contents/Resources/VietnameseIM_ST.icns
+./Input Methods/VietnameseIM.app/Contents/PlugIns/VIM_Extension.appex/Contents/Resources/VietnameseIM_TX.icns
+./Input Methods/VietnameseIM.app/Contents/PlugIns/VIM_Extension.appex/Contents/Resources/VietnameseIM_VN.icns
+./Input Methods/VietnameseIM.app/Contents/PlugIns/VIM_Extension.appex/Contents/Resources/VietnameseIM_VQ.icns
+./Java/Support/CoreDeploy.bundle/Contents/Download Java Components.app/Contents/Resources/WebStart.icns
+./PreferencePanes/Accounts.prefPane/Contents/Resources/AccountsPref.icns
+./PreferencePanes/Accounts.prefPane/Contents/XPCServices/com.apple.preferences.users.remoteservice.xpc/Contents/Resources/AccountsPref.icns
+./PreferencePanes/AppStore.prefPane/Contents/Resources/appStore.icns
+./PreferencePanes/AppStore.prefPane/Contents/XPCServices/com.apple.preferences.appstore.remoteservice.xpc/Contents/Resources/appStore.icns
+./PreferencePanes/Appearance.prefPane/Contents/Resources/GeneralPrefsIcons.icns
+./PreferencePanes/Bluetooth.prefPane/Contents/Resources/AppIcon.icns
+./PreferencePanes/Bluetooth.prefPane/Contents/Resources/NewBluetoothLogo.icns
+./PreferencePanes/DateAndTime.prefPane/Contents/Resources/DateAndTime-Arab.icns
+./PreferencePanes/DateAndTime.prefPane/Contents/Resources/DateAndTime.icns
+./PreferencePanes/DateAndTime.prefPane/Contents/Resources/TimeZone.prefPane/Contents/Resources/timezoned.app/Contents/Resources/DateAndTime.icns
+./PreferencePanes/DateAndTime.prefPane/Contents/XPCServices/com.apple.preference.datetime.remoteservice.xpc/Contents/Resources/DateAndTime.icns
+./PreferencePanes/DesktopScreenEffectsPref.prefPane/Contents/Resources/DesktopScreenEffectsPref.icns
+./PreferencePanes/DigiHubDiscs.prefPane/Contents/Resources/cd.icns
+./PreferencePanes/Displays.prefPane/Contents/Resources/Displays.icns
+./PreferencePanes/Dock.prefPane/Contents/Resources/Dock.icns
+./PreferencePanes/EnergySaver.prefPane/Contents/Resources/EnergySaver.icns
+./PreferencePanes/Expose.prefPane/Contents/Resources/Expose.icns
+./PreferencePanes/Expose.prefPane/Contents/Resources/MissionControlPrefPane.icns
+./PreferencePanes/Extensions.prefPane/Contents/Resources/Extensions.icns
+./PreferencePanes/FibreChannel.prefPane/Contents/Resources/FibreChannel.icns
+./PreferencePanes/Ink.prefPane/Contents/Resources/Ink.icns
+./PreferencePanes/InternetAccounts.prefPane/Contents/Resources/InternetAccountsIcons.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/Keyboard.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/KeyboardIcon_2.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/KeyboardIcon_3-5EA3EDE802-5C29671E58.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_appshortcuts.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_display.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_dock.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_expose.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_fn.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_screenshots.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_services.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_spotlight.icns
+./PreferencePanes/Keyboard.prefPane/Contents/Resources/category_ua.icns
+./PreferencePanes/Localization.prefPane/Contents/Resources/Localization.icns
+./PreferencePanes/Mouse.prefPane/Contents/Resources/Mouse.icns
+./PreferencePanes/Network.prefPane/Contents/Resources/Network.icns
+./PreferencePanes/Network.prefPane/Contents/XPCServices/com.apple.preference.network.remoteservice.xpc/Contents/Resources/Network.icns
+./PreferencePanes/Notifications.prefPane/Contents/Resources/Notifications-RTL.icns
+./PreferencePanes/Notifications.prefPane/Contents/Resources/Notifications.icns
+./PreferencePanes/Notifications.prefPane/Contents/XPCServices/com.apple.preference.notifications.remoteservice.xpc/Contents/Resources/Notifications.icns
+./PreferencePanes/ParentalControls.prefPane/Contents/Resources/Family.icns
+./PreferencePanes/ParentalControls.prefPane/Contents/Resources/chatFile.icns
+./PreferencePanes/ParentalControls.prefPane/Contents/Resources/widget.icns
+./PreferencePanes/ParentalControls.prefPane/Contents/XPCServices/com.apple.preferences.parentalcontrols.remoteservice.xpc/Contents/Resources/Family.icns
+./PreferencePanes/PrintAndScan.prefPane/Contents/Resources/PrintScanPref.icns
+./PreferencePanes/PrintAndScan.prefPane/Contents/XPCServices/com.apple.preference.printfax.remoteservice.xpc/Contents/Resources/PrintScanPref.icns
+./PreferencePanes/Profiles.prefPane/Contents/Resources/Profiles.icns
+./PreferencePanes/Profiles.prefPane/Contents/XPCServices/com.apple.preferences.configurationprofiles.remoteservice.xpc/Contents/Resources/Profiles.icns
+./PreferencePanes/Security.prefPane/Contents/Resources/FileVault.icns
+./PreferencePanes/Security.prefPane/Contents/XPCServices/com.apple.preference.security.remoteservice.xpc/Contents/Resources/FileVault.icns
+./PreferencePanes/SharingPref.prefPane/Contents/Resources/SharingPref.icns
+./PreferencePanes/SharingPref.prefPane/Contents/XPCServices/com.apple.preferences.sharing.remoteservice.xpc/Contents/Resources/SharingPref.icns
+./PreferencePanes/Sound.prefPane/Contents/Resources/SoundPref.icns
+./PreferencePanes/Speech.prefPane/Contents/Resources/Siri.icns
+./PreferencePanes/Spotlight.prefPane/Contents/Resources/SpotlightPrefIcons.icns
+./PreferencePanes/StartupDisk.prefPane/Contents/Resources/StartupDiskPref.icns
+./PreferencePanes/StartupDisk.prefPane/Contents/Resources/folder_windows_icon.icns
+./PreferencePanes/StartupDisk.prefPane/Contents/XPCServices/com.apple.preference.startupdisk.remoteservice.xpc/Contents/Resources/StartupDiskPref.icns
+./PreferencePanes/TimeMachine.prefPane/Contents/Resources/TimeMachine.icns
+./PreferencePanes/TimeMachine.prefPane/Contents/XPCServices/com.apple.prefs.backup.remoteservice.xpc/Contents/Resources/TimeMachine.icns
+./PreferencePanes/TouchID.prefPane/Contents/Resources/touchid_icon.icns
+./PreferencePanes/TouchID.prefPane/Contents/XPCServices/com.apple.preferences.password.remoteservice.xpc/Contents/Resources/touchid_icon.icns
+./PreferencePanes/Trackpad.prefPane/Contents/Resources/Trackpad.icns
+./PreferencePanes/Trackpad.prefPane/Contents/Resources/TrackpadIcon_2.icns
+./PreferencePanes/UniversalAccessPref.prefPane/Contents/Resources/UniversalAccessPref.icns
+./PreferencePanes/Wallet.prefPane/Contents/Resources/WalletPref.icns
+./PreferencePanes/Wallet.prefPane/Contents/XPCServices/com.apple.preferences.wallet.remoteservice.xpc/Contents/Resources/WalletPref.icns
+./PreferencePanes/iCloudPref.prefPane/Contents/Resources/iCloud.icns
+./PreferencePanes/iCloudPref.prefPane/Contents/XPCServices/com.apple.preferences.icloud.remoteservice.xpc/Contents/Resources/iCloud.icns
+./PrivateFrameworks/AOSAccounts.framework/Versions/A/Resources/iCloudUserNotificationsd.app/Contents/Resources/AppIcon.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/AirPortUtility.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_accounts.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_cal.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_contact.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_mail.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_notes.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_photo.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_reminders.icns
+./PrivateFrameworks/AOSUI.framework/Versions/A/Resources/pref_safari.icns
+./PrivateFrameworks/AccountsUI.framework/Versions/A/Resources/InternetAccountsIcons.icns
+./PrivateFrameworks/AmbientDisplay.framework/Versions/A/Resources/Calibration Assistant.app/Contents/Resources/AppIcon.icns
+./PrivateFrameworks/AskPermission.framework/Versions/A/Resources/AskPermissionUI.app/Contents/Resources/iCloud.icns
+./PrivateFrameworks/Assistant.framework/Versions/A/Resources/Assistant Plugin.ibplugin/Contents/Resources/AFView.icns
+./PrivateFrameworks/AssistantServices.framework/Versions/A/Resources/siri-osx.icns
+./PrivateFrameworks/CalendarPersistence.framework/Versions/A/Resources/App.icns
+./PrivateFrameworks/CloudDocsDaemon.framework/PlugIns/CloudDocsStorageManagement.appex/Contents/Resources/AppIcon.icns
+./PrivateFrameworks/CloudDocsDaemon.framework/Versions/A/Resources/iCloud Drive.app/Contents/Resources/iCloudDrive.icns
+./PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/OSBadge.icns
+./PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/appStore.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebarGenericFile.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebarGenericFolder.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebarMacBook.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebarMacMini.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebarMacPro.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebarMacProCylinder.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebarPC.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebariMac.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebariPad.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebariPhone.icns
+./PrivateFrameworks/ConsoleKit.framework/Versions/A/Resources/SidebariPodTouch.icns
+./PrivateFrameworks/CoreFollowUp.framework/Versions/A/Resources/FollowUpUI.app/Contents/Resources/iCloud.icns
+./PrivateFrameworks/CoreWLANKit.framework/Versions/A/Resources/WirelessDiagnostics.icns
+./PrivateFrameworks/DiskImages.framework/Versions/A/Resources/CDiskImage.icns
+./PrivateFrameworks/FMFUI.framework/Versions/A/Resources/fmf.icns
+./PrivateFrameworks/FamilyControls.framework/Versions/A/Resources/ParentalControls.app/Contents/Resources/Dashboard.icns
+./PrivateFrameworks/FamilyNotification.framework/Versions/A/Resources/Family.app/Contents/Resources/AppIcon.icns
+./PrivateFrameworks/FinderKit.framework/Versions/A/PlugIns/AirDrop.appex/Contents/Resources/AirDrop_AppIcon.icns
+./PrivateFrameworks/FinderKit.framework/Versions/A/PlugIns/iCloud Sharing.appex/Contents/Resources/CloudSharingShareKitAppIcon.icns
+./PrivateFrameworks/GameCenterUI.framework/XPCServices/com.apple.gamecenter.GameCenterUIService.xpc/Contents/Resources/icon.icns
+./PrivateFrameworks/IDS.framework/identityservicesd.app/Contents/Resources/FaceTime.icns
+./PrivateFrameworks/IDS.framework/identityservicesd.app/Contents/Resources/IDS.icns
+./PrivateFrameworks/IDS.framework/identityservicesd.app/Contents/Resources/iCloud.icns
+./PrivateFrameworks/InternetAccounts.framework/Versions/A/Resources/InternetAccounts.icns
+./PrivateFrameworks/MarkupUI.framework/Plugins/Markup.appex/Contents/Resources/AlertIcon.icns
+./PrivateFrameworks/MobileDevice.framework/Versions/A/AppleMobileDeviceHelper.app/Contents/Resources/iPodSyncClientImages.icns
+./PrivateFrameworks/MobileDevice.framework/Versions/A/AppleMobileSync.app/Contents/Resources/iPodSyncClientImages.icns
+./PrivateFrameworks/PassKitCore.framework/Versions/A/Resources/GenericIcon.icns
+./PrivateFrameworks/PassKitUI.framework/Versions/A/Resources/wallet.icns
+./PrivateFrameworks/PhotoLibraryPrivate.framework/Versions/A/Frameworks/RedRock.framework/Versions/A/Resources/CommandSet.icns
+./PrivateFrameworks/PhotoLibraryPrivate.framework/Versions/A/Frameworks/RedRock.framework/Versions/A/Resources/Library.icns
+./PrivateFrameworks/PhotoLibraryPrivate.framework/Versions/A/Frameworks/RedRock.framework/Versions/A/Resources/PlugInBundle.icns
+./PrivateFrameworks/PhotoLibraryPrivate.framework/Versions/A/Frameworks/RedRock.framework/Versions/A/Resources/Project.icns
+./PrivateFrameworks/PhotoLibraryPrivate.framework/Versions/A/Frameworks/RedRock.framework/Versions/A/Resources/VaultIcon.icns
+./PrivateFrameworks/PhotoLibraryPrivate.framework/Versions/A/Frameworks/ShareServicesCore.framework/Versions/A/PlugIns/PhotosPluginAddToAperture.appex/Contents/Resources/ApertureIcon.icns
+./PrivateFrameworks/PhotoLibraryPrivate.framework/Versions/A/Frameworks/ShareServicesCore.framework/Versions/A/PlugIns/PhotosPluginAddToPhotos.appex/Contents/Resources/PhotosIcon.icns
+./PrivateFrameworks/SIUFoundation.framework/Versions/A/XPCServices/com.apple.SIUAgent.xpc/Contents/Resources/AutoPartition.app/Contents/Resources/AutoPartition.icns
+./PrivateFrameworks/ScreenReader.framework/Versions/A/Resources/ScreenReaderUIServer.app/Contents/Resources/voiceover.icns
+./PrivateFrameworks/ScreenReader.framework/Versions/A/Resources/VoiceOver Quickstart.app/Contents/Resources/VOTraining.bundle/Contents/Resources/voiceover.icns
+./PrivateFrameworks/ScreenReader.framework/Versions/A/Resources/VoiceOver Quickstart.app/Contents/Resources/VoiceOverQuickstart.icns
+./PrivateFrameworks/ScreenSharing.framework/Versions/A/Resources/ssdownload.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/FacebookPost.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/FacebookProfilePic.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/FacebookVideo.appex/Contents/Resources/facebookicon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/FlickrImage.appex/Contents/Resources/flickricon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/FlickrVideo.appex/Contents/Resources/flickricon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/LinkedIn.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/LinkedInProfilePic.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/ShareMail.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/ShareMailBack.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/SinaWeibo.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/Tudou.appex/Contents/Resources/tudouicon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/Twitter.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/TwitterProfilePic.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/Vimeo.appex/Contents/Resources/vimeoicon.icns
+./PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/Youku.appex/Contents/Resources/youkuicon.icns
+./PrivateFrameworks/SpeechObjects.framework/Versions/A/Frameworks/DictationServices.framework/Versions/A/Resources/Speech.icns
+./PrivateFrameworks/SpeechObjects.framework/Versions/A/Resources/Speech.icns
+./PrivateFrameworks/SpeechObjects.framework/Versions/A/SpeechDataInstallerd.app/Contents/Resources/Dictation.icns
+./PrivateFrameworks/StorageManagement.framework/PlugIns/Applications.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/StorageManagement.framework/PlugIns/GarageBandExtension.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/StorageManagement.framework/PlugIns/OtherUsersExtension.appex/Contents/Resources/OtherUsersExtensionIcon.icns
+./PrivateFrameworks/StorageManagement.framework/PlugIns/Trash.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/StorageManagement.framework/PlugIns/iOSFilesExtension.appex/Contents/Resources/icon.icns
+./PrivateFrameworks/SyncServicesUI.framework/Versions/A/Resources/Conflict Resolver.app/Contents/Resources/Sync Services Icon.icns
+./PrivateFrameworks/SyncServicesUI.framework/Versions/A/Resources/Sync Services Icon.icns
+./PrivateFrameworks/SyncServicesUI.framework/Versions/A/Resources/syncuid.app/Contents/Resources/Sync Services Icon.icns
+./PrivateFrameworks/SystemMigration.framework/Versions/A/Resources/Base.lproj/TimeMachine.icns
+./PrivateFrameworks/SystemMigration.framework/Versions/A/Resources/PrintScanPref.icns
+./PrivateFrameworks/Tourist.framework/Versions/A/Resources/OSBadge.icns
+./PrivateFrameworks/UniversalAccess.framework/Versions/A/Resources/universalAccessAuthWarn.app/Contents/Resources/UniversalAccessPref.icns
+./QuickTime/QuickTimeComponents.component/Contents/Resources/music.icns
+./Services/ChineseTextConverterService.app/Contents/Resources/CTC.icns
+./Services/ImageCaptureService.app/Contents/Resources/ImageCapture.icns
+./Services/SummaryService.app/Contents/Resources/SummaryService.icns
+./SyncServices/Schemas/Bookmarks.syncschema/Contents/Resources/com.apple.Bookmarks.icns
+./SyncServices/Schemas/Calendars.syncschema/Contents/Resources/com.apple.Calendars.icns
+./SyncServices/Schemas/Contacts.syncschema/Contents/Resources/com.apple.Contacts.icns
+./SystemConfiguration/PPPController.bundle/Contents/PlugIns/PPPDialogs.ppp/Contents/Resources/NetworkConnect.icns
+./SystemConfiguration/PPPController.bundle/Contents/Resources/NetworkConnect.icns
