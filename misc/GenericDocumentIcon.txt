@@ -1,1 +1,8 @@
+/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/
+/System/Library/Extensions/IOStorageFamily.kext/Contents/Resources/
+
+Blank Document Icon:
 /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericDocumentIcon.icns
+
+Blank Removable Drive Icon:
+/System/Library/Extensions/IOStorageFamily.kext/Contents/Resources/Removable.icns
