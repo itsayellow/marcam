@@ -34,7 +34,7 @@ ICON_DIR = os.path.dirname(os.path.realpath(__file__))
 
 if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
     # if we're being executed from inside a Mac app, turn off DEBUG
-    logfile = os.path.join(os.path.expanduser("~"),'cellcounter.log')
+    logfile = os.path.join(os.path.expanduser("~"), 'cellcounter.log')
     out_fh = open(logfile, 'w')
 
     DEBUG = 0
@@ -62,6 +62,28 @@ def debug_fxn(func):
             print("    )", flush=True)
         return func(*args, **kwargs)
     return func_wrapper
+
+
+@debug_fxn
+def file1sc_to_Image(file1sc_file):
+    try:
+        read1sc = biorad1sc_reader.Reader(file1sc_file)
+    except (BioRadInvalidFileError, BioRadParsingError):
+        # img_ok is false if 1sc is not valid 1sc file
+        return False
+
+    (img_x, img_y, img_data) = read1sc.get_img_data()
+
+    # TODO: wx.Image is probably only 8-bits each color channel
+    #   yet we have 16-bit images
+    # wx.Image wants img_x * img_y * 3
+    # TODO: shadow data with full 16-bit info
+    img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
+    img_data_rgb[0::3] = img_data//256
+    img_data_rgb[1::3] = img_data//256
+    img_data_rgb[2::3] = img_data//256
+    img = wx.Image(img_x, img_y, bytes(img_data_rgb))
+    return img
 
 
 class EditHistory():
@@ -110,7 +132,7 @@ class EditHistory():
 
         self.update_menu_items()
         return redo_action
-    
+
     @debug_fxn
     def can_undo(self):
         return (len(self.history) > 0) and (self.history_ptr >= 0)
@@ -226,7 +248,7 @@ class MainWindow(wx.Frame):
 
         self.SetMenuBar(menubar)
 
-        # register Undo, Redo menu items so EditHistory obj can 
+        # register Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
         self.app_history.register_undo_menu_item(undoitem)
         self.app_history.register_redo_menu_item(redoitem)
@@ -257,7 +279,9 @@ class MainWindow(wx.Frame):
         # init marks_num_display before ImageScrolledCanvas so ISC can
         #   update number on its init
         # TODO: find width of "999" text to give to size
-        self.marks_num_display = wx.StaticText(self, wx.ID_ANY, size=wx.Size(30,-1))
+        self.marks_num_display = wx.StaticText(
+                self, wx.ID_ANY, size=wx.Size(30, -1)
+                )
 
         # ImageScrolledCanvas is the cleanest, fastest implementation for
         #   what we need
@@ -347,24 +371,24 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_key_down(self, evt):
-        KeyCode = evt.GetKeyCode()
+        key_code = evt.GetKeyCode()
         debugmsg(DEBUG_KEYPRESS,
                 "KEY:Key Down" + \
-                "    KeyCode: %d"%KeyCode + \
+                "    key_code: %d"%key_code + \
                 "    RawKeyCode: %d"%(evt.GetRawKeyCode()) + \
                 "    Position: " + repr(evt.GetPosition())
                 )
 
-        if KeyCode == 91:
+        if key_code == 91:
             # [ key
-            #  KeyCode: 91
+            #  key_code: 91
             #  RawKeyCode: 33
             zoom = self.img_panel.zoom_out(1)
             if zoom:
                 self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
-        if KeyCode == 93:
+        if key_code == 93:
             # ] key
-            #  KeyCode: 93
+            #  key_code: 93
             #  RawKeyCode: 30
             zoom = self.img_panel.zoom_in(1)
             if zoom:
@@ -374,42 +398,42 @@ class MainWindow(wx.Frame):
         # "arrow keys move virtual viewport over image"
         # NOTE: if we wanted to automatically implement panning, we could
         #   just evt.Skip in the following if statements
-        if KeyCode == 314:
+        if key_code == 314:
             # left key
             self.img_panel.pan_left(const.SCROLL_KEY_SPEED)
-        if KeyCode == 315:
+        if key_code == 315:
             # up key
             self.img_panel.pan_up(const.SCROLL_KEY_SPEED)
-        if KeyCode == 316:
+        if key_code == 316:
             # right key
             self.img_panel.pan_right(const.SCROLL_KEY_SPEED)
-        if KeyCode == 317:
+        if key_code == 317:
             # down key
             self.img_panel.pan_down(const.SCROLL_KEY_SPEED)
 
-        if KeyCode == 127 or KeyCode == 8:
+        if key_code == 127 or key_code == 8:
             # Delete (127) or Backspace (8)
             deleted_marks = self.img_panel.delete_selected_marks()
             self.app_history.new(['DELETE_MARK_LIST', deleted_marks])
 
-        if KeyCode == 366:
+        if key_code == 366:
             # PAGE UP
             # skip to process page up
             evt.Skip()
-        if KeyCode == 367:
+        if key_code == 367:
             # PAGE DOWN
             # skip to process page up
             evt.Skip()
-        if KeyCode == 313:
+        if key_code == 313:
             # HOME
             # skip to process HOME
             evt.Skip()
-        if KeyCode == 312:
+        if key_code == 312:
             # END
             # skip to process END
             evt.Skip()
 
-        if KeyCode == 32:
+        if key_code == 32:
             # Space Bar
             pass
 
@@ -475,31 +499,32 @@ class MainWindow(wx.Frame):
                     if name.startswith("image."):
                         with container_fh.open(name, 'r') as img_fh:
                             if name.endswith(".1sc"):
-                                img = self.file1sc_to_Image(img_fh)
+                                img = file1sc_to_Image(img_fh)
                             else:
                                 img = wx.Image(img_fh)
                         # check if img loaded ok
                         img_ok = img.IsOk()
+                        img_name = name
 
-                        if img_ok:
-                            self.img_panel.init_image(img)
-                            # reset filepath for cco file to nothing if we load new image
-                            # self.img_path if from zip is list, zipfile, member_name
-                            self.img_path = [imdata_path,name]
-                            self.save_filepath = None
-                        else:
-                            self.statusbar.SetStatusText(
-                                    "Image " + img_file + " loading ERROR."
-                                    )
                     if name == "marks.txt":
                         with container_fh.open(name, 'r') as json_fh:
                             marks = json.load(json_fh)
                         marks = [tuple(x) for x in marks]
                         print(marks)
                         self.img_panel.mark_point_list(marks)
-            self.statusbar.SetStatusText(
-                    "Image Data " + imdata_path + " loaded OK."
-                    )
+            if img_ok:
+                self.img_panel.init_image(img)
+                # reset filepath for cco file to nothing if we load new image
+                # self.img_path if from zip is list, zipfile, member_name
+                self.img_path = [imdata_path, img_name]
+                self.save_filepath = None
+                self.statusbar.SetStatusText(
+                        "Image Data " + imdata_path + " loaded OK."
+                        )
+            else:
+                self.statusbar.SetStatusText(
+                        "Image " + imdata_path+ " loading ERROR."
+                        )
 
         except IOError:
             # TODO: need real error dialog
@@ -532,27 +557,6 @@ class MainWindow(wx.Frame):
         self.load_image_from_file(img_path)
 
     @debug_fxn
-    def file1sc_to_Image(self, file1sc_file):
-        try:
-            read1sc = biorad1sc_reader.Reader(file1sc_file)
-        except (BioRadInvalidFileError, BioRadParsingError):
-            # img_ok is false if 1sc is not valid 1sc file
-            return False
-
-        (img_x, img_y, img_data) = read1sc.get_img_data()
-
-        # TODO: wx.Image is probably only 8-bits each color channel
-        #   yet we have 16-bit images
-        # wx.Image wants img_x * img_y * 3
-        # TODO: shadow data with full 16-bit info
-        img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
-        img_data_rgb[0::3] = img_data//256
-        img_data_rgb[1::3] = img_data//256
-        img_data_rgb[2::3] = img_data//256
-        img = wx.Image(img_x, img_y, bytes(img_data_rgb))
-        return img
-
-    @debug_fxn
     def load_image_from_file(self, img_file):
         """Given full img_file, load image into app
 
@@ -561,7 +565,7 @@ class MainWindow(wx.Frame):
         # check for 1sc files and get image data to send to Image
         (_, imgfile_ext) = os.path.splitext(img_file)
         if imgfile_ext == ".1sc":
-            img = self.file1sc_to_Image(img_file)
+            img = file1sc_to_Image(img_file)
         else:
             img = wx.Image(img_file)
 
@@ -591,7 +595,7 @@ class MainWindow(wx.Frame):
                     wx.CANCEL | wx.YES_NO | wx.YES_DEFAULT | wx.ICON_EXCLAMATION,
                     )
             save_query.SetYesNoLabels("&Save", "&Don't Save")
-            save_query_response = save_query.ShowModal() 
+            save_query_response = save_query.ShowModal()
             if save_query_response == wx.ID_YES:
                 self.on_save(None)
             elif save_query_response == wx.ID_CANCEL:
@@ -616,7 +620,7 @@ class MainWindow(wx.Frame):
     def on_save(self, evt):
         """Save menu handler for Main Window
         """
-        if self.save_filepath == None:
+        if self.save_filepath is None:
             # we've never "Save As..." so do that instead
             self.on_saveas(evt)
         else:
@@ -659,18 +663,18 @@ class MainWindow(wx.Frame):
     def on_undo(self, evt):
         action = self.app_history.undo()
         debugmsg(DEBUG_MISC, "MSC:undo: "+repr(action))
-        if action[0]=='MARK':
+        if action[0] == 'MARK':
             self.img_panel.delete_mark(action[1], internal=False)
-        if action[0]=='DELETE_MARK_LIST':
+        if action[0] == 'DELETE_MARK_LIST':
             self.img_panel.mark_point_list(action[1])
 
     @debug_fxn
     def on_redo(self, evt):
         action = self.app_history.redo()
         debugmsg(DEBUG_MISC, "MSC:redo: "+repr(action))
-        if action[0]=='MARK':
+        if action[0] == 'MARK':
             self.img_panel.mark_point(action[1])
-        if action[0]=='DELETE_MARK_LIST':
+        if action[0] == 'DELETE_MARK_LIST':
             self.img_panel.delete_mark_point_list(action[1])
 
     @debug_fxn
@@ -727,15 +731,15 @@ class MainWindow(wx.Frame):
             (_, imgfile_ext) = os.path.splitext(self.img_path)
             img_arcname = "image" + imgfile_ext
         else:
-            img_arcname = img_path[1]
+            img_arcname = self.img_path[1]
 
-        # write new save file 
+        # write new save file
         try:
             with zipfile.ZipFile(imdata_path, 'w') as container_fh:
                 container_fh.write(temp_img_name, arcname=img_arcname)
                 container_fh.writestr(
                         "marks.txt",
-                        json.dumps(self.img_panel.marks, separators=(',',':'))
+                        json.dumps(self.img_panel.marks, separators=(',', ':'))
                         )
         except IOError:
             # TODO: need real error dialog
