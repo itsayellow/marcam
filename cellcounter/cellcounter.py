@@ -774,7 +774,7 @@ class HelpFrame(wx.Frame):
         self.html = wx.html.HtmlWindow(self)
         self.html.SetRelatedFrame(self, "%s")
         self.html.LoadPage(os.path.join(ICON_DIR, 'cellcounter_help.html'))
-        self.SetSize((400, 600))
+        self.SetSize((500, 600))
 
 
 def process_command_line(argv):
