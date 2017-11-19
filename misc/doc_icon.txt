@@ -1,0 +1,21 @@
+Start with GenericDocumentIcon
+Layer 3: paper curl is top layer
+Layer 2: Shadows
+    All Black layer
+    Layer Mask with:
+        create version of icon with white background in separate file
+        Invert this (black<->white)
+        Copy this into Layer mask (using Option-Click to select Layer mask)
+        Slide Levels top slider to make more or less shadow in shadow areas
+            Changing from 255 to 192 seems close to right
+Layer 1: Totally white outline of icon
+    Select everythin inside icon paper, excluding curled corner
+        using magic wand, keep adding magic wand areas until all 
+        selected in paper
+    Create new layer, keeping selection, and fill with white      
+
+
+Put downsized app icon in between Layer 1 and Layer 2
+    50% to 55% seems about right
+    Probably put as distance from icon edge to bottom paper edge
+        as from icon edge to left/right edges
