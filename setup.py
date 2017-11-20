@@ -38,6 +38,13 @@ if sys.platform == 'darwin':
                         "Matthew A. Clapp, All Rights Reserved",
                 'CFBundleDocumentTypes':[
                     {
+                        'CFBundleTypeName':'Cellcounter Image Data File',
+                        'CFBundleTypeRole':'Editor',
+                        'CFBundleTypeIconFile':'cellcounter_doc.icns',
+                        'LSHandlerRank': "Owner",
+                        'LSItemContentTypes': ["com.itsayellow.cco"],
+                        },
+                    {
                         'CFBundleTypeName':'Bio-Rad Gel File',
                         'CFBundleTypeRole':'Viewer',
                         #'CFBundleTypeIconFile':'.icns',
@@ -63,12 +70,20 @@ if sys.platform == 'darwin':
                         'LSItemContentTypes': ["public.jpeg"],
                         },
                     ],
-                'UTExportedTypeDeclarations': [{
-                    'UTTypeConformsTo': ["public.data"],
-                    'UTTypeIdentifier': "com.itsayellow.1sc",
-                    'UTTypeDescription': "Bio-Rad Gel File",
-                    'UTTypeTagSpecification': {'public.filename-extension': "1sc"}
-                }],
+                'UTExportedTypeDeclarations': [
+                    {
+                        'UTTypeConformsTo': ["public.data"],
+                        'UTTypeIdentifier': "com.itsayellow.cco",
+                        'UTTypeDescription': "Cellcounter Image Data File",
+                        'UTTypeTagSpecification': {'public.filename-extension': "cco"}
+                        },
+                    {
+                        'UTTypeConformsTo': ["public.data"],
+                        'UTTypeIdentifier': "com.itsayellow.1sc",
+                        'UTTypeDescription': "Bio-Rad Gel File",
+                        'UTTypeTagSpecification': {'public.filename-extension': "1sc"}
+                        },
+                    ],
                 },
             }
     extra_options = dict(
