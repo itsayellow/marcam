@@ -16,6 +16,7 @@ data_files = [
         'cellcounter/marktool32.png',
         'cellcounter/cellcounter_help.html',
         'cellcounter/cellcounter_help_markmodeoff.png'
+        'cellcounter/cellcounter_doc.icns'
         ]
 version = '0.1.0'
 
