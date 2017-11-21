@@ -13,7 +13,7 @@ srcfile=$1
 srcfile_info=(`gm identify $1`)
 srcdir=`dirname $srcfile`
 srcfile_size=${srcfile_info[2]}
-iconset_dir=$srcdir/Icon.iconset
+iconset_dir=${srcfile%.*}.iconset
 
 echo "File:      $srcfile"
 echo "Size:      $srcfile_size"
