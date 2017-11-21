@@ -10,23 +10,15 @@ echo "Output:      $outputiconset"
 
 mkdir $outputiconset
 
-this_icon="icon_512x512@2x.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_512x512.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_256x256@2x.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_256x256.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_128x128@2x.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_128x128.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_32x32@2x.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_32x32.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_16x16@2x.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
-this_icon="icon_16x16.png"
-gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
+iconset_files=(\
+    "icon_512x512@2x.png" "icon_512x512.png" \
+    "icon_256x256@2x.png" "icon_256x256.png" \
+    "icon_128x128@2x.png" "icon_128x128.png" \
+    "icon_32x32@2x.png" "icon_32x32.png" \
+    "icon_16x16@2x.png" "icon_16x16.png" \
+)
+
+for this_icon in ${iconset_files[*]}; do
+    echo $this_icon
+    gm composite $upperlayer/$this_icon $baselayer/$this_icon $outputiconset/$this_icon
+done
