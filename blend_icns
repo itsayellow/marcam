@@ -1,0 +1,52 @@
+#!/bin/bash
+
+baselayer_icns=$1
+upperlayer_icns=$2
+output_icns=$3
+
+echo "Base Layer:  $baselayer_icns"
+echo "Upper Layer: $upperlayer_icns"
+echo "Output:      $output_icns"
+
+mytempdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX")
+
+echo $mytempdir
+
+baselayer_icns_base=${baselayer_icns##*/}
+upperlayer_icns_base=${upperlayer_icns##*/}
+output_icns_base=${output_icns##*/}
+
+baselayer_iconset=$mytempdir/${baselayer_icns_base%.*}.iconset
+upperlayer_iconset=$mytempdir/${upperlayer_icns_base%.*}.iconset
+output_iconset=$mytempdir/${output_icns_base%.*}.iconset
+
+echo $baselayer_iconset
+echo $upperlayer_iconset
+echo $output_iconset
+
+# create iconset dirs in temp dir, and make empty dir for output iconset
+iconutil -c iconset -o $baselayer_iconset $baselayer_icns
+iconutil -c iconset -o $upperlayer_iconset $upperlayer_icns
+mkdir $output_iconset
+
+# all iconset member files
+iconset_files=(\
+    "icon_512x512@2x.png" "icon_512x512.png" \
+    "icon_256x256@2x.png" "icon_256x256.png" \
+    "icon_128x128@2x.png" "icon_128x128.png" \
+    "icon_32x32@2x.png" "icon_32x32.png" \
+    "icon_16x16@2x.png" "icon_16x16.png" \
+)
+
+# composite every matching png file in baselayer and upper layer and put into
+#   output_iconset dir
+for this_icon in ${iconset_files[*]}; do
+    echo $this_icon
+    gm composite $upperlayer_iconset/$this_icon $baselayer_iconset/$this_icon $output_iconset/$this_icon
+done
+
+# write out final icns file
+iconutil -c icns -o $output_icns $output_iconset
+
+# remove tempdir
+rm -rf $mytempdir
