@@ -3,21 +3,33 @@
 # For creation of Mac icon from source image file
 # Source image file should be 1024x1024 or larger, preferably PNG with
 #   alpha channel.
-# from starting image file, create iconset dir and icns file
+# from starting image file, create icns file
 #
 # usage: gen_icon <src_image_file>
 #
 # requires graphicsmagick
 
+# simple usage info
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <sourcefile>.png"
+    echo ""
+    echo "  Convert <sourcefile>.png to <sourcefile>.icns, where "
+    echo "  <sourcefile>.png is a 1024x1024 or larger png image file."
+    exit
+fi
+
+# create safe temp dir
+mytempdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX")
+
 srcfile=$1
 srcfile_info=(`gm identify $1`)
-srcdir=`dirname $srcfile`
 srcfile_size=${srcfile_info[2]}
-iconset_dir=${srcfile%.*}.iconset
+srcfile_base=${srcfile##*/}
+iconset_dir=$mytempdir/${srcfile_base%.*}.iconset
+icnsout_file=${srcfile%.*}.icns
 
 echo "File:      $srcfile"
 echo "Size:      $srcfile_size"
-echo "Directory: $srcdir"
 
 mkdir $iconset_dir
 
@@ -51,4 +63,7 @@ cp $iconset_dir/icon_32x32.png $iconset_dir/icon_16x16@2x.png
 gm convert $srcfile -resize 16x16 $iconset_dir/icon_16x16.png
 
 # convert iconset to icns file
-iconutil -c icns $iconset_dir
+iconutil -c icns -o $icnsout_file $iconset_dir
+
+# remove tempdir
+rm -rf $mytempdir
