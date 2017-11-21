@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# simple usage info
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 <baselayer>.icns <upperlayer>.icns <output>.icns"
+    exit
+fi
+
 baselayer_icns=$1
 upperlayer_icns=$2
 output_icns=$3
