@@ -198,7 +198,10 @@ class MainWindow(wx.Frame):
         self.init_ui()
         if srcfiles:
             # TODO: are we able to load more than one file?
-            self.load_image_from_file(srcfiles[0])
+            if srcfiles[0].endswith(".cco"):
+                self.load_ccofile_from_path(srcfiles[0])
+            else:
+                self.load_image_from_file(srcfiles[0])
 
     @debug_fxn
     def init_ui(self):
