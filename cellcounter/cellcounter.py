@@ -4,6 +4,7 @@
 
 import os
 import sys
+import platform
 import time
 import argparse
 import os.path
@@ -815,13 +816,15 @@ def debug_main():
     # log situation before doing anything else
     debugmsg(0, time.asctime(time.gmtime()) + " UTC")
     debugmsg(0, "Cellcounter version "+const.VERSION_STR)
-    uname_obj = os.uname()
-    debugmsg(0, "os.uname")
-    debugmsg(0, "    sysname:" + uname_obj.sysname)
-    debugmsg(0, "    nodename:" + uname_obj.nodename)
+    # os.uname doesn't work on Windows (platform.uname more portable)
+    uname_obj = platform.uname()
+    debugmsg(0, "platform.uname")
+    debugmsg(0, "    system:" + uname_obj.system)
+    debugmsg(0, "    node:" + uname_obj.node)
     debugmsg(0, "    release:" + uname_obj.release)
     debugmsg(0, "    version:" + uname_obj.version)
     debugmsg(0, "    machine:" + uname_obj.machine)
+    debugmsg(0, "    processor:" + uname_obj.processor)
     debugmsg(0, "sys.argv")
     debugmsg(0, repr(sys.argv))
 
