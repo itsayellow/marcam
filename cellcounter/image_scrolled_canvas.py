@@ -274,9 +274,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if (0 <= img_x <= self.img_size_x and
                 0 <= img_y <= self.img_size_y):
             if self.mark_mode:
-                img_pt = (round(img_x), round(img_y))
-                self.mark_point(img_pt)
-                self.history.new(['MARK',img_pt])
+                img_pt = (int(img_x), int(img_y))
+                mark_added = self.mark_point(img_pt)
+                if mark_added:
+                    self.history.new(['MARK',img_pt])
+                else:
+                    print("NOP")
+                    self.history.new(['NOP'])
             else:
                 # selecting with no mark nearby deselects
                 # find the closest mark to click, as long as it is close
@@ -437,8 +441,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         Args:
             img_point (tuple): int (x, y) in image coordinates mark location
+
+        Returns (bool): True if new mark added, False if same point already
+            exists in mark list
         """
         debugmsg(DEBUG_MISC, "MSC: point (%d, %d)"%img_point)
+
+        if img_point in self.marks:
+            # mark already exists, doing nothing
+            return False
 
         self.marks.append(img_point)
         # signal to parent that a new unsaved state has happened
@@ -450,6 +461,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             # tell parent UI new total marks number
             self.update_mark_total()
             self.Update()
+        return True
 
     @debug_fxn
     def mark_point_list(self, point_list):
