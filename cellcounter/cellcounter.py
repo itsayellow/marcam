@@ -105,17 +105,38 @@ class EditHistory():
 
     @debug_fxn
     def new(self, item):
+        """Make a new Edit History item
+        """
         # truncate list so current item is last item (makes empty list
         #   if self.history_ptr == -1)
         self.history = self.history[:self.history_ptr + 1]
-        self.history.append(item)
+        self.history.append({'edit_action':item, 'save_flag':False})
         self.history_ptr = len(self.history) - 1
         self.update_menu_items()
 
     @debug_fxn
+    def save_notify(self):
+        """Set save flag for current history action only, erase all others
+        """
+        # set all edit history save flags to False
+        for i in range(len(self.history)):
+            self.history[i]['save_flag'] = False
+
+        # set current edit history action save flags to True
+        self.history[self.history_ptr]['save_flag'] = True
+
+    @debug_fxn
+    def is_saved(self):
+        if self.history_ptr == -1:
+            # no edit history, so no save needed (TODO?)
+            return True
+        else:
+            return self.history[self.history_ptr]['save_flag']
+
+    @debug_fxn
     def undo(self):
         if self.can_undo():
-            undo_action = self.history[self.history_ptr]
+            undo_action = self.history[self.history_ptr]['edit_action']
             self.history_ptr -= 1
         else:
             undo_action = None
@@ -127,7 +148,7 @@ class EditHistory():
     def redo(self):
         if self.can_redo():
             self.history_ptr += 1
-            redo_action = self.history[self.history_ptr]
+            redo_action = self.history[self.history_ptr]['edit_action']
         else:
             redo_action = None
 
@@ -540,7 +561,8 @@ class MainWindow(wx.Frame):
         self.save_filepath = img_path
         # we just loaded, so have nothing to save
         self.save_notify()
-
+        # add successful file open to file history
+        self.file_history.AddFileToHistory(img_path)
 
     @debug_fxn
     def load_ccofile_from_path(self, imdata_path):
@@ -711,6 +733,8 @@ class MainWindow(wx.Frame):
             self.save_filepath = pathname
             # signify we have saved content
             self.save_notify()
+            # add successful file save as to file history
+            self.file_history.AddFileToHistory(pathname)
 
     @debug_fxn
     def on_undo(self, evt):
@@ -721,6 +745,12 @@ class MainWindow(wx.Frame):
         if action[0] == 'DELETE_MARK_LIST':
             self.img_panel.mark_point_list(action[1])
 
+        # if we now are in a point in history that was saved, notify self
+        #   and img_panel
+        if self.app_history.is_saved():
+            self.content_saved = True
+            self.img_panel.save_notify()
+
     @debug_fxn
     def on_redo(self, evt):
         action = self.app_history.redo()
@@ -729,6 +759,12 @@ class MainWindow(wx.Frame):
             self.img_panel.mark_point(action[1])
         if action[0] == 'DELETE_MARK_LIST':
             self.img_panel.delete_mark_point_list(action[1])
+
+        # if we now are in a point in history that was saved, notify self
+        #   and img_panel
+        if self.app_history.is_saved():
+            self.content_saved = True
+            self.img_panel.save_notify()
 
     @debug_fxn
     def on_select_all(self, evt):
@@ -739,6 +775,7 @@ class MainWindow(wx.Frame):
         # tell self and children data was saved now
         self.content_saved = True
         self.img_panel.save_notify()
+        self.app_history.save_notify()
 
     @debug_fxn
     def needs_save(self):
@@ -749,21 +786,7 @@ class MainWindow(wx.Frame):
     def save_img_data(self, imdata_path):
         """Save image and mark locations to zipfile filename
         """
-        ## make temp file
-        #temp_img = tempfile.TemporaryFile()
-        ## copy source image into temp file
-        #if isinstance(self.img_path, str):
-        #    # pathname
-        #    with open(self.img_path, 'rb') as img_fh:
-        #        temp_img.write(img_fh.read())
-        #else:
-        #    # zipfile cco file
-        #    with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
-        #        temp_img.write(container_fh.open(self.img_path[1]).read())
-        ## rewind temp_img to read from it
-        #temp_img.seek(0)
-
-        # make temp file
+        # make temp file - must make actual file for use with zipfile
         (temp_img_fd, temp_img_name) = tempfile.mkstemp()
         temp_img = os.fdopen(temp_img_fd, mode='wb')
         # copy source image into temp file
