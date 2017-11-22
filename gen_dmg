@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# from:
+# https://stackoverflow.com/questions/96882/how-do-i-create-a-nice-looking-dmg-for-mac-os-x-using-command-line-tools
+
 thispwd=`pwd -P`
 
 if [ -e dist/dmg_dir ]; then
@@ -11,17 +14,64 @@ fi
 
 cp -a dist/Cellcounter.app dist/dmg_dir/
 
-if [ -e dist/dmg_dirApplications ]; then
-    echo "Alias to /Applications already exists"
-else
-    echo "Creating alias to /Applications"
-osascript <<END_OSASCRIPT
-tell application "Finder"
-    make alias file to folder (posix file "/Applications") at (posix file "$thispwd/dist/dmg_dir") with properties {name:"Applications"}
-end tell
-END_OSASCRIPT
-fi
+srcfolder="dist/dmg_dir"
+volname="Cellcounter"
+fs="HFS+"
+size="200000"
 
-hdiutil create dist/Cellcounter.dmg -volname "Cellcounter" -srcfolder dist/dmg_dir
+# create disk image
+hdiutil create -srcfolder "${srcfolder}" -volname "${volname}" -fs "${fs}" \
+      -fsargs "-c c=64,a=16,e=16" -format UDRW -size ${size}k pack.temp.dmg
 
+# open disk image
+device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" | egrep '^/dev/')
+
+# DEBUG DELETE ME
+echo $device
+
+# put icns in path for custom volume icon
+cp misc/cellcounter_drive.icns /Volumes/${volname}/.VolumeIcon.icns
+# set bit to indicate custom icon
+#   SetFile is "deprecated" but man page doesn't say what to do instead !
+SetFile -a C /Volumes/${volname}
+
+# copy arrow.png to volume as hidden file
+mkdir /Volumes/${volname}/.background
+cp misc/arrow.png /Volumes/${volname}/.background/arrow.png
+
+echo '
+    tell application "Finder"
+        tell disk "'${volname}'"
+            open
+            set current view of container window to icon view
+            set toolbar visible of container window to false
+            set statusbar visible of container window to false
+            set the bounds of container window to {500, 400, 1000, 650}
+            set theViewOptions to the icon view options of container window
+            set arrangement of theViewOptions to not arranged
+            set icon size of theViewOptions to 128
+            set background picture of theViewOptions to file ".background:arrow.png"
+            make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
+            set position of item "Cellcounter.app" of container window to {100, 100}
+            set position of item "Applications" of container window to {375, 100}
+            update without registering applications
+            delay 5
+            close
+        end tell
+    end tell
+' | osascript
+
+# make all files read-only in volume (necessary?)
+chmod -Rf go-w /Volumes/"${volname}"
+# 2 syncs? really?
+sync
+sync
+
+# eject volume
+hdiutil detach  /Volumes/"${volname}"
+
+hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "dist/Cellcounter.dmg"
+
+# clean up
+rm pack.temp.dmg
 rm -rf dist/dmg_dir

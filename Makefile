@@ -29,6 +29,6 @@ dist/Cellcounter.dmg: dist/Cellcounter.app
 	@echo "---------------------------------------------------------------"
 	@echo "Make dmg"
 	@echo ""
-	./gen_dmg2
+	./gen_dmg
 
 # vim: nowrap noexpandtab sw=8 sts=0
