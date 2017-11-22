@@ -70,8 +70,8 @@ sync
 # eject volume
 hdiutil detach  /Volumes/"${volname}"
 
-hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "Cellcounter.dmg"
+hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "dist/Cellcounter.dmg"
 
 # clean up
-rm -f /pack.temp.dmg
+rm pack.temp.dmg
 rm -rf dist/dmg_dir
