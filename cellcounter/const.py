@@ -81,4 +81,30 @@ CROSS_11x11_YELLOW_BMP = wx.Bitmap.FromBufferRGBA(
         centerline_11*5 + crossline_11 + centerline_11*5
         )
 
-YELLOW_PIX_BMP = wx.Bitmap.FromBufferRGBA(1, 1, pix_yellow)
+
+# TODO: attempts to make bg shadow or glow just end up making it look like
+#       marks are blurry or odd.  unsuccessful
+pix_transluc50_black = b'\x00\x00\x00\x80'
+pix_transluc50_white = b'\xff\xff\xff\x80'
+pix_transluc25_black = b'\x00\x00\x00\x40'
+pix_transluc25_white = b'\xff\xff\xff\x40'
+pix_transluc25_cyan = b'\x00\xff\xff\x40'
+
+# red cross with background shadow, 11px x 11px
+centerline_11 = pix_clear*5 + pix_red + pix_transluc25_black + pix_clear*4
+crossline_11 = pix_red*11
+crossline_below_11 = pix_transluc25_black*5 + pix_red + pix_transluc25_black*5
+CROSS_11x11_RED_SHADOW_BMP = wx.Bitmap.FromBufferRGBA(
+        11, 11,
+        centerline_11*5 + crossline_11 + crossline_below_11 + centerline_11*4
+        )
+
+# red cross with background glow, 11px x 11px
+centerline_11 = pix_clear*4 + pix_transluc25_cyan + pix_red + pix_transluc25_cyan + pix_clear*4
+crossline_above_11 = pix_transluc25_cyan*5 + pix_red + pix_transluc25_cyan*5
+crossline_11 = pix_red*11
+crossline_below_11 = pix_transluc25_cyan*5 + pix_red + pix_transluc25_cyan*5
+CROSS_11x11_RED_GLOW_BMP = wx.Bitmap.FromBufferRGBA(
+        11, 11,
+        centerline_11*4 + crossline_above_11 + crossline_11 + crossline_below_11 + centerline_11*4
+        )
