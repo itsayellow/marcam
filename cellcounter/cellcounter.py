@@ -123,7 +123,8 @@ class EditHistory():
             self.history[i]['save_flag'] = False
 
         # set current edit history action save flags to True
-        self.history[self.history_ptr]['save_flag'] = True
+        if self.history_ptr > -1:
+            self.history[self.history_ptr]['save_flag'] = True
 
     @debug_fxn
     def is_saved(self):
@@ -217,7 +218,7 @@ class MainWindow(wx.Frame):
         self.toolbar = None
 
         # App configuration
-        self.config = wx.Config("Cellcounter")
+        self.config = wx.Config("Cellcounter", "itsayellow.com")
 
         # File history
         self.file_history = wx.FileHistory()

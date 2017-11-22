@@ -279,7 +279,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 if mark_added:
                     self.history.new(['MARK',img_pt])
                 else:
-                    print("NOP")
                     self.history.new(['NOP'])
             else:
                 # selecting with no mark nearby deselects
