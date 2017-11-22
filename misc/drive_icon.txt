@@ -1,0 +1,19 @@
+iconutil -c iconset Removable.icns
+Open Removable.iconset/icon_512x512@2x.png in photoshop
+on a new layer, position a 50%-55% sized version of app.icon on top
+    position icon so distance to sides is the same as distance to bottom
+    of GenericDocumentIcon img
+In the icon layer, transform so it matches perspective of drive "top"
+    Edit->Transform->Skew
+    or
+    Edit->Transform->Perspective
+In this new icon layer, Select-All, and Copy
+
+In new blank image with transparent bg (1024x1024)
+    Paste Special->Paste in place
+Export image (just the icon with placement) as its own png file, iconlayer.png
+
+gen_icon iconlayer.png
+    (to make iconlayer.icns)
+
+blend_icns Removable.icns iconlayer.icns cellcounter_drive.icns

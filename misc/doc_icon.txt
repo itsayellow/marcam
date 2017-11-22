@@ -1,4 +1,5 @@
-Open GenericDocumentIcon.iconset/icon_512x512.png in photoshop
+iconutil -c iconset GenericDocumentIcon.icns
+Open GenericDocumentIcon.iconset/icon_512x512@2x.png in photoshop
 on a new layer, position a 50%-55% sized version of app.icon on top
     position icon so distance to sides is the same as distance to bottom
     of GenericDocumentIcon img
