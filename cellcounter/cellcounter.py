@@ -686,18 +686,19 @@ class MainWindow(wx.Frame):
         """Save As... menu handler for Main Window
         """
         if self.save_filepath:
-            default_save_filename = self.save_filepath
+            (default_dir, default_filename) = os.path.split(self.save_filepath)
         else:
             (img_path_root, _) = os.path.splitext(
                     os.path.basename(self.img_path)
                     )
-            default_save_filename = img_path_root + ".cco"
-
+            default_save_path = img_path_root + ".cco"
+            (default_dir, default_filename) = os.path.split(default_save_path)
         with wx.FileDialog(
                 self,
                 "Save CCO file", wildcard="CCO files (*.cco)|*.cco",
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
-                defaultFile=default_save_filename,
+                defaultDir=default_dir,
+                defaultFile=default_filename,
                 ) as file_dialog:
 
             if file_dialog.ShowModal() == wx.ID_CANCEL:
