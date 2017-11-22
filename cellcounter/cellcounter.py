@@ -195,6 +195,13 @@ class MainWindow(wx.Frame):
         self.mark_id = None
         self.toolbar = None
 
+        # App configuration
+        self.config = wx.Config("Cellcounter")
+
+        # File history
+        self.file_history = wx.FileHistory()
+        self.file_history.Load(self.config)
+
         self.init_ui()
         if srcfiles:
             # TODO: are we able to load more than one file?
@@ -208,13 +215,16 @@ class MainWindow(wx.Frame):
         # menu bar stuff
         menubar = wx.MenuBar()
         # File
+        open_recent_menu = wx.Menu()
         file_menu = wx.Menu()
-        fitem = file_menu.Append(wx.ID_EXIT,
+        quititem = file_menu.Append(wx.ID_EXIT,
                 'Quit', 'Quit application\tCtrl+Q'
                 )
         oitem = file_menu.Append(wx.ID_OPEN,
                 'Open Image Data...\tCtrl+O', 'Open .cco image and data file'
                 )
+        orecentitem = file_menu.Append(wx.ID_ANY,
+                'Open Recent', open_recent_menu, 'Open recent .cco files')
         citem = file_menu.Append(wx.ID_CLOSE,
                 'Close\tCtrl+W', 'Close image'
                 )
@@ -251,6 +261,10 @@ class MainWindow(wx.Frame):
         menubar.Append(help_menu, "&Help")
 
         self.SetMenuBar(menubar)
+
+        # register Open Recent menu, put under control of FileHistory obj
+        self.file_history.UseMenu(open_recent_menu)
+        self.file_history.AddFilesToMenu()
 
         # register Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
@@ -327,18 +341,25 @@ class MainWindow(wx.Frame):
         mybox.Add(self.img_panel, proportion=1, flag=wx.EXPAND)
         self.SetSizer(mybox)
 
+        # setup event handlers for Frame events
+        self.Bind(wx.EVT_CLOSE, self.on_evt_close)
+
         # setup event handlers for toolbar
         self.Bind(wx.EVT_TOOL, self.on_open, otool)
         self.Bind(wx.EVT_TOOL, self.on_markmode_toggle, marktool)
 
         # setup event handlers for menus
-        self.Bind(wx.EVT_MENU, self.on_quit, fitem)
         # File menu items
         self.Bind(wx.EVT_MENU, self.on_open, oitem)
         self.Bind(wx.EVT_MENU, self.on_close, citem)
         self.Bind(wx.EVT_MENU, self.on_save, sitem)
         self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
         self.Bind(wx.EVT_MENU, self.on_import_image, importimitem)
+        self.Bind(wx.EVT_MENU, self.on_quit, quititem)
+        # open recent handler
+        self.Bind(wx.EVT_MENU_RANGE, self.on_open_recent,
+                id=wx.ID_FILE1, id2=wx.ID_FILE9
+                )
         # Edit menu items
         self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
@@ -368,9 +389,20 @@ class MainWindow(wx.Frame):
         self.marks_num_display.SetLabel("%d"%mark_total)
 
     @debug_fxn
+    def on_evt_close(self, evt):
+        """Handler for anytime user quits program in any way
+        """
+        self.file_history.Save(self.config)
+        evt.Skip()
+
+    @debug_fxn
     def on_quit(self, evt):
+        """Handler for menu Quit
+        """
         is_closed = self.on_close(None)
+
         if is_closed:
+            # save file history to config
             self.Close()
 
     @debug_fxn
@@ -491,6 +523,24 @@ class MainWindow(wx.Frame):
         self.save_filepath = img_path
         # we just loaded, so have nothing to save
         self.save_notify()
+        # add successful file open to file history
+        self.file_history.AddFileToHistory(img_path)
+
+    @debug_fxn
+    def on_open_recent(self, evt):
+        # first close current image (if it exists)
+        is_closed = self.on_close(None)
+
+        if not is_closed:
+            return
+
+        # get path from file_history
+        img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
+        self.load_ccofile_from_path(img_path)
+        self.save_filepath = img_path
+        # we just loaded, so have nothing to save
+        self.save_notify()
+
 
     @debug_fxn
     def load_ccofile_from_path(self, imdata_path):
@@ -498,7 +548,6 @@ class MainWindow(wx.Frame):
         try:
             with zipfile.ZipFile(imdata_path, 'r') as container_fh:
                 namelist = container_fh.namelist()
-                print(namelist)
                 for name in namelist:
                     if name.startswith("image."):
                         with container_fh.open(name, 'r') as img_fh:
@@ -514,7 +563,6 @@ class MainWindow(wx.Frame):
                         with container_fh.open(name, 'r') as json_fh:
                             marks = json.load(json_fh)
                         marks = [tuple(x) for x in marks]
-                        print(marks)
                         self.img_panel.mark_point_list(marks)
             if img_ok:
                 self.img_panel.init_image(img)
@@ -716,8 +764,6 @@ class MainWindow(wx.Frame):
 
         # make temp file
         (temp_img_fd, temp_img_name) = tempfile.mkstemp()
-        print("temp_img_name")
-        print(temp_img_name)
         temp_img = os.fdopen(temp_img_fd, mode='wb')
         # copy source image into temp file
         if isinstance(self.img_path, str):
@@ -748,6 +794,8 @@ class MainWindow(wx.Frame):
         except IOError:
             # TODO: need real error dialog
             print("Cannot save current data in file '%s'." % imdata_path)
+        finally:
+            os.unlink(temp_img_name)
 
     @debug_fxn
     def on_about(self, evt):
