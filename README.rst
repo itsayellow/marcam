@@ -27,6 +27,10 @@ To make a new icon
 * export to png
 * read in png file and then downsize to 32x32 and save as png
 
+Notes
+--------
+Application preferences on Mac stored at: "~/Library/Preferences/Cellcounter Preferences"
+
 References
 ----------
 
