@@ -81,7 +81,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.marks_selected = []
         self.overlay = wx.Overlay() # for making rubber-band box during drag
         self.mouse_left_down = None
-        self.mouse_was_drag = False
+        self.mouse_was_dragging = False
         self.zoom = None
         self.zoom_idx = None
         self.zoom_list = None
@@ -250,12 +250,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         return (img_x_min, img_y_min, img_x_max, img_y_max)
 
-    def debug_mouse_left_is_down(self, evt, ms):
-        if evt.LeftIsDown():
-            print("%.fms: I think we're dragging!"%ms)
-        else:
-            print("%.fms: NO dragging."%ms)
-
     @debug_fxn
     def on_left_down(self, evt):
         """Handle mouse left-clicks
@@ -275,38 +269,56 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #       (unscrolled)
         #   * not to depend on which img_dc we supply
         #   * not to depend on zoom or pan
-        point = evt.GetLogicalPosition(self.img_dc)
-        (img_x, img_y) = self.win2img_coord(point.x, point.y)
+        # with self.img_dc, GetPosition == GetLogicalPosition (???)
+        point = evt.GetPosition()
+        point_log = evt.GetLogicalPosition(self.img_dc)
+        (img_x, img_y) = self.win2img_coord(point_log.x, point_log.y)
 
         debugmsg(DEBUG_MISC,
-            "MSC:left click at img (%.2f, %.2f)"%(img_x, img_y)
+            "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y)
+            )
+        debugmsg(DEBUG_MISC,
+            "MSC:evt.GetLogicalPosition = (%.2f, %.2f)"%(point_log.x, point_log.y)
+            )
+        debugmsg(DEBUG_MISC,
+            "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
             )
 
-        if (0 <= img_x <= self.img_size_x and
-                0 <= img_y <= self.img_size_y):
-            if self.mark_mode:
+        if self.mark_mode:
+            if (0 <= img_x <= self.img_size_x and
+                    0 <= img_y <= self.img_size_y):
                 img_pt = (int(img_x), int(img_y))
                 mark_added = self.mark_point(img_pt)
                 if mark_added:
                     self.history.new(['MARK',img_pt])
                 else:
                     self.history.new(['NOP'])
-            else:
-                # in case we need a drag capture mouse
-                self.CaptureMouse()
+        else:
+            # we allow click outside of image in case we drag onto image
 
-                # selecting with no mark nearby deselects
-                # find the closest mark to click, as long as it is close
-                #   enough to click
-                # then color mark yellow and that one will be "selected"
-                #   and can be deleted
-                # Shift always adds select, CONTROL toggles select state
-                is_appending = mods & wx.MOD_SHIFT
-                is_toggling = mods & wx.MOD_CONTROL
-                # record args so on _left_up can select at point if this
-                #   turns out to be a click and not a drag
-                self.mouse_left_down = [img_x, img_y, is_appending, is_toggling]
-                #self.select_at_point(img_x, img_y, is_appending, is_toggling)
+            # in case we need a drag capture mouse
+            self.CaptureMouse()
+
+            # selecting with no mark nearby deselects all
+            # find the closest mark to click, as long as it is close
+            #   enough to click
+            # then color mark yellow and that one will be "selected"
+            #   and can be deleted
+            # Shift always adds select, CONTROL toggles select state
+            is_appending = mods & wx.MOD_SHIFT
+            is_toggling = mods & wx.MOD_CONTROL
+            # record args so on on_left_up can select at point if this
+            #   turns out to be a click and not a drag
+            self.mouse_left_down = {
+                    'point_log':point_log,
+                    'point':point,
+                    'img_x':img_x,
+                    'img_y':img_y,
+                    'is_appending':is_appending,
+                    'is_toggling':is_toggling,
+                    }
+            self.mouse_drag_start = point
+            #self.select_at_point(img_x, img_y, is_appending, is_toggling)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -314,23 +326,85 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def on_motion(self, evt):
         if evt.Dragging() and evt.LeftIsDown():
-            self.mouse_was_drag = True
-            print("Dragging now!")
+            self.mouse_was_dragging = True
+
+    @debug_fxn
+    def marks_in_box_img(self, box_corner1_img, box_corner2_img):
+        (xmin, xmax) = sorted((box_corner1_img[0], box_corner2_img[0]))
+        (ymin, ymax) = sorted((box_corner1_img[1], box_corner2_img[1]))
+
+        marks_in_box = []
+        for (x,y) in self.marks:
+            if xmin <= x <= xmax and ymin <= y <= ymax:
+                marks_in_box.append((x,y))
+
+        return marks_in_box    
 
     @debug_fxn
     def on_left_up(self, evt):
+        # DEBUG DELETEME
         print("Left UP!")
 
-        if self.mouse_was_drag:
+        if self.mouse_was_dragging:
             # finish drag by selecting everything in box (TODO)
+            box_corner1_win = self.mouse_left_down['point']
+            box_corner2_win = evt.GetPosition()
+
+            box_corner1_img = (
+                    self.mouse_left_down['img_x'],
+                    self.mouse_left_down['img_y']
+                    )
+            box_corner2_img = self.win2img_coord(box_corner2_win.x, box_corner2_win.y)
+
+            print("img box from (%.1f,%.1f) to (%.1f,%.1f)"%(
+                box_corner1_img[0],
+                box_corner1_img[1],
+                box_corner2_img[0],
+                box_corner2_img[1]
+                )
+                )
+
+            marks_in_box = self.marks_in_box_img(box_corner1_img, box_corner2_img)
+            print(marks_in_box)
+
+            # get key modifiers for this left_up event
+            mods = evt.GetModifiers()
+            is_appending = mods & wx.MOD_SHIFT
+
+            if not is_appending:
+                marks_unselected = [
+                        x for x in self.marks_selected if x not in marks_in_box]
+                marks_new_selected = [
+                        x for x in marks_in_box if x not in self.marks_selected]
+                self.marks_selected = marks_in_box
+                for mark in marks_new_selected + marks_unselected:
+                    self.refresh_mark_area(mark)
+            else:
+                for mark in marks_in_box:
+                    if mark not in self.marks_selected:
+                        self.marks_selected.append(mark)
+                        self.refresh_mark_area(mark)
+            self.Update()
+
+            # DEBUG DELETEME
             print("This was a drag")
         else:
             # finish click by selecting at point with args from on_left_down
+
+            # DEBUG DELETEME
             print("This was a click")
-            self.select_at_point(*self.mouse_left_down)
+
+            if (0 <= self.mouse_left_down['img_x'] <= self.img_size_x and
+                    0 <= self.mouse_left_down['img_y'] <= self.img_size_y):
+                self.select_at_point(
+                        self.mouse_left_down['img_x'],
+                        self.mouse_left_down['img_y'],
+                        self.mouse_left_down['is_appending'],
+                        self.mouse_left_down['is_toggling'],
+                        )
 
         # reset mouse state
-        self.mouse_was_drag = False
+        self.mouse_was_dragging = False
         self.mouse_left_down = None
 
         if not self.mark_mode and self.HasCapture():
