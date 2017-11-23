@@ -79,6 +79,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.marks = []
         self.marks_num_update_fxn = marks_num_update_fxn
         self.marks_selected = []
+        self.overlay = wx.Overlay() # for making rubber-band box during drag
+        self.mouse_left_down = None
+        self.mouse_was_drag = False
         self.zoom = None
         self.zoom_idx = None
         self.zoom_list = None
@@ -116,7 +119,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_SCROLLWIN, self.on_scroll)
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+        self.Bind(wx.EVT_LEFT_UP, self.on_left_up)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
+        self.Bind(wx.EVT_MOTION, self.on_motion)
 
         # tell parent UI new total marks number (0)
         self.update_mark_total()
@@ -245,6 +250,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         return (img_x_min, img_y_min, img_x_max, img_y_max)
 
+    def debug_mouse_left_is_down(self, evt, ms):
+        if evt.LeftIsDown():
+            print("%.fms: I think we're dragging!"%ms)
+        else:
+            print("%.fms: NO dragging."%ms)
+
     @debug_fxn
     def on_left_down(self, evt):
         """Handle mouse left-clicks
@@ -281,6 +292,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 else:
                     self.history.new(['NOP'])
             else:
+                # in case we need a drag capture mouse
+                self.CaptureMouse()
+
                 # selecting with no mark nearby deselects
                 # find the closest mark to click, as long as it is close
                 #   enough to click
@@ -289,7 +303,38 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 # Shift always adds select, CONTROL toggles select state
                 is_appending = mods & wx.MOD_SHIFT
                 is_toggling = mods & wx.MOD_CONTROL
-                self.select_at_point(img_x, img_y, is_appending, is_toggling)
+                # record args so on _left_up can select at point if this
+                #   turns out to be a click and not a drag
+                self.mouse_left_down = [img_x, img_y, is_appending, is_toggling]
+                #self.select_at_point(img_x, img_y, is_appending, is_toggling)
+
+        # continue processing click, for example shifting focus to app
+        evt.Skip()
+
+    @debug_fxn
+    def on_motion(self, evt):
+        if evt.Dragging() and evt.LeftIsDown():
+            self.mouse_was_drag = True
+            print("Dragging now!")
+
+    @debug_fxn
+    def on_left_up(self, evt):
+        print("Left UP!")
+
+        if self.mouse_was_drag:
+            # finish drag by selecting everything in box (TODO)
+            print("This was a drag")
+        else:
+            # finish click by selecting at point with args from on_left_down
+            print("This was a click")
+            self.select_at_point(*self.mouse_left_down)
+
+        # reset mouse state
+        self.mouse_was_drag = False
+        self.mouse_left_down = None
+
+        if not self.mark_mode and self.HasCapture():
+            self.ReleaseMouse()
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
