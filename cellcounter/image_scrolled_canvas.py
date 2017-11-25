@@ -74,19 +74,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_dc_div4 = None
         self.img_size_x = 0
         self.img_size_y = 0
+        self.is_dragging = False
         self.mark_mode = False
+        self.mouse_left_down = None
         self.parent = parent    # TODO: do we need this?
         self.marks = []
         self.marks_num_update_fxn = marks_num_update_fxn
         self.marks_selected = []
         self.overlay = wx.Overlay() # for making rubber-band box during drag
+        self.rubberband_draw_rect = None
+        self.rubberband_refresh_rect = None
         self.zoom = None
         self.zoom_idx = None
         self.zoom_list = None
-
-        self.mouse_left_down = None
-        self.is_dragging = False
-        self.rubberband_rect = None
 
         # prevent erasing of background before paint events
         #   we will be responsible for painting entire window, which we
@@ -272,15 +272,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   * not to depend on which img_dc we supply
         #   * not to depend on zoom or pan
         # with self.img_dc, GetPosition == GetLogicalPosition (???)
+        # NOTE: GetLogicalPosition doesn't seem to return anything different
+        #       than GetPosition -- we are not getting unscrolled coords
         point = evt.GetPosition()
-        point_log = evt.GetLogicalPosition(self.img_dc)
-        (img_x, img_y) = self.win2img_coord(point_log.x, point_log.y)
+        point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
+        (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
         debugmsg(DEBUG_MISC,
             "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y)
-            )
-        debugmsg(DEBUG_MISC,
-            "MSC:evt.GetLogicalPosition = (%.2f, %.2f)"%(point_log.x, point_log.y)
             )
         debugmsg(DEBUG_MISC,
             "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
@@ -312,8 +311,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             # record args so on on_left_up can select at point if this
             #   turns out to be a click and not a drag
             self.mouse_left_down = {
-                    'point_log':point_log,
                     'point':point,
+                    'point_unscroll':point_unscroll,
                     'img_x':img_x,
                     'img_y':img_y,
                     'is_appending':is_appending,
@@ -330,22 +329,35 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.is_dragging = True
             
             evt_pos = evt.GetPosition()
+            evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos.x, evt_pos.y)
 
             try:
-                rect = wx.Rect(topLeft=self.mouse_left_down['point'], bottomRight=evt_pos)
+                refresh_rect = wx.Rect(
+                        topLeft=self.mouse_left_down['point'],
+                        bottomRight=evt_pos
+                        )
+                draw_rect = wx.Rect(
+                        topLeft=wx.Point(*self.mouse_left_down['point_unscroll']),
+                        bottomRight=wx.Point(*evt_pos_unscroll)
+                        )
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
                 return
             except Exception as exc:
                 raise exc
 
-            last_rect = self.rubberband_rect
-            self.rubberband_rect = rect
-
             # make copy of rects, inflate by 1 pixel in each dir, union
-            refresh_rect = wx.Rect(*self.rubberband_rect.Get()).Inflate(1,1)
-            refresh_last_rect = wx.Rect(*last_rect.Get()).Inflate(1,1)
-            refresh_rect.Union(refresh_last_rect)
+            #   inflate by same width as rubberband rect Pen width
+            refresh_rect.Inflate(1,1)
+
+            last_draw_rect = self.rubberband_draw_rect
+            self.rubberband_draw_rect = draw_rect
+            last_refresh_rect = self.rubberband_refresh_rect
+            self.rubberband_refresh_rect = refresh_rect
+
+            # union of this and last refresh_rect
+            if last_refresh_rect is not None:
+                refresh_rect.Union(last_refresh_rect)
 
             self.RefreshRect(refresh_rect)
             self.Update()
@@ -364,16 +376,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_up(self, evt):
-        # DEBUG DELETEME
-        print("Left UP!")
-
         if self.is_dragging:
-            # make copy of rubberband_rect and inflate by 2 pixels in each dir
-            refresh_rect = wx.Rect(*self.rubberband_rect.Get()).Inflate(2,2)
+            # make copy of rubberband_rect and inflate by 1 pixel in each dir
+            #   inflate by same width as rubberband rect Pen width
+            refresh_rect = self.rubberband_refresh_rect
             self.RefreshRect(refresh_rect)
             self.Update()
 
-            # finish drag by selecting everything in box (TODO)
+            # finish drag by selecting everything in box
             box_corner1_win = self.mouse_left_down['point']
             box_corner2_win = evt.GetPosition()
 
@@ -383,16 +393,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
             box_corner2_img = self.win2img_coord(box_corner2_win.x, box_corner2_win.y)
 
-            print("img box from (%.1f,%.1f) to (%.1f,%.1f)"%(
-                box_corner1_img[0],
-                box_corner1_img[1],
-                box_corner2_img[0],
-                box_corner2_img[1]
-                )
-                )
-
             marks_in_box = self.marks_in_box_img(box_corner1_img, box_corner2_img)
-            print(marks_in_box)
 
             # get key modifiers for this left_up event
             mods = evt.GetModifiers()
@@ -412,15 +413,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         self.marks_selected.append(mark)
                         self.refresh_mark_area(mark)
             self.Update()
-
-            # DEBUG DELETEME
-            print("This was a drag")
         else:
             # finish click by selecting at point with args from on_left_down
-
-            # DEBUG DELETEME
-            print("This was a click")
-
             if (0 <= self.mouse_left_down['img_x'] <= self.img_size_x and
                     0 <= self.mouse_left_down['img_y'] <= self.img_size_y):
                 self.select_at_point(
@@ -433,7 +427,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # reset all drag info
         self.mouse_left_down = None
         self.is_dragging = False
-        self.rubberband_rect = None
+        self.rubberband_refresh_rect = None
+        self.rubberband_draw_rect = None
 
         if not self.mark_mode and self.HasCapture():
             self.ReleaseMouse()
@@ -1022,7 +1017,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def draw_rubberband_box(self, dc):
-        print("draw_rubberband_box")
         # Set the pen, for the box's border
         # Mac Native selecting on background:
         #   white at 56.8% opacity (255, 255, 255, 145)
@@ -1043,7 +1037,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     style=wx.BRUSHSTYLE_SOLID
                     )
                 )
-        dc.DrawRectangle(self.rubberband_rect)
+        dc.DrawRectangle(self.rubberband_draw_rect)
 
     @debug_fxn
     def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
