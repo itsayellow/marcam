@@ -80,11 +80,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.marks_num_update_fxn = marks_num_update_fxn
         self.marks_selected = []
         self.overlay = wx.Overlay() # for making rubber-band box during drag
-        self.mouse_left_down = None
-        self.mouse_was_dragging = False
         self.zoom = None
         self.zoom_idx = None
         self.zoom_list = None
+
+        self.mouse_left_down = None
+        self.is_dragging = False
+        self.rubberband_rect = None
 
         # prevent erasing of background before paint events
         #   we will be responsible for painting entire window, which we
@@ -317,7 +319,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     'is_appending':is_appending,
                     'is_toggling':is_toggling,
                     }
-            self.mouse_drag_start = point
             #self.select_at_point(img_x, img_y, is_appending, is_toggling)
 
         # continue processing click, for example shifting focus to app
@@ -326,7 +327,28 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def on_motion(self, evt):
         if evt.Dragging() and evt.LeftIsDown():
-            self.mouse_was_dragging = True
+            self.is_dragging = True
+            
+            evt_pos = evt.GetPosition()
+
+            try:
+                rect = wx.Rect(topLeft=self.mouse_left_down['point'], bottomRight=evt_pos)
+            except TypeError as exc:
+                # topLeft = NoneType. Attempting to double click image or something
+                return
+            except Exception as exc:
+                raise exc
+
+            last_rect = self.rubberband_rect
+            self.rubberband_rect = rect
+
+            # make copy of rects, inflate by 1 pixel in each dir, union
+            refresh_rect = wx.Rect(*self.rubberband_rect.Get()).Inflate(1,1)
+            refresh_last_rect = wx.Rect(*last_rect.Get()).Inflate(1,1)
+            refresh_rect.Union(refresh_last_rect)
+
+            self.RefreshRect(refresh_rect)
+            self.Update()
 
     @debug_fxn
     def marks_in_box_img(self, box_corner1_img, box_corner2_img):
@@ -345,7 +367,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # DEBUG DELETEME
         print("Left UP!")
 
-        if self.mouse_was_dragging:
+        if self.is_dragging:
+            # make copy of rubberband_rect and inflate by 2 pixels in each dir
+            refresh_rect = wx.Rect(*self.rubberband_rect.Get()).Inflate(2,2)
+            self.RefreshRect(refresh_rect)
+            self.Update()
+
             # finish drag by selecting everything in box (TODO)
             box_corner1_win = self.mouse_left_down['point']
             box_corner2_win = evt.GetPosition()
@@ -403,9 +430,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         self.mouse_left_down['is_toggling'],
                         )
 
-        # reset mouse state
-        self.mouse_was_dragging = False
+        # reset all drag info
         self.mouse_left_down = None
+        self.is_dragging = False
+        self.rubberband_rect = None
 
         if not self.mark_mode and self.HasCapture():
             self.ReleaseMouse()
@@ -981,10 +1009,41 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # draw crosses visible in this region
         # need to multiply by scale_dc to get back to div1 image coordinates
+        # expand by const.CROSS_REFRESH_SQ_SIZE/2 in each dir to repaint
+        #   portion of mark even if center of mark is not in region
+        sq_size = const.CROSS_REFRESH_SQ_SIZE
         self.draw_crosses(
                 dc,
-                src_pos_x*scale_dc, src_pos_y*scale_dc,
-                src_size_x*scale_dc, src_size_y*scale_dc)
+                (src_pos_x - sq_size/2)*scale_dc, (src_pos_y - sq_size/2)*scale_dc,
+                (src_size_x + sq_size)*scale_dc, (src_size_y + sq_size)*scale_dc)
+
+        if self.is_dragging:
+            self.draw_rubberband_box(dc)
+
+    @debug_fxn
+    def draw_rubberband_box(self, dc):
+        print("draw_rubberband_box")
+        # Set the pen, for the box's border
+        # Mac Native selecting on background:
+        #   white at 56.8% opacity (255, 255, 255, 145)
+        dc.SetPen(
+                wx.Pen(
+                    colour=wx.Colour(0xff,0xff,0xff,145),
+                     width=1,
+                     style=wx.SOLID
+                     )
+                )
+        # Create a brush (for the box's interior) with the same colour,
+        # but 50% transparency.
+        # Mac Native selecting on background:
+        #   white at 14.5% opacity (255, 255, 255, 37)
+        dc.SetBrush(
+                wx.Brush(
+                    colour=wx.Colour(0xff,0xff,0xff,37),
+                    style=wx.BRUSHSTYLE_SOLID
+                    )
+                )
+        dc.DrawRectangle(self.rubberband_rect)
 
     @debug_fxn
     def draw_crosses(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
