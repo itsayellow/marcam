@@ -326,8 +326,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def on_motion(self, evt):
         if evt.Dragging() and evt.LeftIsDown():
-            self.is_dragging = True
-            
             evt_pos = evt.GetPosition()
             evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos.x, evt_pos.y)
 
@@ -342,10 +340,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         )
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
+                # DEBUG DELETEME
+                print("Drag but TypeError: returning")
                 return
             except Exception as exc:
                 raise exc
 
+            # only set self.is_dragging flag if draw_rect is ever not (1,1)
+            #   (1,1) means start, end the same (click)
+            # Once set, only on_left_up can unset self.is_dragging
+            if draw_rect.GetSize() != (1, 1):
+                self.is_dragging = True
+            else:
+                # DEBUG DELETEME
+                print("Drag with (1,1) size")
+            
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
             refresh_rect.Inflate(1,1)
@@ -376,6 +385,25 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_up(self, evt):
+        # DEBUG DELETEME
+        evt_pos = evt.GetPosition()
+        evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos.x, evt_pos.y)
+        drag_rect = wx.Rect(
+                topLeft=wx.Point(*self.mouse_left_down['point_unscroll']),
+                bottomRight=wx.Point(*evt_pos_unscroll)
+                )
+        print("left down at:")
+        print(self.mouse_left_down['point_unscroll'])
+        print("left up at:")
+        print(evt_pos_unscroll)
+        print("drag_rect.GetSize()")
+        print(drag_rect.GetSize())
+
+        # TODO: Yosemite VM always says a click is a drag.  Does non-VM?
+        #   if so, we need to also check if
+        #   self.rubberband_draw_rect.GetSize()==(1,1)
+        #   if it does, final and starting mouse pos are the same--prob.
+        #   a click
         if self.is_dragging:
             # make copy of rubberband_rect and inflate by 1 pixel in each dir
             #   inflate by same width as rubberband rect Pen width
