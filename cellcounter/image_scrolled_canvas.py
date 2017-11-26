@@ -352,6 +352,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if draw_rect.GetSize() != (1, 1):
                 self.is_dragging = True
             else:
+                pass
                 # DEBUG DELETEME
                 #print("Drag with (1,1) size")
             
