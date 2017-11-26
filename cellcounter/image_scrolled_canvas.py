@@ -341,7 +341,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
                 # DEBUG DELETEME
-                print("Drag but TypeError: returning")
+                #print("Drag but TypeError: returning")
                 return
             except Exception as exc:
                 raise exc
@@ -353,7 +353,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 self.is_dragging = True
             else:
                 # DEBUG DELETEME
-                print("Drag with (1,1) size")
+                #print("Drag with (1,1) size")
             
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
@@ -392,12 +392,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 topLeft=wx.Point(*self.mouse_left_down['point_unscroll']),
                 bottomRight=wx.Point(*evt_pos_unscroll)
                 )
-        print("left down at:")
-        print(self.mouse_left_down['point_unscroll'])
-        print("left up at:")
-        print(evt_pos_unscroll)
-        print("drag_rect.GetSize()")
-        print(drag_rect.GetSize())
+        #print("left down at:")
+        #print(self.mouse_left_down['point_unscroll'])
+        #print("left up at:")
+        #print(evt_pos_unscroll)
+        #print("drag_rect.GetSize()")
+        #print(drag_rect.GetSize())
 
         # TODO: Yosemite VM always says a click is a drag.  Does non-VM?
         #   if so, we need to also check if
