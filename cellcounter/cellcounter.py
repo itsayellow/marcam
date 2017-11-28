@@ -14,7 +14,7 @@ import traceback
 import zipfile
 import wx
 import wx.adv
-import wx.html
+import wx.html2
 import numpy as np
 import biorad1sc_reader
 from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
@@ -880,11 +880,11 @@ class HelpFrame(wx.Frame):
     def __init__(self, *args, **kwargs):
         """Constructor"""
         super().__init__(*args, **kwargs)
-        # TODO: consider using wx.html2.WebView if we want to make Help look
-        #   nicer than crummy html4 (e.g. being able to use CSS)
-        self.html = wx.html.HtmlWindow(self)
-        self.html.SetRelatedFrame(self, "%s")
-        self.html.LoadPage(os.path.join(ICON_DIR, 'cellcounter_help.html'))
+        # use wx.html2 to allow better rendering (and CSS in future)
+        self.html = wx.html2.WebView.New(self)
+        self.html.LoadURL('file://' + os.path.join(ICON_DIR, 'cellcounter_help.html'))
+
+        self.SetTitle("Cellcounter Help")
         self.SetSize((500, 600))
 
 
