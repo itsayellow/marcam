@@ -214,7 +214,10 @@ class MainWindow(wx.Frame):
 
         # GUI-related
         self.html = None
-        self.mark_id = None
+        self.mark_tool_id = None
+        self.select_tool_id = None
+        self.mark_menu_item = None
+        self.select_menu_item = None
         self.toolbar = None
 
         # App configuration
@@ -274,7 +277,11 @@ class MainWindow(wx.Frame):
         menubar.Append(edit_menu, '&Edit')
         # Tools
         tools_menu = wx.Menu()
-        self.markmodeitem = tools_menu.Append(wx.ID_ANY, "&Enable Mark Mode\tCtrl+M")
+        # TODO: better keyboard accelerator for select mode
+        self.select_menu_item = tools_menu.Append(wx.ID_ANY, "&Select Mode\tCtrl+T")
+        # we start in select mode, so disable menu to enable select mode
+        self.select_menu_item.Enable(False)
+        self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
@@ -296,15 +303,14 @@ class MainWindow(wx.Frame):
         # toolbar stuff
         self.toolbar = self.CreateToolBar()
         debugmsg(DEBUG_MISC, "MSC:ICON_DIR=%s"%(ICON_DIR))
-        obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
-        otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', obmp)
+        #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
+        #otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', obmp)
+        selectbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pointer32.png'))
+        selecttool = self.toolbar.AddRadioTool(wx.ID_ANY, 'Select Mode', selectbmp)
+        self.select_tool_id = selecttool.GetId()
         markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'marktool32.png'))
-        marktool = self.toolbar.AddCheckTool(
-                wx.ID_ANY,
-                'Point/Mark',
-                markbmp,
-                )
-        self.mark_id = marktool.GetId()
+        marktool = self.toolbar.AddRadioTool(wx.ID_ANY, 'Mark Mode', markbmp)
+        self.mark_tool_id = marktool.GetId()
         self.toolbar.Realize()
 
         # status bar stuff
@@ -367,8 +373,9 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_evt_close)
 
         # setup event handlers for toolbar
-        self.Bind(wx.EVT_TOOL, self.on_open, otool)
-        self.Bind(wx.EVT_TOOL, self.on_markmode_toggle, marktool)
+        #self.Bind(wx.EVT_TOOL, self.on_open, otool)
+        self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
+        self.Bind(wx.EVT_TOOL, self.on_markmode, marktool)
 
         # setup event handlers for menus
         # File menu items
@@ -387,7 +394,8 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
         self.Bind(wx.EVT_MENU, self.on_select_all, self.selallitem)
         # Tools menu items
-        self.Bind(wx.EVT_MENU, self.on_markmode_toggle, self.markmodeitem)
+        self.Bind(wx.EVT_MENU, self.on_selectmode, self.select_menu_item)
+        self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
@@ -496,6 +504,32 @@ class MainWindow(wx.Frame):
             pass
 
     @debug_fxn
+    def on_selectmode(self, evt):
+        # SELECT MODE
+        self.img_panel.mark_mode = False
+
+        self.mark_menu_item.Enable(True)
+        self.select_menu_item.Enable(False)
+        self.selallitem.Enable(True)
+        # NOTE: must use this, can't talk to ToolbarBase item directly
+        self.toolbar.ToggleTool(self.select_tool_id, True) # works!
+        self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_NONE))
+
+    @debug_fxn
+    def on_markmode(self, evt):
+        # MARK MODE
+        self.img_panel.mark_mode = True
+
+        self.mark_menu_item.Enable(False)
+        self.select_menu_item.Enable(True)
+        self.selallitem.Enable(False)
+        # NOTE: must use this, can't talk to ToolbarBase item directly
+        self.toolbar.ToggleTool(self.mark_tool_id, True) # works!
+        # exiting select mode so no marks can be selected
+        self.img_panel.deselect_all_marks()
+        self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
+
+    @debug_fxn
     def on_markmode_toggle(self, evt):
         # toggle state
         self.img_panel.mark_mode = not self.img_panel.mark_mode
@@ -505,7 +539,7 @@ class MainWindow(wx.Frame):
             # MARK MODE
             self.markmodeitem.SetItemLabel("Disable &Mark Mode\tCtrl+M")
             # NOTE: must use this, can't talk to ToolbarBase item directly
-            self.toolbar.ToggleTool(self.mark_id, True) # works!
+            self.toolbar.ToggleTool(self.mark_tool_id, True) # works!
             # exiting select mode so no marks can be selected
             self.img_panel.deselect_all_marks()
             self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
@@ -514,7 +548,7 @@ class MainWindow(wx.Frame):
             # SELECT MODE
             self.markmodeitem.SetItemLabel("Enable &Mark Mode\tCtrl+M")
             # NOTE: must use this, can't talk to ToolbarBase item directly
-            self.toolbar.ToggleTool(self.mark_id, False) # works!
+            self.toolbar.ToggleTool(self.mark_tool_id, False) # works!
             self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_NONE))
             self.selallitem.Enable(True)
 
