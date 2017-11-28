@@ -12,7 +12,7 @@ import sys
 mainscript = 'cellcounter/cellcounter.py'
 app_name = 'Cellcounter'
 data_files = [
-        'cellcounter/topen32.png',
+        'cellcounter/pointer32.png',
         'cellcounter/marktool32.png',
         'cellcounter/cellcounter_help.html',
         'cellcounter/cellcounter_help_markmodeoff.png',
