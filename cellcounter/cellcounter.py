@@ -2,49 +2,71 @@
 #
 # GUI for displaying an image and counting cells
 
-import os
-import sys
-import platform
-import time
 import argparse
-import os.path
 import json
+import logging
+import os
+import os.path
+import platform
+import sys
 import tempfile
+import time
 import traceback
 import zipfile
+
 import wx
 import wx.adv
 import wx.html2
 import numpy as np
+
 import biorad1sc_reader
 from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
 from image_scrolled_canvas import ImageScrolledCanvas
-
 import const
 from const import (
         DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
         )
-
 # DEBUG sets global debug message verbosity
+
+
+EXE_DIR = os.path.dirname(os.path.realpath(__file__))
+# for now the paths are the same
+ICON_DIR = EXE_DIR
+
+
+# logging stuff
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+# create formatter
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:\n    %(message)s")
+
+if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
+    # file handler
+    file_handler = logging.FileHandler(os.path.join(os.path.expanduser("~"), 'cellcounter.log'))
+    file_handler.setLevel(logging.DEBUG)
+    # add global formatter to file handler
+    file_handler.setFormatter(formatter)
+
+    # use file handler for mac-wrapped app
+    logger.addHandler(file_handler)
+else:
+    # console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    # add formatter to console handler
+    console_handler.setFormatter(formatter)
+
+    # use console handler for command-line execution
+    logger.addHandler(console_handler)
+
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
-DEBUG_FILE = sys.stdout
-ICON_DIR = os.path.dirname(os.path.realpath(__file__))
 
-if ICON_DIR.endswith("Cellcounter.app/Contents/Resources"):
-    # if we're being executed from inside a Mac app, turn off DEBUG
-    logfile = os.path.join(os.path.expanduser("~"), 'cellcounter.log')
-    out_fh = open(logfile, 'w')
-
-    DEBUG = 0
-    DEBUG_FILE = out_fh
-
-
-def debugmsg(debug_bit, *args, **kwargs):
+def debugmsg(debug_bit, message):
     if debug_bit == 0 or DEBUG & debug_bit:
-        print(*args, **kwargs, file=DEBUG_FILE)
+        logger.info(message)
 
 
 # debug decorator that announces function call/entry and lists args
@@ -55,12 +77,13 @@ def debug_fxn(func):
     """
     def func_wrapper(*args, **kwargs):
         if DEBUG & DEBUG_FXN_ENTRY:
-            print("FXN:" + func.__qualname__ + "(", flush=True)
+            log_string = "FXN:" + func.__qualname__ + "(\n"
             for arg in args[1:]:
-                print("    " + repr(arg) + ", ", flush=True)
+                log_string += "        " + repr(arg) + ",\n"
             for key in kwargs:
-                print("    " + key + "=" + repr(kwargs[key]) + ", ", flush=True)
-            print("    )", flush=True)
+                log_string += "        " + key + "=" + repr(kwargs[key]) + ",\n"
+            log_string += "        )"
+            logger.info(log_string)
         return func(*args, **kwargs)
     return func_wrapper
 
@@ -637,7 +660,7 @@ class MainWindow(wx.Frame):
 
         except IOError:
             # TODO: need real error dialog
-            print("Cannot open data in file '%s'." % imdata_path)
+            logger.warning("Cannot open data in file '%s'." % imdata_path)
 
     @debug_fxn
     def on_import_image(self, evt):
@@ -852,7 +875,7 @@ class MainWindow(wx.Frame):
                         )
         except IOError:
             # TODO: need real error dialog
-            print("Cannot save current data in file '%s'." % imdata_path)
+            logger.warning("Cannot save current data in file '%s'." % imdata_path)
         finally:
             os.unlink(temp_img_name)
 
@@ -912,10 +935,10 @@ def process_command_line(argv):
             )
 
     # switches/options:
-    #parser.add_argument(
-    #    '-d', '--debug', action='store_true',
-    #    help='Enable debugging messages to console'
-    #    )
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Enable debugging messages to console'
+        )
 
     #(settings, args) = parser.parse_args(argv)
     args = parser.parse_args(argv)
@@ -923,26 +946,42 @@ def process_command_line(argv):
     return args
 
 def debug_main():
+    print("debug_main")
     # log situation before doing anything else
-    debugmsg(0, time.asctime(time.gmtime()) + " UTC")
-    debugmsg(0, "Cellcounter version "+const.VERSION_STR)
+    logger.info(time.asctime(time.gmtime()) + " UTC")
+    logger.info("Cellcounter version "+const.VERSION_STR)
     # os.uname doesn't work on Windows (platform.uname more portable)
     uname_obj = platform.uname()
-    debugmsg(0, "platform.uname")
-    debugmsg(0, "    system:" + uname_obj.system)
-    debugmsg(0, "    node:" + uname_obj.node)
-    debugmsg(0, "    release:" + uname_obj.release)
-    debugmsg(0, "    version:" + uname_obj.version)
-    debugmsg(0, "    machine:" + uname_obj.machine)
-    debugmsg(0, "    processor:" + uname_obj.processor)
-    debugmsg(0, "sys.argv")
-    debugmsg(0, repr(sys.argv))
+    log_string = "platform.uname" + "\n"
+    log_string += "        system:" + uname_obj.system + "\n"
+    log_string += "        node:" + uname_obj.node + "\n"
+    log_string += "        release:" + uname_obj.release + "\n"
+    log_string += "        version:" + uname_obj.version + "\n"
+    log_string += "        machine:" + uname_obj.machine + "\n"
+    log_string += "        processor:" + uname_obj.processor + "\n"
+    log_string += "sys.argv" + "\n"
+    log_string += repr(sys.argv) + "\n"
+    logger.info(log_string)
 
 def main(argv=None):
+    global DEBUG
+
     # process command line if started from there
     # Also, py2app sends file(s) to open via argv if file is dragged on top
     #   of the application icon to start the icon
     args = process_command_line(argv)
+
+    if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
+        # if we're being executed from inside a Mac app, turn off DEBUG unless
+        #   -d or --debug overrides
+        DEBUG = 0
+
+    # if -d or --debug turn on full debug
+    if args.debug:
+        DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
+
+    # get basic debug info
+    debug_main()
 
     # see what argv and args are
     debugmsg(0, repr(args))
@@ -970,7 +1009,6 @@ def main(argv=None):
 
 if __name__ == "__main__":
     try:
-        debug_main()
         status = main(sys.argv)
     except KeyboardInterrupt:
         print("Stopped by Keyboard Interrupt", file=sys.stderr)

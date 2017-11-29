@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 import time
 import wx
 import numpy as np
@@ -8,10 +9,16 @@ from const import (
         DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
         )
 
+# logging stuff
+#   not necessary to make a handler since we will be child logger of cellcounter
+#   we use NullHandler so if no config at top level we won't default to printing
+#       to stderr
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
-def debugmsg(debug_bit, *args, **kwargs):
+def debugmsg(debug_bit, message):
     if DEBUG & debug_bit:
-        print(*args, **kwargs)
+        logger.info(message)
 
 
 # debug decorator that announces function call/entry and lists args
@@ -22,12 +29,13 @@ def debug_fxn(func):
     """
     def func_wrapper(*args, **kwargs):
         if DEBUG & DEBUG_FXN_ENTRY:
-            print("FXN:" + func.__qualname__ + "(", flush=True)
+            log_string = "FXN:" + func.__qualname__ + "(\n"
             for arg in args[1:]:
-                print("    " + repr(arg) + ", ", flush=True)
+                log_string += "        " + repr(arg) + ",\n"
             for key in kwargs:
-                print("    " + key + "=" + repr(kwargs[key]) + ", ", flush=True)
-            print("    )", flush=True)
+                log_string += "        " + key + "=" + repr(kwargs[key]) + ",\n"
+            log_string += "        )"
+            logger.info(log_string)
         return func(*args, **kwargs)
     return func_wrapper
 
@@ -215,8 +223,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         debugmsg(DEBUG_MISC,
             "MSC:img_zoom_wincenter = " + \
             "(%.3f,%.3f)\n"%(img_zoom_wincenter_x, img_zoom_wincenter_y) + \
-            "MSC:origin = (%.3f,%.3f)\n"%(origin_x, origin_y) + \
-            "MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y)
+            "    MSC:origin = (%.3f,%.3f)\n"%(origin_x, origin_y) + \
+            "    MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y)
             )
 
     def wincenter_scroll_limits(self):
@@ -347,7 +355,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
                 # DEBUG DELETEME
-                #print("Drag but TypeError: returning")
+                #logger.warning("Drag but TypeError: returning")
                 return
             except Exception as exc:
                 raise exc
@@ -361,7 +369,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             else:
                 pass
                 # DEBUG DELETEME
-                #print("Drag with (1,1) size")
+                #logger.warning("Drag with (1,1) size")
             
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
@@ -752,32 +760,33 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         EventType = evt.GetEventType()
         Orientation = evt.GetOrientation()
         if DEBUG & DEBUG_MISC:
-            print("MSC:")
+            log_string = "MSC:"
             if Orientation == wx.HORIZONTAL:
-                print("    wx.HORIZONTAL")
+                log_string += " wx.HORIZONTAL"
             elif Orientation == wx.VERTICAL:
-                print("    wx.VERTICAL")
+                log_string += " wx.VERTICAL"
             else:
-                print("    Orientation="+repr(Orientation))
+                log_string += " Orientation="+repr(Orientation)
 
             if EventType == wx.wxEVT_SCROLLWIN_TOP:
-                print("    wx.wxEVT_SCROLLWIN_TOP")
+                log_string += " wx.wxEVT_SCROLLWIN_TOP"
             elif EventType == wx.wxEVT_SCROLLWIN_BOTTOM:
-                print("    wx.wxEVT_SCROLLWIN_BOTTOM")
+                log_string += " wx.wxEVT_SCROLLWIN_BOTTOM"
             elif EventType == wx.wxEVT_SCROLLWIN_LINEUP:
-                print("    wx.wxEVT_SCROLLWIN_LINEUP")
+                log_string += " wx.wxEVT_SCROLLWIN_LINEUP"
             elif EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
-                print("    wx.wxEVT_SCROLLWIN_LINEDOWN")
+                log_string += " wx.wxEVT_SCROLLWIN_LINEDOWN"
             elif EventType == wx.wxEVT_SCROLLWIN_PAGEUP:
-                print("    wx.wxEVT_SCROLLWIN_PAGEUP")
+                log_string += " wx.wxEVT_SCROLLWIN_PAGEUP"
             elif EventType == wx.wxEVT_SCROLLWIN_PAGEDOWN:
-                print("    wx.wxEVT_SCROLLWIN_PAGEDOWN")
+                log_string += " wx.wxEVT_SCROLLWIN_PAGEDOWN"
             elif EventType == wx.wxEVT_SCROLLWIN_THUMBTRACK:
-                print("    wx.wxEVT_SCROLLWIN_THUMBTRACK")
+                log_string += " wx.wxEVT_SCROLLWIN_THUMBTRACK"
             elif EventType == wx.wxEVT_SCROLLWIN_THUMBRELEASE:
-                print("    wx.wxEVT_SCROLLWIN_THUMBRELEASE")
+                log_string += " wx.wxEVT_SCROLLWIN_THUMBRELEASE"
             else:
-                print("    EventType="+repr(EventType))
+                log_string += " EventType="+repr(EventType)
+            logger.info(log_string)
 
         # NOTE: by setting position only on scroll (and not on zoom) we
         #   preserve position on zoom out/zoom back in even if the image gets
@@ -863,6 +872,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   * use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
         #   * call wx.Window.SetBackgroundStyle with wx.BG_STYLE_PAINT
         #       (also style=wx.BUFFER_VIRTUAL_AREA ?)
+        # TODO: do we need dc = wx.GCDC(dc) for Windows for transparency of
+        #   rubberband box?
         dc = wx.PaintDC(self)
         # for scrolled window
         self.DoPrepareDC(dc)
@@ -879,7 +890,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if DEBUG & DEBUG_TIMING:
             onpaint_eltime = time.time() - start_onpaint
             panel_size = self.GetSize()
-            print(
+            logger.info(
                     "TIM:on_paint: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
                         onpaint_eltime,
                         self.zoom,
@@ -1205,7 +1216,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         if DEBUG & DEBUG_TIMING:
             staticdc_eltime = time.time() - staticdc_start
-            print("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
+            logger.info("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
 
         # set zoom_idx to scaling that will fit image in window
         #   or 1.0 if max_zoom > 1.0
