@@ -957,10 +957,9 @@ def debug_main():
     log_string += "        release:" + uname_obj.release + "\n"
     log_string += "        version:" + uname_obj.version + "\n"
     log_string += "        machine:" + uname_obj.machine + "\n"
-    log_string += "        processor:" + uname_obj.processor + "\n"
-    log_string += "sys.argv" + "\n"
-    log_string += repr(sys.argv) + "\n"
+    log_string += "        processor:" + uname_obj.processor
     logger.info(log_string)
+    logger.info("sys.argv:" + repr(sys.argv))
 
 def main(argv=None):
     global DEBUG
