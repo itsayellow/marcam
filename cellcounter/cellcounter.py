@@ -946,7 +946,6 @@ def process_command_line(argv):
     return args
 
 def debug_main():
-    print("debug_main")
     # log situation before doing anything else
     logger.info(time.asctime(time.gmtime()) + " UTC")
     logger.info("Cellcounter version "+const.VERSION_STR)
