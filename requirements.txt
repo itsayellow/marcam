@@ -7,6 +7,6 @@ olefile==0.44
 Pillow==4.3.0
 pip==9.0.1
 py2app==0.14
-setuptools==36.7.2
+setuptools==38.2.3
 six==1.11.0
 wxPython==4.0.0b2
