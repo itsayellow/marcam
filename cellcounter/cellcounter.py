@@ -64,11 +64,6 @@ else:
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
 
-def debugmsg(debug_bit, message):
-    if debug_bit == 0 or DEBUG & debug_bit:
-        logger.info(message)
-
-
 # debug decorator that announces function call/entry and lists args
 def debug_fxn(func):
     """Function decorator that (if enabled by DEBUG_FXN_ENTRY bit in DEBUG)
@@ -215,9 +210,7 @@ class DropTarget(wx.FileDropTarget):
     @debug_fxn
     def OnDropFiles(self, x, y, filenames):
         filename = filenames[0]
-        debugmsg(DEBUG_MISC,
-            "MSC:Drag and Drop filename:\n" + "    "+repr(filename)
-            )
+        logger.info("MSC:Drag and Drop filename:\n" + "    "+repr(filename))
         self.window_target.init_image_from_file(filename)
 
         # TODO: which one of these??
@@ -325,7 +318,7 @@ class MainWindow(wx.Frame):
 
         # toolbar stuff
         self.toolbar = self.CreateToolBar()
-        debugmsg(DEBUG_MISC, "MSC:ICON_DIR=%s"%(ICON_DIR))
+        logger.info("MSC:ICON_DIR=%s"%(ICON_DIR))
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
         #otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', obmp)
         selectbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pointer32.png'))
@@ -432,7 +425,7 @@ class MainWindow(wx.Frame):
 
         self.Show(True)
 
-        debugmsg(DEBUG_MISC,
+        logger.info(
                 "MSC:self.img_panel size: " + \
                 repr(self.img_panel.GetClientSize())
                 )
@@ -461,7 +454,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_key_down(self, evt):
         key_code = evt.GetKeyCode()
-        debugmsg(DEBUG_KEYPRESS,
+        logger.info(
                 "KEY:Key Down" + \
                 "    key_code: %d"%key_code + \
                 "    RawKeyCode: %d"%(evt.GetRawKeyCode()) + \
@@ -797,7 +790,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_undo(self, evt):
         action = self.app_history.undo()
-        debugmsg(DEBUG_MISC, "MSC:undo: "+repr(action))
+        logger.info("MSC:undo: "+repr(action))
         if action[0] == 'MARK':
             self.img_panel.delete_mark(action[1], internal=False)
         if action[0] == 'DELETE_MARK_LIST':
@@ -812,7 +805,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_redo(self, evt):
         action = self.app_history.redo()
-        debugmsg(DEBUG_MISC, "MSC:redo: "+repr(action))
+        logger.info("MSC:redo: "+repr(action))
         if action[0] == 'MARK':
             self.img_panel.mark_point(action[1])
         if action[0] == 'DELETE_MARK_LIST':
@@ -982,7 +975,7 @@ def main(argv=None):
     debug_main()
 
     # see what argv and args are
-    debugmsg(0, repr(args))
+    logger.info(repr(args))
 
     # setup main wx event loop
     myapp = wx.App()
@@ -1013,8 +1006,8 @@ if __name__ == "__main__":
         # exit error code for Ctrl-C
         status = 130
     except:
-        debugmsg(0, "\nFatal Error")
-        debugmsg(0, traceback.format_exc())
+        logger.info("\nFatal Error")
+        logger.info(traceback.format_exc())
         status = 1
 
     sys.exit(status)

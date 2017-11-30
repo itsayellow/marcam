@@ -9,16 +9,13 @@ from const import (
         DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
         )
 
+
 # logging stuff
 #   not necessary to make a handler since we will be child logger of cellcounter
 #   we use NullHandler so if no config at top level we won't default to printing
 #       to stderr
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
-def debugmsg(debug_bit, message):
-    if DEBUG & debug_bit:
-        logger.info(message)
 
 
 # debug decorator that announces function call/entry and lists args
@@ -195,12 +192,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (self.img_at_wincenter_x, self.img_at_wincenter_y
                 ) = self.win2img_coord(win_size_x/2, win_size_y/2)
 
-        debugmsg(DEBUG_MISC,
-                    "MSC:self.img_at_wincenter=(%.3f,%.3f)"%(
-                        self.img_at_wincenter_x,
-                        self.img_at_wincenter_y
-                        )
+        logger.info(
+                "MSC:self.img_at_wincenter=(%.3f,%.3f)"%(
+                    self.img_at_wincenter_x,
+                    self.img_at_wincenter_y
                     )
+                )
 
     @debug_fxn
     def scroll_to_img_at_wincenter(self):
@@ -220,12 +217,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         scroll_x = round(origin_x/scroll_ppu_x)
         scroll_y = round(origin_y/scroll_ppu_y)
         self.Scroll(scroll_x, scroll_y)
-        debugmsg(DEBUG_MISC,
-            "MSC:img_zoom_wincenter = " + \
-            "(%.3f,%.3f)\n"%(img_zoom_wincenter_x, img_zoom_wincenter_y) + \
-            "    MSC:origin = (%.3f,%.3f)\n"%(origin_x, origin_y) + \
-            "    MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y)
-            )
+        logger.info(
+                "MSC:img_zoom_wincenter = " + \
+                "(%.3f,%.3f)\n"%(img_zoom_wincenter_x, img_zoom_wincenter_y) + \
+                "    MSC:origin = (%.3f,%.3f)\n"%(origin_x, origin_y) + \
+                "    MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y)
+                )
 
     def wincenter_scroll_limits(self):
         """
@@ -253,10 +250,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_y_min = win_size_y / 2 / self.zoom
             img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom)
 
-        debugmsg(DEBUG_MISC,
-            "MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(
-                img_x_min, img_y_min, img_x_max, img_y_max)
-            )
+        logger.info(
+                "MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(
+                    img_x_min, img_y_min, img_x_max, img_y_max)
+                )
 
         return (img_x_min, img_y_min, img_x_max, img_y_max)
 
@@ -286,12 +283,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
-        debugmsg(DEBUG_MISC,
-            "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y)
-            )
-        debugmsg(DEBUG_MISC,
-            "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
-            )
+        logger.info(
+                "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y) + "\n" + \
+                " "*8 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
+                )
 
         if self.mark_mode:
             if (0 <= img_x <= self.img_size_x and
@@ -486,7 +481,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         point = evt.GetLogicalPosition(self.img_dc)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
-        debugmsg(DEBUG_MISC,
+        logger.info(
                 "MSC:right click at img (%.2f, %.2f)"%(img_x, img_y)
                 )
 
@@ -523,10 +518,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if img_x_end == img_x_start and img_y_end == img_y_start:
             return
 
-        debugmsg(DEBUG_MISC,
-            "MSC:panimate: start=(%.2f,%.2f) "%(img_x_start,img_y_start) + \
-            "end=(%.2f, %.2f)"%(img_x_end, img_y_end)
-            )
+        logger.info(
+                "MSC:panimate: start=(%.2f,%.2f) "%(img_x_start,img_y_start) + \
+                "end=(%.2f, %.2f)"%(img_x_end, img_y_end)
+                )
 
         img_dist = np.sqrt((img_x_end - img_x_start)**2 + (img_y_end - img_y_start)**2)
 
@@ -617,7 +612,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns (bool): True if new mark added, False if same point already
             exists in mark list
         """
-        debugmsg(DEBUG_MISC, "MSC: point (%d, %d)"%img_point)
+        logger.info("MSC: point (%d, %d)"%img_point)
 
         if img_point in self.marks:
             # mark already exists, doing nothing
@@ -1010,7 +1005,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dc.DrawRectangleList(rects_to_draw)
 
         # DEBUG DELETEME
-        debugmsg(DEBUG_MISC,
+        logger.info(
                 "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
                 "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
                 "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
