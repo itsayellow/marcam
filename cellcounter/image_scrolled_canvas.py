@@ -133,7 +133,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
     @debug_fxn
-    def set_no_image(self):
+    def set_no_image(self, refresh_update=True):
         self.content_saved = True
         self.history.reset()
         self.img_at_wincenter_x = 0
@@ -153,12 +153,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # make sure canvas is no larger than window
         self.set_virt_size_with_min()
 
-        # force a paint event with Refresh and Update
-        # Refresh Invalidates the window
-        self.Refresh()
-        # Update immediately repaints invalidated areas
-        #   without this, repainting will happen next iteration of event loop
-        self.Update()
+        # if we are using this in an inherited class method via super, option to
+        #   refresh and update in inherited method
+        if refresh_update:
+            # force a paint event with Refresh and Update
+            # Refresh Invalidates the window
+            self.Refresh()
+            # Update immediately repaints invalidated areas
+            #   without this, repainting will happen next iteration of event loop
+            self.Update()
 
     @debug_fxn
     def needs_save(self):
@@ -275,49 +278,32 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 " "*8 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
                 )
 
-        if self.mark_mode:
-            if (0 <= img_x <= self.img_size_x and
-                    0 <= img_y <= self.img_size_y):
-                img_pt = (int(img_x), int(img_y))
-                mark_added = self.mark_point(img_pt)
-                if mark_added:
-                    self.history.new(['MARK',img_pt])
-                else:
-                    self.history.new(['NOP'])
-        else:
-            # we allow click outside of image in case we drag onto image
+        # we allow click outside of image in case we drag onto image
 
-            # in case we need a drag capture mouse
-            self.CaptureMouse()
+        # in case we need a drag capture mouse
+        self.CaptureMouse()
 
-            # selecting with no mark nearby deselects all
-            # find the closest mark to click, as long as it is close
-            #   enough to click
-            # then color mark yellow and that one will be "selected"
-            #   and can be deleted
-            # Shift always adds select, CONTROL toggles select state
-            is_appending = mods & wx.MOD_SHIFT
-            is_toggling = mods & wx.MOD_CONTROL
-            # record args so on on_left_up can select at point if this
-            #   turns out to be a click and not a drag
-            self.mouse_left_down = {
-                    'point':point,
-                    'point_unscroll':point_unscroll,
-                    'img_x':img_x,
-                    'img_y':img_y,
-                    'is_appending':is_appending,
-                    'is_toggling':is_toggling,
-                    }
-            #self.select_at_point(img_x, img_y, is_appending, is_toggling)
+        # Shift always adds select, CONTROL toggles select state
+        is_appending = mods & wx.MOD_SHIFT
+        is_toggling = mods & wx.MOD_CONTROL
+        # record args so on on_left_up can select at point if this
+        #   turns out to be a click and not a drag
+        self.mouse_left_down = {
+                'point':point,
+                'point_unscroll':point_unscroll,
+                'img_x':img_x,
+                'img_y':img_y,
+                'is_appending':is_appending,
+                'is_toggling':is_toggling,
+                }
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
 
     @debug_fxn
     def on_motion(self, evt):
-        # return early if no image or if in Mark Mode
-        #   (Mark mode does everything in on_left_down, no drags)
-        if self.img_dc is None or self.mark_mode == True:
+        # return early if no image
+        if self.img_dc is None:
             wx.CallAfter(evt.Skip)
             return
 
@@ -371,15 +357,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_up(self, evt):
-        # return early if no image or if in Mark Mode
-        #   (Mark mode does everything in on_left_down, no drags)
-        if self.img_dc is None or self.mark_mode == True:
+        # return early if no image
+        if self.img_dc is None:
             wx.CallAfter(evt.Skip)
             return
 
         if self.is_dragging:
-            # make copy of rubberband_rect and inflate by 1 pixel in each dir
-            #   inflate by same width as rubberband rect Pen width
+            # use last rubberband_refresh_rect
             refresh_rect = self.rubberband_refresh_rect
             self.RefreshRect(refresh_rect)
             self.Update()
@@ -394,36 +378,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
             box_corner2_img = self.win2img_coord(box_corner2_win.x, box_corner2_win.y)
 
-            marks_in_box = self.marks_in_box_img(box_corner1_img, box_corner2_img)
-
-            # get key modifiers for this left_up event
-            mods = evt.GetModifiers()
-            is_appending = mods & wx.MOD_SHIFT
-
-            if not is_appending:
-                marks_unselected = [
-                        x for x in self.marks_selected if x not in marks_in_box]
-                marks_new_selected = [
-                        x for x in marks_in_box if x not in self.marks_selected]
-                self.marks_selected = marks_in_box
-                for mark in marks_new_selected + marks_unselected:
-                    self.refresh_mark_area(mark)
-            else:
-                for mark in marks_in_box:
-                    if mark not in self.marks_selected:
-                        self.marks_selected.append(mark)
-                        self.refresh_mark_area(mark)
             self.Update()
         else:
-            # finish click by selecting at point with args from on_left_down
-            if (0 <= self.mouse_left_down['img_x'] <= self.img_size_x and
-                    0 <= self.mouse_left_down['img_y'] <= self.img_size_y):
-                self.select_at_point(
-                        self.mouse_left_down['img_x'],
-                        self.mouse_left_down['img_y'],
-                        self.mouse_left_down['is_appending'],
-                        self.mouse_left_down['is_toggling'],
-                        )
+            # finish click
+            pass
 
         # reset all drag info
         self.mouse_left_down = None
@@ -1236,26 +1194,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def set_no_image(self):
-        self.content_saved = True
-        self.history.reset()
-        self.img_at_wincenter_x = 0
-        self.img_at_wincenter_y = 0
-        self.img_coord_xlation_x = None
-        self.img_coord_xlation_y = None
-        self.img_dc = None
-        self.img_dc_div2 = None
-        self.img_dc_div4 = None
-        self.img_size_x = 0
-        self.img_size_y = 0
+        # execute all non-mark no-image init
+        super().set_no_image(refresh_update=False)
+
         self.marks = []
         self.marks_selected = []
-
-        # set zoom_idx to 1.00 scaling
-        self.zoom_idx = self.zoom_list.index(1.0)
-        self.zoom = self.zoom_list[self.zoom_idx]
-
-        # make sure canvas is no larger than window
-        self.set_virt_size_with_min()
 
         # tell parent UI new total marks number
         self.update_mark_total()
@@ -1413,8 +1356,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             return
 
         if self.is_dragging:
-            # make copy of rubberband_rect and inflate by 1 pixel in each dir
-            #   inflate by same width as rubberband rect Pen width
+            # use last rubberband_refresh_rect
             refresh_rect = self.rubberband_refresh_rect
             self.RefreshRect(refresh_rect)
             self.Update()
@@ -1451,6 +1393,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             self.Update()
         else:
             # finish click by selecting at point with args from on_left_down
+            # TODO: if this was a double click, then mouse_left_down is None
+            #       which makes error
             if (0 <= self.mouse_left_down['img_x'] <= self.img_size_x and
                     0 <= self.mouse_left_down['img_y'] <= self.img_size_y):
                 self.select_at_point(
