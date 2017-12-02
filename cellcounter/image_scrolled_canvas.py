@@ -154,7 +154,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.set_virt_size_with_min()
 
         # if we are using this in an inherited class method via super, option to
-        #   refresh and update in inherited method
+        #   refresh and update only in inherited method (not here)
         if refresh_update:
             # force a paint event with Refresh and Update
             # Refresh Invalidates the window
@@ -1393,16 +1393,16 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             self.Update()
         else:
             # finish click by selecting at point with args from on_left_down
-            # TODO: if this was a double click, then mouse_left_down is None
-            #       which makes error
-            if (0 <= self.mouse_left_down['img_x'] <= self.img_size_x and
-                    0 <= self.mouse_left_down['img_y'] <= self.img_size_y):
-                self.select_at_point(
-                        self.mouse_left_down['img_x'],
-                        self.mouse_left_down['img_y'],
-                        self.mouse_left_down['is_appending'],
-                        self.mouse_left_down['is_toggling'],
-                        )
+            # NOTE: if this was a double click, then mouse_left_down is None
+            if self.mouse_left_down is not None:
+                if (0 <= self.mouse_left_down['img_x'] <= self.img_size_x and
+                        0 <= self.mouse_left_down['img_y'] <= self.img_size_y):
+                    self.select_at_point(
+                            self.mouse_left_down['img_x'],
+                            self.mouse_left_down['img_y'],
+                            self.mouse_left_down['is_appending'],
+                            self.mouse_left_down['is_toggling'],
+                            )
 
         # reset all drag info
         self.mouse_left_down = None
