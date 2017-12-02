@@ -22,7 +22,7 @@ import numpy as np
 import biorad1sc_reader
 from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
-from image_scrolled_canvas import ImageScrolledCanvas
+from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 from const import (
         DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
@@ -347,7 +347,7 @@ class MainWindow(wx.Frame):
 
         # ImageScrolledCanvas is the cleanest, fastest implementation for
         #   what we need
-        self.img_panel = ImageScrolledCanvas(
+        self.img_panel = ImageScrolledCanvasMarks(
                 self,
                 self.app_history,
                 self.marks_num_update
