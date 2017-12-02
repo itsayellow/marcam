@@ -781,15 +781,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if rects_to_draw:
             dc.DrawRectangleList(rects_to_draw)
 
-        # DEBUG DELETEME
-        logger.info(
-                "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
-                "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
-                "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
-                "dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
-                "    rect_pos=(%.2f,%.2f)\t"%(rect_pos_log_x,rect_pos_log_y) + \
-                "rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
-                )
+        # DEBUG ONLY (don't slow down unless we need to debug)
+        #logger.info(
+        #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
+        #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
+        #        "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
+        #        "dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
+        #        "    rect_pos=(%.2f,%.2f)\t"%(rect_pos_log_x,rect_pos_log_y) + \
+        #        "rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
+        #        )
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -1685,15 +1685,15 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         if rects_to_draw:
             dc.DrawRectangleList(rects_to_draw)
 
-        # DEBUG DELETEME
-        logger.info(
-                "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
-                "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
-                "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
-                "dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
-                "    rect_pos=(%.2f,%.2f)\t"%(rect_pos_log_x,rect_pos_log_y) + \
-                "rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
-                )
+        # DEBUG ONLY (don't slow down unless we need to debug)
+        #logger.info(
+        #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
+        #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
+        #        "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
+        #        "dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
+        #        "    rect_pos=(%.2f,%.2f)\t"%(rect_pos_log_x,rect_pos_log_y) + \
+        #        "rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
+        #        )
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
