@@ -781,7 +781,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if rects_to_draw:
             dc.DrawRectangleList(rects_to_draw)
 
-        # DEBUG ONLY (don't slow down unless we need to debug)
+        # DEBUG ONLY (don't slow us down with this unless we need to debug)
         #logger.info(
         #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
         #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
@@ -1685,7 +1685,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         if rects_to_draw:
             dc.DrawRectangleList(rects_to_draw)
 
-        # DEBUG ONLY (don't slow down unless we need to debug)
+        # DEBUG ONLY (don't slow us down with this unless we need to debug)
         #logger.info(
         #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
         #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
