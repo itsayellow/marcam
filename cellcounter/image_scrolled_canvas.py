@@ -1169,6 +1169,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     """Window (in the wx sense) widget that displays an image, zooms in and
     out, and allows scrolling/panning in up/down and side/side if image is
     big enough.  If image is smaller than window it is auto-centered
+    Also allow for setting, selecting, deleting, marks.
     """
     @debug_fxn
     def __init__(self, parent, app_history, marks_num_update_fxn,
