@@ -41,24 +41,32 @@ logger.setLevel(logging.DEBUG)
 # create formatter
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:\n    %(message)s")
 
+global_log_level = logging.DEBUG
+
 if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
     # file handler
     file_handler = logging.FileHandler(os.path.join(os.path.expanduser("~"), 'cellcounter.log'))
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(global_log_level)
     # add global formatter to file handler
     file_handler.setFormatter(formatter)
 
     # use file handler for mac-wrapped app
-    logger.addHandler(file_handler)
+    my_handler = file_handler
 else:
     # console handler
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(global_log_level)
     # add formatter to console handler
     console_handler.setFormatter(formatter)
 
     # use console handler for command-line execution
-    logger.addHandler(console_handler)
+    my_handler = console_handler
+
+LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
+
+for logger_name in LOGGED_MODULES:
+    logging.getLogger(logger_name).setLevel(global_log_level)
+    logging.getLogger(logger_name).addHandler(my_handler)
 
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
@@ -623,14 +631,20 @@ class MainWindow(wx.Frame):
                 namelist = container_fh.namelist()
                 for name in namelist:
                     if name.startswith("image."):
-                        with container_fh.open(name, 'r') as img_fh:
-                            if name.endswith(".1sc"):
-                                img = file1sc_to_Image(img_fh)
-                            else:
-                                img = wx.Image(img_fh)
+                        tmp_dir = tempfile.mkdtemp()
+                        container_fh.extract(name, tmp_dir)
+
+                        if name.endswith(".1sc"):
+                            img = file1sc_to_Image(os.path.join(tmp_dir, name))
+                        else:
+                            img = wx.Image(os.path.join(tmp_dir, name))
+
                         # check if img loaded ok
                         img_ok = img.IsOk()
                         img_name = name
+
+                        os.remove(os.path.join(tmp_dir, name))
+                        os.rmdir(tmp_dir)
 
                     if name == "marks.txt":
                         with container_fh.open(name, 'r') as json_fh:
@@ -653,7 +667,10 @@ class MainWindow(wx.Frame):
 
         except IOError:
             # TODO: need real error dialog
-            logger.warning("Cannot open data in file '%s'." % imdata_path)
+            logger.warning(
+                    "Cannot open data in file '%s'." % imdata_path,
+                    exc_info=True
+                    )
 
     @debug_fxn
     def on_import_image(self, evt):
