@@ -643,6 +643,7 @@ class MainWindow(wx.Frame):
                         img_ok = img.IsOk()
                         img_name = name
 
+                        # remove temp dir
                         os.remove(os.path.join(tmp_dir, name))
                         os.rmdir(tmp_dir)
 
