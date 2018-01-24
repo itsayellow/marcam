@@ -637,8 +637,15 @@ class MainWindow(wx.Frame):
                         if name.endswith(".1sc"):
                             img = file1sc_to_Image(os.path.join(tmp_dir, name))
                         else:
+                            # disable logging, we don't care if there is e.g. TIFF image
+                            #   with unknown fields
+                            # TODO: could also just raise loglevel to Error and above
+                            no_log = wx.LogNull()
+
                             img = wx.Image(os.path.join(tmp_dir, name))
 
+                            # re-enable logging
+                            del no_log
                         # check if img loaded ok
                         img_ok = img.IsOk()
                         img_name = name
@@ -710,7 +717,15 @@ class MainWindow(wx.Frame):
         if imgfile_ext == ".1sc":
             img = file1sc_to_Image(img_file)
         else:
+            # disable logging, we don't care if there is e.g. TIFF image
+            #   with unknown fields
+            # TODO: could also just raise loglevel to Error and above
+            no_log = wx.LogNull()
+
             img = wx.Image(img_file)
+
+            # re-enable logging
+            del no_log
 
         # check if img loaded ok
         img_ok = img.IsOk()
