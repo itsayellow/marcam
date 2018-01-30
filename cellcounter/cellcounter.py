@@ -29,47 +29,61 @@ from const import (
         )
 # DEBUG sets global debug message verbosity
 
+# NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
+
 
 EXE_DIR = os.path.dirname(os.path.realpath(__file__))
 # for now the paths are the same
 ICON_DIR = EXE_DIR
 
-
-# logging stuff
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-# create formatter
-formatter = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:\n    %(message)s")
-
-global_log_level = logging.DEBUG
-
-if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
-    # file handler
-    file_handler = logging.FileHandler(os.path.join(os.path.expanduser("~"), 'cellcounter.log'))
-    file_handler.setLevel(global_log_level)
-    # add global formatter to file handler
-    file_handler.setFormatter(formatter)
-
-    # use file handler for mac-wrapped app
-    my_handler = file_handler
-else:
-    # console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(global_log_level)
-    # add formatter to console handler
-    console_handler.setFormatter(formatter)
-
-    # use console handler for command-line execution
-    my_handler = console_handler
-
+# which modules are we logging
 LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
 
-for logger_name in LOGGED_MODULES:
-    logging.getLogger(logger_name).setLevel(global_log_level)
-    logging.getLogger(logger_name).addHandler(my_handler)
+# global logger obj for this file
+LOGGER = logging.getLogger(__name__)
 
 
-# NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
+def logging_setup(log_level=logging.DEBUG):
+    """Setup logging for all logged modules
+
+    Args:
+        log_level (logging.LOG_LEVEL): log level for all modules from logging
+    """
+
+    # create formatter
+    formatter = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:\n    %(message)s")
+
+    # log to stderr if command-line executable
+    # log to ~/cellcounter.log if running from App (TODO: better log location)
+    if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
+        # file handler
+        file_handler = logging.FileHandler(os.path.join(os.path.expanduser("~"), 'cellcounter.log'))
+        file_handler.setLevel(log_level)
+        # add global formatter to file handler
+        file_handler.setFormatter(formatter)
+
+        # use file handler for mac-wrapped app
+        my_handler = file_handler
+    else:
+        # console handler
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(log_level)
+        # add formatter to console handler
+        console_handler.setFormatter(formatter)
+
+        # use console handler for command-line execution
+        my_handler = console_handler
+
+    for logger_name in LOGGED_MODULES:
+        logging.getLogger(logger_name).setLevel(log_level)
+        logging.getLogger(logger_name).addHandler(my_handler)
+
+    # inform log of the global log level
+    log_eff_level = LOGGER.getEffectiveLevel()
+    LOGGER.log(
+            log_eff_level,
+            "Global log level set to %s", logging.getLevelName(log_eff_level)
+            )
 
 
 # debug decorator that announces function call/entry and lists args
@@ -86,13 +100,21 @@ def debug_fxn(func):
             for key in kwargs:
                 log_string += "        " + key + "=" + repr(kwargs[key]) + ",\n"
             log_string += "        )"
-            logger.info(log_string)
+            LOGGER.info(log_string)
         return func(*args, **kwargs)
     return func_wrapper
 
 
 @debug_fxn
 def file1sc_to_Image(file1sc_file):
+    """Read in file1sc file and convert to wx.Image
+
+    Args:
+        file1sc_file (str): path to .1sc file
+
+    Returns:
+        wx.Image: image object
+    """
     try:
         read1sc = biorad1sc_reader.Reader(file1sc_file)
     except (BioRadInvalidFileError, BioRadParsingError):
@@ -218,7 +240,7 @@ class DropTarget(wx.FileDropTarget):
     @debug_fxn
     def OnDropFiles(self, x, y, filenames):
         filename = filenames[0]
-        logger.info("MSC:Drag and Drop filename:\n" + "    "+repr(filename))
+        LOGGER.info("MSC:Drag and Drop filename:\n" + "    "+repr(filename))
         self.window_target.init_image_from_file(filename)
 
         # TODO: which one of these??
@@ -326,7 +348,7 @@ class MainWindow(wx.Frame):
 
         # toolbar stuff
         self.toolbar = self.CreateToolBar()
-        logger.info("MSC:ICON_DIR=%s"%(ICON_DIR))
+        LOGGER.info("MSC:ICON_DIR=%s", ICON_DIR)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
         #otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', obmp)
         selectbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pointer32.png'))
@@ -433,8 +455,8 @@ class MainWindow(wx.Frame):
 
         self.Show(True)
 
-        logger.info(
-                "MSC:self.img_panel size: " + \
+        LOGGER.info(
+                "MSC:self.img_panel size: %s",
                 repr(self.img_panel.GetClientSize())
                 )
 
@@ -462,7 +484,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_key_down(self, evt):
         key_code = evt.GetKeyCode()
-        logger.info(
+        LOGGER.info(
                 "KEY:Key Down" + \
                 "    key_code: %d"%key_code + \
                 "    RawKeyCode: %d"%(evt.GetRawKeyCode()) + \
@@ -675,8 +697,8 @@ class MainWindow(wx.Frame):
 
         except IOError:
             # TODO: need real error dialog
-            logger.warning(
-                    "Cannot open data in file '%s'." % imdata_path,
+            LOGGER.warning(
+                    "Cannot open data in file '%s'.", imdata_path,
                     exc_info=True
                     )
 
@@ -823,7 +845,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_undo(self, evt):
         action = self.app_history.undo()
-        logger.info("MSC:undo: "+repr(action))
+        LOGGER.info("MSC:undo: %s", repr(action))
         if action[0] == 'MARK':
             self.img_panel.delete_mark(action[1], internal=False)
         if action[0] == 'DELETE_MARK_LIST':
@@ -838,7 +860,7 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_redo(self, evt):
         action = self.app_history.redo()
-        logger.info("MSC:redo: "+repr(action))
+        LOGGER.info("MSC:redo: %s", repr(action))
         if action[0] == 'MARK':
             self.img_panel.mark_point(action[1])
         if action[0] == 'DELETE_MARK_LIST':
@@ -901,7 +923,7 @@ class MainWindow(wx.Frame):
                         )
         except IOError:
             # TODO: need real error dialog
-            logger.warning("Cannot save current data in file '%s'." % imdata_path)
+            LOGGER.warning("Cannot save current data in file '%s'.", imdata_path)
         finally:
             os.unlink(temp_img_name)
 
@@ -973,8 +995,8 @@ def process_command_line(argv):
 
 def debug_main():
     # log situation before doing anything else
-    logger.info(time.asctime(time.gmtime()) + " UTC")
-    logger.info("Cellcounter version "+const.VERSION_STR)
+    LOGGER.info("%s UTC", time.asctime(time.gmtime()))
+    LOGGER.info("Cellcounter version %s", const.VERSION_STR)
     # os.uname doesn't work on Windows (platform.uname more portable)
     uname_obj = platform.uname()
     log_string = "platform.uname" + "\n"
@@ -984,8 +1006,8 @@ def debug_main():
     log_string += "        version:" + uname_obj.version + "\n"
     log_string += "        machine:" + uname_obj.machine + "\n"
     log_string += "        processor:" + uname_obj.processor
-    logger.info(log_string)
-    logger.info("sys.argv:" + repr(sys.argv))
+    LOGGER.info(log_string)
+    LOGGER.info("sys.argv:%s", repr(sys.argv))
 
 def main(argv=None):
     global DEBUG
@@ -1004,11 +1026,14 @@ def main(argv=None):
     if args.debug:
         DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
+    # setup logging
+    logging_setup(logging.DEBUG)
+
     # get basic debug info
     debug_main()
 
     # see what argv and args are
-    logger.info(repr(args))
+    LOGGER.info(repr(args))
 
     # setup main wx event loop
     myapp = wx.App()
@@ -1039,8 +1064,8 @@ if __name__ == "__main__":
         # exit error code for Ctrl-C
         status = 130
     except:
-        logger.info("\nFatal Error")
-        logger.info(traceback.format_exc())
+        LOGGER.info("\nFatal Error")
+        LOGGER.info(traceback.format_exc())
         status = 1
 
     sys.exit(status)
