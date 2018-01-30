@@ -273,7 +273,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         LOGGER.info(
                 "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y) + "\n" + \
-                " "*8 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
+                " "*4 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
                 )
 
         # we allow click outside of image in case we drag onto image
@@ -1237,7 +1237,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         LOGGER.info(
                 "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y) + "\n" + \
-                " "*8 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
+                " "*4 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
                 )
 
         if self.mark_mode:
