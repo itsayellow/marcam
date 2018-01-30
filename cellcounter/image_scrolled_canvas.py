@@ -206,10 +206,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         scroll_y = round(origin_y/scroll_ppu_y)
         self.Scroll(scroll_x, scroll_y)
         LOGGER.info(
-                "MSC:img_zoom_wincenter = " + \
-                "(%.3f,%.3f)\n"%(img_zoom_wincenter_x, img_zoom_wincenter_y) + \
-                "    MSC:origin = (%.3f,%.3f)\n"%(origin_x, origin_y) + \
-                "    MSC:Scroll to (%d,%d)"%(scroll_x, scroll_y)
+                "MSC:img_zoom_wincenter = (%.3f,%.3f)\nMSC:origin = " + \
+                        "(%.3f,%.3f)\nMSC:Scroll to (%d,%d)",
+                img_zoom_wincenter_x, img_zoom_wincenter_y,
+                origin_x, origin_y,
+                scroll_x, scroll_y
                 )
 
     def wincenter_scroll_limits(self):
@@ -298,7 +299,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # continue processing click, for example shifting focus to app
         evt.Skip()
 
-    @debug_fxn
+    # don't debug on_motion normally, too much log msgs
+    #@debug_fxn
     def on_motion(self, evt):
         # return early if no image
         if self.img_dc is None:
@@ -1278,7 +1280,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # continue processing click, for example shifting focus to app
         evt.Skip()
 
-    @debug_fxn
+    # don't debug on_motion normally, too much log msgs
+    #@debug_fxn
     def on_motion(self, evt):
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
