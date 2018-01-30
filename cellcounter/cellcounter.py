@@ -27,6 +27,8 @@ import const
 from const import (
         DEBUG, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
         )
+from common import debug_fxn
+
 # DEBUG sets global debug message verbosity
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
@@ -43,6 +45,32 @@ LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
 LOGGER = logging.getLogger(__name__)
 
 
+class CellcounterFormatter(logging.Formatter):
+    def format(self, record):
+        out_string = super().format(record)
+        # indent all lines after main format string
+        out_string = out_string.replace("\n", "\n    ")
+        return out_string
+
+
+# debug decorator that announces function call/entry and lists args
+def debug_fxn(func):
+    """Function decorator that prints the function name and the arguments used
+    in the function call before executing the function
+    """
+    def func_wrapper(*args, **kwargs):
+        log_string = "FXN:" + func.__qualname__ + "(\n"
+        for arg in args[1:]:
+            log_string += "    " + repr(arg) + ",\n"
+        for key in kwargs:
+            log_string += "    " + key + "=" + repr(kwargs[key]) + ",\n"
+        log_string += "    )"
+        LOGGER.info(log_string)
+        return func(*args, **kwargs)
+    return func_wrapper
+
+
+@debug_fxn
 def logging_setup(log_level=logging.DEBUG):
     """Setup logging for all logged modules
 
@@ -51,7 +79,12 @@ def logging_setup(log_level=logging.DEBUG):
     """
 
     # create formatter
-    formatter = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:\n    %(message)s")
+    #formatter = logging.Formatter(
+    #        "%(asctime)s:%(name)s:%(levelname)s:\n    %(message)s"
+    #        )
+    formatter = CellcounterFormatter(
+            "%(asctime)s:%(name)s:%(levelname)s:\n%(message)s"
+            )
 
     # log to stderr if command-line executable
     # log to ~/cellcounter.log if running from App (TODO: better log location)
@@ -84,23 +117,6 @@ def logging_setup(log_level=logging.DEBUG):
             log_eff_level,
             "Global log level set to %s", logging.getLevelName(log_eff_level)
             )
-
-
-# debug decorator that announces function call/entry and lists args
-def debug_fxn(func):
-    """Function decorator that prints the function name and the arguments used
-    in the function call before executing the function
-    """
-    def func_wrapper(*args, **kwargs):
-        log_string = "FXN:" + func.__qualname__ + "(\n"
-        for arg in args[1:]:
-            log_string += "        " + repr(arg) + ",\n"
-        for key in kwargs:
-            log_string += "        " + key + "=" + repr(kwargs[key]) + ",\n"
-        log_string += "        )"
-        LOGGER.info(log_string)
-        return func(*args, **kwargs)
-    return func_wrapper
 
 
 @debug_fxn

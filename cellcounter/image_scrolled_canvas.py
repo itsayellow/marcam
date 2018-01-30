@@ -14,8 +14,8 @@ from const import (
 #   not necessary to make a handler since we will be child logger of cellcounter
 #   we use NullHandler so if no config at top level we won't default to printing
 #       to stderr
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(logging.NullHandler())
 
 
 # debug decorator that announces function call/entry and lists args
@@ -26,11 +26,11 @@ def debug_fxn(func):
     def func_wrapper(*args, **kwargs):
         log_string = "FXN:" + func.__qualname__ + "(\n"
         for arg in args[1:]:
-            log_string += "        " + repr(arg) + ",\n"
+            log_string += "    " + repr(arg) + ",\n"
         for key in kwargs:
-            log_string += "        " + key + "=" + repr(kwargs[key]) + ",\n"
-        log_string += "        )"
-        logger.info(log_string)
+            log_string += "    " + key + "=" + repr(kwargs[key]) + ",\n"
+        log_string += "    )"
+        LOGGER.info(log_string)
         return func(*args, **kwargs)
     return func_wrapper
 
@@ -180,7 +180,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (self.img_at_wincenter_x, self.img_at_wincenter_y
                 ) = self.win2img_coord(win_size_x/2, win_size_y/2)
 
-        logger.info(
+        LOGGER.info(
                 "MSC:self.img_at_wincenter=(%.3f,%.3f)"%(
                     self.img_at_wincenter_x,
                     self.img_at_wincenter_y
@@ -205,7 +205,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         scroll_x = round(origin_x/scroll_ppu_x)
         scroll_y = round(origin_y/scroll_ppu_y)
         self.Scroll(scroll_x, scroll_y)
-        logger.info(
+        LOGGER.info(
                 "MSC:img_zoom_wincenter = " + \
                 "(%.3f,%.3f)\n"%(img_zoom_wincenter_x, img_zoom_wincenter_y) + \
                 "    MSC:origin = (%.3f,%.3f)\n"%(origin_x, origin_y) + \
@@ -238,7 +238,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_y_min = win_size_y / 2 / self.zoom
             img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom)
 
-        logger.info(
+        LOGGER.info(
                 "MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(
                     img_x_min, img_y_min, img_x_max, img_y_max)
                 )
@@ -271,7 +271,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
-        logger.info(
+        LOGGER.info(
                 "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y) + "\n" + \
                 " "*8 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
                 )
@@ -321,7 +321,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
                 # DEBUG DELETEME
-                #logger.warning("Drag but TypeError: returning")
+                #LOGGER.warning("Drag but TypeError: returning")
                 return
             except Exception as exc:
                 raise exc
@@ -335,7 +335,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             else:
                 pass
                 # DEBUG DELETEME
-                #logger.warning("Drag with (1,1) size")
+                #LOGGER.warning("Drag with (1,1) size")
             
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
@@ -412,7 +412,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         point = evt.GetLogicalPosition(self.img_dc)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
-        logger.info(
+        LOGGER.info(
                 "MSC:right click at img (%.2f, %.2f)"%(img_x, img_y)
                 )
 
@@ -449,7 +449,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if img_x_end == img_x_start and img_y_end == img_y_start:
             return
 
-        logger.info(
+        LOGGER.info(
                 "MSC:panimate: start=(%.2f,%.2f) "%(img_x_start,img_y_start) + \
                 "end=(%.2f, %.2f)"%(img_x_end, img_y_end)
                 )
@@ -555,7 +555,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 log_string += " wx.wxEVT_SCROLLWIN_THUMBRELEASE"
             else:
                 log_string += " EventType="+repr(EventType)
-            logger.info(log_string)
+            LOGGER.info(log_string)
 
         # NOTE: by setting position only on scroll (and not on zoom) we
         #   preserve position on zoom out/zoom back in even if the image gets
@@ -660,7 +660,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if DEBUG & DEBUG_TIMING:
             onpaint_eltime = time.time() - start_onpaint
             panel_size = self.GetSize()
-            logger.info(
+            LOGGER.info(
                     "TIM:on_paint: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
                         onpaint_eltime,
                         self.zoom,
@@ -780,7 +780,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dc.DrawRectangleList(rects_to_draw)
 
         # DEBUG ONLY (don't slow us down with this unless we need to debug)
-        #logger.info(
+        #LOGGER.info(
         #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
         #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
         #        "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
@@ -947,7 +947,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         if DEBUG & DEBUG_TIMING:
             staticdc_eltime = time.time() - staticdc_start
-            logger.info("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
+            LOGGER.info("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
 
         # set zoom_idx to scaling that will fit image in window
         #   or 1.0 if max_zoom > 1.0
@@ -1235,7 +1235,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
-        logger.info(
+        LOGGER.info(
                 "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y) + "\n" + \
                 " "*8 + "MSC:evt.GetPosition = (%.2f, %.2f)"%(point.x, point.y)
                 )
@@ -1302,7 +1302,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
                 # DEBUG DELETEME
-                #logger.warning("Drag but TypeError: returning")
+                #LOGGER.warning("Drag but TypeError: returning")
                 return
             except Exception as exc:
                 raise exc
@@ -1316,7 +1316,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             else:
                 pass
                 # DEBUG DELETEME
-                #logger.warning("Drag with (1,1) size")
+                #LOGGER.warning("Drag with (1,1) size")
             
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
@@ -1439,7 +1439,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         Returns (bool): True if new mark added, False if same point already
             exists in mark list
         """
-        logger.info("MSC: point (%d, %d)"%img_point)
+        LOGGER.info("MSC: point (%d, %d)"%img_point)
 
         if img_point in self.marks:
             # mark already exists, doing nothing
@@ -1685,7 +1685,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             dc.DrawRectangleList(rects_to_draw)
 
         # DEBUG ONLY (don't slow us down with this unless we need to debug)
-        #logger.info(
+        #LOGGER.info(
         #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
         #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
         #        "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
