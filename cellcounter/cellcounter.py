@@ -25,7 +25,7 @@ from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 from const import (
-        DEBUG, DEBUG_FXN_ENTRY, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
+        DEBUG, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
         )
 # DEBUG sets global debug message verbosity
 
@@ -88,19 +88,17 @@ def logging_setup(log_level=logging.DEBUG):
 
 # debug decorator that announces function call/entry and lists args
 def debug_fxn(func):
-    """Function decorator that (if enabled by DEBUG_FXN_ENTRY bit in DEBUG)
-    prints the function name and the arguments used in the function call
-    before executing the function
+    """Function decorator that prints the function name and the arguments used
+    in the function call before executing the function
     """
     def func_wrapper(*args, **kwargs):
-        if DEBUG & DEBUG_FXN_ENTRY:
-            log_string = "FXN:" + func.__qualname__ + "(\n"
-            for arg in args[1:]:
-                log_string += "        " + repr(arg) + ",\n"
-            for key in kwargs:
-                log_string += "        " + key + "=" + repr(kwargs[key]) + ",\n"
-            log_string += "        )"
-            LOGGER.info(log_string)
+        log_string = "FXN:" + func.__qualname__ + "(\n"
+        for arg in args[1:]:
+            log_string += "        " + repr(arg) + ",\n"
+        for key in kwargs:
+            log_string += "        " + key + "=" + repr(kwargs[key]) + ",\n"
+        log_string += "        )"
+        LOGGER.info(log_string)
         return func(*args, **kwargs)
     return func_wrapper
 
@@ -1024,7 +1022,7 @@ def main(argv=None):
 
     # if -d or --debug turn on full debug
     if args.debug:
-        DEBUG = DEBUG_FXN_ENTRY | DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
+        DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
     # setup logging
     logging_setup(logging.DEBUG)
