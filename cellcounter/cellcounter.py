@@ -254,7 +254,7 @@ class DropTarget(wx.FileDropTarget):
     @debug_fxn
     def OnDropFiles(self, x, y, filenames):
         filename = filenames[0]
-        LOGGER.info("MSC:Drag and Drop filename:\n" + "    "+repr(filename))
+        LOGGER.info("MSC:Drag and Drop filename:\n    %s", repr(filename))
         self.window_target.init_image_from_file(filename)
 
         # TODO: which one of these??
@@ -499,10 +499,8 @@ class MainWindow(wx.Frame):
     def on_key_down(self, evt):
         key_code = evt.GetKeyCode()
         LOGGER.info(
-                "KEY:Key Down" + \
-                "    key_code: %d"%key_code + \
-                "    RawKeyCode: %d"%(evt.GetRawKeyCode()) + \
-                "    Position: " + repr(evt.GetPosition())
+                "KEY:Key Down    key_code: %d    RawKeyCode: %d    Position: %s",
+                key_code, evt.GetRawKeyCode(), evt.GetPosition()
                 )
 
         if key_code == 91:
@@ -1014,12 +1012,12 @@ def debug_main():
     # os.uname doesn't work on Windows (platform.uname more portable)
     uname_obj = platform.uname()
     log_string = "platform.uname" + "\n"
-    log_string += "        system:" + uname_obj.system + "\n"
-    log_string += "        node:" + uname_obj.node + "\n"
-    log_string += "        release:" + uname_obj.release + "\n"
-    log_string += "        version:" + uname_obj.version + "\n"
-    log_string += "        machine:" + uname_obj.machine + "\n"
-    log_string += "        processor:" + uname_obj.processor
+    log_string += "    system:" + uname_obj.system + "\n"
+    log_string += "    node:" + uname_obj.node + "\n"
+    log_string += "    release:" + uname_obj.release + "\n"
+    log_string += "    version:" + uname_obj.version + "\n"
+    log_string += "    machine:" + uname_obj.machine + "\n"
+    log_string += "    processor:" + uname_obj.processor
     LOGGER.info(log_string)
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
@@ -1078,8 +1076,7 @@ if __name__ == "__main__":
         # exit error code for Ctrl-C
         status = 130
     except:
-        LOGGER.info("\nFatal Error")
-        LOGGER.info(traceback.format_exc())
+        LOGGER.error("Uncaught Fatal Error", exc_info=True)
         status = 1
 
     sys.exit(status)
