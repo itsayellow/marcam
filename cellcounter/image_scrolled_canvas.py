@@ -959,61 +959,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Refresh()
         self.Update()
 
-
-    #@debug_fxn
-    #def zoom_in_point(self, zoom_amt, do_refresh=True):
-    #    """Zoom in the image in this window (increase zoom ratio).  There
-    #    is a fixed list of zoom ratios, move down in the list
-
-    #    Args:
-    #        zoom_amt (int): How many positions to move down in the zoom ratio
-    #            list
-    #        do_refresh (bool, default=True): whether to force a refresh now
-    #            after changing the zoom ratio
-
-    #    Returns:
-    #        self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
-    #    """
-    #    # return early if no image or we're at max
-    #    if self.img_dc is None or self.zoom_idx == len(self.zoom_list)-1:
-    #        return
-
-    #    # get mouse location in window coords and img coords
-    #    #point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
-    #    (img_x, img_y) = self.win2img_coord(win_coords.x, win_coords.y)
-    #    zoom_orig = self.zoom_val
-    #    delta_x_orig = img_x - self.img_at_wincenter_x
-    #    delta_y_orig = img_y - self.img_at_wincenter_y
-
-    #    self.zoom_idx += zoom_amt
-
-    #    # enforce max zoom
-    #    if self.zoom_idx > len(self.zoom_list)-1:
-    #        self.zoom_idx = len(self.zoom_list)-1
-
-    #    # record floating point zoom
-    #    self.zoom_val = self.zoom_list[self.zoom_idx]
-
-    #    # expand virtual window size
-    #    self.set_virt_size_with_min()
-
-    #    # set img centerpoint coords so img coords and win coords from mouse
-    #    #   point are still the same
-    #    delta_x_new = delta_x_orig * zoom_orig / self.zoom_val
-    #    delta_y_new = delta_y_orig * zoom_orig / self.zoom_val
-    #    self.img_at_wincenter_x = img_x - delta_x_new
-    #    self.img_at_wincenter_y = img_y - delta_y_new
-
-    #    # scroll so center of image is at self.img_at_wincenter_{x,y}
-    #    self.scroll_to_img_at_wincenter()
-
-    #    if do_refresh:
-    #        # force a paint event with Refresh and Update
-    #        self.Refresh()
-    #        self.Update()
-
-    #    return self.zoom_val
-
     @debug_fxn
     def zoom_point(self, zoom_amt, win_coords=None, do_refresh=True):
         """Zoom in the image in this window (increase zoom ratio).  There
