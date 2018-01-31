@@ -2,11 +2,12 @@ import logging
 import time
 import wx
 import numpy as np
+
 import const
 from const import (
         DEBUG, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
         )
-
+import common
 
 # logging stuff
 #   not necessary to make a handler since we will be child logger of cellcounter
@@ -15,22 +16,8 @@ from const import (
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
 
-
-# debug decorator that announces function call/entry and lists args
-def debug_fxn(func):
-    """Function decorator that prints the function name and the arguments used
-    in the function call before executing the function
-    """
-    def func_wrapper(*args, **kwargs):
-        log_string = "FXN:" + func.__qualname__ + "(\n"
-        for arg in args[1:]:
-            log_string += "    " + repr(arg) + ",\n"
-        for key in kwargs:
-            log_string += "    " + key + "=" + repr(kwargs[key]) + ",\n"
-        log_string += "    )"
-        LOGGER.info(log_string)
-        return func(*args, **kwargs)
-    return func_wrapper
+# create debug function using this file's logger
+debug_fxn = common.debug_fxn_factory(LOGGER)
 
 
 def ceil(num):
