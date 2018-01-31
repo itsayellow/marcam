@@ -72,7 +72,8 @@ def logging_setup(log_level=logging.DEBUG):
             )
 
     # log to stderr if command-line executable
-    # log to ~/cellcounter.log if running from App (TODO: better log location)
+    # log to ~/cellcounter.log if running from App
+    # TODO: better log location
     if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
         # file handler
         file_handler = logging.FileHandler(os.path.join(os.path.expanduser("~"), 'cellcounter.log'))
@@ -482,8 +483,13 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_key_down(self, evt):
+        """Handler for pressing a key down event.  Holding a key down (at least
+        on macOS) generates repeated EVT_KEY_DOWN events but only one
+        EVT_KEY_UP when user releases the key.
+        """
+
         key_code = evt.GetKeyCode()
-        LOGGER.info(
+        LOGGER.debug(
                 "KEY:Key Down    key_code: %d    RawKeyCode: %d    Position: %s",
                 key_code, evt.GetRawKeyCode(), evt.GetPosition()
                 )
@@ -492,14 +498,14 @@ class MainWindow(wx.Frame):
             # [ key
             #  key_code: 91
             #  RawKeyCode: 33
-            zoom = self.img_panel.zoom_out(1)
+            zoom = self.img_panel.zoom(-1)
             if zoom:
                 self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
         if key_code == 93:
             # ] key
             #  key_code: 93
             #  RawKeyCode: 30
-            zoom = self.img_panel.zoom_in(1)
+            zoom = self.img_panel.zoom(1)
             if zoom:
                 self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
@@ -525,6 +531,11 @@ class MainWindow(wx.Frame):
             deleted_marks = self.img_panel.delete_selected_marks()
             self.app_history.new(['DELETE_MARK_LIST', deleted_marks])
 
+        if key_code == 307:
+            # option key - initiate temporary zoom
+            LOGGER.debug("Option key down")
+            self.img_panel.zoom_point(10, evt.GetPosition())
+
         if key_code == 366:
             # PAGE UP
             # skip to process page up
@@ -545,6 +556,21 @@ class MainWindow(wx.Frame):
         if key_code == 32:
             # Space Bar
             pass
+
+    @debug_fxn
+    def on_key_up(self, evt):
+        key_code = evt.GetKeyCode()
+        LOGGER.debug(
+                "KEY:Key Up  key_code: %d    RawKeyCode: %d    Position: %s",
+                key_code, evt.GetRawKeyCode(), evt.GetPosition()
+                )
+
+        if key_code == 307:
+            # option key - release temporary zoom
+            LOGGER.debug("Option key up")
+            self.img_panel.zoom_point(-10, evt.GetPosition())
+
+        evt.Skip()
 
     @debug_fxn
     def on_selectmode(self, evt):
@@ -1047,6 +1073,7 @@ def main(argv=None):
     #   (see wx.Panel.AcceptsFocus, wx.Panel.SetFocus,
     #   wx.Panel.SetFocusIgnoringChildren)
     myapp.Bind(wx.EVT_KEY_DOWN, main_win.on_key_down)
+    myapp.Bind(wx.EVT_KEY_UP, main_win.on_key_up)
     myapp.MainLoop()
 
     # TODO: meaningless
@@ -1061,7 +1088,7 @@ if __name__ == "__main__":
         # exit error code for Ctrl-C
         status = 130
     except:
-        LOGGER.error("Uncaught Fatal Error", exc_info=True)
+        LOGGER.error("UNCAUGHT FATAL ERROR", exc_info=True)
         status = 1
 
     sys.exit(status)

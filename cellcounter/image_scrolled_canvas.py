@@ -67,7 +67,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.overlay = wx.Overlay() # for making rubber-band box during drag
         self.rubberband_draw_rect = None
         self.rubberband_refresh_rect = None
-        self.zoom = None
+        self.zoom_val = None
         self.zoom_idx = None
         self.zoom_list = None
 
@@ -97,7 +97,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_list = lomags + [1.0,] + himags
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
-        self.zoom = self.zoom_list[self.zoom_idx]
+        self.zoom_val = self.zoom_list[self.zoom_idx]
 
         # setup handlers
         self.Bind(wx.EVT_PAINT, self.on_paint)
@@ -131,7 +131,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
-        self.zoom = self.zoom_list[self.zoom_idx]
+        self.zoom_val = self.zoom_list[self.zoom_idx]
 
         # make sure canvas is no larger than window
         self.set_virt_size_with_min()
@@ -181,8 +181,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (win_size_x, win_size_y) = self.GetClientSize()
         (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
 
-        img_zoom_wincenter_x = self.img_at_wincenter_x * self.zoom
-        img_zoom_wincenter_y = self.img_at_wincenter_y * self.zoom
+        img_zoom_wincenter_x = self.img_at_wincenter_x * self.zoom_val
+        img_zoom_wincenter_y = self.img_at_wincenter_y * self.zoom_val
 
         origin_x = img_zoom_wincenter_x - win_size_x/2
         origin_y = img_zoom_wincenter_y - win_size_y/2
@@ -207,22 +207,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # GetClientSize returns physical window dimensions, not unscrolled
         (win_size_x, win_size_y) = self.GetClientSize()
-        win_size_img_x = win_size_x / self.zoom
-        win_size_img_y = win_size_y / self.zoom
+        win_size_img_x = win_size_x / self.zoom_val
+        win_size_img_y = win_size_y / self.zoom_val
 
         if win_size_img_x > self.img_size_x:
             img_x_min = self.img_size_x / 2
             img_x_max = self.img_size_x / 2
         else:
-            img_x_min = win_size_x / 2 / self.zoom
-            img_x_max = self.img_size_x - (win_size_x / 2 / self.zoom)
+            img_x_min = win_size_x / 2 / self.zoom_val
+            img_x_max = self.img_size_x - (win_size_x / 2 / self.zoom_val)
 
         if win_size_img_y > self.img_size_y:
             img_y_min = self.img_size_y / 2
             img_y_max = self.img_size_y / 2
         else:
-            img_y_min = win_size_y / 2 / self.zoom
-            img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom)
+            img_y_min = win_size_y / 2 / self.zoom_val
+            img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom_val)
 
         LOGGER.info(
                 "MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(
@@ -421,7 +421,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             max_speed (float): maximum speed of pan in win pixels/sec
         """
         max_speed = clip(max_speed, 1, None)
-        img_max_speed = max_speed / self.zoom
+        img_max_speed = max_speed / self.zoom_val
 
         (xmin, ymin, xmax, ymax) = self.wincenter_scroll_limits()
 
@@ -573,8 +573,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         image in window.
         """
         (win_size_x, win_size_y) = self.GetClientSize()
-        virt_size_x = max([self.img_size_x * self.zoom, win_size_x])
-        virt_size_y = max([self.img_size_y * self.zoom, win_size_y])
+        virt_size_x = max([self.img_size_x * self.zoom_val, win_size_x])
+        virt_size_y = max([self.img_size_y * self.zoom_val, win_size_y])
         self.SetVirtualSize(virt_size_x, virt_size_y)
 
         # check and see if Client Size changed after setting VirtualSize
@@ -583,21 +583,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if (win_size_new_x != win_size_x) or (win_size_new_y != win_size_y):
             win_size_x = win_size_new_x
             win_size_y = win_size_new_y
-            virt_size_x = max([self.img_size_x * self.zoom, win_size_x])
-            virt_size_y = max([self.img_size_y * self.zoom, win_size_y])
+            virt_size_x = max([self.img_size_x * self.zoom_val, win_size_x])
+            virt_size_y = max([self.img_size_y * self.zoom_val, win_size_y])
             self.SetVirtualSize(virt_size_x, virt_size_y)
 
         # center image if Virtual Size is larger than image
-        if win_size_x > self.img_size_x * self.zoom:
+        if win_size_x > self.img_size_x * self.zoom_val:
             self.img_coord_xlation_x = int(
-                    (win_size_x - self.img_size_x * self.zoom) / 2
+                    (win_size_x - self.img_size_x * self.zoom_val) / 2
                     )
         else:
             self.img_coord_xlation_x = 0
 
-        if win_size_y > self.img_size_y * self.zoom:
+        if win_size_y > self.img_size_y * self.zoom_val:
             self.img_coord_xlation_y = int(
-                    (win_size_y - self.img_size_y * self.zoom) / 2
+                    (win_size_y - self.img_size_y * self.zoom_val) / 2
                     )
         else:
             self.img_coord_xlation_y = 0
@@ -650,7 +650,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             LOGGER.info(
                     "TIM:on_paint: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
                         onpaint_eltime,
-                        self.zoom,
+                        self.zoom_val,
                         panel_size.x, panel_size.y,
                         )
                     )
@@ -676,10 +676,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         # see if we need to use a downscaled version of memdc
-        if self.zoom > 0.5:
+        if self.zoom_val > 0.5:
             img_dc_src = self.img_dc
             scale_dc = 1
-        elif self.zoom > 0.25:
+        elif self.zoom_val > 0.25:
             img_dc_src = self.img_dc_div2
             scale_dc = 2
         else:
@@ -839,8 +839,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         (win_unscroll_x, win_unscroll_y) = self.CalcUnscrolledPosition(win_x, win_y)
 
-        img_x = (win_unscroll_x - self.img_coord_xlation_x) / self.zoom / scale_dc
-        img_y = (win_unscroll_y - self.img_coord_xlation_y) / self.zoom / scale_dc
+        img_x = (win_unscroll_x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
+        img_y = (win_unscroll_y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
 
         return (img_x, img_y)
 
@@ -861,8 +861,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
 
-        img_x = (logical_x - self.img_coord_xlation_x) / self.zoom / scale_dc
-        img_y = (logical_y - self.img_coord_xlation_y) / self.zoom / scale_dc
+        img_x = (logical_x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
+        img_y = (logical_y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
 
         return (img_x, img_y)
 
@@ -878,8 +878,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             tuple: (logical_x (float), logical_y (float)) position in
                 logical unscrolled canvas coordinates
         """
-        win_unscroll_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
-        win_unscroll_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
+        win_unscroll_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
+        win_unscroll_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
         return (win_unscroll_x, win_unscroll_y)
 
     @debug_fxn
@@ -894,8 +894,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             tuple: (win_x (float), win_y (float)) position in device
                 window coordinates
         """
-        win_logical_x = img_x * self.zoom * scale_dc + self.img_coord_xlation_x
-        win_logical_y = img_y * self.zoom * scale_dc + self.img_coord_xlation_y
+        win_logical_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
+        win_logical_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
         (win_x, win_y) = self.CalcScrolledPosition(win_logical_x, win_logical_y)
         return (win_x, win_y)
 
@@ -947,7 +947,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
         ok_zooms = [x for x in self.zoom_list if x < max_zoom]
         self.zoom_idx = self.zoom_list.index(max(ok_zooms))
-        self.zoom = self.zoom_list[self.zoom_idx]
+        self.zoom_val = self.zoom_list[self.zoom_idx]
 
         self.set_virt_size_with_min()
 
@@ -960,22 +960,141 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
 
+    #@debug_fxn
+    #def zoom_in_point(self, zoom_amt, do_refresh=True):
+    #    """Zoom in the image in this window (increase zoom ratio).  There
+    #    is a fixed list of zoom ratios, move down in the list
+
+    #    Args:
+    #        zoom_amt (int): How many positions to move down in the zoom ratio
+    #            list
+    #        do_refresh (bool, default=True): whether to force a refresh now
+    #            after changing the zoom ratio
+
+    #    Returns:
+    #        self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
+    #    """
+    #    # return early if no image or we're at max
+    #    if self.img_dc is None or self.zoom_idx == len(self.zoom_list)-1:
+    #        return
+
+    #    # get mouse location in window coords and img coords
+    #    #point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
+    #    (img_x, img_y) = self.win2img_coord(win_coords.x, win_coords.y)
+    #    zoom_orig = self.zoom_val
+    #    delta_x_orig = img_x - self.img_at_wincenter_x
+    #    delta_y_orig = img_y - self.img_at_wincenter_y
+
+    #    self.zoom_idx += zoom_amt
+
+    #    # enforce max zoom
+    #    if self.zoom_idx > len(self.zoom_list)-1:
+    #        self.zoom_idx = len(self.zoom_list)-1
+
+    #    # record floating point zoom
+    #    self.zoom_val = self.zoom_list[self.zoom_idx]
+
+    #    # expand virtual window size
+    #    self.set_virt_size_with_min()
+
+    #    # set img centerpoint coords so img coords and win coords from mouse
+    #    #   point are still the same
+    #    delta_x_new = delta_x_orig * zoom_orig / self.zoom_val
+    #    delta_y_new = delta_y_orig * zoom_orig / self.zoom_val
+    #    self.img_at_wincenter_x = img_x - delta_x_new
+    #    self.img_at_wincenter_y = img_y - delta_y_new
+
+    #    # scroll so center of image is at self.img_at_wincenter_{x,y}
+    #    self.scroll_to_img_at_wincenter()
+
+    #    if do_refresh:
+    #        # force a paint event with Refresh and Update
+    #        self.Refresh()
+    #        self.Update()
+
+    #    return self.zoom_val
+
     @debug_fxn
-    def zoom_in(self, zoom_amt, do_refresh=True):
+    def zoom_point(self, zoom_amt, win_coords=None, do_refresh=True):
         """Zoom in the image in this window (increase zoom ratio).  There
         is a fixed list of zoom ratios, move down in the list
 
         Args:
-            zoom_amt (int): How many positions to move down in the zoom ratio
-                list
+            zoom_amt (int): How many positions to move up or down in the
+                zoom ratio list
             do_refresh (bool, default=True): whether to force a refresh now
                 after changing the zoom ratio
 
         Returns:
-            self.zoom (float): resulting zoom ratio (1.00 is 1x zoom)
+            self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
         """
-        # return early if no image or we're at max
-        if self.img_dc is None or self.zoom_idx == len(self.zoom_list)-1:
+        # return early if no image or we can't zoom any more
+        if self.img_dc is None:
+            return
+        if zoom_amt > 0 and self.zoom_idx == len(self.zoom_list)-1:
+            return
+        if zoom_amt < 0 and self.zoom_idx == 0:
+            return
+
+        # get mouse location in window coords and img coords
+        #point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
+        (img_x, img_y) = self.win2img_coord(win_coords.x, win_coords.y)
+        zoom_orig = self.zoom_val
+        delta_x_orig = img_x - self.img_at_wincenter_x
+        delta_y_orig = img_y - self.img_at_wincenter_y
+
+        self.zoom_idx += zoom_amt
+
+        # enforce max zoom
+        if self.zoom_idx > len(self.zoom_list)-1:
+            self.zoom_idx = len(self.zoom_list)-1
+        # enforce min zoom
+        if self.zoom_idx < 0:
+            self.zoom_idx = 0
+
+        # record floating point zoom
+        self.zoom_val = self.zoom_list[self.zoom_idx]
+
+        # expand virtual window size
+        self.set_virt_size_with_min()
+
+        # set img centerpoint coords so img coords and win coords from mouse
+        #   point are still the same
+        delta_x_new = delta_x_orig * zoom_orig / self.zoom_val
+        delta_y_new = delta_y_orig * zoom_orig / self.zoom_val
+        self.img_at_wincenter_x = img_x - delta_x_new
+        self.img_at_wincenter_y = img_y - delta_y_new
+
+        # scroll so center of image at same point it used to be
+        self.scroll_to_img_at_wincenter()
+
+        if do_refresh:
+            # force a paint event with Refresh and Update
+            self.Refresh()
+            self.Update()
+
+        return self.zoom_val
+
+    @debug_fxn
+    def zoom(self, zoom_amt, do_refresh=True):
+        """Zoom in the image in this window (increase zoom ratio).  There
+        is a fixed list of zoom ratios, move down in the list
+
+        Args:
+            zoom_amt (int): How many positions to move up or down in the
+                zoom ratio list
+            do_refresh (bool, default=True): whether to force a refresh now
+                after changing the zoom ratio
+
+        Returns:
+            self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
+        """
+        # return early if no image or we can't zoom any more
+        if self.img_dc is None:
+            return
+        if zoom_amt > 0 and self.zoom_idx == len(self.zoom_list)-1:
+            return
+        if zoom_amt < 0 and self.zoom_idx == 0:
             return
 
         self.zoom_idx += zoom_amt
@@ -983,9 +1102,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # enforce max zoom
         if self.zoom_idx > len(self.zoom_list)-1:
             self.zoom_idx = len(self.zoom_list)-1
+        # enforce min zoom
+        if self.zoom_idx < 0:
+            self.zoom_idx = 0
 
         # record floating point zoom
-        self.zoom = self.zoom_list[self.zoom_idx]
+        self.zoom_val = self.zoom_list[self.zoom_idx]
 
         # expand virtual window size
         self.set_virt_size_with_min()
@@ -998,47 +1120,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.Refresh()
             self.Update()
 
-        return self.zoom
-
-    @debug_fxn
-    def zoom_out(self, zoom_amt, do_refresh=True):
-        """Zoom out the image in this window (reduce zoom ratio).  There
-        is a fixed list of zoom ratios, move up in the list
-
-        Args:
-            zoom_amt (int): How many positions to move up in the zoom ratio
-                list
-            do_refresh (bool, default=True): whether to force a refresh now
-                after changing the zoom ratio
-
-        Returns:
-            self.zoom (float): resulting zoom ratio (1.00 is 1x zoom)
-        """
-        # return early if no image or we're at max
-        if self.img_dc is None or self.zoom_idx == 0:
-            return
-
-        self.zoom_idx -= zoom_amt
-
-        # enforce min zoom
-        if self.zoom_idx < 0:
-            self.zoom_idx = 0
-
-        # record floating point zoom
-        self.zoom = self.zoom_list[self.zoom_idx]
-
-        # contract virtual window size
-        self.set_virt_size_with_min()
-
-        # scroll so center of image at same point it used to be
-        self.scroll_to_img_at_wincenter()
-
-        if do_refresh:
-            # force a paint event with Refresh and Update
-            self.Refresh()
-            self.Update()
-
-        return self.zoom
+        return self.zoom_val
 
     @debug_fxn
     def pan_down(self, pan_amt):
@@ -1510,7 +1592,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     @debug_fxn
     def select_at_point(self, click_img_x, click_img_y, is_appending, is_toggling=False):
         # how close can click to a mark to say we clicked on it
-        prox_img = const.PROXIMITY_PX / self.zoom
+        prox_img = const.PROXIMITY_PX / self.zoom_val
         poss_points = []
         for (x,y) in self.marks:
             # check if pt is in a 2*prox_img x 2*prox_img box centered
@@ -1582,10 +1664,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             return
 
         # see if we need to use a downscaled version of memdc
-        if self.zoom > 0.5:
+        if self.zoom_val > 0.5:
             img_dc_src = self.img_dc
             scale_dc = 1
-        elif self.zoom > 0.25:
+        elif self.zoom_val > 0.25:
             img_dc_src = self.img_dc_div2
             scale_dc = 2
         else:
