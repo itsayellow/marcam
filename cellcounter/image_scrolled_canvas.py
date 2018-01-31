@@ -973,6 +973,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
         """
+
+        # TODO: zoom at point can get confused if there is a scrollbar that
+        #   disappears/appears between zooms.  Need to figure out how to deal
+        #   with presence/absence of scrollbar
+
         # return early if no image or we can't zoom any more
         if self.img_dc is None:
             return
