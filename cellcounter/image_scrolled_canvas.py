@@ -590,22 +590,23 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   img_coord_xlation_y needs to be adjusted if horiz scrollbar is
         #   showing
 
-        (win_size_x, win_size_y) = self.GetClientSize()
-        virt_size_x = max([self.img_size_x * self.zoom_val, win_size_x])
-        virt_size_y = max([self.img_size_y * self.zoom_val, win_size_y])
+        (win_clsize_x, win_clsize_y) = self.GetClientSize()
+        virt_size_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
+        virt_size_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
         self.SetVirtualSize(virt_size_x, virt_size_y)
 
         # check and see if Client Size changed after setting VirtualSize
         #   e.g. for loss or addition of a Scrollbar
-        (win_size_new_x, win_size_new_y) = self.GetClientSize()
-        if (win_size_new_x != win_size_x) or (win_size_new_y != win_size_y):
-            win_size_x = win_size_new_x
-            win_size_y = win_size_new_y
-            virt_size_x = max([self.img_size_x * self.zoom_val, win_size_x])
-            virt_size_y = max([self.img_size_y * self.zoom_val, win_size_y])
+        (win_clsize_new_x, win_clsize_new_y) = self.GetClientSize()
+        if (win_clsize_new_x != win_clsize_x) or (win_clsize_new_y != win_clsize_y):
+            win_clsize_x = win_clsize_new_x
+            win_clsize_y = win_clsize_new_y
+            virt_size_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
+            virt_size_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
             self.SetVirtualSize(virt_size_x, virt_size_y)
 
         # center image if Virtual Size is larger than image
+        (win_size_x, win_size_y) = self.GetSize()
         if win_size_x > self.img_size_x * self.zoom_val:
             self.img_coord_xlation_x = int(
                     (win_size_x - self.img_size_x * self.zoom_val) / 2
@@ -884,7 +885,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         return (img_x, img_y)
 
-    @debug_fxn
+    # this happens too many times, don't print to logs normally
+    #@debug_fxn
     def img2logical_coord(self, img_x, img_y, scale_dc=1):
         """Given image coordinates, return logical unscrolled canvas coordinates
 

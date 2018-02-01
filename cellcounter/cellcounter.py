@@ -541,7 +541,10 @@ class MainWindow(wx.Frame):
             self.temp_zoom_orig_zoom = self.img_panel.zoom_val # or _idx??
             self.temp_zoom_orig_position = evt.GetPosition()
 
-            self.img_panel.zoom_point(10, evt.GetPosition())
+            self.img_panel.zoom_point(
+                    const.TEMP_ZOOM,
+                    evt.GetPosition()
+                    )
 
         if key_code == 366:
             # PAGE UP
@@ -580,7 +583,10 @@ class MainWindow(wx.Frame):
             #self.temp_zoom_orig_zoom = self.img_panel.zoom_val # or _idx??
             #self.temp_zoom_orig_position = evt.GetPosition()
 
-            self.img_panel.zoom_point(-10, self.temp_zoom_orig_position)
+            self.img_panel.zoom_point(
+                    -const.TEMP_ZOOM,
+                    self.temp_zoom_orig_position
+                    )
 
         evt.Skip()
 

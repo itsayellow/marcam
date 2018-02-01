@@ -31,6 +31,9 @@ PANIMATE_STEP_MS = 30
 # appropriate for 11px x 11px cross
 CROSS_REFRESH_SQ_SIZE = 12
 
+# how many zoom_idx to zoom in on press of Option key
+TEMP_ZOOM = 10
+
 # BITMAPS
 
 # useful for bitmaps below
