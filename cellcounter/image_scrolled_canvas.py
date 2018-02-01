@@ -583,6 +583,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   GetClientSize -- side with scroll bar should have scrollbar_width/2
         #   less padding than other side - use GetSize-GetClientSize to
         #   measure scrollbar size
+        #
+        # virtual size fits exactly in client size, but
+        #   img_coord_xlation_x needs to be adjusted if vert scrollbar is
+        #   showing
+        #   img_coord_xlation_y needs to be adjusted if horiz scrollbar is
+        #   showing
 
         (win_size_x, win_size_y) = self.GetClientSize()
         virt_size_x = max([self.img_size_x * self.zoom_val, win_size_x])
