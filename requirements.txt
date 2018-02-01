@@ -3,8 +3,8 @@ biorad1sc-reader==0.6
 macholib==1.9
 modulegraph==0.16
 numpy==1.14.0
-olefile==0.44
+olefile==0.45.1
 Pillow==5.0.0
 py2app==0.14
 six==1.11.0
-wxPython==4.0.0b2
+wxPython==4.0.0
