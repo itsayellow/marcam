@@ -578,18 +578,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         window if image is smaller than window in order to be able to center
         image in window.
         """
-        # TODO: when centering image, center in window, not in client area
-        #   e.g. if one scroll bar is present, center within GetSize not within
-        #   GetClientSize -- side with scroll bar should have scrollbar_width/2
-        #   less padding than other side - use GetSize-GetClientSize to
-        #   measure scrollbar size
-        #
-        # virtual size fits exactly in client size, but
-        #   img_coord_xlation_x needs to be adjusted if vert scrollbar is
-        #   showing
-        #   img_coord_xlation_y needs to be adjusted if horiz scrollbar is
-        #   showing
-
         (win_clsize_x, win_clsize_y) = self.GetClientSize()
         virt_size_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
         virt_size_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
@@ -606,6 +594,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.SetVirtualSize(virt_size_x, virt_size_y)
 
         # center image if Virtual Size is larger than image
+
+        # center in window, not client area, so presence/absence of scrollbar
+        #   doesn't affect placement
         (win_size_x, win_size_y) = self.GetSize()
         if win_size_x > self.img_size_x * self.zoom_val:
             self.img_coord_xlation_x = int(
@@ -993,10 +984,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
         """
-
-        # TODO: zoom at point can get confused if there is a scrollbar that
-        #   disappears/appears between zooms.  Need to figure out how to deal
-        #   with presence/absence of scrollbar
 
         # return early if no image or we can't zoom any more
         if self.img_dc is None:
