@@ -498,6 +498,7 @@ class MainWindow(wx.Frame):
             # [ key
             #  key_code: 91
             #  RawKeyCode: 33
+            # zoom out
             zoom = self.img_panel.zoom(-1)
             if zoom:
                 self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
@@ -505,6 +506,7 @@ class MainWindow(wx.Frame):
             # ] key
             #  key_code: 93
             #  RawKeyCode: 30
+            # zoom in
             zoom = self.img_panel.zoom(1)
             if zoom:
                 self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
@@ -534,6 +536,11 @@ class MainWindow(wx.Frame):
         if key_code == 307:
             # option key - initiate temporary zoom
             LOGGER.debug("Option key down")
+
+            # TODO: set these up properly 
+            self.temp_zoom_orig_zoom = self.img_panel.zoom_val # or _idx??
+            self.temp_zoom_orig_position = evt.GetPosition()
+
             self.img_panel.zoom_point(10, evt.GetPosition())
 
         if key_code == 366:
@@ -568,7 +575,12 @@ class MainWindow(wx.Frame):
         if key_code == 307:
             # option key - release temporary zoom
             LOGGER.debug("Option key up")
-            self.img_panel.zoom_point(-10, evt.GetPosition())
+
+            # TODO: set these up properly 
+            #self.temp_zoom_orig_zoom = self.img_panel.zoom_val # or _idx??
+            #self.temp_zoom_orig_position = evt.GetPosition()
+
+            self.img_panel.zoom_point(-10, self.temp_zoom_orig_position)
 
         evt.Skip()
 
