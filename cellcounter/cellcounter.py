@@ -515,10 +515,10 @@ class MainWindow(wx.Frame):
         #   just evt.Skip in the following if statements
         if key_code == 314:
             # left key
-            self.img_panel.pan_left(const.SCROLL_KEY_SPEED)
+            self.img_panel.pan_right(-const.SCROLL_KEY_SPEED)
         if key_code == 315:
             # up key
-            self.img_panel.pan_up(const.SCROLL_KEY_SPEED)
+            self.img_panel.pan_down(-const.SCROLL_KEY_SPEED)
         if key_code == 316:
             # right key
             self.img_panel.pan_right(const.SCROLL_KEY_SPEED)

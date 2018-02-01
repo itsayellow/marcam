@@ -554,11 +554,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         wx.CallAfter(self.get_img_wincenter)
 
         if Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
-            self.pan_left(const.SCROLL_WHEEL_SPEED)
+            self.pan_right(-const.SCROLL_WHEEL_SPEED)
         elif Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
             self.pan_right(const.SCROLL_WHEEL_SPEED)
         elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
-            self.pan_up(const.SCROLL_WHEEL_SPEED)
+            self.pan_down(-const.SCROLL_WHEEL_SPEED)
         elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
             self.pan_down(const.SCROLL_WHEEL_SPEED)
         else:
@@ -1092,36 +1092,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         scroll_y = self.GetScrollPos(wx.VERTICAL)
         (_, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
-        scroll_amt = clip(round(pan_amt/scroll_ppu_y), 1, None)
+        if pan_amt > 0:
+            scroll_amt = clip(round(pan_amt/scroll_ppu_y), 1, None)
+        elif pan_amt < 0:
+            scroll_amt = clip(round(pan_amt/scroll_ppu_y), None, -1)
 
         self.Scroll(wx.DefaultCoord, scroll_y + scroll_amt)
-        # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
-        #   update wincenter position manually
-        self.get_img_wincenter()
-
-    @debug_fxn
-    def pan_up(self, pan_amt):
-        """Scroll the current viewport so we see an area above
-
-        Args:
-            pan_amt (float): amount to pan in pixels of the image
-
-        Returns:
-            None
-        """
-        # return early if no image
-        if self.img_dc is None:
-            return
-
-        # NOTE: we don't use SetScrollPos here because that requires a
-        #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
-        #   events either
-
-        scroll_y = self.GetScrollPos(wx.VERTICAL)
-        (_, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
-        scroll_amt = clip(round(pan_amt/scroll_ppu_y), 1, None)
-
-        self.Scroll(wx.DefaultCoord, scroll_y - scroll_amt)
         # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
         #   update wincenter position manually
         self.get_img_wincenter()
@@ -1146,36 +1122,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         scroll_x = self.GetScrollPos(wx.HORIZONTAL)
         (scroll_ppu_x, _) = self.GetScrollPixelsPerUnit()
-        scroll_amt = clip(round(pan_amt/scroll_ppu_x), 1, None)
+        if pan_amt > 0:
+            scroll_amt = clip(round(pan_amt/scroll_ppu_x), 1, None)
+        elif pan_amt < 0:
+            scroll_amt = clip(round(pan_amt/scroll_ppu_x), None, -1)
 
         self.Scroll(scroll_x + scroll_amt, wx.DefaultCoord)
-        # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
-        #   update wincenter position manually
-        self.get_img_wincenter()
-
-    @debug_fxn
-    def pan_left(self, pan_amt):
-        """Scroll the current viewport so we see an area to the left
-
-        Args:
-            pan_amt (float): amount to pan in pixels of the image
-
-        Returns:
-            None
-        """
-        # return early if no image
-        if self.img_dc is None:
-            return
-
-        # NOTE: we don't use SetScrollPos here because that requires a
-        #   separate refresh.  It also doesn't? seem to make EVT_SCROLLWIN
-        #   events either
-
-        scroll_x = self.GetScrollPos(wx.HORIZONTAL)
-        (scroll_ppu_x, _) = self.GetScrollPixelsPerUnit()
-        scroll_amt = clip(round(pan_amt/scroll_ppu_x), 1, None)
-
-        self.Scroll(scroll_x - scroll_amt, wx.DefaultCoord)
         # self.Scroll doesn't create an EVT_SCROLLWIN event, so we need to
         #   update wincenter position manually
         self.get_img_wincenter()
