@@ -24,10 +24,14 @@ hdiutil create -srcfolder "${srcfolder}" -volname "${volname}" -fs "${fs}" \
       -fsargs "-c c=64,a=16,e=16" -format UDRW -size ${size}k pack.temp.dmg
 
 # open disk image
+echo "Device name:"
 device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" | egrep '^/dev/')
 
 # DEBUG DELETE ME
 echo $device
+
+# pause to workaround "Can't get disk Cellcounter" (-1728) issue
+sleep 2
 
 # put icns in path for custom volume icon
 cp misc/cellcounter_drive.icns /Volumes/${volname}/.VolumeIcon.icns
