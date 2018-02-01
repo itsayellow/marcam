@@ -371,8 +371,13 @@ class MainWindow(wx.Frame):
         # init marks_num_display before ImageScrolledCanvas so ISC can
         #   update number on its init
         # TODO: find width of "999" text to give to size
-        self.marks_num_display = wx.StaticText(
-                self, wx.ID_ANY, size=wx.Size(30, -1)
+        #self.marks_num_display = wx.StaticText(
+        #        self, wx.ID_ANY, size=wx.Size(30, -1)
+        #        )
+        # using TextCtrl to allow copy to clipboard
+        self.marks_num_display = wx.TextCtrl(
+                self, wx.ID_ANY, size=wx.Size(35, -1),
+                style=wx.TE_READONLY
                 )
 
         # ImageScrolledCanvas is the cleanest, fastest implementation for
@@ -540,10 +545,12 @@ class MainWindow(wx.Frame):
             # TODO: save scroll position too
             self.temp_zoom_orig_position = evt.GetPosition()
 
-            self.img_panel.zoom_point(
+            zoom = self.img_panel.zoom_point(
                     const.TEMP_ZOOM,
                     evt.GetPosition()
                     )
+            if zoom:
+                self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
         if key_code == 366:
             # PAGE UP
@@ -579,10 +586,12 @@ class MainWindow(wx.Frame):
             LOGGER.debug("Option key up")
 
             # TODO: reinstate old scroll position too
-            self.img_panel.zoom_point(
+            zoom = self.img_panel.zoom_point(
                     -const.TEMP_ZOOM,
                     self.temp_zoom_orig_position
                     )
+            if zoom:
+                self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
         evt.Skip()
 
