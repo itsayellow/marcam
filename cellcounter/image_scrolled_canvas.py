@@ -158,8 +158,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def get_img_wincenter(self):
-        # find client size (visible image)
-        (win_size_x, win_size_y) = self.GetClientSize()
+        # GetClientSize is size of window graphics not including scrollbars
+        # GetSize is size of window including scrollbars
+
+        # use GetSize not GetClientSize, so presence or absence of scrollbars
+        #   doesn't affect image location in window
+        (win_size_x, win_size_y) = self.GetSize()
 
         # translate client center to zoomed image center coords
         (self.img_at_wincenter_x, self.img_at_wincenter_y
@@ -178,7 +182,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Scroll window so center of window is at
         (self.img_at_wincenter_x, self.img_at_wincenter_y)
         """
-        (win_size_x, win_size_y) = self.GetClientSize()
+        # use GetSize not GetClientSize, so presence or absence of scrollbars
+        #   doesn't affect image location in window
+        (win_size_x, win_size_y) = self.GetSize()
         (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
 
         img_zoom_wincenter_x = self.img_at_wincenter_x * self.zoom_val
@@ -190,7 +196,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         scroll_x = round(origin_x/scroll_ppu_x)
         scroll_y = round(origin_y/scroll_ppu_y)
         self.Scroll(scroll_x, scroll_y)
-        LOGGER.info(
+        LOGGER.debug(
                 "MSC:img_zoom_wincenter = (%.3f,%.3f)\nMSC:origin = " + \
                         "(%.3f,%.3f)\nMSC:Scroll to (%d,%d)",
                 img_zoom_wincenter_x, img_zoom_wincenter_y,
@@ -572,6 +578,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         window if image is smaller than window in order to be able to center
         image in window.
         """
+        # TODO: when centering image, center in window, not in client area
+        #   e.g. if one scroll bar is present, center within GetSize not within
+        #   GetClientSize -- side with scroll bar should have scrollbar_width/2
+        #   less padding than other side - use GetSize-GetClientSize to
+        #   measure scrollbar size
+
         (win_size_x, win_size_y) = self.GetClientSize()
         virt_size_x = max([self.img_size_x * self.zoom_val, win_size_x])
         virt_size_y = max([self.img_size_y * self.zoom_val, win_size_y])
