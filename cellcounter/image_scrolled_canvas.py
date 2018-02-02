@@ -615,6 +615,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom, divide by div_scale to get to img coordinates
 
+        # TODO: if GetSize is bigger in both x and y than GetClientSize,
+        #   blank out the corner between scrollbars in box:
+        #   (x_cs, y_cs), (x_s, y_s)
+
     @debug_fxn
     def on_size(self, evt):
         self.set_virt_size_with_min()
