@@ -64,9 +64,6 @@ def logging_setup(log_level=logging.DEBUG):
     """
 
     # create formatter
-    #formatter = logging.Formatter(
-    #        "%(asctime)s:%(name)s:%(levelname)s:\n    %(message)s"
-    #        )
     formatter = CellcounterFormatter(
             "%(asctime)s:%(name)s:%(levelname)s:\n%(message)s"
             )
