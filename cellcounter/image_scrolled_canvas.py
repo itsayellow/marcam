@@ -326,14 +326,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 self.is_dragging = True
             else:
                 pass
-                # DEBUG DELETEME
-                #LOGGER.warning("Drag with (1,1) size")
 
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
             refresh_rect.Inflate(1, 1)
 
-            last_draw_rect = self.rubberband_draw_rect
             self.rubberband_draw_rect = draw_rect
             last_refresh_rect = self.rubberband_refresh_rect
             self.rubberband_refresh_rect = refresh_rect
@@ -644,9 +641,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # TODO: do we need dc = wx.GCDC(dc) for Windows for transparency of
         #   rubberband box?
 
-        dc = wx.PaintDC(self)
+        paint_dc = wx.PaintDC(self)
         # for scrolled window
-        self.DoPrepareDC(dc)
+        self.DoPrepareDC(paint_dc)
 
         # get the update rect list
         upd = wx.RegionIterator(self.GetUpdateRegion())
@@ -654,18 +651,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         while upd.HaveRects():
             rect = upd.GetRect()
             # Repaint this rectangle
-            self.paint_rect(dc, rect)
+            self.paint_rect(paint_dc, rect)
             upd.Next()
 
         if DEBUG & DEBUG_TIMING:
             onpaint_eltime = time.time() - start_onpaint
             panel_size = self.GetSize()
             LOGGER.info(
-                    "TIM:on_paint: %.3fs, zoom = %.3f, panel_size=(%d,%d)"%(
-                        onpaint_eltime,
-                        self.zoom_val,
-                        panel_size.x, panel_size.y,
-                        )
+                    "TIM:on_paint: %.3fs, zoom = %.3f, panel_size=(%d,%d)",
+                    onpaint_eltime,
+                    self.zoom_val,
+                    panel_size.x, panel_size.y,
                     )
 
     @debug_fxn
@@ -948,7 +944,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         if DEBUG & DEBUG_TIMING:
             staticdc_eltime = time.time() - staticdc_start
-            LOGGER.info("TIM:Create MemoryDCs: %.3fs"%staticdc_eltime)
+            LOGGER.info("TIM:Create MemoryDCs: %.3fs", staticdc_eltime)
 
         # set zoom_idx to scaling that will fit image in window
         #   or 1.0 if max_zoom > 1.0
@@ -1047,15 +1043,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 after changing the zoom ratio
 
         Returns:
-            self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
+            self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom) or
+                None, if no image
         """
         # return early if no image or we can't zoom any more
         if self.img_dc is None:
-            return
+            return None
         if zoom_amt > 0 and self.zoom_idx == len(self.zoom_list)-1:
-            return
+            return self.zoom_val
         if zoom_amt < 0 and self.zoom_idx == 0:
-            return
+            return self.zoom_val
 
         self.zoom_idx += zoom_amt
 
@@ -1304,7 +1301,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             #   inflate by same width as rubberband rect Pen width
             refresh_rect.Inflate(1, 1)
 
-            last_draw_rect = self.rubberband_draw_rect
             self.rubberband_draw_rect = draw_rect
             last_refresh_rect = self.rubberband_refresh_rect
             self.rubberband_refresh_rect = refresh_rect
@@ -1421,7 +1417,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         Returns (bool): True if new mark added, False if same point already
             exists in mark list
         """
-        LOGGER.info("MSC: point (%d, %d)"%img_point)
+        LOGGER.info("MSC: point (%d, %d)", img_point[0], img_point[1])
 
         if img_point in self.marks:
             # mark already exists, doing nothing
@@ -1734,4 +1730,3 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(const.CROSS_11x11_YELLOW_BMP, x_win - 6, y_win - 6)
-
