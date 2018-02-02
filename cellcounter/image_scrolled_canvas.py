@@ -1551,7 +1551,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def paint_rect(self, dc, rect):
-        # TODO: use super for most of this
+        # TODO: use super for most of this?  The problem is that we need
+        #   to calculate src_pos and src_size which involves a lot of
+        #   redundant code anyway
+        #   Maybe we just need a private helper function to calculate
+        #   everything, which we can instance in both places
         """Given a rect needing a refresh in window PaintDC, Blit the image
         to fill that rect.
 
