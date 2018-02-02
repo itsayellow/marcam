@@ -15,20 +15,20 @@ virt: requirements.txt
 	@echo "Make virtual environment"
 	@echo ""
 	rm -rf virt
-	./gen_virt
+	./build_scripts/gen_virt
 
 dist/Cellcounter.app: cellcounter/* virt
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make app"
 	@echo ""
-	./gen_app
+	./build_scripts/gen_app
 
 dist/Cellcounter.dmg: dist/Cellcounter.app
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make dmg"
 	@echo ""
-	./gen_dmg
+	./build_scripts/gen_dmg
 
 # vim: nowrap noexpandtab sw=8 sts=0
