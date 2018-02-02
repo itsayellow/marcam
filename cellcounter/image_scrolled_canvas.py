@@ -356,13 +356,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.Update()
 
             # finish drag by selecting everything in box
-            box_corner2_win = evt.GetPosition()
+            # In this function the following code does nothing, so commented out
 
-            box_corner1_img = (
-                    self.mouse_left_down['img_x'],
-                    self.mouse_left_down['img_y']
-                    )
-            box_corner2_img = self.win2img_coord(box_corner2_win.x, box_corner2_win.y)
+            #box_corner2_win = evt.GetPosition()
+            #box_corner1_img = (
+            #        self.mouse_left_down['img_x'],
+            #        self.mouse_left_down['img_y']
+            #        )
+            #box_corner2_img = self.win2img_coord(box_corner2_win.x, box_corner2_win.y)
 
             self.Update()
         else:
@@ -401,7 +402,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
         LOGGER.info(
-                "MSC:right click at img (%.2f, %.2f)"%(img_x, img_y)
+                "MSC:right click at img (%.2f, %.2f)",
+                img_x, img_y
                 )
 
         #self.img_at_wincenter_x = img_x
@@ -514,35 +516,35 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             wx.CallAfter(evt.Skip)
             return
 
-        EventType = evt.GetEventType()
-        Orientation = evt.GetOrientation()
+        event_type = evt.GetEventType()
+        orientation = evt.GetOrientation()
         if DEBUG & DEBUG_MISC:
             log_string = "MSC:"
-            if Orientation == wx.HORIZONTAL:
+            if orientation == wx.HORIZONTAL:
                 log_string += " wx.HORIZONTAL"
-            elif Orientation == wx.VERTICAL:
+            elif orientation == wx.VERTICAL:
                 log_string += " wx.VERTICAL"
             else:
-                log_string += " Orientation="+repr(Orientation)
+                log_string += " orientation="+repr(orientation)
 
-            if EventType == wx.wxEVT_SCROLLWIN_TOP:
+            if event_type == wx.wxEVT_SCROLLWIN_TOP:
                 log_string += " wx.wxEVT_SCROLLWIN_TOP"
-            elif EventType == wx.wxEVT_SCROLLWIN_BOTTOM:
+            elif event_type == wx.wxEVT_SCROLLWIN_BOTTOM:
                 log_string += " wx.wxEVT_SCROLLWIN_BOTTOM"
-            elif EventType == wx.wxEVT_SCROLLWIN_LINEUP:
+            elif event_type == wx.wxEVT_SCROLLWIN_LINEUP:
                 log_string += " wx.wxEVT_SCROLLWIN_LINEUP"
-            elif EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
+            elif event_type == wx.wxEVT_SCROLLWIN_LINEDOWN:
                 log_string += " wx.wxEVT_SCROLLWIN_LINEDOWN"
-            elif EventType == wx.wxEVT_SCROLLWIN_PAGEUP:
+            elif event_type == wx.wxEVT_SCROLLWIN_PAGEUP:
                 log_string += " wx.wxEVT_SCROLLWIN_PAGEUP"
-            elif EventType == wx.wxEVT_SCROLLWIN_PAGEDOWN:
+            elif event_type == wx.wxEVT_SCROLLWIN_PAGEDOWN:
                 log_string += " wx.wxEVT_SCROLLWIN_PAGEDOWN"
-            elif EventType == wx.wxEVT_SCROLLWIN_THUMBTRACK:
+            elif event_type == wx.wxEVT_SCROLLWIN_THUMBTRACK:
                 log_string += " wx.wxEVT_SCROLLWIN_THUMBTRACK"
-            elif EventType == wx.wxEVT_SCROLLWIN_THUMBRELEASE:
+            elif event_type == wx.wxEVT_SCROLLWIN_THUMBRELEASE:
                 log_string += " wx.wxEVT_SCROLLWIN_THUMBRELEASE"
             else:
-                log_string += " EventType="+repr(EventType)
+                log_string += " event_type="+repr(event_type)
             LOGGER.info(log_string)
 
         # NOTE: by setting position only on scroll (and not on zoom) we
@@ -554,13 +556,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   useful in case event handled by default handler with evt.Skip()
         wx.CallAfter(self.get_img_wincenter)
 
-        if Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
+        if orientation == wx.HORIZONTAL and event_type == wx.wxEVT_SCROLLWIN_LINEUP:
             self.pan_right(-const.SCROLL_WHEEL_SPEED)
-        elif Orientation == wx.HORIZONTAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
+        elif orientation == wx.HORIZONTAL and event_type == wx.wxEVT_SCROLLWIN_LINEDOWN:
             self.pan_right(const.SCROLL_WHEEL_SPEED)
-        elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEUP:
+        elif orientation == wx.VERTICAL and event_type == wx.wxEVT_SCROLLWIN_LINEUP:
             self.pan_down(-const.SCROLL_WHEEL_SPEED)
-        elif Orientation == wx.VERTICAL and EventType == wx.wxEVT_SCROLLWIN_LINEDOWN:
+        elif orientation == wx.VERTICAL and event_type == wx.wxEVT_SCROLLWIN_LINEDOWN:
             self.pan_down(const.SCROLL_WHEEL_SPEED)
         else:
             # process with default handler(s)
@@ -985,11 +987,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # return early if no image or we can't zoom any more
         if self.img_dc is None:
-            return
+            return None
         if zoom_amt > 0 and self.zoom_idx == len(self.zoom_list)-1:
-            return
+            return self.zoom_val
         if zoom_amt < 0 and self.zoom_idx == 0:
-            return
+            return self.zoom_val
 
         # get mouse location in window coords and img coords
         #point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
@@ -1260,7 +1262,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     def on_motion(self, evt):
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
-        if self.img_dc is None or self.mark_mode == True:
+        if self.img_dc is None or self.mark_mode:
             wx.CallAfter(evt.Skip)
             return
 
@@ -1327,7 +1329,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     def on_left_up(self, evt):
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
-        if self.img_dc is None or self.mark_mode == True:
+        if self.img_dc is None or self.mark_mode:
             wx.CallAfter(evt.Skip)
             return
 
