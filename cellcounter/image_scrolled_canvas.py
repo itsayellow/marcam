@@ -63,7 +63,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_y = 0
         self.is_dragging = False
         self.mouse_left_down = None
-        self.parent = parent    # TODO: do we need this?
         self.overlay = wx.Overlay() # for making rubber-band box during drag
         self.rubberband_draw_rect = None
         self.rubberband_refresh_rect = None
