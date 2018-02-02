@@ -673,6 +673,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
+        # TODO: separate private function to handle coordinate mapping?
+
         # break out rect details into variables
         (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
 
