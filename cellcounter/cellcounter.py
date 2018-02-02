@@ -11,7 +11,6 @@ import platform
 import sys
 import tempfile
 import time
-import traceback
 import zipfile
 
 import wx
@@ -254,6 +253,7 @@ class MainWindow(wx.Frame):
         self.content_saved = True
         self.img_path = None
         self.save_filepath = None
+        self.temp_zoom_orig_position = None
 
         # GUI-related
         self.html = None
@@ -320,7 +320,6 @@ class MainWindow(wx.Frame):
         menubar.Append(edit_menu, '&Edit')
         # Tools
         tools_menu = wx.Menu()
-        # TODO: better keyboard accelerator for select mode
         self.select_menu_item = tools_menu.Append(wx.ID_ANY, "&Select Mode\tCtrl+T")
         # we start in select mode, so disable menu to enable select mode
         self.select_menu_item.Enable(False)
@@ -365,13 +364,6 @@ class MainWindow(wx.Frame):
         #   probably with more than one Panel we need to worry about which
         #       has keyboard focus
 
-        # init marks_num_display before ImageScrolledCanvas so ISC can
-        #   update number on its init
-        # TODO: find width of "999" text to give to size
-        #self.marks_num_display = wx.StaticText(
-        #        self, wx.ID_ANY, size=wx.Size(30, -1)
-        #        )
-
         # find text width of "9999", to leave enough padding to have space
         #   to contain "999"
         dc = wx.ScreenDC()
@@ -379,6 +371,8 @@ class MainWindow(wx.Frame):
         (text_width_px, _) = dc.GetTextExtent("9999")
         del dc
 
+        # init marks_num_display before ImageScrolledCanvas so ISC can
+        #   update number on its init
         # using TextCtrl to allow copy to clipboard
         self.marks_num_display = wx.TextCtrl(
                 self, wx.ID_ANY, size=wx.Size(text_width_px, -1),
@@ -1001,7 +995,7 @@ class MainWindow(wx.Frame):
 
 
 class HelpFrame(wx.Frame):
-    """
+    """Separate window to contain HTML help viewer
     """
     def __init__(self, *args, **kwargs):
         """Constructor"""
@@ -1108,7 +1102,7 @@ def main(argv=None):
     myapp.Bind(wx.EVT_KEY_UP, main_win.on_key_up)
     myapp.MainLoop()
 
-    # TODO: meaningless
+    # return 0 to indicate "status OK"
     return 0
 
 

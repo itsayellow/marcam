@@ -170,10 +170,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 ) = self.win2img_coord(win_size_x/2, win_size_y/2)
 
         LOGGER.info(
-                "MSC:self.img_at_wincenter=(%.3f,%.3f)"%(
-                    self.img_at_wincenter_x,
-                    self.img_at_wincenter_y
-                    )
+                "MSC:self.img_at_wincenter=(%.3f,%.3f)",
+                self.img_at_wincenter_x,
+                self.img_at_wincenter_y
                 )
 
     @debug_fxn
@@ -231,8 +230,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_y_max = self.img_size_y - (win_size_y / 2 / self.zoom_val)
 
         LOGGER.info(
-                "MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)"%(
-                    img_x_min, img_y_min, img_x_max, img_y_max)
+                "MSC:wincenter img limits (%.2f,%.2f) to (%.2f,%.2f)",
+                img_x_min, img_y_min, img_x_max, img_y_max
                 )
 
         return (img_x_min, img_y_min, img_x_max, img_y_max)
@@ -329,10 +328,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 pass
                 # DEBUG DELETEME
                 #LOGGER.warning("Drag with (1,1) size")
-            
+
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
-            refresh_rect.Inflate(1,1)
+            refresh_rect.Inflate(1, 1)
 
             last_draw_rect = self.rubberband_draw_rect
             self.rubberband_draw_rect = draw_rect
@@ -443,7 +442,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         LOGGER.info(
-                "MSC:panimate: start=(%.2f,%.2f) "%(img_x_start,img_y_start) + \
+                "MSC:panimate: start=(%.2f,%.2f) "%(img_x_start, img_y_start) + \
                 "end=(%.2f, %.2f)"%(img_x_end, img_y_end)
                 )
 
@@ -817,7 +816,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   white at 56.8% opacity (255, 255, 255, 145)
         dc.SetPen(
                 wx.Pen(
-                    colour=wx.Colour(0xff,0xff,0xff,145),
+                    colour=wx.Colour(0xff, 0xff, 0xff, 145),
                      width=1,
                      style=wx.SOLID
                      )
@@ -828,7 +827,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   white at 14.5% opacity (255, 255, 255, 37)
         dc.SetBrush(
                 wx.Brush(
-                    colour=wx.Colour(0xff,0xff,0xff,37),
+                    colour=wx.Colour(0xff, 0xff, 0xff, 37),
                     style=wx.BRUSHSTYLE_SOLID
                     )
                 )
@@ -1228,7 +1227,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 img_pt = (int(img_x), int(img_y))
                 mark_added = self.mark_point(img_pt)
                 if mark_added:
-                    self.history.new(['MARK',img_pt])
+                    self.history.new(['MARK', img_pt])
                 else:
                     self.history.new(['NOP'])
         else:
@@ -1300,10 +1299,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 pass
                 # DEBUG DELETEME
                 #LOGGER.warning("Drag with (1,1) size")
-            
+
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
-            refresh_rect.Inflate(1,1)
+            refresh_rect.Inflate(1, 1)
 
             last_draw_rect = self.rubberband_draw_rect
             self.rubberband_draw_rect = draw_rect
@@ -1323,11 +1322,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         (ymin, ymax) = sorted((box_corner1_img[1], box_corner2_img[1]))
 
         marks_in_box = []
-        for (x,y) in self.marks:
+        for (x, y) in self.marks:
             if xmin <= x <= xmax and ymin <= y <= ymax:
-                marks_in_box.append((x,y))
+                marks_in_box.append((x, y))
 
-        return marks_in_box    
+        return marks_in_box
 
     @debug_fxn
     def on_left_up(self, evt):
@@ -1401,7 +1400,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     @debug_fxn
     def refresh_mark_area(self, mark_pt):
         # force a paint event with Refresh and Update
-        #   to force paint_rect to paint new selected mark 
+        #   to force paint_rect to paint new selected mark
         (pos_x, pos_y) = self.img2win_coord(mark_pt[0] + 0.5, mark_pt[1] + 0.5)
         # refresh square size should be >= than mark size
         sq_size = const.CROSS_REFRESH_SQ_SIZE
@@ -1494,7 +1493,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         marks_selected = self.marks_selected.copy()
         self.delete_mark_point_list(marks_selected)
         # return marks_deleted
-        return marks_selected 
+        return marks_selected
 
     @debug_fxn
     def update_mark_total(self):
@@ -1507,7 +1506,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # how close can click to a mark to say we clicked on it
         prox_img = const.PROXIMITY_PX / self.zoom_val
         poss_points = []
-        for (x,y) in self.marks:
+        for (x, y) in self.marks:
             # check if pt is in a 2*prox_img x 2*prox_img box centered
             #   around click
             dist = np.sqrt(
