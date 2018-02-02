@@ -379,7 +379,7 @@ class MainWindow(wx.Frame):
         #   to contain "999"
         dc = wx.ScreenDC()
         dc.SetFont(self.GetFont())
-        (text_width_px, _) = dc.GetTextExtent("999")
+        (text_width_px, _) = dc.GetTextExtent("9999")
         del dc
 
         # using TextCtrl to allow copy to clipboard
