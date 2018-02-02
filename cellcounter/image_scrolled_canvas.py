@@ -5,7 +5,7 @@ import numpy as np
 
 import const
 from const import (
-        DEBUG, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
+        DEBUG, DEBUG_TIMING, DEBUG_MISC
         )
 import common
 
@@ -356,7 +356,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.Update()
 
             # finish drag by selecting everything in box
-            box_corner1_win = self.mouse_left_down['point']
             box_corner2_win = evt.GetPosition()
 
             box_corner1_img = (
@@ -1339,7 +1338,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             self.Update()
 
             # finish drag by selecting everything in box
-            box_corner1_win = self.mouse_left_down['point']
             box_corner2_win = evt.GetPosition()
 
             box_corner1_img = (
