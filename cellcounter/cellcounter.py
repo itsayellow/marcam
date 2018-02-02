@@ -23,9 +23,6 @@ from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
 from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
-from const import (
-        DEBUG, DEBUG_KEYPRESS, DEBUG_TIMING, DEBUG_MISC
-        )
 import common
 
 # DEBUG sets global debug message verbosity
@@ -46,8 +43,18 @@ LOGGER = logging.getLogger(__name__)
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER)
 
+
 class CellcounterFormatter(logging.Formatter):
     def format(self, record):
+        """Overload of default format fxn, make all lines after first indented
+        of a log message
+
+        Args:
+            record (str): log message
+
+        Returns:
+            out_string: processed log message
+        """
         out_string = super().format(record)
         # indent all lines after main format string
         out_string = out_string.replace("\n", "\n    ")
@@ -139,28 +146,36 @@ class EditHistory():
         self.redo_menu_item = None
         self.history = []
         self.history_ptr = -1
-        self.update_menu_items()
+        self._update_menu_items()
 
     @debug_fxn
     def reset(self):
         self.history = []
         self.history_ptr = -1
-        self.update_menu_items()
+        self._update_menu_items()
 
     @debug_fxn
     def new(self, item):
         """Make a new Edit History item
+
+        Args:
+            item (list): list with first item being action string, and
+                following items information concerning that action
         """
         # truncate list so current item is last item (makes empty list
         #   if self.history_ptr == -1)
         self.history = self.history[:self.history_ptr + 1]
         self.history.append({'edit_action':item, 'save_flag':False})
         self.history_ptr = len(self.history) - 1
-        self.update_menu_items()
+        self._update_menu_items()
 
     @debug_fxn
     def save_notify(self):
-        """Set save flag for current history action only, erase all others
+        """Set save flag for current history action only, erase flag for all
+        other actions in history
+
+        save flag indicates that at this point in history, the file can be
+        considered "saved" and we don't have to query user on close of file
         """
         # set all edit history save flags to False
         for i in range(len(self.history)):
@@ -172,6 +187,11 @@ class EditHistory():
 
     @debug_fxn
     def is_saved(self):
+        """At this point in history, has user most recently saved document?
+
+        Returns:
+            bool: True if this point in history is saved
+        """
         if self.history_ptr == -1:
             # no edit history, so no save needed (TODO?)
             return True
@@ -180,50 +200,82 @@ class EditHistory():
 
     @debug_fxn
     def undo(self):
-        if self.can_undo():
+        """Return action to undo, and move history pointer to prev. action
+        in history
+
+        Returns:
+            list: action, first item is str of action, remainig items
+                are action info.  Returns None if nothing left to redo
+        """
+        if self._can_undo():
             undo_action = self.history[self.history_ptr]['edit_action']
             self.history_ptr -= 1
         else:
             undo_action = None
 
-        self.update_menu_items()
+        self._update_menu_items()
         return undo_action
 
     @debug_fxn
     def redo(self):
-        if self.can_redo():
+        """Return action to redo, and move history pointer to next action
+        in history
+
+        Returns:
+            list: action, first item is str of action, remainig items
+                are action info.  Returns None if nothing left to undo
+        """
+        if self._can_redo():
             self.history_ptr += 1
             redo_action = self.history[self.history_ptr]['edit_action']
         else:
             redo_action = None
 
-        self.update_menu_items()
+        self._update_menu_items()
         return redo_action
 
     @debug_fxn
-    def can_undo(self):
+    def _can_undo(self):
+        """Is there an action to undo back in history?
+
+        Returns:
+            bool: True if can undo
+        """
         return (len(self.history) > 0) and (self.history_ptr >= 0)
 
     @debug_fxn
-    def can_redo(self):
+    def _can_redo(self):
+        """Is there an action to redo next in history?
+
+        Returns:
+            bool: True if can redo
+        """
         return (len(self.history) > 0) and (self.history_ptr < len(self.history) - 1)
 
     @debug_fxn
-    def update_menu_items(self):
+    def _update_menu_items(self):
+        """Update the Enabled/Disabled quality of Undo, Redo Menu items
+        """
         if self.undo_menu_item is not None:
-            self.undo_menu_item.Enable(self.can_undo())
+            self.undo_menu_item.Enable(self._can_undo())
         if self.redo_menu_item is not None:
-            self.redo_menu_item.Enable(self.can_redo())
+            self.redo_menu_item.Enable(self._can_redo())
 
     @debug_fxn
     def register_undo_menu_item(self, undo_menu_item):
+        """Give this class instance the Undo menu item instance so it can
+        Enable and Disable menu item on its own
+
+        Args:
+            undo_menu_item (wx.MenuItem): menud item instance for Undo
+        """
         self.undo_menu_item = undo_menu_item
-        self.update_menu_items()
+        self._update_menu_items()
 
     @debug_fxn
     def register_redo_menu_item(self, redo_menu_item):
         self.redo_menu_item = redo_menu_item
-        self.update_menu_items()
+        self._update_menu_items()
 
 
 class DropTarget(wx.FileDropTarget):
@@ -366,10 +418,10 @@ class MainWindow(wx.Frame):
 
         # find text width of "9999", to leave enough padding to have space
         #   to contain "999"
-        dc = wx.ScreenDC()
-        dc.SetFont(self.GetFont())
-        (text_width_px, _) = dc.GetTextExtent("9999")
-        del dc
+        screen_dc = wx.ScreenDC()
+        screen_dc.SetFont(self.GetFont())
+        (text_width_px, _) = screen_dc.GetTextExtent("9999")
+        del screen_dc
 
         # init marks_num_display before ImageScrolledCanvas so ISC can
         #   update number on its init
@@ -1043,6 +1095,8 @@ def process_command_line(argv):
     return args
 
 def debug_main():
+    """Log basic system information
+    """
     # log situation before doing anything else
     LOGGER.info("%s UTC", time.asctime(time.gmtime()))
     LOGGER.info("Cellcounter version %s", const.VERSION_STR)
@@ -1059,24 +1113,22 @@ def debug_main():
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
 def main(argv=None):
-    global DEBUG
-
+    """Main entrance into app.  Setup logging, MainWindow, and enter main loop
+    """
     # process command line if started from there
     # Also, py2app sends file(s) to open via argv if file is dragged on top
     #   of the application icon to start the icon
     args = process_command_line(argv)
 
-    if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
-        # if we're being executed from inside a Mac app, turn off DEBUG unless
-        #   -d or --debug overrides
-        DEBUG = 0
-
     # if -d or --debug turn on full debug
     if args.debug:
-        DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
+        log_level = logging.DEBUG
+    else:
+        # default loglevel
+        log_level = logging.INFO
 
     # setup logging
-    logging_setup(logging.DEBUG)
+    logging_setup(log_level)
 
     # get basic debug info
     debug_main()
@@ -1088,7 +1140,7 @@ def main(argv=None):
     myapp = wx.App()
     main_win = MainWindow(args.srcfiles, None)
     # binding to App is surest way to catch keys accurately, not having
-    #   to worry about focus
+    #   to worry about which widget has focus
     # binding to a panel can end up it not having focus, just donk, donk, donk,
     #   bell sounds
     # The reason is because a Panel will not accept focus if it has a child
