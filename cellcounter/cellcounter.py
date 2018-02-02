@@ -374,11 +374,23 @@ class MainWindow(wx.Frame):
         #self.marks_num_display = wx.StaticText(
         #        self, wx.ID_ANY, size=wx.Size(30, -1)
         #        )
+
+        # find text width of "9999", to leave enough padding to have space
+        #   to contain "999"
+        dc = wx.ScreenDC()
+        dc.SetFont(self.GetFont())
+        (text_width_px, _) = dc.GetTextExtent("999")
+        del dc
+
         # using TextCtrl to allow copy to clipboard
         self.marks_num_display = wx.TextCtrl(
-                self, wx.ID_ANY, size=wx.Size(35, -1),
-                style=wx.TE_READONLY
+                self, wx.ID_ANY, size=wx.Size(text_width_px, -1),
+                style=wx.TE_READONLY | wx.BORDER_NONE
                 )
+        # set color to be the same as background color
+        #self.marks_num_display.SetBackgroundColour(
+        #        wx.SystemSettings().GetColour(wx.SYS_COLOUR_BACKGROUND)
+        #        )
 
         # ImageScrolledCanvas is the cleanest, fastest implementation for
         #   what we need
