@@ -17,6 +17,8 @@ DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
 # what is one step of zoom?
 MAG_STEP = 1.1
+# how many zoom steps from minimum to maximum zoom, centered on zoom 100%
+TOTAL_MAG_STEPS = 69
 
 # how much to scroll for an EVT_SROLLWIN_* 
 SCROLL_WHEEL_SPEED = 2
