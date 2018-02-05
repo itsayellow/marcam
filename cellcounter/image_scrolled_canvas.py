@@ -87,13 +87,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.SetScrollRate(1, 1)
 
         # setup possible magnification list
-        mag_frac = 0.1
+        mag_step = const.MAG_STEP
         mag_len = 69
-        lomags = [(1.0 - mag_frac)**x for x in range(1, (mag_len+1)//2)]
-        lomags.reverse()
-        himags = [(1.0 + mag_frac)**x for x in range(1, (mag_len+1)//2)]
         # possible mag list
-        self.zoom_list = lomags + [1.0,] + himags
+        self.zoom_list = [
+                mag_step**x
+                for x in range(-int(mag_len/2),int(mag_len/2)+1)
+                ]
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
         self.zoom_val = self.zoom_list[self.zoom_idx]

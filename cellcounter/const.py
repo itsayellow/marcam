@@ -15,6 +15,9 @@ DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_TIMING | DEBUG_MISC
 DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
 
+# what is one step of zoom?
+MAG_STEP = 1.1
+
 # how much to scroll for an EVT_SROLLWIN_* 
 SCROLL_WHEEL_SPEED = 2
 # how much to scroll for an keypress
