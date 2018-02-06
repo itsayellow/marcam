@@ -597,8 +597,8 @@ class MainWindow(wx.Frame):
             # option key - initiate temporary zoom
             LOGGER.debug("Option key down")
 
-            # TODO: save scroll position too
-            self.temp_zoom_orig_position = evt.GetPosition()
+            # save zoom / scxroll state
+            self.temp_scroll_zoom_state = self.img_panel.get_scroll_zoom_state()
 
             zoom = self.img_panel.zoom_point(
                     const.TEMP_ZOOM,
@@ -640,13 +640,17 @@ class MainWindow(wx.Frame):
             # option key - release temporary zoom
             LOGGER.debug("Option key up")
 
-            # TODO: reinstate old scroll position too
-            zoom = self.img_panel.zoom_point(
-                    -const.TEMP_ZOOM,
-                    self.temp_zoom_orig_position
+            self.img_panel.set_scroll_zoom_state(
+                    self.temp_scroll_zoom_state
                     )
-            if zoom:
-                self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+
+            ## TODO: reinstate old scroll position too
+            #zoom = self.img_panel.zoom_point(
+            #        -const.TEMP_ZOOM,
+            #        self.temp_zoom_orig_position
+            #        )
+            #if zoom:
+            #    self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
         evt.Skip()
 

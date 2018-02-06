@@ -178,6 +178,29 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
 
     @debug_fxn
+    def get_scroll_zoom_state(self):
+        """Fetch current state of image position / zoom
+
+        Returns:
+            list: scroll_zoom_state 
+        """
+        return (
+                (self.img_at_wincenter_x, self.img_at_wincenter_y),
+                self.zoom_idx
+                )
+
+    @debug_fxn
+    def set_scroll_zoom_state(self, scroll_zoom_state):
+        """Set current state of image position / zoom
+
+        Args:
+            scroll_zoom_state (tuple): (scroll_coords, zoom_idx)
+        """
+        (self.img_at_wincenter_x, self.img_at_wincenter_y) = scroll_zoom_state[0]
+        delta_zoom = scroll_zoom_state[1] - self.zoom_idx
+        self.zoom(delta_zoom)
+
+    @debug_fxn
     def scroll_to_img_at_wincenter(self):
         """
         Scroll window so center of window is at
