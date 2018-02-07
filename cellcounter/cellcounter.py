@@ -1114,6 +1114,10 @@ def debug_main():
     log_string += "    machine:" + uname_obj.machine + "\n"
     log_string += "    processor:" + uname_obj.processor
     LOGGER.info(log_string)
+    log_string = "Python info" + "\n"
+    log_string += "    python:" + sys.version.replace('\n', '') + "\n"
+    log_string += "    wxPython:" + wx.__version__
+    LOGGER.info(log_string)
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
 def main(argv=None):
