@@ -89,7 +89,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # setup possible magnification list
         mag_step = const.MAG_STEP
         mag_len_half = int(const.TOTAL_MAG_STEPS/2)
-        # possible mag list
+        # possible magnification list
         self.zoom_list = [
                 mag_step**x
                 for x in range(-mag_len_half, mag_len_half+1)
@@ -182,7 +182,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """Fetch current state of image position / zoom
 
         Returns:
-            list: scroll_zoom_state 
+            list: scroll_zoom_state - (scroll_coords, zoom_index)
         """
         return (
                 (self.img_at_wincenter_x, self.img_at_wincenter_y),
@@ -197,8 +197,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             scroll_zoom_state (tuple): (scroll_coords, zoom_idx)
         """
         (self.img_at_wincenter_x, self.img_at_wincenter_y) = scroll_zoom_state[0]
-        delta_zoom = scroll_zoom_state[1] - self.zoom_idx
-        self.zoom(delta_zoom)
+        # zoom() will scroll to self.img_at_wincenter_{x,y} after zoom
+        self.zoom(scroll_zoom_state[1] - self.zoom_idx)
 
     @debug_fxn
     def scroll_to_img_at_wincenter(self):
@@ -599,6 +599,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         same as image if image is zoomed larger than window, or as large as
         window if image is smaller than window in order to be able to center
         image in window.
+
+        Uses instance variables:
+            self.img_size_x
+            self.img_size_y
+            self.zoom_val
+
+        Affects instance variables:
+            self.img_coord_xlation_x
+            self.img_coord_xlation_y
         """
         (win_clsize_x, win_clsize_y) = self.GetClientSize()
         virt_size_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
@@ -691,6 +700,43 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
 
     @debug_fxn
+    def _get_margin_rects(self,
+            rect_pos_log_x, rect_pos_log_y,
+            rect_size_x, rect_size_y,
+            rect_lr_log_x, rect_lr_log_y,
+            dest_pos_x, dest_pos_y,
+            dest_lr_x, dest_lr_y,
+            ):
+        # paint bg rectangles around border if necessary
+        left_gap = clip(dest_pos_x - rect_pos_log_x, 0, None)
+        right_gap = clip(rect_lr_log_x - dest_lr_x, 0, None)
+        top_gap = clip(dest_pos_y - rect_pos_log_y, 0, None)
+        bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
+
+        dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+        # debug pen:
+        #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+        dc.SetBrush(dc.GetBackground())
+        rects_to_draw = []
+        if top_gap > 0:
+            rects_to_draw.append(
+                    (rect_pos_log_x, rect_pos_log_y, rect_size_x, top_gap)
+                    )
+        if bottom_gap > 0:
+            rects_to_draw.append(
+                    (rect_pos_log_x, dest_lr_y, rect_size_x, bottom_gap)
+                    )
+        if left_gap > 0:
+            rects_to_draw.append(
+                    (rect_pos_log_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
+                    )
+        if right_gap > 0:
+            rects_to_draw.append(
+                    (dest_lr_x, dest_pos_y, right_gap, rect_size_y - top_gap - bottom_gap)
+                    )
+        return rects_to_draw
+
+    @debug_fxn
     def paint_rect(self, dc, rect):
         """Given a rect needing a refresh in window PaintDC, Blit the image
         to fill that rect.
@@ -773,33 +819,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_size_x = dest_lr_x - dest_pos_x
         dest_size_y = dest_lr_y - dest_pos_y
 
-        # paint bg rectangles around border if necessary
-        left_gap = clip(dest_pos_x - rect_pos_log_x, 0, None)
-        right_gap = clip(rect_lr_log_x - dest_lr_x, 0, None)
-        top_gap = clip(dest_pos_y - rect_pos_log_y, 0, None)
-        bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
-
-        dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-        # debug pen:
-        #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
-        dc.SetBrush(dc.GetBackground())
-        rects_to_draw = []
-        if top_gap > 0:
-            rects_to_draw.append(
-                    (rect_pos_log_x, rect_pos_log_y, rect_size_x, top_gap)
-                    )
-        if bottom_gap > 0:
-            rects_to_draw.append(
-                    (rect_pos_log_x, dest_lr_y, rect_size_x, bottom_gap)
-                    )
-        if left_gap > 0:
-            rects_to_draw.append(
-                    (rect_pos_log_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
-                    )
-        if right_gap > 0:
-            rects_to_draw.append(
-                    (dest_lr_x, dest_pos_y, right_gap, rect_size_y - top_gap - bottom_gap)
-                    )
+        # paint margins bg color if image is smaller than window
+        rects_to_draw = self._get_margin_rects(
+                rect_pos_log_x, rect_pos_log_y,
+                rect_size_x, rect_size_y,
+                rect_lr_log_x, rect_lr_log_y,
+                dest_pos_x, dest_pos_y,
+                dest_lr_x, dest_lr_y,
+                )
         if rects_to_draw:
             dc.DrawRectangleList(rects_to_draw)
 
@@ -1039,7 +1066,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
 
-        # expand virtual window size
+        # expand virtual window size for new zoom value
         self.set_virt_size_with_min()
 
         # set img centerpoint coords so img coords and win coords from mouse
@@ -1663,33 +1690,14 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         dest_size_x = dest_lr_x - dest_pos_x
         dest_size_y = dest_lr_y - dest_pos_y
 
-        # paint bg rectangles around border if necessary
-        left_gap = clip(dest_pos_x - rect_pos_log_x, 0, None)
-        right_gap = clip(rect_lr_log_x - dest_lr_x, 0, None)
-        top_gap = clip(dest_pos_y - rect_pos_log_y, 0, None)
-        bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
-
-        dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-        # debug pen:
-        #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
-        dc.SetBrush(dc.GetBackground())
-        rects_to_draw = []
-        if top_gap > 0:
-            rects_to_draw.append(
-                    (rect_pos_log_x, rect_pos_log_y, rect_size_x, top_gap)
-                    )
-        if bottom_gap > 0:
-            rects_to_draw.append(
-                    (rect_pos_log_x, dest_lr_y, rect_size_x, bottom_gap)
-                    )
-        if left_gap > 0:
-            rects_to_draw.append(
-                    (rect_pos_log_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
-                    )
-        if right_gap > 0:
-            rects_to_draw.append(
-                    (dest_lr_x, dest_pos_y, right_gap, rect_size_y - top_gap - bottom_gap)
-                    )
+        # paint margins bg color if image is smaller than window
+        rects_to_draw = self._get_margin_rects(
+                rect_pos_log_x, rect_pos_log_y,
+                rect_size_x, rect_size_y,
+                rect_lr_log_x, rect_lr_log_y,
+                dest_pos_x, dest_pos_y,
+                dest_lr_x, dest_lr_y,
+                )
         if rects_to_draw:
             dc.DrawRectangleList(rects_to_draw)
 
