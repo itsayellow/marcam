@@ -713,10 +713,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         top_gap = clip(dest_pos_y - rect_pos_log_y, 0, None)
         bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
 
-        dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-        # debug pen:
-        #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
-        dc.SetBrush(dc.GetBackground())
         rects_to_draw = []
         if top_gap > 0:
             rects_to_draw.append(
@@ -828,6 +824,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 dest_lr_x, dest_lr_y,
                 )
         if rects_to_draw:
+            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            # debug pen:
+            #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+            dc.SetBrush(dc.GetBackground())
             dc.DrawRectangleList(rects_to_draw)
 
         # DEBUG ONLY (don't slow us down with this unless we need to debug)
@@ -1699,6 +1699,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 dest_lr_x, dest_lr_y,
                 )
         if rects_to_draw:
+            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            # debug pen:
+            #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+            dc.SetBrush(dc.GetBackground())
             dc.DrawRectangleList(rects_to_draw)
 
         # DEBUG ONLY (don't slow us down with this unless we need to debug)
