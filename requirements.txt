@@ -7,4 +7,4 @@ olefile==0.45.1
 Pillow==5.0.0
 py2app==0.14
 six==1.11.0
-wxPython==4.0.0
+wxPython==4.0.1
