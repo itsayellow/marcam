@@ -1035,6 +1035,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             zoom_amt (int): How many positions to move up or down in the
                 zoom ratio list
+            win_coords (wx.Point): point to center zoom around
             do_refresh (bool, default=True): whether to force a refresh now
                 after changing the zoom ratio
 
@@ -1050,7 +1051,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if zoom_amt < 0 and self.zoom_idx == 0:
             return self.zoom_val
 
-        # get mouse location in window coords and img coords
+        # make sure self.img_at_wincenter_{x,y} is up to date
+        self.get_img_wincenter()
+
+        # translate mouse location from window coords to img coords
         #point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
         (img_x, img_y) = self.win2img_coord(win_coords)
         zoom_orig = self.zoom_val
