@@ -284,7 +284,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # NOTE: GetLogicalPosition doesn't seem to return anything different
         #       than GetPosition -- we are not getting unscrolled coords
         point = evt.GetPosition()
-        point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
+        point_unscroll = self.CalcUnscrolledPosition(point)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
         LOGGER.info(
@@ -324,7 +324,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         if evt.Dragging() and evt.LeftIsDown():
             evt_pos = evt.GetPosition()
-            evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos.x, evt_pos.y)
+            evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos)
 
             try:
                 refresh_rect = wx.Rect(
@@ -740,7 +740,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def _get_rect_coords(self, rect):
         # break out rect details into variables
-        (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
+        rect_pos = rect.GetPosition()
+        rect_size = rect.GetSize()
 
         # see if we need to use a downscaled version of memdc
         if self.zoom_val > 0.5:
@@ -755,12 +756,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # rect_pos_{x,y} is upper left corner
         # rect_lr_{x,y} is lower right corner
-        rect_lr_x = rect_pos_x + rect_size_x
-        rect_lr_y = rect_pos_y + rect_size_y
-        (rect_pos_log_x, rect_pos_log_y) = self.CalcUnscrolledPosition(
-                rect_pos_x, rect_pos_y)
-        (rect_lr_log_x, rect_lr_log_y) = self.CalcUnscrolledPosition(
-                rect_lr_x, rect_lr_y)
+        rect_lr = rect_pos + rect_size
+        (rect_pos_log_x, rect_pos_log_y) = self.CalcUnscrolledPosition(rect_pos)
+        (rect_lr_log_x, rect_lr_log_y) = self.CalcUnscrolledPosition(rect_lr)
 
         # img coordinates of upper left corner
         (src_pos_x, src_pos_y) = self.logical2img_coord(
@@ -808,7 +806,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         return (
                 rect_pos_log_x, rect_pos_log_y,
-                rect_size_x, rect_size_y,
+                rect_size.x, rect_size.y,
                 dest_pos_x, dest_pos_y,
                 dest_size_x, dest_size_y,
                 src_pos_x, src_pos_y,
@@ -1285,7 +1283,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # NOTE: GetLogicalPosition doesn't seem to return anything different
         #       than GetPosition -- we are not getting unscrolled coords
         point = evt.GetPosition()
-        point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
+        point_unscroll = self.CalcUnscrolledPosition(point)
         (img_x, img_y) = self.win2img_coord(point.x, point.y)
 
         LOGGER.info(
@@ -1342,7 +1340,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         if evt.Dragging() and evt.LeftIsDown():
             evt_pos = evt.GetPosition()
-            evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos.x, evt_pos.y)
+            evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos)
 
             try:
                 refresh_rect = wx.Rect(
