@@ -169,7 +169,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # translate client center to zoomed image center coords
         (self.img_at_wincenter_x, self.img_at_wincenter_y
-                ) = self.win2img_coord(win_size_x/2, win_size_y/2)
+                ) = self.win2img_coord(wx.Point(win_size_x/2, win_size_y/2))
 
         LOGGER.info(
                 "MSC:self.img_at_wincenter=(%.3f,%.3f)",
@@ -285,7 +285,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #       than GetPosition -- we are not getting unscrolled coords
         point = evt.GetPosition()
         point_unscroll = self.CalcUnscrolledPosition(point)
-        (img_x, img_y) = self.win2img_coord(point.x, point.y)
+        (img_x, img_y) = self.win2img_coord(point)
 
         LOGGER.info(
                 "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y) + "\n" + \
@@ -424,7 +424,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   * not to depend on which img_dc we supply
         #   * not to depend on zoom or pan
         point = evt.GetLogicalPosition(self.img_dc)
-        (img_x, img_y) = self.win2img_coord(point.x, point.y)
+        (img_x, img_y) = self.win2img_coord(point)
 
         LOGGER.info(
                 "MSC:right click at img (%.2f, %.2f)",
@@ -903,12 +903,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dc.DrawRectangle(self.rubberband_draw_rect)
 
     @debug_fxn
-    def win2img_coord(self, win_x, win_y, scale_dc=1):
+    def win2img_coord(self, win_coord, scale_dc=1):
         """Given plain window coordinates, return image coordinates
 
         Args:
-            win_x (float): window device coordinates
-            win_y (float): window device coordinates
+            win_coord (wx.Point): point in device (window) coordinates
 
         Returns:
             tuple: (img_x (float), img_y (float)) position in src image
@@ -919,7 +918,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
 
-        win_unscroll = self.CalcUnscrolledPosition(wx.Point(win_x, win_y))
+        win_unscroll = self.CalcUnscrolledPosition(win_coord)
 
         img_x = (win_unscroll.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
         img_y = (win_unscroll.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
@@ -1067,7 +1066,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # get mouse location in window coords and img coords
         #point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
-        (img_x, img_y) = self.win2img_coord(win_coords.x, win_coords.y)
+        (img_x, img_y) = self.win2img_coord(win_coords)
         zoom_orig = self.zoom_val
         delta_x_orig = img_x - self.img_at_wincenter_x
         delta_y_orig = img_y - self.img_at_wincenter_y
@@ -1284,7 +1283,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         #       than GetPosition -- we are not getting unscrolled coords
         point = evt.GetPosition()
         point_unscroll = self.CalcUnscrolledPosition(point)
-        (img_x, img_y) = self.win2img_coord(point.x, point.y)
+        (img_x, img_y) = self.win2img_coord(point)
 
         LOGGER.info(
                 "MSC:left down at img (%.2f, %.2f)"%(img_x, img_y) + "\n" + \
@@ -1418,7 +1417,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     self.mouse_left_down['img_x'],
                     self.mouse_left_down['img_y']
                     )
-            box_corner2_img = self.win2img_coord(box_corner2_win.x, box_corner2_win.y)
+            box_corner2_img = self.win2img_coord(box_corner2_win)
 
             marks_in_box = self.marks_in_box_img(box_corner1_img, box_corner2_img)
 
