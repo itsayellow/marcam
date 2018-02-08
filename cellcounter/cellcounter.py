@@ -150,6 +150,8 @@ class EditHistory():
 
     @debug_fxn
     def reset(self):
+        """Reset Edit History so it has no entries and ptr is reset
+        """
         self.history = []
         self.history_ptr = -1
         self._update_menu_items()
@@ -274,6 +276,12 @@ class EditHistory():
 
     @debug_fxn
     def register_redo_menu_item(self, redo_menu_item):
+        """Give this class instance the Redo menu item instance so it can
+        Enable and Disable menu item on its own
+
+        Args:
+            redo_menu_item (wx.MenuItem): menud item instance for Redo
+        """
         self.redo_menu_item = redo_menu_item
         self._update_menu_items()
 
@@ -287,6 +295,13 @@ class DropTarget(wx.FileDropTarget):
 
     @debug_fxn
     def OnDropFiles(self, x, y, filenames):
+        """Dropped File Handler
+
+        Args:
+            x (int): x coordinate of mouse
+            y (int): y coordinate of mouse
+            filenames (list): A list of filepaths
+        """
         filename = filenames[0]
         LOGGER.info("MSC:Drag and Drop filename:\n    %s", repr(filename))
         self.window_target.init_image_from_file(filename)
@@ -332,6 +347,8 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def init_ui(self):
+        """Initialize the GUI widgets of the main window
+        """
         # menu bar stuff
         menubar = wx.MenuBar()
         # File
@@ -522,11 +539,20 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def marks_num_update(self, mark_total):
+        """Update the Total Marks display with argument.  Registered with
+        img_panel so it can update this automatically
+
+        Args:
+            mark_total (int): number of marks to display in UI
+        """
         self.marks_num_display.SetLabel("%d"%mark_total)
 
     @debug_fxn
     def on_evt_close(self, evt):
-        """Handler for anytime user quits program in any way
+        """EVT_CLOSE Handler: anytime user quits program in any way
+
+        Args:
+            evt (wx.)
         """
         self.file_history.Save(self.config)
         evt.Skip()
@@ -534,6 +560,9 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_quit(self, evt):
         """Handler for menu Quit
+
+        Args:
+            evt (wx.)
         """
         is_closed = self.on_close(None)
 
@@ -543,9 +572,13 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_key_down(self, evt):
-        """Handler for pressing a key down event.  Holding a key down (at least
-        on macOS) generates repeated EVT_KEY_DOWN events but only one
-        EVT_KEY_UP when user releases the key.
+        """EVT_KEY_DOWN Handler: pressing a key down event.
+
+        Holding a key down (at least on macOS) generates repeated EVT_KEY_DOWN
+        events but only one EVT_KEY_UP when user releases the key.
+
+        Args:
+            evt (wx.)
         """
 
         key_code = evt.GetKeyCode()
@@ -630,6 +663,14 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_key_up(self, evt):
+        """EVT_KEY_UP Handler: releasing a key event.
+
+        Holding a key down (at least on macOS) generates repeated EVT_KEY_DOWN
+        events but only one EVT_KEY_UP when user releases the key.
+
+        Args:
+            evt (wx.)
+        """
         key_code = evt.GetKeyCode()
         LOGGER.debug(
                 "KEY:Key Up  key_code: %d    RawKeyCode: %d    Position: %s",
@@ -1034,6 +1075,11 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_about(self, evt):
+        """Help->About Menuitem: Open the About window
+
+        Args:
+            evt (wx.):
+        """
         info = wx.adv.AboutDialogInfo()
         info.SetName("Cellcounter")
         info.SetVersion(const.VERSION_STR)
@@ -1044,7 +1090,10 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_help(self, evt):
-        """Open a brief help window (html)
+        """Help->Help Menuitem: Open a brief help window (html)
+
+        Args:
+            evt (wx.):
         """
         self.html = HelpFrame(self, id=wx.ID_ANY)
         self.html.Show(True)
