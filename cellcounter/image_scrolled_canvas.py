@@ -703,10 +703,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def _get_margin_rects(self,
             rect_pos_log_x, rect_pos_log_y,
             rect_size_x, rect_size_y,
-            rect_lr_log_x, rect_lr_log_y,
             dest_pos_x, dest_pos_y,
-            dest_lr_x, dest_lr_y,
+            dest_size_x, dest_size_y,
             ):
+        # useful local variables (lower-right corner coords)
+        rect_lr_log_x = rect_pos_log_x + rect_size_x
+        rect_lr_log_y = rect_pos_log_y + rect_size_y
+        dest_lr_x = dest_pos_x + dest_size_x
+        dest_lr_y = dest_pos_y + dest_size_y
+
         # paint bg rectangles around border if necessary
         left_gap = clip(dest_pos_x - rect_pos_log_x, 0, None)
         right_gap = clip(rect_lr_log_x - dest_lr_x, 0, None)
@@ -733,26 +738,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return rects_to_draw
 
     @debug_fxn
-    def paint_rect(self, dc, rect):
-        """Given a rect needing a refresh in window PaintDC, Blit the image
-        to fill that rect.
-
-        Args:
-            dc (wx.PaintDC): Device Context to Blit into
-            rect (tuple): coordinates to refresh (window coordinates)
-        """
-        # TODO: separate private function to handle coordinate mapping?
-
+    def _get_rect_coords(self, rect):
         # break out rect details into variables
         (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
-
-        # if no image, fill area with background color
-        if self.img_dc is None:
-            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-            dc.SetBrush(dc.GetBackground())
-            dc.DrawRectangle(rect_pos_x, rect_pos_y, rect_size_x, rect_size_y)
-            # DONE
-            return
 
         # see if we need to use a downscaled version of memdc
         if self.zoom_val > 0.5:
@@ -815,13 +803,52 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_size_x = dest_lr_x - dest_pos_x
         dest_size_y = dest_lr_y - dest_pos_y
 
+        return (
+                rect_pos_log_x, rect_pos_log_y,
+                rect_size_x, rect_size_y,
+                dest_pos_x, dest_pos_y,
+                dest_size_x, dest_size_y,
+                src_pos_x, src_pos_y,
+                src_size_x, src_size_y,
+                scale_dc, img_dc_src
+                )
+
+    @debug_fxn
+    def paint_rect(self, dc, rect):
+        """Given a rect needing a refresh in window PaintDC, Blit the image
+        to fill that rect.
+
+        Args:
+            dc (wx.PaintDC): Device Context to Blit into
+            rect (tuple): coordinates to refresh (window coordinates)
+        """
+        # TODO: separate private function to handle coordinate mapping?
+
+        # if no image, fill area with background color
+        if self.img_dc is None:
+            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            dc.SetBrush(dc.GetBackground())
+            dc.DrawRectangle(rect)
+            # DONE
+            return
+
+        # get coords and choose scaled version of img_dc
+        (
+                rect_pos_log_x, rect_pos_log_y,
+                rect_size_x, rect_size_y,
+                dest_pos_x, dest_pos_y,
+                dest_size_x, dest_size_y,
+                src_pos_x, src_pos_y,
+                src_size_x, src_size_y,
+                scale_dc, img_dc_src
+                ) = self._get_rect_coords(rect)
+
         # paint margins bg color if image is smaller than window
         rects_to_draw = self._get_margin_rects(
                 rect_pos_log_x, rect_pos_log_y,
                 rect_size_x, rect_size_y,
-                rect_lr_log_x, rect_lr_log_y,
                 dest_pos_x, dest_pos_y,
-                dest_lr_x, dest_lr_y,
+                dest_size_x, dest_size_y,
                 )
         if rects_to_draw:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
@@ -829,16 +856,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
             dc.SetBrush(dc.GetBackground())
             dc.DrawRectangleList(rects_to_draw)
-
-        # DEBUG ONLY (don't slow us down with this unless we need to debug)
-        #LOGGER.info(
-        #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
-        #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
-        #        "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
-        #        "dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
-        #        "    rect_pos=(%.2f,%.2f)\t"%(rect_pos_log_x,rect_pos_log_y) + \
-        #        "rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
-        #        )
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -1618,85 +1635,31 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             dc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
-        # break out rect details into variables
-        (rect_pos_x, rect_pos_y, rect_size_x, rect_size_y) = rect.Get()
-
         # if no image, fill area with background color
         if self.img_dc is None:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
             dc.SetBrush(dc.GetBackground())
-            dc.DrawRectangle(rect_pos_x, rect_pos_y, rect_size_x, rect_size_y)
+            dc.DrawRectangle(rect)
             # DONE
             return
 
-        # see if we need to use a downscaled version of memdc
-        if self.zoom_val > 0.5:
-            img_dc_src = self.img_dc
-            scale_dc = 1
-        elif self.zoom_val > 0.25:
-            img_dc_src = self.img_dc_div2
-            scale_dc = 2
-        else:
-            img_dc_src = self.img_dc_div4
-            scale_dc = 4
-
-        # rect_pos_{x,y} is upper left corner
-        # rect_lr_{x,y} is lower right corner
-        rect_lr_x = rect_pos_x + rect_size_x
-        rect_lr_y = rect_pos_y + rect_size_y
-        (rect_pos_log_x, rect_pos_log_y) = self.CalcUnscrolledPosition(
-                rect_pos_x, rect_pos_y)
-        (rect_lr_log_x, rect_lr_log_y) = self.CalcUnscrolledPosition(
-                rect_lr_x, rect_lr_y)
-
-        # img coordinates of upper left corner
-        (src_pos_x, src_pos_y) = self.logical2img_coord(
+        # get coords and choose scaled version of img_dc
+        (
                 rect_pos_log_x, rect_pos_log_y,
-                scale_dc=scale_dc
-                )
-        # make int and enforce min. val of 0
-        src_pos_x = clip(int(src_pos_x), 0, None)
-        src_pos_y = clip(int(src_pos_y), 0, None)
-        # img coordinates of lower right corner
-        (src_lr_x, src_lr_y) = self.logical2img_coord(
-                rect_lr_log_x, rect_lr_log_y,
-                scale_dc=scale_dc
-                )
-        # make int (via ceil) and enforce max. val of img_dc_src size
-        dc_size = img_dc_src.GetSize()
-        src_lr_x = clip(ceil(src_lr_x), None, dc_size.x)
-        src_lr_y = clip(ceil(src_lr_y), None, dc_size.y)
-
-        # multiply pos back out to get slightly off-window but
-        #   on src-pixel-boundary coords for dest
-        # dest coordinates are all logical
-        (dest_pos_x, dest_pos_y) = self.img2logical_coord(
-                src_pos_x, src_pos_y, scale_dc=scale_dc
-               )
-        dest_pos_x = round(dest_pos_x)
-        dest_pos_y = round(dest_pos_y)
-        # multiply size back out to get slightly off-window but
-        #   on src-pixel-boundary coords for dest
-        (dest_lr_x, dest_lr_y) = self.img2logical_coord(
-                src_lr_x, src_lr_y, scale_dc=scale_dc
-                )
-        dest_lr_x = round(dest_lr_x)
-        dest_lr_y = round(dest_lr_y)
-
-        # compute src size
-        src_size_x = src_lr_x - src_pos_x
-        src_size_y = src_lr_y - src_pos_y
-        # compute dest size
-        dest_size_x = dest_lr_x - dest_pos_x
-        dest_size_y = dest_lr_y - dest_pos_y
+                rect_size_x, rect_size_y,
+                dest_pos_x, dest_pos_y,
+                dest_size_x, dest_size_y,
+                src_pos_x, src_pos_y,
+                src_size_x, src_size_y,
+                scale_dc, img_dc_src
+                ) = self._get_rect_coords(rect)
 
         # paint margins bg color if image is smaller than window
         rects_to_draw = self._get_margin_rects(
                 rect_pos_log_x, rect_pos_log_y,
                 rect_size_x, rect_size_y,
-                rect_lr_log_x, rect_lr_log_y,
                 dest_pos_x, dest_pos_y,
-                dest_lr_x, dest_lr_y,
+                dest_size_x, dest_size_y,
                 )
         if rects_to_draw:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
@@ -1704,16 +1667,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
             dc.SetBrush(dc.GetBackground())
             dc.DrawRectangleList(rects_to_draw)
-
-        # DEBUG ONLY (don't slow us down with this unless we need to debug)
-        #LOGGER.info(
-        #        "MSC:src_pos=(%.2f,%.2f)\t"%(src_pos_x,src_pos_y) + \
-        #        "src_size=(%.2f,%.2f)\n"%(src_size_x,src_size_y) + \
-        #        "    dest_pos=(%.2f,%.2f)\t"%(dest_pos_x,dest_pos_y) + \
-        #        "dest_size=(%.2f,%.2f)\n"%(dest_size_x,dest_size_y) + \
-        #        "    rect_pos=(%.2f,%.2f)\t"%(rect_pos_log_x,rect_pos_log_y) + \
-        #        "rect_size=(%.2f,%.2f)"%(rect_size_x,rect_size_y)
-        #        )
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
