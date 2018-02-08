@@ -597,7 +597,7 @@ class MainWindow(wx.Frame):
             # option key - initiate temporary zoom
             LOGGER.debug("Option key down")
 
-            # save zoom / scxroll state
+            # save zoom / scroll state
             self.temp_scroll_zoom_state = self.img_panel.get_scroll_zoom_state()
 
             zoom = self.img_panel.zoom_point(
