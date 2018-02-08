@@ -700,40 +700,33 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
 
     @debug_fxn
-    def _get_margin_rects(self,
-            rect_pos_log_x, rect_pos_log_y,
-            rect_size_x, rect_size_y,
-            dest_pos_x, dest_pos_y,
-            dest_size_x, dest_size_y,
-            ):
+    def _get_margin_rects(self, rect_pos_log, rect_size, dest_pos, dest_size):
         # useful local variables (lower-right corner coords)
-        rect_lr_log_x = rect_pos_log_x + rect_size_x
-        rect_lr_log_y = rect_pos_log_y + rect_size_y
-        dest_lr_x = dest_pos_x + dest_size_x
-        dest_lr_y = dest_pos_y + dest_size_y
+        rect_lr_log = rect_pos_log + rect_size
+        dest_lr = dest_pos + dest_size
 
         # paint bg rectangles around border if necessary
-        left_gap = clip(dest_pos_x - rect_pos_log_x, 0, None)
-        right_gap = clip(rect_lr_log_x - dest_lr_x, 0, None)
-        top_gap = clip(dest_pos_y - rect_pos_log_y, 0, None)
-        bottom_gap = clip(rect_lr_log_y - dest_lr_y, 0, None)
+        left_gap = clip(dest_pos.x - rect_pos_log.x, 0, None)
+        right_gap = clip(rect_lr_log.x - dest_lr.x, 0, None)
+        top_gap = clip(dest_pos.y - rect_pos_log.y, 0, None)
+        bottom_gap = clip(rect_lr_log.y - dest_lr.y, 0, None)
 
         rects_to_draw = []
         if top_gap > 0:
             rects_to_draw.append(
-                    (rect_pos_log_x, rect_pos_log_y, rect_size_x, top_gap)
+                    (rect_pos_log.x, rect_pos_log.y, rect_size.x, top_gap)
                     )
         if bottom_gap > 0:
             rects_to_draw.append(
-                    (rect_pos_log_x, dest_lr_y, rect_size_x, bottom_gap)
+                    (rect_pos_log.x, dest_lr.y, rect_size.x, bottom_gap)
                     )
         if left_gap > 0:
             rects_to_draw.append(
-                    (rect_pos_log_x, dest_pos_y, left_gap, rect_size_y - top_gap - bottom_gap)
+                    (rect_pos_log.x, dest_pos.y, left_gap, rect_size.y - top_gap - bottom_gap)
                     )
         if right_gap > 0:
             rects_to_draw.append(
-                    (dest_lr_x, dest_pos_y, right_gap, rect_size_y - top_gap - bottom_gap)
+                    (dest_lr.x, dest_pos.y, right_gap, rect_size.y - top_gap - bottom_gap)
                     )
         return rects_to_draw
 
@@ -757,6 +750,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # rect_pos_{x,y} is upper left corner
         # rect_lr_{x,y} is lower right corner
         rect_lr = rect_pos + rect_size
+
         rect_pos_log = self.CalcUnscrolledPosition(rect_pos)
         rect_lr_log = self.CalcUnscrolledPosition(rect_lr)
 
@@ -783,32 +777,27 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # dest coordinates are all logical
-        (dest_pos_x, dest_pos_y) = self.img2logical_coord(
+        dest_pos = self.img2logical_coord(
                 src_pos_x, src_pos_y, scale_dc=scale_dc
                )
-        dest_pos_x = round(dest_pos_x)
-        dest_pos_y = round(dest_pos_y)
 
         # multiply size back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
-        (dest_lr_x, dest_lr_y) = self.img2logical_coord(
+        dest_lr = self.img2logical_coord(
                 src_lr_x, src_lr_y, scale_dc=scale_dc
                 )
-        dest_lr_x = round(dest_lr_x)
-        dest_lr_y = round(dest_lr_y)
 
         # compute src size
         src_size_x = src_lr_x - src_pos_x
         src_size_y = src_lr_y - src_pos_y
         # compute dest size
-        dest_size_x = dest_lr_x - dest_pos_x
-        dest_size_y = dest_lr_y - dest_pos_y
+        dest_size = wx.Size(dest_lr.x - dest_pos.x, dest_lr.y - dest_pos.y)
 
         return (
-                rect_pos_log.x, rect_pos_log.y,
-                rect_size.x, rect_size.y,
-                dest_pos_x, dest_pos_y,
-                dest_size_x, dest_size_y,
+                rect_pos_log,
+                rect_size,
+                dest_pos,
+                dest_size,
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
                 scale_dc, img_dc_src
@@ -835,10 +824,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # get coords and choose scaled version of img_dc
         (
-                rect_pos_log_x, rect_pos_log_y,
-                rect_size_x, rect_size_y,
-                dest_pos_x, dest_pos_y,
-                dest_size_x, dest_size_y,
+                rect_pos_log,
+                rect_size,
+                dest_pos,
+                dest_size,
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
                 scale_dc, img_dc_src
@@ -846,10 +835,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # paint margins bg color if image is smaller than window
         rects_to_draw = self._get_margin_rects(
-                rect_pos_log_x, rect_pos_log_y,
-                rect_size_x, rect_size_y,
-                dest_pos_x, dest_pos_y,
-                dest_size_x, dest_size_y,
+                rect_pos_log,
+                rect_size,
+                dest_pos,
+                dest_size,
                 )
         if rects_to_draw:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
@@ -868,8 +857,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # copy region from self.img_dc into dc with possible stretching
         dc.StretchBlit(
-                dest_pos_x, dest_pos_y,
-                dest_size_x, dest_size_y,
+                dest_pos.x, dest_pos.y,
+                dest_size.x, dest_size.y,
                 img_dc_src,
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
@@ -961,7 +950,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         win_unscroll_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
         win_unscroll_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
-        return (win_unscroll_x, win_unscroll_y)
+
+        return wx.Point(round(win_unscroll_x), round(win_unscroll_y))
 
     @debug_fxn
     def img2win_coord(self, img_x, img_y, scale_dc=1):
@@ -1644,10 +1634,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # get coords and choose scaled version of img_dc
         (
-                rect_pos_log_x, rect_pos_log_y,
-                rect_size_x, rect_size_y,
-                dest_pos_x, dest_pos_y,
-                dest_size_x, dest_size_y,
+                rect_pos_log,
+                rect_size,
+                dest_pos,
+                dest_size,
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
                 scale_dc, img_dc_src
@@ -1655,10 +1645,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # paint margins bg color if image is smaller than window
         rects_to_draw = self._get_margin_rects(
-                rect_pos_log_x, rect_pos_log_y,
-                rect_size_x, rect_size_y,
-                dest_pos_x, dest_pos_y,
-                dest_size_x, dest_size_y,
+                rect_pos_log,
+                rect_size,
+                dest_pos,
+                dest_size,
                 )
         if rects_to_draw:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
@@ -1677,8 +1667,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # copy region from self.img_dc into dc with possible stretching
         dc.StretchBlit(
-                dest_pos_x, dest_pos_y,
-                dest_size_x, dest_size_y,
+                dest_pos.x, dest_pos.y,
+                dest_size.x, dest_size.y,
                 img_dc_src,
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
@@ -1706,23 +1696,29 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
-                (x_win, y_win) = self.img2logical_coord(x + 0.5, y + 0.5)
-                if (x_win, y_win) not in pts_in_box:
+                cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
+                if cross_win not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
-                    pts_in_box.append((x_win, y_win))
+                    pts_in_box.append(cross_win)
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
-                    dc.DrawBitmap(const.CROSS_11x11_RED_BMP, x_win - 6, y_win - 6)
+                    dc.DrawBitmap(
+                            const.CROSS_11x11_RED_BMP,
+                            cross_win - (6, 6)
+                            )
 
         pts_in_box = []
         for (x, y) in self.marks_selected:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
-                (x_win, y_win) = self.img2logical_coord(x + 0.5, y + 0.5)
-                if (x_win, y_win) not in pts_in_box:
+                cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
+                if cross_win not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
-                    pts_in_box.append((x_win, y_win))
+                    pts_in_box.append(cross_win)
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
-                    dc.DrawBitmap(const.CROSS_11x11_YELLOW_BMP, x_win - 6, y_win - 6)
+                    dc.DrawBitmap(
+                            const.CROSS_11x11_YELLOW_BMP,
+                            cross_win - (6, 6)
+                            )
