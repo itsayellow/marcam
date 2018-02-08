@@ -835,10 +835,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # paint margins bg color if image is smaller than window
         rects_to_draw = self._get_margin_rects(
-                rect_pos_log,
-                rect_size,
-                dest_pos,
-                dest_size,
+                rect_pos_log, rect_size,
+                dest_pos, dest_size,
                 )
         if rects_to_draw:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
@@ -945,8 +943,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_y (float): src image coordinates
 
         Returns:
-            tuple: (logical_x (float), logical_y (float)) position in
-                logical unscrolled canvas coordinates
+            wx.Point: position in logical unscrolled canvas coordinates
         """
         win_unscroll_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
         win_unscroll_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
