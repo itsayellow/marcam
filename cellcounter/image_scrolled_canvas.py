@@ -44,7 +44,7 @@ def clip(num, num_min=None, num_max=None):
             Use None to designate no minimum value.
         num_max (float): maximum value, if more than this return this num
             Use None to designate no maximum value.
-    
+
     Returns
         float: clipped version of input number
     """
@@ -817,17 +817,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         Returns:
             tuple: contains the following in order:
-                rect_pos_log (wx.Point): TODO
-                rect_size (wx.Size): TODO
-                dest_pos (wx.Point): TODO
-                dest_size (wx.Size): TODO
-                src_pos_x (float): TODO
-                src_pos_y (float): TODO
-                src_size_x (float): TODO
-                src_size_y (float): TODO
-                scale_dc (int): TODO
-                img_dc_src (wx.DC): TODO
-                
+                rect_pos_log (wx.Point): paint rect position
+                rect_size (wx.Size): paint rect size
+                dest_pos (wx.Point): pos of region in dest window
+                dest_size (wx.Size): size of region in dest window
+                src_pos_x (float): x pos of region in img src
+                src_pos_y (float): y pos of region in img src
+                src_size_x (float): x size of region in img src
+                src_size_y (float): y size of region in src
+                scale_dc (int): which scale we are using src img
+                img_dc_src (wx.MemoryDC): which scaled DC we use for src img
         """
         # break out rect details into variables
         rect_pos = rect.GetPosition()
@@ -964,6 +963,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def draw_rubberband_box(self, dc):
+        """Draw rubberband box onto given DC to indicate dragging
+
+        Args:
+            dc (wx.DC): typically wx.PaintDC, DC on which to draw drag rect
+        """
         # Set the pen, for the box's border
         # Mac Native selecting on background:
         #   white at 56.8% opacity (255, 255, 255, 145)
@@ -1330,6 +1334,12 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def set_no_image(self):
+        """Reset image display area and state, remove image
+
+        Args:
+            refresh_update (bool): default True.  Whether to Refresh() and
+                Update() window area
+        """
         # execute all non-mark no-image init
         super().set_no_image(refresh_update=False)
 
@@ -1478,6 +1488,16 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def marks_in_box_img(self, box_corner1_img, box_corner2_img):
+        """Return list of coordinates of marks within denoted box (img coords)
+
+        Args:
+            box_corner1_img (tuple): one corner of region in img coords
+            box_corner2_img (tuple): opposite corner of region in img coords
+
+        Returns:
+            list: list of (x,y) tuples of all marks within box region
+                (img coordinates)
+        """
         (xmin, xmax) = sorted((box_corner1_img[0], box_corner2_img[0]))
         (ymin, ymax) = sorted((box_corner1_img[1], box_corner2_img[1]))
 
@@ -1563,8 +1583,12 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def refresh_mark_area(self, mark_pt):
-        # force a paint event with Refresh and Update
-        #   to force paint_rect to paint new selected mark
+        """Given img coords of a mark point, force a paint event with Refresh
+        to paint mark region
+
+        Args:
+            mark_pt (tuple): mark point in image coordinates
+        """
         (pos_x, pos_y) = self.img2win_coord(mark_pt[0] + 0.5, mark_pt[1] + 0.5)
         # refresh square size should be >= than mark size
         sq_size = const.CROSS_REFRESH_SQ_SIZE
