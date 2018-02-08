@@ -21,6 +21,14 @@ debug_fxn = common.debug_fxn_factory(LOGGER)
 
 
 def ceil(num):
+    """Simple numerical ceiling function.
+
+    Args:
+        num (float): input number
+
+    Returns:
+        int: if num is non-integer: (int(num) + 1), else: num
+    """
     if int(num) < num:
         return int(num) + 1
     else:
@@ -28,6 +36,18 @@ def ceil(num):
 
 
 def clip(num, num_min=None, num_max=None):
+    """Clip to max and/or min values.  To not use limit, give argument None
+
+    Args:
+        num (float): input number
+        num_min (float): minimum value, if less than this return this num
+            Use None to designate no minimum value.
+        num_max (float): maximum value, if more than this return this num
+            Use None to designate no maximum value.
+    
+    Returns
+        float: clipped version of input number
+    """
     if num_min is not None and num_max is not None:
         return min(max(num, num_min), num_max)
     elif num_min is not None:
@@ -119,6 +139,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def set_no_image(self, refresh_update=True):
+        """Reset image display area and state, remove image
+
+        Args:
+            refresh_update (bool): default True.  Whether to Refresh() and
+                Update() window area
+        """
         self.content_saved = True
         self.history.reset()
         self.img_at_wincenter_x = 0
@@ -555,7 +581,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         pop_num = int((time.time()-last_time)/(const.PANIMATE_STEP_MS*1e-3))
         # 1 <= pop_num <= len(x_vals)
         pop_num = clip(pop_num, 1, len(x_vals))
-        for i in range(pop_num):
+        for _ in range(pop_num):
             self.img_at_wincenter_x = x_vals.pop(0)
             self.img_at_wincenter_y = y_vals.pop(0)
         self.scroll_to_img_at_wincenter()
@@ -744,6 +770,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def _get_margin_rects(self, rect_pos_log, rect_size, dest_pos, dest_size):
+        """Given a EVT_PAINT rectangle, if image is smaller than rect return
+        background rectangles to paint.
+
+        Args:
+            rect_pos_log (wx.Point): position of EVT_PAINT rectangle
+            rect_size (wx.Size): size of EVT_PAINT rectangle
+            dest_pos (wx.Point): position of image in window
+            dest_size (wx.Size): size of image in window
+        """
         # useful local variables (lower-right corner coords)
         rect_lr_log = rect_pos_log + rect_size
         dest_lr = dest_pos + dest_size
@@ -775,6 +810,25 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def _get_rect_coords(self, rect):
+        """Get all useful coordinates for a paint event given EVT_PAINT rect
+
+        Args:
+            rect (wx.Rect): rectangle being refreshed for EVT_PAINT event
+
+        Returns:
+            tuple: contains the following in order:
+                rect_pos_log (wx.Point): TODO
+                rect_size (wx.Size): TODO
+                dest_pos (wx.Point): TODO
+                dest_size (wx.Size): TODO
+                src_pos_x (float): TODO
+                src_pos_y (float): TODO
+                src_size_x (float): TODO
+                src_size_y (float): TODO
+                scale_dc (int): TODO
+                img_dc_src (wx.DC): TODO
+                
+        """
         # break out rect details into variables
         rect_pos = rect.GetPosition()
         rect_size = rect.GetSize()
