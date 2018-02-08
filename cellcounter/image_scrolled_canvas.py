@@ -332,8 +332,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         bottomRight=evt_pos
                         )
                 draw_rect = wx.Rect(
-                        topLeft=wx.Point(*self.mouse_left_down['point_unscroll']),
-                        bottomRight=wx.Point(*evt_pos_unscroll)
+                        topLeft=self.mouse_left_down['point_unscroll'],
+                        bottomRight=evt_pos_unscroll
                         )
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
@@ -757,12 +757,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # rect_pos_{x,y} is upper left corner
         # rect_lr_{x,y} is lower right corner
         rect_lr = rect_pos + rect_size
-        (rect_pos_log_x, rect_pos_log_y) = self.CalcUnscrolledPosition(rect_pos)
-        (rect_lr_log_x, rect_lr_log_y) = self.CalcUnscrolledPosition(rect_lr)
+        rect_pos_log = self.CalcUnscrolledPosition(rect_pos)
+        rect_lr_log = self.CalcUnscrolledPosition(rect_lr)
 
         # img coordinates of upper left corner
         (src_pos_x, src_pos_y) = self.logical2img_coord(
-                rect_pos_log_x, rect_pos_log_y,
+                rect_pos_log.x, rect_pos_log.y,
                 scale_dc=scale_dc
                 )
         # make int and enforce min. val of 0
@@ -771,7 +771,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # img coordinates of lower right corner
         (src_lr_x, src_lr_y) = self.logical2img_coord(
-                rect_lr_log_x, rect_lr_log_y,
+                rect_lr_log.x, rect_lr_log.y,
                 scale_dc=scale_dc
                 )
 
@@ -805,7 +805,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         dest_size_y = dest_lr_y - dest_pos_y
 
         return (
-                rect_pos_log_x, rect_pos_log_y,
+                rect_pos_log.x, rect_pos_log.y,
                 rect_size.x, rect_size.y,
                 dest_pos_x, dest_pos_y,
                 dest_size_x, dest_size_y,
@@ -919,10 +919,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
 
-        (win_unscroll_x, win_unscroll_y) = self.CalcUnscrolledPosition(win_x, win_y)
+        win_unscroll = self.CalcUnscrolledPosition(wx.Point(win_x, win_y))
 
-        img_x = (win_unscroll_x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
-        img_y = (win_unscroll_y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
+        img_x = (win_unscroll.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
+        img_y = (win_unscroll.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
 
         return (img_x, img_y)
 
@@ -1348,8 +1348,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                         bottomRight=evt_pos
                         )
                 draw_rect = wx.Rect(
-                        topLeft=wx.Point(*self.mouse_left_down['point_unscroll']),
-                        bottomRight=wx.Point(*evt_pos_unscroll)
+                        topLeft=self.mouse_left_down['point_unscroll'],
+                        bottomRight=evt_pos_unscroll
                         )
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
