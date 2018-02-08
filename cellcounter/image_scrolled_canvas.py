@@ -1714,12 +1714,23 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def _update_mark_total(self):
-        # tell parent UI new total marks number
+        """tell parent UI new total marks number via previously registered fxn
+        """
         if self.marks_num_update_fxn is not None:
             self.marks_num_update_fxn(len(self.marks))
 
     @debug_fxn
     def select_at_point(self, click_img_x, click_img_y, is_appending, is_toggling=False):
+        """Given mouse click point coords, select mark (if any) that was clicked
+
+        Args:
+            click_img_x (float): x location of click in img coords
+            click_img_y (float): y location of click in img coords
+            is_appending (bool): True if we are appending selection, False if
+                this mark becomes only selection
+            is_toggling (bool): Default False. True to toggle selection status
+                of this mark
+        """
         # how close can click to a mark to say we clicked on it
         prox_img = const.PROXIMITY_PX / self.zoom_val
         poss_points = []
@@ -1763,6 +1774,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def select_all_marks(self):
+        """Select All marks
+        """
         marks_unselected = [x for x in self.marks if x not in self.marks_selected]
         # copy all marks into marks_selected
         self.marks_selected = self.marks.copy()
@@ -1845,6 +1858,15 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def draw_marks(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
+        """Given a region of a DC, Draw all marks within that region
+
+        Args:
+            dc (wx.MemoryDC): DC to draw into
+            src_pos_x (float): x position in img coords of region
+            src_pos_y (float): y position in img coords of region
+            src_size_x (float): x size in img coords of region
+            src_size_y (float): y size in img coords of region
+        """
         pts_in_box = []
         marks_unselected = [x for x in self.marks if x not in self.marks_selected]
         for (x, y) in marks_unselected:
