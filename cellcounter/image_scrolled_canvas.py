@@ -770,11 +770,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # make int and enforce min. val of 0
         src_pos_x = clip(int(src_pos_x), 0, None)
         src_pos_y = clip(int(src_pos_y), 0, None)
+
         # img coordinates of lower right corner
         (src_lr_x, src_lr_y) = self.logical2img_coord(
                 rect_lr_log_x, rect_lr_log_y,
                 scale_dc=scale_dc
                 )
+
         # make int (via ceil) and enforce max. val of img_dc_src size
         dc_size = img_dc_src.GetSize()
         src_lr_x = clip(ceil(src_lr_x), None, dc_size.x)
@@ -788,6 +790,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                )
         dest_pos_x = round(dest_pos_x)
         dest_pos_y = round(dest_pos_y)
+
         # multiply size back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         (dest_lr_x, dest_lr_y) = self.img2logical_coord(
@@ -1695,6 +1698,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 (src_pos_x - sq_size/2)*scale_dc, (src_pos_y - sq_size/2)*scale_dc,
                 (src_size_x + sq_size)*scale_dc, (src_size_y + sq_size)*scale_dc)
 
+        # draw rubber-band box AFTER marks, so it is drawn on top of them
         if self.is_dragging:
             self.draw_rubberband_box(dc)
 
