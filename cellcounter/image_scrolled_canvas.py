@@ -762,7 +762,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # img coordinates of upper left corner
         (src_pos_x, src_pos_y) = self.logical2img_coord(
-                rect_pos_log.x, rect_pos_log.y,
+                rect_pos_log,
                 scale_dc=scale_dc
                 )
         # make int and enforce min. val of 0
@@ -771,7 +771,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # img coordinates of lower right corner
         (src_lr_x, src_lr_y) = self.logical2img_coord(
-                rect_lr_log.x, rect_lr_log.y,
+                rect_lr_log,
                 scale_dc=scale_dc
                 )
 
@@ -926,12 +926,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return (img_x, img_y)
 
     @debug_fxn
-    def logical2img_coord(self, logical_x, logical_y, scale_dc=1):
+    def logical2img_coord(self, logical_coord, scale_dc=1):
         """Given logical unscrolled canvas coordinates, return image coordinates
 
         Args:
-            win_x (float): logical canvas (unscrolled) coordinates
-            win_y (float): logical canvas (unscrolled) coordinates
+            logical_coord (wx.Point): logical canvas (unscrolled) coordinates
 
         Returns:
             tuple: (img_x (float), img_y (float)) position in src image
@@ -942,8 +941,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
 
-        img_x = (logical_x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
-        img_y = (logical_y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
+        img_x = (logical_coord.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
+        img_y = (logical_coord.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
 
         return (img_x, img_y)
 
