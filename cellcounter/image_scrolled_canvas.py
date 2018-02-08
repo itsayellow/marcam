@@ -150,16 +150,33 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def needs_save(self):
-        # poll self and children to determine if we need to save document
+        """poll self and children to determine if we need to save document
+
+        Uses:
+            self.content_saved
+
+        Returns:
+            bool: whether content needs saving
+        """
         return not self.content_saved
 
     @debug_fxn
     def save_notify(self):
-        # tell self and children data was saved now
+        """tell self and children data was saved now
+
+        Affects:
+            self.content_saved
+        """
         self.content_saved = True
 
     @debug_fxn
     def get_img_wincenter(self):
+        """Set this scroll position as internally-saved scroll location
+
+        Affects:
+            self.img_at_wincenter_x
+            self.img_at_wincenter_y
+        """
         # GetClientSize is size of window graphics not including scrollbars
         # GetSize is size of window including scrollbars
 
@@ -202,8 +219,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def scroll_to_img_at_wincenter(self):
-        """
-        Scroll window so center of window is at
+        """Scroll window so center of window is at intern. saved scroll location
         (self.img_at_wincenter_x, self.img_at_wincenter_y)
         """
         # use GetSize not GetClientSize, so presence or absence of scrollbars
@@ -263,10 +279,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_down(self, evt):
-        """Handle mouse left-clicks
+        """EVT_LEFT_DOWN handler: mouse left-clicks
 
         Args:
-            evt (wx.MouseEvent): todo.
+            evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
         if self.img_dc is None:
@@ -317,6 +333,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     # don't debug on_motion normally, too much log msgs
     #@debug_fxn
     def on_motion(self, evt):
+        """EVT_MOTION handler: "mouse moving".  Used esp. to track dragging
+
+        Args:
+            evt (wx.MouseEvent): obj returned from mouse event
+        """
         # return early if no image
         if self.img_dc is None:
             wx.CallAfter(evt.Skip)
@@ -369,6 +390,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_left_up(self, evt):
+        """EVT_LEFT_UP handler: "mouse button up".  Used esp. to stop dragging
+
+        Args:
+            evt (wx.MouseEvent): obj returned from mouse event
+        """
         # return early if no image
         if self.img_dc is None:
             wx.CallAfter(evt.Skip)
@@ -409,10 +435,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_right_down(self, evt):
-        """Handle mouse right-clicks
+        """EVT_RIGHT_DOWN handler: mouse right-clicks
 
         Args:
-            evt (wx.MouseEvent): todo.
+            evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
         if self.img_dc is None:
@@ -517,6 +543,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def panimate_step(self, x_vals, y_vals, last_time):
+        """One step of a panimate pan animation
+
+        Args:
+            x_vals (list): future x_vals in pan-animation
+            y_vals (list): future y_vals in pan-animation
+            last_time (time.time()): last time panimate_step was executed
+        """
         # check if time since last panimate step is multiple steps
         #   and skip ahead if so
         pop_num = int((time.time()-last_time)/(const.PANIMATE_STEP_MS*1e-3))
@@ -536,6 +569,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_scroll(self, evt):
+        """EVT_SCROLLWIN handler: scrolling events
+
+        Args:
+            evt (wx.ScrollWinEvent): obj returned from scrolled window event
+        """
         # return early if no image
         if self.img_dc is None:
             wx.CallAfter(evt.Skip)
@@ -652,6 +690,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def on_size(self, evt):
+        """EVT_SIZE handler: resizing window
+
+        Args:
+            evt (wx.ScrollWinEvent): obj returned from scrolled window event
+        """
         self.set_virt_size_with_min()
 
         # scroll so center of image at same point it used to be
@@ -661,7 +704,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     # GetSize is size of window including scrollbars
     @debug_fxn
     def on_paint(self, evt):
-        """EVT_PAINT event handler to update window area
+        """EVT_PAINT handler: update window area
 
         Args:
             evt (wx.PaintEvent): no useful information
@@ -1251,10 +1294,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def on_left_down(self, evt):
-        """Handle mouse left-clicks
+        """EVT_LEFT_DOWN handler: mouse left-clicks
 
         Args:
-            evt (wx.MouseEvent): todo.
+            evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
         if self.img_dc is None:
@@ -1321,6 +1364,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     # don't debug on_motion normally, too much log msgs
     #@debug_fxn
     def on_motion(self, evt):
+        """EVT_MOTION handler: "mouse moving".  Used esp. to track dragging
+
+        Args:
+            evt (wx.MouseEvent): obj returned from mouse event
+        """
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
         if self.img_dc is None or self.mark_mode:
@@ -1388,6 +1436,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def on_left_up(self, evt):
+        """EVT_LEFT_UP handler: "mouse button up".  Used esp. to stop dragging
+
+        Args:
+            evt (wx.MouseEvent): obj returned from mouse event
+        """
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
         if self.img_dc is None or self.mark_mode:
