@@ -1323,7 +1323,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.marks_selected = []
 
         # tell parent UI new total marks number (0)
-        self.update_mark_total()
+        self._update_mark_total()
 
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
@@ -1347,7 +1347,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.marks_selected = []
 
         # tell parent UI new total marks number
-        self.update_mark_total()
+        self._update_mark_total()
 
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
@@ -1623,19 +1623,30 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         if not internal:
             # tell parent UI new total marks number
-            self.update_mark_total()
+            self._update_mark_total()
             self.Update()
         return True
 
     @debug_fxn
     def mark_point_list(self, point_list):
+        """Add list of points to marks
+
+        Args:
+            point_list (list): list of (x,y) tuples in image coordinates
+        """
         for point in point_list:
             self.mark_point(point, internal=True)
-        self.update_mark_total()
+        self._update_mark_total()
         self.Update()
 
     @debug_fxn
     def deselect_mark(self, desel_pt, internal=False):
+        """Deselect one mark
+
+        Args:
+            desel_pt (tuple): (x,y) image coordinates of mark to deselect
+            internal (bool): Default False.  If true, do NOT Update window
+        """
         self.marks_selected.remove(desel_pt)
         self.refresh_mark_area(desel_pt)
         if not internal:
@@ -1643,6 +1654,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def deselect_all_marks(self):
+        """Deselect all marks
+        """
         marks_selected = self.marks_selected.copy()
         for mark_pt in marks_selected:
             self.deselect_mark(mark_pt, internal=True)
@@ -1651,6 +1664,12 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def delete_mark(self, mark_pt, internal=False):
+        """Delete one mark
+
+        Args:
+            mark_pt (tuple): (x,y) image coordinates of mark to delete
+            internal (bool): Default False.  If true, do NOT Update window
+        """
         self.marks.remove(mark_pt)
         # deleted mark may or may not be selected
         try:
@@ -1662,19 +1681,29 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.content_saved = False
         if not internal:
             # tell parent UI new total marks number
-            self.update_mark_total()
+            self._update_mark_total()
             self.Update()
 
     @debug_fxn
     def delete_mark_point_list(self, point_list):
+        """Delete list of marks
+
+        Args:
+            point_list (list): list of (x,y) mark img coords to delete
+        """
         for point in point_list:
             self.delete_mark(point, internal=True)
         # tell parent UI new total marks number
-        self.update_mark_total()
+        self._update_mark_total()
         self.Update()
 
     @debug_fxn
     def delete_selected_marks(self):
+        """Delete all marks currently selected
+
+        Returns:
+            list: list of (x,y) image coordinates of marks just deleted
+        """
         # make list copy
         # so deleting from self.marks_selected doesn't corrupt this operation
         # also so we have list later on for history
@@ -1684,7 +1713,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         return marks_selected
 
     @debug_fxn
-    def update_mark_total(self):
+    def _update_mark_total(self):
         # tell parent UI new total marks number
         if self.marks_num_update_fxn is not None:
             self.marks_num_update_fxn(len(self.marks))
@@ -1744,11 +1773,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def paint_rect(self, dc, rect):
-        # TODO: use super for most of this?  The problem is that we need
-        #   to calculate src_pos and src_size which involves a lot of
-        #   redundant code anyway
-        #   Maybe we just need a private helper function to calculate
-        #   everything, which we can instance in both places
         """Given a rect needing a refresh in window PaintDC, Blit the image
         to fill that rect.
 
@@ -1756,7 +1780,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             dc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
-        # if no image, fill area with background color
         if self.img_dc is None:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
             dc.SetBrush(dc.GetBackground())
