@@ -552,7 +552,7 @@ class MainWindow(wx.Frame):
         """EVT_CLOSE Handler: anytime user quits program in any way
 
         Args:
-            evt (wx.)
+            evt (wx.): TODO
         """
         self.file_history.Save(self.config)
         evt.Skip()
@@ -562,7 +562,7 @@ class MainWindow(wx.Frame):
         """Handler for menu Quit
 
         Args:
-            evt (wx.)
+            evt (wx.): TODO
         """
         is_closed = self.on_close(None)
 
@@ -578,7 +578,7 @@ class MainWindow(wx.Frame):
         events but only one EVT_KEY_UP when user releases the key.
 
         Args:
-            evt (wx.)
+            evt (wx.): TODO
         """
 
         key_code = evt.GetKeyCode()
@@ -669,7 +669,7 @@ class MainWindow(wx.Frame):
         events but only one EVT_KEY_UP when user releases the key.
 
         Args:
-            evt (wx.)
+            evt (wx.): TODO
         """
         key_code = evt.GetKeyCode()
         LOGGER.debug(
@@ -697,6 +697,12 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_selectmode(self, evt):
+        """Tools->Select Mode Menuitem, or Arrow tool button handler
+        Go into Select Mode.
+
+        Args:
+            evt (wx.): TODO
+        """
         # SELECT MODE
         self.img_panel.mark_mode = False
 
@@ -709,6 +715,12 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_markmode(self, evt):
+        """Tools->Mark Mode Menuitem, or Mark tool button handler
+        Go into Mark Mode.
+
+        Args:
+            evt (wx.): TODO
+        """
         # MARK MODE
         self.img_panel.mark_mode = True
 
@@ -720,29 +732,6 @@ class MainWindow(wx.Frame):
         # exiting select mode so no marks can be selected
         self.img_panel.deselect_all_marks()
         self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
-
-    @debug_fxn
-    def on_markmode_toggle(self, evt):
-        # toggle state
-        self.img_panel.mark_mode = not self.img_panel.mark_mode
-        # update toolbartoolbase
-        # update menu item
-        if self.img_panel.mark_mode:
-            # MARK MODE
-            self.markmodeitem.SetItemLabel("Disable &Mark Mode\tCtrl+M")
-            # NOTE: must use this, can't talk to ToolbarBase item directly
-            self.toolbar.ToggleTool(self.mark_tool_id, True) # works!
-            # exiting select mode so no marks can be selected
-            self.img_panel.deselect_all_marks()
-            self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
-            self.selallitem.Enable(False)
-        else:
-            # SELECT MODE
-            self.markmodeitem.SetItemLabel("Enable &Mark Mode\tCtrl+M")
-            # NOTE: must use this, can't talk to ToolbarBase item directly
-            self.toolbar.ToggleTool(self.mark_tool_id, False) # works!
-            self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_NONE))
-            self.selallitem.Enable(True)
 
     @debug_fxn
     def on_open(self, evt):
@@ -1078,7 +1067,7 @@ class MainWindow(wx.Frame):
         """Help->About Menuitem: Open the About window
 
         Args:
-            evt (wx.):
+            evt (wx.): TODO
         """
         info = wx.adv.AboutDialogInfo()
         info.SetName("Cellcounter")
@@ -1093,7 +1082,7 @@ class MainWindow(wx.Frame):
         """Help->Help Menuitem: Open a brief help window (html)
 
         Args:
-            evt (wx.):
+            evt (wx.): TODO
         """
         self.html = HelpFrame(self, id=wx.ID_ANY)
         self.html.Show(True)
