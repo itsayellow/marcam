@@ -735,7 +735,10 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_open(self, evt):
-        """Open Image Data... menu handler for Main Window
+        """File->Open Image Data... menu handler for Main Window
+
+        Args:
+            evt (wx.): TODO
         """
         # first close current image (if it exists)
         is_closed = self.on_close(None)
@@ -765,6 +768,11 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_open_recent(self, evt):
+        """File->Open Recent-> <File> menu handler for Main Window
+
+        Args:
+            evt (wx.): TODO
+        """
         # first close current image (if it exists)
         is_closed = self.on_close(None)
 
@@ -782,6 +790,11 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def load_ccofile_from_path(self, imdata_path):
+        """Load native app .cco file
+
+        Args:
+            imdata_path (str): path to .cco file to open
+        """
         # first load image from zip
         try:
             with zipfile.ZipFile(imdata_path, 'r') as container_fh:
@@ -840,6 +853,9 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_import_image(self, evt):
         """Import Image... menu handler for Main Window
+
+        Args:
+            evt (wx.): TODO
         """
         # first close current image (if it exists)
         is_closed = self.on_close(None)
@@ -868,6 +884,9 @@ class MainWindow(wx.Frame):
         """Given full img_file, load image into app
 
         Separate from on_open so we can use this with argv_emulation
+
+        Args:
+            img_file (str): full path to image file (JPG, TIFF, etc.)
         """
         # check for 1sc files and get image data to send to Image
         (_, imgfile_ext) = os.path.splitext(img_file)
@@ -901,6 +920,9 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_close(self, evt):
         """Close Image menu handler for Main Window
+
+        Args:
+            evt (wx.): TODO
         """
         if self.needs_save():
             save_query = wx.MessageDialog(
@@ -934,6 +956,9 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_save(self, evt):
         """Save menu handler for Main Window
+
+        Args:
+            evt (wx.): TODO
         """
         if self.save_filepath is None:
             # we've never "Save As..." so do that instead
@@ -947,6 +972,9 @@ class MainWindow(wx.Frame):
     @debug_fxn
     def on_saveas(self, evt):
         """Save As... menu handler for Main Window
+
+        Args:
+            evt (wx.): TODO
         """
         if self.save_filepath:
             (default_dir, default_filename) = os.path.split(self.save_filepath)
@@ -979,6 +1007,11 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_undo(self, evt):
+        """Edit->Undo handler
+
+        Args:
+            evt (wx.): TODO
+        """
         action = self.app_history.undo()
         LOGGER.info("MSC:undo: %s", repr(action))
         if action[0] == 'MARK':
@@ -994,6 +1027,11 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_redo(self, evt):
+        """Edit->Redo handler
+
+        Args:
+            evt (wx.): TODO
+        """
         action = self.app_history.redo()
         LOGGER.info("MSC:redo: %s", repr(action))
         if action[0] == 'MARK':
@@ -1009,6 +1047,11 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def on_select_all(self, evt):
+        """Edit->Select All handler
+
+        Args:
+            evt (wx.): TODO
+        """
         self.img_panel.select_all_marks()
 
     @debug_fxn
@@ -1020,12 +1063,20 @@ class MainWindow(wx.Frame):
 
     @debug_fxn
     def needs_save(self):
+        """Function to determine if file has changed since last save or open
+
+        Returns:
+            bool: True if file has changed since save or open
+        """
         # poll self and children to determine if we need to save document
         return not self.content_saved or self.img_panel.needs_save()
 
     @debug_fxn
     def save_img_data(self, imdata_path):
-        """Save image and mark locations to zipfile filename
+        """Save image and mark locations to .cco zipfile
+
+        Args:
+            imdata_path (str): full path to filename to save to
         """
         # make temp file - must make actual file for use with zipfile
         (temp_img_fd, temp_img_name) = tempfile.mkstemp()
