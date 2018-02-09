@@ -320,7 +320,7 @@ class MainWindow(wx.Frame):
         self.content_saved = True
         self.img_path = None
         self.save_filepath = None
-        self.temp_zoom_orig_position = None
+        self.temp_scroll_zoom_state = None
 
         # GUI-related
         self.html = None
@@ -684,14 +684,6 @@ class MainWindow(wx.Frame):
             self.img_panel.set_scroll_zoom_state(
                     self.temp_scroll_zoom_state
                     )
-
-            ## TODO: reinstate old scroll position too
-            #zoom = self.img_panel.zoom_point(
-            #        -const.TEMP_ZOOM,
-            #        self.temp_zoom_orig_position
-            #        )
-            #if zoom:
-            #    self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
         evt.Skip()
 
