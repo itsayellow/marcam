@@ -358,7 +358,7 @@ class MainWindow(wx.Frame):
                 'Quit', 'Quit application\tCtrl+Q'
                 )
         oitem = file_menu.Append(wx.ID_OPEN,
-                'Open Image Data...\tCtrl+O', 'Open .cco image and data file'
+                'Open Image...\tCtrl+O', 'Open image file'
                 )
         orecentitem = file_menu.Append(wx.ID_ANY,
                 'Open Recent', open_recent_menu, 'Open recent .cco files')
@@ -371,11 +371,6 @@ class MainWindow(wx.Frame):
         saitem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S',
                 'Save .cco image and data file'
-                )
-        file_menu.Append(wx.ID_SEPARATOR)
-        importimitem = file_menu.Append(wx.ID_ANY,
-                'Import Image from File...\tCtrl+I',
-                'Import image from various image file formats'
                 )
         menubar.Append(file_menu, '&File')
         # Edit
@@ -496,7 +491,6 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_evt_close)
 
         # setup event handlers for toolbar
-        #self.Bind(wx.EVT_TOOL, self.on_open, otool)
         self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
         self.Bind(wx.EVT_TOOL, self.on_markmode, marktool)
 
@@ -506,7 +500,6 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_close, citem)
         self.Bind(wx.EVT_MENU, self.on_save, sitem)
         self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
-        self.Bind(wx.EVT_MENU, self.on_import_image, importimitem)
         self.Bind(wx.EVT_MENU, self.on_quit, quititem)
         # open recent handler
         self.Bind(wx.EVT_MENU_RANGE, self.on_open_recent,
@@ -738,10 +731,16 @@ class MainWindow(wx.Frame):
         if not is_closed:
             return
 
-        # create wildcard for Image files, and for *.1sc files (Bio-Rad)
-        wildcard = "Cellcounter Image Data files (*.cco)|*.cco"
+        # create wildcard for:
+        #   native *.cco files
+        #   Image files
+        #   *.1sc files (Bio-Rad)
+        wildcard_cco = "Cellcounter Image Data files (*.cco)|*.cco|"
+        wildcard_img = "Image Files " + wx.Image.GetImageExtWildcard() + "|"
+        wildcard_1sc = "Bio-Rad 1sc Files|*.1sc"
+        wildcard = wildcard_cco + wildcard_img + wildcard_1sc
         open_file_dialog = wx.FileDialog(self,
-                "Open Image Data file",
+                "Open Image file",
                 wildcard=wildcard,
                 style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 
@@ -751,12 +750,20 @@ class MainWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
-        self.load_ccofile_from_path(img_path)
-        self.save_filepath = img_path
-        # we just loaded, so have nothing to save
-        self.save_notify()
-        # add successful file open to file history
-        self.file_history.AddFileToHistory(img_path)
+
+        (_, imgfile_ext) = os.path.splitext(img_path)
+        if imgfile_ext == ".cco":
+            self.load_ccofile_from_path(img_path)
+            self.save_filepath = img_path
+            # add successful file open to file history
+            self.file_history.AddFileToHistory(img_path)
+            # we just loaded .cco file, so have nothing to save
+            self.save_notify()
+        else:
+            # image or *.1sc file
+            self.load_image_from_file(img_path)
+            # TODO: make it think it needs save immediately
+
 
     @debug_fxn
     def on_open_recent(self, evt):
@@ -841,35 +848,6 @@ class MainWindow(wx.Frame):
                     "Cannot open data in file '%s'.", imdata_path,
                     exc_info=True
                     )
-
-    @debug_fxn
-    def on_import_image(self, evt):
-        """Import Image... menu handler for Main Window
-
-        Args:
-            evt (wx.): TODO
-        """
-        # first close current image (if it exists)
-        is_closed = self.on_close(None)
-
-        if not is_closed:
-            return
-
-        # create wildcard for Image files, and for *.1sc files (Bio-Rad)
-        wildcard = wx.Image.GetImageExtWildcard()
-        wildcard = "Image Files " + wildcard + "|Bio-Rad 1sc Files|*.1sc"
-        open_file_dialog = wx.FileDialog(self,
-                "Import image file",
-                wildcard=wildcard,
-                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
-
-        if open_file_dialog.ShowModal() == wx.ID_CANCEL:
-            # the user canceled
-            return
-
-        # get filepath and attempt to open image into bitmap
-        img_path = open_file_dialog.GetPath()
-        self.load_image_from_file(img_path)
 
     @debug_fxn
     def load_image_from_file(self, img_file):
