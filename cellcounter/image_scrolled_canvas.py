@@ -1410,6 +1410,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             # Shift always adds select, CONTROL toggles select state
             is_appending = mods & wx.MOD_SHIFT
             is_toggling = mods & wx.MOD_CONTROL
+
+            # get mark location if we started click/drag on a mark
+            sel_pt = self._mark_that_is_near_click(img_x, img_y)
+
             # record args so on on_left_up can select at point if this
             #   turns out to be a click and not a drag
             self.mouse_left_down = {
@@ -1419,8 +1423,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     'img_y':img_y,
                     'is_appending':is_appending,
                     'is_toggling':is_toggling,
+                    'mark_pt':sel_pt
                     }
-            #self.select_at_point(img_x, img_y, is_appending, is_toggling)
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
@@ -1443,48 +1447,61 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             evt_pos = evt.GetPosition()
             evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos)
 
-            try:
-                refresh_rect = wx.Rect(
-                        topLeft=self.mouse_left_down['point'],
-                        bottomRight=evt_pos
-                        )
-                draw_rect = wx.Rect(
+            if self.mouse_left_down['mark_pt'] is not None:
+                # we are dragging a mark
+                drag_rect = wx.Rect(
                         topLeft=self.mouse_left_down['point_unscroll'],
                         bottomRight=evt_pos_unscroll
                         )
-            except TypeError as exc:
-                # topLeft = NoneType. Attempting to double click image or something
-                # DEBUG DELETEME
-                #LOGGER.warning("Drag but TypeError: returning")
-                return
-            except Exception as exc:
-                raise exc
-
-            # NOTE: Yosemite VM always says a click is a drag.  Does non-VM?
-            # only set self.is_dragging flag if draw_rect is ever not (1,1)
-            #   (1,1) means start point and end point the same (i.e. click)
-            # Once set, only on_left_up can unset self.is_dragging
-            if draw_rect.GetSize() != (1, 1):
-                self.is_dragging = True
+                # NOTE: Yosemite VM always says a click is a drag.  Does non-VM?
+                # only set self.is_dragging flag if draw_rect is ever not (1,1)
+                #   (1,1) means start point and end point the same (i.e. click)
+                # Once set, only on_left_up can unset self.is_dragging
+                if drag_rect.GetSize() != (1, 1):
+                    self.is_dragging = True
+                else:
+                    return
             else:
-                return
-                # DEBUG DELETEME
-                #LOGGER.warning("Drag with (1,1) size")
+                try:
+                    refresh_rect = wx.Rect(
+                            topLeft=self.mouse_left_down['point'],
+                            bottomRight=evt_pos
+                            )
+                    draw_rect = wx.Rect(
+                            topLeft=self.mouse_left_down['point_unscroll'],
+                            bottomRight=evt_pos_unscroll
+                            )
+                except TypeError as exc:
+                    # topLeft = NoneType. Attempting to double click image or something
+                    # DEBUG DELETEME
+                    #LOGGER.warning("Drag but TypeError: returning")
+                    return
+                except Exception as exc:
+                    raise exc
 
-            # make copy of rects, inflate by 1 pixel in each dir, union
-            #   inflate by same width as rubberband rect Pen width
-            refresh_rect.Inflate(1, 1)
+                # NOTE: Yosemite VM always says a click is a drag.  Does non-VM?
+                # only set self.is_dragging flag if draw_rect is ever not (1,1)
+                #   (1,1) means start point and end point the same (i.e. click)
+                # Once set, only on_left_up can unset self.is_dragging
+                if draw_rect.GetSize() != (1, 1):
+                    self.is_dragging = True
+                else:
+                    return
 
-            self.rubberband_draw_rect = draw_rect
-            last_refresh_rect = self.rubberband_refresh_rect
-            self.rubberband_refresh_rect = refresh_rect
+                # make copy of rects, inflate by 1 pixel in each dir, union
+                #   inflate by same width as rubberband rect Pen width
+                refresh_rect.Inflate(1, 1)
 
-            # union of this and last refresh_rect
-            if last_refresh_rect is not None:
-                refresh_rect.Union(last_refresh_rect)
+                self.rubberband_draw_rect = draw_rect
+                last_refresh_rect = self.rubberband_refresh_rect
+                self.rubberband_refresh_rect = refresh_rect
 
-            self.RefreshRect(refresh_rect)
-            self.Update()
+                # union of this and last refresh_rect
+                if last_refresh_rect is not None:
+                    refresh_rect.Union(last_refresh_rect)
+
+                self.RefreshRect(refresh_rect)
+                self.Update()
 
     @debug_fxn
     def marks_in_box_img(self, box_corner1_img, box_corner2_img):
@@ -1522,40 +1539,44 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             return
 
         if self.is_dragging:
-            # use last rubberband_refresh_rect
-            refresh_rect = self.rubberband_refresh_rect
-            self.RefreshRect(refresh_rect)
-            self.Update()
+            if self.rubberband_refresh_rect is not None:
+                # use last rubberband_refresh_rect
+                refresh_rect = self.rubberband_refresh_rect
+                self.RefreshRect(refresh_rect)
+                self.Update()
 
-            # finish drag by selecting everything in box
-            box_corner2_win = evt.GetPosition()
+                # finish drag by selecting everything in box
+                box_corner2_win = evt.GetPosition()
 
-            box_corner1_img = (
-                    self.mouse_left_down['img_x'],
-                    self.mouse_left_down['img_y']
-                    )
-            box_corner2_img = self.win2img_coord(box_corner2_win)
+                box_corner1_img = (
+                        self.mouse_left_down['img_x'],
+                        self.mouse_left_down['img_y']
+                        )
+                box_corner2_img = self.win2img_coord(box_corner2_win)
 
-            marks_in_box = self.marks_in_box_img(box_corner1_img, box_corner2_img)
+                marks_in_box = self.marks_in_box_img(box_corner1_img, box_corner2_img)
 
-            # get key modifiers for this left_up event
-            mods = evt.GetModifiers()
-            is_appending = mods & wx.MOD_SHIFT
+                # get key modifiers for this left_up event
+                mods = evt.GetModifiers()
+                is_appending = mods & wx.MOD_SHIFT
 
-            if not is_appending:
-                marks_unselected = [
-                        x for x in self.marks_selected if x not in marks_in_box]
-                marks_new_selected = [
-                        x for x in marks_in_box if x not in self.marks_selected]
-                self.marks_selected = marks_in_box
-                for mark in marks_new_selected + marks_unselected:
-                    self.refresh_mark_area(mark)
-            else:
-                for mark in marks_in_box:
-                    if mark not in self.marks_selected:
-                        self.marks_selected.append(mark)
+                if not is_appending:
+                    marks_unselected = [
+                            x for x in self.marks_selected if x not in marks_in_box]
+                    marks_new_selected = [
+                            x for x in marks_in_box if x not in self.marks_selected]
+                    self.marks_selected = marks_in_box
+                    for mark in marks_new_selected + marks_unselected:
                         self.refresh_mark_area(mark)
-            self.Update()
+                else:
+                    for mark in marks_in_box:
+                        if mark not in self.marks_selected:
+                            self.marks_selected.append(mark)
+                            self.refresh_mark_area(mark)
+                self.Update()
+            else:
+                # finish moving mark by placing it
+                pass
         else:
             # finish click by selecting at point with args from on_left_down
             # NOTE: if this was a double click, then mouse_left_down is None
@@ -1720,17 +1741,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             self.marks_num_update_fxn(len(self.marks))
 
     @debug_fxn
-    def select_at_point(self, click_img_x, click_img_y, is_appending, is_toggling=False):
-        """Given mouse click point coords, select mark (if any) that was clicked
+    def _mark_that_is_near_click(self, click_img_x, click_img_y):
+        # default if no point is close enough
+        sel_pt = None
 
-        Args:
-            click_img_x (float): x location of click in img coords
-            click_img_y (float): y location of click in img coords
-            is_appending (bool): True if we are appending selection, False if
-                this mark becomes only selection
-            is_toggling (bool): Default False. True to toggle selection status
-                of this mark
-        """
         # how close can click to a mark to say we clicked on it
         prox_img = const.PROXIMITY_PX / self.zoom_val
         poss_points = []
@@ -1742,11 +1756,30 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     )
             if dist < prox_img:
                 poss_points.append((x, y, dist))
+
         # if we're near at least one point, find the closest point to the click
         if poss_points:
             poss_points.sort(key=lambda pt: pt[2])
             sel_pt = poss_points[0][0:2]
 
+        return sel_pt
+
+    @debug_fxn
+    def select_at_point(self, click_img_x, click_img_y, is_appending, is_toggling=False):
+        """Given mouse click point coords, select mark (if any) that was clicked
+
+        Args:
+            click_img_x (float): x location of click in img coords
+            click_img_y (float): y location of click in img coords
+            is_appending (bool): True if we are appending selection, False if
+                this mark becomes only selection
+            is_toggling (bool): Default False. True to toggle selection status
+                of this mark
+        """
+        # if we clicked on/near a mark, which mark?
+        sel_pt = self._mark_that_is_near_click(click_img_x, click_img_y)
+
+        if sel_pt is not None:
             # click: select only this mark (deselect all others)
             # shift-click: add this mark select to prev selects
             # control-click: toggle this mark select
