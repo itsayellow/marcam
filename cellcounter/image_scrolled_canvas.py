@@ -370,6 +370,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         if evt.Dragging() and evt.LeftIsDown():
+            # NOTE: Yosemite VM always says a click is a drag.  Does non-VM?
+            # only set self.is_dragging flag if draw_rect is ever not (1,1)
+            #   (1,1) means start point and end point the same (i.e. click)
+            # Once set, only on_left_up can unset self.is_dragging
+            if draw_rect.GetSize() != (1, 1):
+                self.is_dragging = True
+            else:
+                return
+
+            # TODO: if self.mouse_left_down['point_unscroll'] is near a point
+            #   then move that point, don't drag a box
             evt_pos = evt.GetPosition()
             evt_pos_unscroll = self.CalcUnscrolledPosition(evt_pos)
 
@@ -389,15 +400,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 return
             except Exception as exc:
                 raise exc
-
-            # NOTE: Yosemite VM always says a click is a drag.  Does non-VM?
-            # only set self.is_dragging flag if draw_rect is ever not (1,1)
-            #   (1,1) means start point and end point the same (i.e. click)
-            # Once set, only on_left_up can unset self.is_dragging
-            if draw_rect.GetSize() != (1, 1):
-                self.is_dragging = True
-            else:
-                pass
 
             # make copy of rects, inflate by 1 pixel in each dir, union
             #   inflate by same width as rubberband rect Pen width
