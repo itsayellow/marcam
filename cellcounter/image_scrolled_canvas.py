@@ -726,6 +726,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # scroll so center of image at same point it used to be
         self.scroll_to_img_at_wincenter()
 
+        # TODO: on Windows we need a Refresh/Update cycle as well,
+        #   should we skip on Mac (and possibly unix?)
+        # force a paint event with Refresh and Update
+        self.Refresh()
+        self.Update()
+
     # GetClientSize is size of window graphics not including scrollbars
     # GetSize is size of window including scrollbars
     @debug_fxn
@@ -1301,21 +1307,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.get_img_wincenter()
 
     # TODO
-    def saveSnapshot(self, dcSource):
+    def export_to_image(self, dc_source):
+        dc_source = self.img_dc
+
         # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
-        size = dcSource.Size
+        size = dc_source.GetSize()
 
         # Create a Bitmap that will later on hold the screenshot image
         # Note that the Bitmap must have a size big enough to hold the screenshot
         # -1 means using the current default colour depth
-        bmp = wx.EmptyBitmap(size.width, size.height)
+        bmp = wx.Bitmap(size.width, size.height)
 
         # Create a memory DC that will be used for actually taking the screenshot
-        memDC = wx.MemoryDC()
-
+        #   use bmp as SelectObject
         # Tell the memory DC to use our Bitmap
         # all drawing action on the memory DC will go to the Bitmap now
-        memDC.SelectObject(bmp)
+        memDC = wx.MemoryDC(bmp)
 
         # Blit (in this case copy) the actual screen on the memory DC
         # and thus the Bitmap
@@ -1323,7 +1330,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             0, # Copy to this Y coordinate
             size.width, # Copy this width
             size.height, # Copy this height
-            dcSource, # From where do we copy?
+            dc_source, # From where do we copy?
             0, # What's the X offset in the original DC?
             0  # What's the Y offset in the original DC?
             )
@@ -1333,7 +1340,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         memDC.SelectObject(wx.NullBitmap)
 
         img = bmp.ConvertToImage()
-        img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
+        #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
+        return img
 
 # really a Scrolled Window
 class ImageScrolledCanvasMarks(ImageScrolledCanvas):
