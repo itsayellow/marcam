@@ -1321,6 +1321,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.marks = []
         self.marks_num_update_fxn = marks_num_update_fxn
         self.marks_selected = []
+        self.mark_move_prev = None
 
         # tell parent UI new total marks number (0)
         self._update_mark_total()
@@ -1461,6 +1462,23 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     self.is_dragging = True
                 else:
                     return
+
+                if self.mark_move_prev is None:
+                    self.mark_move_prev = self.mouse_left_down['mark_pt']
+               
+                # TODO: why does this get screwed up for zooming?
+                #   old mark is deleted, but new mark gets put somewhere else
+                # delete mark at prev mouse location
+                if self.mark_move_prev in self.marks:
+                    self.delete_mark(self.mark_move_prev, internal=True)
+                    self.refresh_mark_area(self.mark_move_prev)
+                # add mark at new mouse location
+                (img_x, img_y) = self.win2img_coord(evt_pos)
+                new_mark_loc = (int(img_x), int(img_y))
+                self.mark_point(new_mark_loc, internal=True)
+                self.refresh_mark_area(new_mark_loc)
+                self.mark_move_prev = new_mark_loc
+
             else:
                 try:
                     refresh_rect = wx.Rect(
@@ -1501,7 +1519,9 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     refresh_rect.Union(last_refresh_rect)
 
                 self.RefreshRect(refresh_rect)
-                self.Update()
+
+            # update window for all rects needing refresh
+            self.Update()
 
     @debug_fxn
     def marks_in_box_img(self, box_corner1_img, box_corner2_img):
@@ -1541,6 +1561,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         if self.is_dragging:
             if self.rubberband_refresh_rect is not None:
                 # use last rubberband_refresh_rect
+                # TODO: do we need these?  Shouldn't we stop drawing the 
+                #   rubberband_draw_rect?
                 refresh_rect = self.rubberband_refresh_rect
                 self.RefreshRect(refresh_rect)
                 self.Update()
@@ -1576,6 +1598,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 self.Update()
             else:
                 # finish moving mark by placing it
+                # TODO
                 pass
         else:
             # finish click by selecting at point with args from on_left_down
@@ -1595,6 +1618,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.is_dragging = False
         self.rubberband_refresh_rect = None
         self.rubberband_draw_rect = None
+
+        self.mark_move_prev = None
 
         if self.HasCapture():
             self.ReleaseMouse()
@@ -1886,7 +1911,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 (src_size_x + sq_size)*scale_dc, (src_size_y + sq_size)*scale_dc)
 
         # draw rubber-band box AFTER marks, so it is drawn on top of them
-        if self.is_dragging:
+        if self.rubberband_draw_rect is not None:
             self.draw_rubberband_box(dc)
 
     @debug_fxn
