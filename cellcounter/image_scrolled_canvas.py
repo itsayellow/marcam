@@ -1319,7 +1319,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.marks = []
         self.marks_num_update_fxn = marks_num_update_fxn
         self.marks_selected = []
-        self.mark_move_prev = None
+        self.mark_dragging = None
+        self.mark_dragging_is_sel = None
 
         # tell parent UI new total marks number (0)
         self._update_mark_total()
@@ -1410,7 +1411,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             is_appending = mods & wx.MOD_SHIFT
             is_toggling = mods & wx.MOD_CONTROL
 
-            # get mark location if we started click/drag on a mark
+            # get mark location if this is click/drag on a mark
             sel_pt = self._mark_that_is_near_click(img_x, img_y)
             mark_pt_is_sel = sel_pt in self.marks_selected
 
@@ -1462,23 +1463,21 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     self.is_dragging = True
                 else:
                     return
-
-                if self.mark_move_prev is None:
-                    self.mark_move_prev = self.mouse_left_down['mark_pt']
-               
-                # delete mark at prev mouse location
-                if self.mark_move_prev in self.marks:
-                    self.delete_mark(self.mark_move_prev, internal=True)
-                    self.refresh_mark_area(self.mark_move_prev)
-                # add mark at new mouse location
+                # delete orig loc of dragged mark from normal list of marks
+                #   at start of drag
+                if self.mouse_left_down['mark_pt'] in self.marks:
+                    self.delete_mark(self.mouse_left_down['mark_pt'])
+                    # update selection flag now that we know we're in drag
+                    self.mark_dragging_is_sel = self.mouse_left_down['mark_pt_is_sel']
+                    # set old mark location to mark_dragging
+                    self.mark_dragging = self.mouse_left_down['mark_pt']
+                # refresh old mark location
+                self.refresh_mark_area(self.mark_dragging)
+                # update dragged mark location
                 (img_x, img_y) = self.win2img_coord(evt_pos)
-                new_mark_loc = (int(img_x), int(img_y))
-                self.mark_point(new_mark_loc, internal=True)
-                if self.mouse_left_down['mark_pt_is_sel']:
-                    self.marks_selected.append(new_mark_loc)
-                self.refresh_mark_area(new_mark_loc)
-                self.mark_move_prev = new_mark_loc
-
+                self.mark_dragging = (int(img_x), int(img_y))
+                # refresh new mark location
+                self.refresh_mark_area(self.mark_dragging)
             else:
                 try:
                     refresh_rect = wx.Rect(
@@ -1558,6 +1557,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             wx.CallAfter(evt.Skip)
             return
 
+        evt_pos = evt.GetPosition()
         if self.is_dragging:
             if self.rubberband_refresh_rect is not None:
                 # use last rubberband_refresh_rect
@@ -1568,13 +1568,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 self.Update()
 
                 # finish drag by selecting everything in box
-                box_corner2_win = evt.GetPosition()
-
                 box_corner1_img = (
                         self.mouse_left_down['img_x'],
                         self.mouse_left_down['img_y']
                         )
-                box_corner2_img = self.win2img_coord(box_corner2_win)
+                box_corner2_img = self.win2img_coord(evt_pos)
 
                 marks_in_box = self.marks_in_box_img(box_corner1_img, box_corner2_img)
 
@@ -1595,11 +1593,27 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                         if mark not in self.marks_selected:
                             self.marks_selected.append(mark)
                             self.refresh_mark_area(mark)
+                # TODO necessary?
                 self.Update()
             else:
-                # finish moving mark by placing it
-                # TODO
-                pass
+                # delete orig position of dragged mark from normal list of marks
+                #   if still present
+                if self.mouse_left_down['mark_pt'] in self.marks:
+                    self.delete_mark(self.mouse_left_down['mark_pt'])
+                    # set old mark location to mark_dragging
+                    self.mark_dragging = self.mouse_left_down['mark_pt']
+                # refresh old mark location
+                self.refresh_mark_area(self.mark_dragging)
+
+                # finish moving mark by placing it in mark list
+                (img_x, img_y) = self.win2img_coord(evt_pos)
+                mark_new_loc = (int(img_x), int(img_y))
+                self.mark_point(mark_new_loc, internal=True)
+                # if dragged mark was selected, add to marks_selected too
+                if self.mark_dragging_is_sel:
+                    self.marks_selected.append(mark_new_loc)
+                # TODO necessary?
+                self.Update()
         else:
             # finish click by selecting at point with args from on_left_down
             # NOTE: if this was a double click, then mouse_left_down is None
@@ -1619,7 +1633,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.rubberband_refresh_rect = None
         self.rubberband_draw_rect = None
 
-        self.mark_move_prev = None
+        self.mark_dragging = None
+        self.mark_dragging_is_sel = None
 
         if self.HasCapture():
             self.ReleaseMouse()
@@ -1646,7 +1661,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 )
 
     @debug_fxn
-    def mark_point(self, img_point, internal=False):
+    def mark_point(self, img_point, internal=False, dup_ok=False):
         """Mark image coordinates with cross in window
 
         Args:
@@ -1657,7 +1672,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         """
         LOGGER.info("MSC: point (%d, %d)", img_point[0], img_point[1])
 
-        if img_point in self.marks:
+        if not dup_ok and img_point in self.marks:
             # mark already exists, doing nothing
             return False
 
@@ -1934,6 +1949,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
                 if cross_win not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
+                    # TODO: is this unnecessary and obsolete?
                     pts_in_box.append(cross_win)
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
@@ -1950,10 +1966,27 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
                 if cross_win not in pts_in_box:
                     # only draw bitmap if this is not a duplicate
+                    # TODO: is this unnecessary and obsolete?
                     pts_in_box.append(cross_win)
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(
                             const.CROSS_11x11_YELLOW_BMP,
+                            cross_win - (6, 6)
+                            )
+
+        if self.mark_dragging is not None:
+            (x, y) = self.mark_dragging
+            if (src_pos_x <= x <= src_pos_x + src_size_x and
+                    src_pos_y <= y <= src_pos_y + src_size_y):
+                cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
+                if self.mark_dragging_is_sel:
+                    dc.DrawBitmap(
+                            const.CROSS_11x11_YELLOW_BMP,
+                            cross_win - (6, 6)
+                            )
+                else:
+                    dc.DrawBitmap(
+                            const.CROSS_11x11_RED_BMP,
                             cross_win - (6, 6)
                             )
