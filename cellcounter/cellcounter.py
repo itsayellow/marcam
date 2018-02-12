@@ -696,7 +696,8 @@ class MainWindow(wx.Frame):
         self.selallitem.Enable(True)
         # NOTE: must use this, can't talk to ToolbarBase item directly
         self.toolbar.ToggleTool(self.select_tool_id, True) # works!
-        self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_NONE))
+        # NOTE: wx.CURSOR_NONE doesn't work on Windows
+        self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_ARROW))
 
     @debug_fxn
     def on_markmode(self, evt):
