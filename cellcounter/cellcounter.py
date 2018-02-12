@@ -794,6 +794,9 @@ class MainWindow(wx.Frame):
         Args:
             imdata_path (str): path to .cco file to open
         """
+        # init img_ok to False in case we don't load image
+        img_ok = False
+
         # first load image from zip
         try:
             with zipfile.ZipFile(imdata_path, 'r') as container_fh:
