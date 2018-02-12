@@ -1300,6 +1300,40 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   update wincenter position manually
         self.get_img_wincenter()
 
+    # TODO
+    def saveSnapshot(self, dcSource):
+        # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
+        size = dcSource.Size
+
+        # Create a Bitmap that will later on hold the screenshot image
+        # Note that the Bitmap must have a size big enough to hold the screenshot
+        # -1 means using the current default colour depth
+        bmp = wx.EmptyBitmap(size.width, size.height)
+
+        # Create a memory DC that will be used for actually taking the screenshot
+        memDC = wx.MemoryDC()
+
+        # Tell the memory DC to use our Bitmap
+        # all drawing action on the memory DC will go to the Bitmap now
+        memDC.SelectObject(bmp)
+
+        # Blit (in this case copy) the actual screen on the memory DC
+        # and thus the Bitmap
+        memDC.Blit( 0, # Copy to this X coordinate
+            0, # Copy to this Y coordinate
+            size.width, # Copy this width
+            size.height, # Copy this height
+            dcSource, # From where do we copy?
+            0, # What's the X offset in the original DC?
+            0  # What's the Y offset in the original DC?
+            )
+
+        # Select the Bitmap out of the memory DC by selecting a new
+        # uninitialized Bitmap
+        memDC.SelectObject(wx.NullBitmap)
+
+        img = bmp.ConvertToImage()
+        img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
 
 # really a Scrolled Window
 class ImageScrolledCanvasMarks(ImageScrolledCanvas):
