@@ -908,8 +908,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             dc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
-        # TODO: separate private function to handle coordinate mapping?
-
         # if no image, fill area with background color
         if self.img_dc is None:
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
@@ -1468,8 +1466,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 if self.mark_move_prev is None:
                     self.mark_move_prev = self.mouse_left_down['mark_pt']
                
-                # TODO: why does this get screwed up for zooming?
-                #   old mark is deleted, but new mark gets put somewhere else
                 # delete mark at prev mouse location
                 if self.mark_move_prev in self.marks:
                     self.delete_mark(self.mark_move_prev, internal=True)
