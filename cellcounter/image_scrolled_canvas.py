@@ -1414,6 +1414,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
             # get mark location if we started click/drag on a mark
             sel_pt = self._mark_that_is_near_click(img_x, img_y)
+            mark_pt_is_sel = sel_pt in self.marks_selected
 
             # record args so on on_left_up can select at point if this
             #   turns out to be a click and not a drag
@@ -1424,7 +1425,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     'img_y':img_y,
                     'is_appending':is_appending,
                     'is_toggling':is_toggling,
-                    'mark_pt':sel_pt
+                    'mark_pt':sel_pt,
+                    'mark_pt_is_sel':mark_pt_is_sel
                     }
 
         # continue processing click, for example shifting focus to app
@@ -1476,6 +1478,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 (img_x, img_y) = self.win2img_coord(evt_pos)
                 new_mark_loc = (int(img_x), int(img_y))
                 self.mark_point(new_mark_loc, internal=True)
+                self.marks_selected.append(new_mark_loc)
                 self.refresh_mark_area(new_mark_loc)
                 self.mark_move_prev = new_mark_loc
 
