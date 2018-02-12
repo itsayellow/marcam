@@ -1478,7 +1478,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 (img_x, img_y) = self.win2img_coord(evt_pos)
                 new_mark_loc = (int(img_x), int(img_y))
                 self.mark_point(new_mark_loc, internal=True)
-                self.marks_selected.append(new_mark_loc)
+                if self.mouse_left_down['mark_pt_is_sel']:
+                    self.marks_selected.append(new_mark_loc)
                 self.refresh_mark_area(new_mark_loc)
                 self.mark_move_prev = new_mark_loc
 
