@@ -1306,7 +1306,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   update wincenter position manually
         self.get_img_wincenter()
 
-    # TODO
+    @debug_fxn
     def export_to_image(self):
         dc_source = self.img_dc
 
@@ -2032,3 +2032,66 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                             const.CROSS_11x11_RED_BMP,
                             cross_win - (6, 6)
                             )
+
+    @debug_fxn
+    def export_to_image(self):
+        dc_source = self.img_dc
+
+        # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
+        size = dc_source.GetSize()
+
+        # Create a Bitmap that will later on hold the screenshot image
+        # Note that the Bitmap must have a size big enough to hold the screenshot
+        # -1 means using the current default colour depth
+        bmp = wx.Bitmap(size.width, size.height)
+
+        # Create a memory DC that will be used for actually taking the screenshot
+        #   use bmp as SelectObject
+        # Tell the memory DC to use our Bitmap
+        # all drawing action on the memory DC will go to the Bitmap now
+        memDC = wx.MemoryDC(bmp)
+
+        # Blit (in this case copy) the actual screen on the memory DC
+        # and thus the Bitmap
+        memDC.Blit( 0, # Copy to this X coordinate
+            0, # Copy to this Y coordinate
+            size.width, # Copy this width
+            size.height, # Copy this height
+            dc_source, # From where do we copy?
+            0, # What's the X offset in the original DC?
+            0  # What's the Y offset in the original DC?
+            )
+
+        # draw marks visible in this region
+        # need to multiply by scale_dc to get back to div1 image coordinates
+        # expand by const.CROSS_REFRESH_SQ_SIZE/2 in each dir to repaint
+        #   portion of mark even if center of mark is not in region
+        sq_size = const.CROSS_REFRESH_SQ_SIZE
+
+        # save current self.zoom_val and self.img_coord_xlation_{x,y}
+        zoom_val_save = self.zoom_val
+        img_coord_xlation_x_save = self.img_coord_xlation_x
+        img_coord_xlation_y_save = self.img_coord_xlation_y
+        # set all mark-affecting parameters for output memDC
+        self.zoom_val = 1
+        self.img_coord_xlation_x = 0
+        self.img_coord_xlation_y = 0
+
+        self.draw_marks(
+                memDC,
+                (0 - sq_size/2), (0 - sq_size/2),
+                (size.width + sq_size), (size.height + sq_size))
+
+        # restore self.zoom_val and self.img_coord_xlation_{x,y}
+        self.zoom_val = zoom_val_save 
+        self.img_coord_xlation_x = img_coord_xlation_x_save 
+        self.img_coord_xlation_y = img_coord_xlation_y_save 
+
+        # Select the Bitmap out of the memory DC by selecting a new
+        # uninitialized Bitmap
+        memDC.SelectObject(wx.NullBitmap)
+
+        img = bmp.ConvertToImage()
+        #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
+        return img
+
