@@ -372,6 +372,10 @@ class MainWindow(wx.Frame):
                 'Save Image Data As...\tShift+Ctrl+S',
                 'Save .cco image and data file'
                 )
+        eiitem = file_menu.Append(wx.ID_SAVEAS,
+                'Export Image...\tCtrl+E',
+                'Export image with marks to image file'
+                )
         menubar.Append(file_menu, '&File')
         # Edit
         edit_menu = wx.Menu()
@@ -500,6 +504,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_close, citem)
         self.Bind(wx.EVT_MENU, self.on_save, sitem)
         self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
+        self.Bind(wx.EVT_MENU, self.on_export_image, eiitem)
         self.Bind(wx.EVT_MENU, self.on_quit, quititem)
         # open recent handler
         self.Bind(wx.EVT_MENU_RANGE, self.on_open_recent,
@@ -953,8 +958,12 @@ class MainWindow(wx.Frame):
         if self.save_filepath:
             (default_dir, default_filename) = os.path.split(self.save_filepath)
         else:
+            if isinstance(self.img_path, list):
+                img_path = self.img_path[0]
+            else:
+                img_path = self.img_path
             (img_path_root, _) = os.path.splitext(
-                    os.path.basename(self.img_path)
+                    os.path.basename(img_path)
                     )
             default_save_path = img_path_root + ".cco"
             (default_dir, default_filename) = os.path.split(default_save_path)
@@ -978,6 +987,37 @@ class MainWindow(wx.Frame):
             self.save_notify()
             # add successful file save as to file history
             self.file_history.AddFileToHistory(pathname)
+
+    @debug_fxn
+    def on_export_image(self, evt):
+        if self.save_filepath:
+            (default_dir, default_filename) = os.path.split(self.save_filepath)
+        else:
+            if isinstance(self.img_path, list):
+                img_path = self.img_path[0]
+            else:
+                img_path = self.img_path
+            (img_path_root, _) = os.path.splitext(
+                    os.path.basename(img_path)
+                    )
+            default_save_path = img_path_root + ".png"
+            (default_dir, default_filename) = os.path.split(default_save_path)
+        with wx.FileDialog(
+                self,
+                "Export Image and Marks as Image",
+                wildcard=wx.Image.GetImageExtWildcard(),
+                style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+                defaultDir=default_dir,
+                #defaultFile=default_filename,
+                ) as file_dialog:
+
+            if file_dialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+
+            # save the current contents in the file
+            pathname = file_dialog.GetPath()
+            export_image = self.img_panel.export_to_image()
+            export_image.SaveFile(pathname)
 
     @debug_fxn
     def on_undo(self, evt):

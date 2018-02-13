@@ -1307,7 +1307,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.get_img_wincenter()
 
     # TODO
-    def export_to_image(self, dc_source):
+    def export_to_image(self):
         dc_source = self.img_dc
 
         # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
