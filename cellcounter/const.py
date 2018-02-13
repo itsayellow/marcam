@@ -1,7 +1,7 @@
 import wx 
 
 # version string
-VERSION_STR = "0.1.0"
+VERSION_STR = "0.2.0"
 
 # OR'able debug values
 DEBUG_KEYPRESS = 2
