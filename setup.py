@@ -19,7 +19,7 @@ data_files = [
         'cellcounter/help_selectmode_off.png',
         'cellcounter/cellcounter_doc.icns'
         ]
-version = '0.1.0'
+version = '0.2.0'
 
 
 if sys.platform == 'darwin':
