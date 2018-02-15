@@ -9,18 +9,6 @@ APP_NAME = 'cellcounter'
 USER_CONFIG_DIR = appdirs.user_config_dir(APP_NAME)
 USER_LOG_DIR = appdirs.user_log_dir(APP_NAME)
 
-# OR'able debug values
-DEBUG_KEYPRESS = 2
-DEBUG_TIMING = 4
-DEBUG_MISC = 1024
-
-# global debug level
-DEBUG = 0
-DEBUG = DEBUG_TIMING | DEBUG_MISC
-DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
-DEBUG = DEBUG_TIMING | DEBUG_MISC
-DEBUG = DEBUG_KEYPRESS | DEBUG_TIMING | DEBUG_MISC
-
 # what is one step of zoom?
 MAG_STEP = 1.1
 # how many zoom steps from minimum to maximum zoom, centered on zoom 100%

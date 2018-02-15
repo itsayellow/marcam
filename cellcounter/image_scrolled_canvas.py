@@ -4,9 +4,6 @@ import wx
 import numpy as np
 
 import const
-from const import (
-        DEBUG, DEBUG_TIMING, DEBUG_MISC
-        )
 import common
 
 # logging stuff
@@ -607,7 +604,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         event_type = evt.GetEventType()
         orientation = evt.GetOrientation()
-        if DEBUG & DEBUG_MISC:
+        if LOGGER.isEnabledFor(logging.DEBUG):
             log_string = "MSC:"
             if orientation == wx.HORIZONTAL:
                 log_string += " wx.HORIZONTAL"
@@ -741,7 +738,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.PaintEvent): no useful information
         """
-        if DEBUG & DEBUG_TIMING:
+        if LOGGER.isEnabledFor(logging.DEBUG):
             start_onpaint = time.time()
 
         # TODO: flicker is a problem in Windows.
@@ -764,7 +761,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.paint_rect(paint_dc, rect)
             upd.Next()
 
-        if DEBUG & DEBUG_TIMING:
+        if LOGGER.isEnabledFor(logging.DEBUG):
             onpaint_eltime = time.time() - start_onpaint
             panel_size = self.GetSize()
             LOGGER.info(
@@ -1082,7 +1079,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_y = img.GetHeight()
         self.img_size_x = img.GetWidth()
 
-        if DEBUG & DEBUG_TIMING:
+        if LOGGER.isEnabledFor(logging.DEBUG):
             staticdc_start = time.time()
 
         # store image data into a static DCs
@@ -1105,7 +1102,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_dc_div4 = wx.MemoryDC()
         self.img_dc_div4.SelectObject(img_bmp)
 
-        if DEBUG & DEBUG_TIMING:
+        if LOGGER.isEnabledFor(logging.DEBUG):
             staticdc_eltime = time.time() - staticdc_start
             LOGGER.info("TIM:Create MemoryDCs: %.3fs", staticdc_eltime)
 
