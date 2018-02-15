@@ -9,7 +9,7 @@ APP_NAME = 'cellcounter'
 USER_CONFIG_DIR = appdirs.user_config_dir(APP_NAME)
 USER_LOG_DIR = appdirs.user_log_dir(APP_NAME)
 
-# what is one step of zoom?
+# what is one step of zoom? (1.2 might be better)
 MAG_STEP = 1.1
 # how many zoom steps from minimum to maximum zoom, centered on zoom 100%
 TOTAL_MAG_STEPS = 69
