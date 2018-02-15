@@ -356,9 +356,6 @@ class MainWindow(wx.Frame):
         # File
         open_recent_menu = wx.Menu()
         file_menu = wx.Menu()
-        quititem = file_menu.Append(wx.ID_EXIT,
-                'Quit', 'Quit application\tCtrl+Q'
-                )
         oitem = file_menu.Append(wx.ID_OPEN,
                 'Open Image...\tCtrl+O', 'Open image file'
                 )
@@ -377,6 +374,10 @@ class MainWindow(wx.Frame):
         eiitem = file_menu.Append(wx.ID_SAVEAS,
                 'Export Image...\tCtrl+E',
                 'Export image with marks to image file'
+                )
+        # TODO: On Windows Ctrl+Q doesn't appear, need to be Alt-F4?
+        quititem = file_menu.Append(wx.ID_EXIT,
+                'Quit', 'Quit application\tCtrl+Q'
                 )
         menubar.Append(file_menu, '&File')
         # Edit
