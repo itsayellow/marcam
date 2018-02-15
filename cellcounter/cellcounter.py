@@ -74,31 +74,33 @@ def logging_setup(log_level=logging.DEBUG):
             "%(asctime)s:%(name)s:%(levelname)s:\n%(message)s"
             )
 
-    # log to stderr if command-line executable
-    # log to ~/cellcounter.log if running from App
-    # TODO: better log location
-    if EXE_DIR.endswith("Cellcounter.app/Contents/Resources"):
-        # file handler
-        file_handler = logging.FileHandler(os.path.join(os.path.expanduser("~"), 'cellcounter.log'))
-        file_handler.setLevel(log_level)
-        # add global formatter to file handler
-        file_handler.setFormatter(formatter)
+    # make sure log file dir exists
+    os.makedirs(const.USER_LOG_DIR, exist_ok=True)
 
-        # use file handler for mac-wrapped app
-        my_handler = file_handler
-    else:
-        # console handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(log_level)
-        # add formatter to console handler
-        console_handler.setFormatter(formatter)
+    # canonical logfile full path
+    logfile_path = os.path.join(
+            const.USER_LOG_DIR,
+            'cellcounter.log'
+            )
 
-        # use console handler for command-line execution
-        my_handler = console_handler
+    # rename all old log files
+    #   (log.txt.2 -> log.txt.3, log.txt.1 -> log.txt.2, log.txt -> log.txt.1
+    num_logfile_hist = 10
+    for i in range(num_logfile_hist-1, -1, -1):
+        fname = logfile_path + ".%d"%i if i != 0 else logfile_path
+        fname_plus_1 = logfile_path + ".%d"%(i+1)
+        if os.path.exists(fname):
+            os.replace(fname, fname_plus_1)
+
+    # file handler
+    file_handler = logging.FileHandler(logfile_path)
+    file_handler.setLevel(log_level)
+    # add global formatter to file handler
+    file_handler.setFormatter(formatter)
 
     for logger_name in LOGGED_MODULES:
         logging.getLogger(logger_name).setLevel(log_level)
-        logging.getLogger(logger_name).addHandler(my_handler)
+        logging.getLogger(logger_name).addHandler(file_handler)
 
     # inform log of the global log level
     log_eff_level = LOGGER.getEffectiveLevel()
