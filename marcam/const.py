@@ -5,7 +5,7 @@ import appdirs
 VERSION_STR = "0.3.0"
 
 # OS-dependent application directories
-APP_NAME = 'marcam'
+APP_NAME = 'Marcam'
 USER_CONFIG_DIR = appdirs.user_config_dir(APP_NAME)
 USER_LOG_DIR = appdirs.user_log_dir(APP_NAME)
 
