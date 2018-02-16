@@ -2,10 +2,10 @@ import wx
 import appdirs
 
 # version string
-VERSION_STR = "0.2.0"
+VERSION_STR = "0.3.0"
 
 # OS-dependent application directories
-APP_NAME = 'cellcounter'
+APP_NAME = 'marcam'
 USER_CONFIG_DIR = appdirs.user_config_dir(APP_NAME)
 USER_LOG_DIR = appdirs.user_log_dir(APP_NAME)
 

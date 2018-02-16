@@ -44,7 +44,7 @@ LOGGER = logging.getLogger(__name__)
 debug_fxn = common.debug_fxn_factory(LOGGER)
 
 
-class CellcounterFormatter(logging.Formatter):
+class MarcamFormatter(logging.Formatter):
     def format(self, record):
         """Overload of default format fxn, make all lines after first indented
         of a log message
@@ -70,7 +70,7 @@ def logging_setup(log_level=logging.DEBUG):
     """
 
     # create formatter
-    formatter = CellcounterFormatter(
+    formatter = MarcamFormatter(
             "%(asctime)s:%(name)s:%(levelname)s:\n%(message)s"
             )
 
@@ -80,7 +80,7 @@ def logging_setup(log_level=logging.DEBUG):
     # canonical logfile full path
     logfile_path = os.path.join(
             const.USER_LOG_DIR,
-            'cellcounter.log'
+            'marcam.log'
             )
 
     # rename all old log files
@@ -373,7 +373,7 @@ class ImageWindow(wx.Frame):
         self.toolbar = None
 
         # App configuration
-        self.config = wx.Config("Cellcounter", "itsayellow.com")
+        self.config = wx.Config("Marcam", "itsayellow.com")
 
         # File history
         self.file_history = wx.FileHistory()
@@ -438,8 +438,8 @@ class ImageWindow(wx.Frame):
         menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
-        aboutitem = help_menu.Append(wx.ID_ABOUT, "&About Cellcounter")
-        helpitem = help_menu.Append(wx.ID_HELP, "&Cellcounter Help")
+        aboutitem = help_menu.Append(wx.ID_ABOUT, "&About Marcam")
+        helpitem = help_menu.Append(wx.ID_HELP, "&Marcam Help")
         menubar.Append(help_menu, "&Help")
 
         self.SetMenuBar(menubar)
@@ -566,7 +566,7 @@ class ImageWindow(wx.Frame):
 
         # finally render app
         self.SetSize((800, 600))
-        self.SetTitle('Cellcounter')
+        self.SetTitle('Marcam')
         self.Centre()
 
         #self.img_panel.subpanel.Centre()
@@ -788,7 +788,7 @@ class ImageWindow(wx.Frame):
         #   native *.cco files
         #   Image files
         #   *.1sc files (Bio-Rad)
-        wildcard_cco = "Cellcounter Image Data files (*.cco)|*.cco|"
+        wildcard_cco = "Marcam Image Data files (*.cco)|*.cco|"
         wildcard_img = "Image Files " + wx.Image.GetImageExtWildcard() + "|"
         wildcard_1sc = "Bio-Rad 1sc Files|*.1sc"
         wildcard = wildcard_cco + wildcard_img + wildcard_1sc
@@ -1182,10 +1182,10 @@ class ImageWindow(wx.Frame):
             evt (wx.): TODO
         """
         info = wx.adv.AboutDialogInfo()
-        info.SetName("Cellcounter")
+        info.SetName("Marcam")
         info.SetVersion(const.VERSION_STR)
-        info.SetDescription("Counting cells in biological images.")
-        info.SetCopyright("(C) 2017 Matthew A. Clapp")
+        info.SetDescription("Counting objects in images.")
+        info.SetCopyright("(C) 2017-2018 Matthew A. Clapp")
 
         wx.adv.AboutBox(info)
 
@@ -1208,13 +1208,13 @@ class HelpFrame(wx.Frame):
         super().__init__(*args, **kwargs)
         # use wx.html2 to allow better rendering (and CSS in future)
         self.html = wx.html2.WebView.New(self)
-        self.html.LoadURL('file://' + os.path.join(ICON_DIR, 'cellcounter_help.html'))
+        self.html.LoadURL('file://' + os.path.join(ICON_DIR, 'marcam_help.html'))
 
-        self.SetTitle("Cellcounter Help")
+        self.SetTitle("Marcam Help")
         self.SetSize((500, 600))
 
 # TODO: investigate wx.PyApp, including wx.PyApp.Mac* functions
-class CellcounterApp(wx.App):
+class MarcamApp(wx.App):
     def __init__(self, open_files, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not open_files:
@@ -1291,7 +1291,7 @@ def debug_main():
     """
     # log situation before doing anything else
     LOGGER.info("%s UTC", time.asctime(time.gmtime()))
-    LOGGER.info("Cellcounter version %s", const.VERSION_STR)
+    LOGGER.info("Marcam version %s", const.VERSION_STR)
     # os.uname doesn't work on Windows (platform.uname more portable)
     uname_obj = platform.uname()
     log_string = "platform.uname" + "\n"
@@ -1336,7 +1336,7 @@ def main(argv=None):
     LOGGER.info(repr(args))
 
     # setup main wx event loop
-    myapp = CellcounterApp(args.srcfiles)
+    myapp = MarcamApp(args.srcfiles)
     myapp.MainLoop()
 
     # return 0 to indicate "status OK"
