@@ -1213,7 +1213,7 @@ class HelpFrame(wx.Frame):
 class CellcounterApp(wx.App):
     def __init__(self, open_files, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if open_files is None:
+        if not open_files:
             open_files = [None,]
         main_win = MainWindow(open_files[0], None)
         # binding to App is surest way to catch keys accurately, not having
