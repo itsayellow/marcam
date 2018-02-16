@@ -354,7 +354,7 @@ class DropTarget(wx.FileDropTarget):
 
 
 class MainWindow(wx.Frame):
-    def __init__(self, srcfiles, *args, **kwargs):
+    def __init__(self, srcfile, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # internal state
@@ -380,12 +380,12 @@ class MainWindow(wx.Frame):
         self.file_history.Load(self.config)
 
         self.init_ui()
-        if srcfiles:
+        if srcfile is not None:
             # TODO: are we able to load more than one file?
-            if srcfiles[0].endswith(".cco"):
-                self.load_ccofile_from_path(srcfiles[0])
+            if srcfile.endswith(".cco"):
+                self.load_ccofile_from_path(srcfile)
             else:
-                self.load_image_from_file(srcfiles[0])
+                self.load_image_from_file(srcfile)
 
     @debug_fxn
     def init_ui(self):
@@ -1210,6 +1210,26 @@ class HelpFrame(wx.Frame):
         self.SetSize((500, 600))
 
 
+class CellcounterApp(wx.App):
+    def __init__(self, open_files, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if open_files is None:
+            open_files = [None,]
+        main_win = MainWindow(open_files[0], None)
+        # binding to App is surest way to catch keys accurately, not having
+        #   to worry about which widget has focus
+        # binding to a panel can end up it not having focus, just donk, donk, donk,
+        #   bell sounds
+        # The reason is because a Panel will not accept focus if it has a child
+        #   window that can accept focus
+        #   wx.Panel.SetFocus: "In practice, if you call this method and the
+        #   control has at least one child window, the focus will be given to the
+        #   child window."
+        #   (see wx.Panel.AcceptsFocus, wx.Panel.SetFocus,
+        #   wx.Panel.SetFocusIgnoringChildren)
+        self.Bind(wx.EVT_KEY_DOWN, main_win.on_key_down)
+        self.Bind(wx.EVT_KEY_UP, main_win.on_key_up)
+
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
 
@@ -1294,21 +1314,7 @@ def main(argv=None):
     LOGGER.info(repr(args))
 
     # setup main wx event loop
-    myapp = wx.App()
-    main_win = MainWindow(args.srcfiles, None)
-    # binding to App is surest way to catch keys accurately, not having
-    #   to worry about which widget has focus
-    # binding to a panel can end up it not having focus, just donk, donk, donk,
-    #   bell sounds
-    # The reason is because a Panel will not accept focus if it has a child
-    #   window that can accept focus
-    #   wx.Panel.SetFocus: "In practice, if you call this method and the
-    #   control has at least one child window, the focus will be given to the
-    #   child window."
-    #   (see wx.Panel.AcceptsFocus, wx.Panel.SetFocus,
-    #   wx.Panel.SetFocusIgnoringChildren)
-    myapp.Bind(wx.EVT_KEY_DOWN, main_win.on_key_down)
-    myapp.Bind(wx.EVT_KEY_UP, main_win.on_key_up)
+    myapp = CellcounterApp(args.srcfiles)
     myapp.MainLoop()
 
     # return 0 to indicate "status OK"
