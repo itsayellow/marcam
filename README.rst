@@ -1,12 +1,12 @@
-Cellcounter
-===========
+Marcam
+======
 
 Summary
 -------
 
-Cellcounter - a cross-platform biology application to automate counting of cells in images.  
+Marcam - a cross-platform biology application to automate counting of cells in images.  
 
-Copyright 2017 Matthew A. Clapp
+Copyright 2017-2018 Matthew A. Clapp
 
 Building
 --------
@@ -29,7 +29,7 @@ To make a new icon
 
 Notes
 --------
-Application preferences on Mac stored at: "~/Library/Preferences/Cellcounter Preferences"
+Application preferences on Mac stored at: "~/Library/Preferences/Marcam Preferences"
 
 References
 ----------
