@@ -1215,7 +1215,11 @@ class CellcounterApp(wx.App):
         super().__init__(*args, **kwargs)
         if not open_files:
             open_files = [None,]
-        main_win = MainWindow(open_files[0], None)
+
+        file_windows = []
+        for open_file in open_files:
+            file_windows.append(MainWindow(open_file, None))
+
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
         # binding to a panel can end up it not having focus, just donk, donk, donk,
@@ -1227,8 +1231,8 @@ class CellcounterApp(wx.App):
         #   child window."
         #   (see wx.Panel.AcceptsFocus, wx.Panel.SetFocus,
         #   wx.Panel.SetFocusIgnoringChildren)
-        self.Bind(wx.EVT_KEY_DOWN, main_win.on_key_down)
-        self.Bind(wx.EVT_KEY_UP, main_win.on_key_up)
+        self.Bind(wx.EVT_KEY_DOWN, file_windows[0].on_key_down)
+        self.Bind(wx.EVT_KEY_UP, file_windows[0].on_key_up)
 
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
