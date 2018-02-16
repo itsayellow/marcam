@@ -7,7 +7,7 @@ import const
 import common
 
 # logging stuff
-#   not necessary to make a handler since we will be child logger of cellcounter
+#   not necessary to make a handler since we will be child logger of marcam
 #   we use NullHandler so if no config at top level we won't default to printing
 #       to stderr
 LOGGER = logging.getLogger(__name__)
