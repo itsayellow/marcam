@@ -2,13 +2,13 @@
 
 # add current git hash to VERSION_STR in const.py, saving backup file
 githash=(`git rev-parse --short HEAD`)
-cp cellcounter/const.py cellcounter/const.py.bak
-perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" cellcounter/const.py
+cp marcam/const.py marcam/const.py.bak
+perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" marcam/const.py
 
 # check if const.py got corrupted
-syntax_error=(`python3 -m py_compile cellcounter/const.py`)
+syntax_error=(`python3 -m py_compile marcam/const.py`)
 if [ ! -z "$syntax_error" ]; then
-    echo "gen_app corrupted cellcounter/const.py"
+    echo "gen_app corrupted marcam/const.py"
     exit 1
 fi
 
@@ -19,4 +19,4 @@ source virt/bin/activate
 python3 setup.py py2app
 
 # move back original const.py file
-mv cellcounter/const.py.bak cellcounter/const.py
+mv marcam/const.py.bak marcam/const.py

@@ -12,10 +12,10 @@ else
     mkdir dist/dmg_dir
 fi
 
-cp -a dist/Cellcounter.app dist/dmg_dir/
+cp -a dist/Marcam.app dist/dmg_dir/
 
 srcfolder="dist/dmg_dir"
-volname="Cellcounter"
+volname="Marcam"
 fs="HFS+"
 size="200000"
 
@@ -30,11 +30,11 @@ device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" | egrep
 # DEBUG DELETE ME
 echo $device
 
-# pause to workaround "Can't get disk Cellcounter" (-1728) issue
+# pause to workaround "Can't get disk Marcam" (-1728) issue
 sleep 2
 
 # put icns in path for custom volume icon
-cp misc/cellcounter_drive.icns /Volumes/${volname}/.VolumeIcon.icns
+cp misc/marcam_drive.icns /Volumes/${volname}/.VolumeIcon.icns
 # set bit to indicate custom icon
 #   SetFile is "deprecated" but man page doesn't say what to do instead !
 SetFile -a C /Volumes/${volname}
@@ -56,7 +56,7 @@ echo '
             set icon size of theViewOptions to 128
             set background picture of theViewOptions to file ".background:arrow.png"
             make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
-            set position of item "Cellcounter.app" of container window to {100, 100}
+            set position of item "Marcam.app" of container window to {100, 100}
             set position of item "Applications" of container window to {375, 100}
             update without registering applications
             delay 5
@@ -74,7 +74,7 @@ sync
 # eject volume
 hdiutil detach  /Volumes/"${volname}"
 
-hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "dist/Cellcounter.dmg"
+hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "dist/Marcam.dmg"
 
 # clean up
 rm pack.temp.dmg
