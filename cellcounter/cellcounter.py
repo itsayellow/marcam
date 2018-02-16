@@ -109,6 +109,46 @@ def logging_setup(log_level=logging.DEBUG):
             "Global log level set to %s", logging.getLevelName(log_eff_level)
             )
 
+@debug_fxn
+def create_config_file(config_filepath):
+    config_data = {}
+    config_data['winsize'] = [800, 600]
+
+    try:
+        config_fh = open(config_filepath, 'w')
+    except:
+        # TODO specific exception
+        LOGGER.warn("Can't create config file: %s", config_filepath)
+        return config_data
+
+    json.dump(
+            config_data,
+            config_fh,
+            )
+    config_fh.close()
+
+    return config_data
+
+@debug_fxn
+def init_config():
+    config_data = None
+
+    # create config dir if necessary
+    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
+
+    config_filepath = os.path.join(
+            const.USER_CONFIG_DIR,
+            "config.json"
+            )
+    # if no config.json file, create
+    try:
+        with open(config_filepath, 'r') as config_fh:
+            config_data = json.load(config_fh)
+    except:
+        # TODO specific exception
+        config_data = create_config_file(config_filepath)
+
+    return config_data 
 
 @debug_fxn
 def file1sc_to_Image(file1sc_file):
@@ -1243,6 +1283,9 @@ def main(argv=None):
 
     # setup logging
     logging_setup(log_level)
+
+    # fetch configuration from file
+    config_data = init_config()
 
     # get basic debug info
     debug_main()
