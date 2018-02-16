@@ -9,15 +9,15 @@ import sys
 
 
 # global
-mainscript = 'cellcounter/cellcounter.py'
-app_name = 'Cellcounter'
+mainscript = 'marcam/marcam.py'
+app_name = 'Marcam'
 data_files = [
-        'cellcounter/pointer32.png',
-        'cellcounter/marktool32.png',
-        'cellcounter/cellcounter_help.html',
-        'cellcounter/help_markmode_off.png',
-        'cellcounter/help_selectmode_off.png',
-        'cellcounter/cellcounter_doc.icns'
+        'marcam/pointer32.png',
+        'marcam/marktool32.png',
+        'marcam/marcam_help.html',
+        'marcam/help_markmode_off.png',
+        'marcam/help_selectmode_off.png',
+        'marcam/marcam_doc.icns'
         ]
 version = '0.2.0'
 
@@ -27,22 +27,22 @@ if sys.platform == 'darwin':
     # Mac and py2app
     py2app_options = {
             'argv_emulation':True, # if enabled makes app start minimized (?)
-            'iconfile':'cellcounter/cellcounter.icns',
+            'iconfile':'marcam/marcam.icns',
             'optimize':1, # try one level of optimization?
             'plist':{
                 'CFBundleName':app_name,
                 'CFBundleDisplayName':app_name,
-                'CFBundleGetInfoString':'Count cells in biological images',
-                'CFBundleIdentifier':'com.itsayellow.osx.cellcounter',
+                'CFBundleGetInfoString':'Count objects in images',
+                'CFBundleIdentifier':'com.itsayellow.osx.marcam',
                 'CFBundleVersion':version,
                 'CFBundleShortVersionString':version,
                 'NSHumanReadableCopyright': u"Copyright © 2017, " \
                         "Matthew A. Clapp, All Rights Reserved",
                 'CFBundleDocumentTypes':[
                     {
-                        'CFBundleTypeName':'Cellcounter Image Data File',
+                        'CFBundleTypeName':'Marcam Image Data File',
                         'CFBundleTypeRole':'Editor',
-                        'CFBundleTypeIconFile':'cellcounter_doc.icns',
+                        'CFBundleTypeIconFile':'marcam_doc.icns',
                         'LSHandlerRank': "Owner",
                         'LSItemContentTypes': ["com.itsayellow.cco"],
                         },
@@ -76,7 +76,7 @@ if sys.platform == 'darwin':
                     {
                         'UTTypeConformsTo': ["public.data"],
                         'UTTypeIdentifier': "com.itsayellow.cco",
-                        'UTTypeDescription': "Cellcounter Image Data File",
+                        'UTTypeDescription': "Marcam Image Data File",
                         'UTTypeTagSpecification': {'public.filename-extension': "cco"}
                         },
                     {
