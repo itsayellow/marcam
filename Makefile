@@ -5,9 +5,9 @@ clean:
 clean_all:
 	rm -rf build dist virt
 
-app: dist/Cellcounter.app
+app: dist/Marcam.app
 
-dmg: dist/Cellcounter.dmg
+dmg: dist/Marcam.dmg
 
 virt: requirements.txt
 	@echo ""
@@ -17,14 +17,14 @@ virt: requirements.txt
 	rm -rf virt
 	./build_scripts/gen_virt
 
-dist/Cellcounter.app: cellcounter/* virt
+dist/Marcam.app: marcam/* virt
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make app"
 	@echo ""
 	./build_scripts/gen_app
 
-dist/Cellcounter.dmg: dist/Cellcounter.app
+dist/Marcam.dmg: dist/Marcam.app
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make dmg"
