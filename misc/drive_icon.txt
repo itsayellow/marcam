@@ -16,4 +16,4 @@ Export image (just the icon with placement) as its own png file, iconlayer.png
 gen_icon iconlayer.png
     (to make iconlayer.icns)
 
-blend_icns Removable.icns iconlayer.icns cellcounter_drive.icns
+blend_icns Removable.icns iconlayer.icns marcam_drive.icns
