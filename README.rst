@@ -4,7 +4,7 @@ Marcam
 Summary
 -------
 
-Marcam - a cross-platform biology application to automate counting of cells in images.  
+Marcam - a cross-platform application to automate counting of objects in images.  
 
 Copyright 2017-2018 Matthew A. Clapp
 
