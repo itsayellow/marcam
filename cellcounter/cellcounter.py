@@ -353,7 +353,7 @@ class DropTarget(wx.FileDropTarget):
         return True
 
 
-class MainWindow(wx.Frame):
+class ImageWindow(wx.Frame):
     def __init__(self, srcfile, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -577,6 +577,10 @@ class MainWindow(wx.Frame):
                 "MSC:self.img_panel size: %s",
                 repr(self.img_panel.GetClientSize())
                 )
+
+    @debug_fxn
+    def register_key_bind(self, key_bind_fxn):
+        self.key_bind_fxn = key_bind_fxn
 
     @debug_fxn
     def marks_num_update(self, mark_total):
@@ -1209,21 +1213,22 @@ class HelpFrame(wx.Frame):
         self.SetTitle("Cellcounter Help")
         self.SetSize((500, 600))
 
-
+# TODO: investigate wx.PyApp, including wx.PyApp.Mac* functions
 class CellcounterApp(wx.App):
     def __init__(self, open_files, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not open_files:
             open_files = [None,]
 
-        file_windows = []
+        self.file_windows = []
         for open_file in open_files:
-            file_windows.append(MainWindow(open_file, None))
+            # add to file_windows list of file windows
+            self.file_windows.append(ImageWindow(open_file, None))
 
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
-        # binding to a panel can end up it not having focus, just donk, donk, donk,
-        #   bell sounds
+        # binding to a frame or panel can end up it not having focus,
+        #   just donk, donk, donk bell sounds
         # The reason is because a Panel will not accept focus if it has a child
         #   window that can accept focus
         #   wx.Panel.SetFocus: "In practice, if you call this method and the
@@ -1231,8 +1236,21 @@ class CellcounterApp(wx.App):
         #   child window."
         #   (see wx.Panel.AcceptsFocus, wx.Panel.SetFocus,
         #   wx.Panel.SetFocusIgnoringChildren)
-        self.Bind(wx.EVT_KEY_DOWN, file_windows[0].on_key_down)
-        self.Bind(wx.EVT_KEY_UP, file_windows[0].on_key_up)
+        self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
+        self.Bind(wx.EVT_KEY_UP, self.on_key_up)
+
+    def on_key_down(self, evt):
+        # TODO: handle App global events: Quit, New..., Open...
+        for file_window in self.file_windows:
+            if file_window.IsActive():
+                file_window.on_key_down(evt)
+
+    def on_key_up(self, evt):
+        # TODO: handle App global events: Quit, New..., Open...
+        for file_window in self.file_windows:
+            if file_window.IsActive():
+                file_window.on_key_up(evt)
+
 
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
@@ -1291,7 +1309,7 @@ def debug_main():
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
 def main(argv=None):
-    """Main entrance into app.  Setup logging, MainWindow, and enter main loop
+    """Main entrance into app.  Setup logging, create App, and enter main loop
     """
     # process command line if started from there
     # Also, py2app sends file(s) to open via argv if file is dragged on top
