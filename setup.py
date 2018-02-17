@@ -44,7 +44,7 @@ if sys.platform == 'darwin':
                         'CFBundleTypeRole':'Editor',
                         'CFBundleTypeIconFile':'marcam_doc.icns',
                         'LSHandlerRank': "Owner",
-                        'LSItemContentTypes': ["com.itsayellow.cco"],
+                        'LSItemContentTypes': ["com.itsayellow.mcm"],
                         },
                     {
                         'CFBundleTypeName':'Bio-Rad Gel File',
@@ -75,9 +75,9 @@ if sys.platform == 'darwin':
                 'UTExportedTypeDeclarations': [
                     {
                         'UTTypeConformsTo': ["public.data"],
-                        'UTTypeIdentifier': "com.itsayellow.cco",
+                        'UTTypeIdentifier': "com.itsayellow.mcm",
                         'UTTypeDescription': "Marcam Image Data File",
-                        'UTTypeTagSpecification': {'public.filename-extension': "cco"}
+                        'UTTypeTagSpecification': {'public.filename-extension': "mcm"}
                         },
                     {
                         'UTTypeConformsTo': ["public.data"],

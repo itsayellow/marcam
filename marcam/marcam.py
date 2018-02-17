@@ -382,8 +382,8 @@ class ImageWindow(wx.Frame):
         self.init_ui()
         if srcfile is not None:
             # TODO: are we able to load more than one file?
-            if srcfile.endswith(".cco"):
-                self.load_ccofile_from_path(srcfile)
+            if srcfile.endswith(".mcm"):
+                self.load_mcmfile_from_path(srcfile)
             else:
                 self.load_image_from_file(srcfile)
 
@@ -400,16 +400,16 @@ class ImageWindow(wx.Frame):
                 'Open Image...\tCtrl+O', 'Open image file'
                 )
         orecentitem = file_menu.Append(wx.ID_ANY,
-                'Open Recent', open_recent_menu, 'Open recent .cco files')
+                'Open Recent', open_recent_menu, 'Open recent .mcm files')
         citem = file_menu.Append(wx.ID_CLOSE,
                 'Close\tCtrl+W', 'Close image'
                 )
         sitem = file_menu.Append(wx.ID_SAVE,
-                'Save Image Data\tCtrl+S', 'Save .cco image and data file'
+                'Save Image Data\tCtrl+S', 'Save .mcm image and data file'
                 )
         saitem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S',
-                'Save .cco image and data file'
+                'Save .mcm image and data file'
                 )
         eiitem = file_menu.Append(wx.ID_SAVEAS,
                 'Export Image...\tCtrl+E',
@@ -785,13 +785,13 @@ class ImageWindow(wx.Frame):
             return
 
         # create wildcard for:
-        #   native *.cco files
+        #   native *.mcm files
         #   Image files
         #   *.1sc files (Bio-Rad)
-        wildcard_cco = "Marcam Image Data files (*.cco)|*.cco|"
+        wildcard_mcm = "Marcam Image Data files (*.mcm)|*.mcm|"
         wildcard_img = "Image Files " + wx.Image.GetImageExtWildcard() + "|"
         wildcard_1sc = "Bio-Rad 1sc Files|*.1sc"
-        wildcard = wildcard_cco + wildcard_img + wildcard_1sc
+        wildcard = wildcard_mcm + wildcard_img + wildcard_1sc
         open_file_dialog = wx.FileDialog(self,
                 "Open Image file",
                 wildcard=wildcard,
@@ -805,12 +805,12 @@ class ImageWindow(wx.Frame):
         img_path = open_file_dialog.GetPath()
 
         (_, imgfile_ext) = os.path.splitext(img_path)
-        if imgfile_ext == ".cco":
-            self.load_ccofile_from_path(img_path)
+        if imgfile_ext == ".mcm":
+            self.load_mcmfile_from_path(img_path)
             self.save_filepath = img_path
             # add successful file open to file history
             self.file_history.AddFileToHistory(img_path)
-            # we just loaded .cco file, so have nothing to save
+            # we just loaded .mcm file, so have nothing to save
             self.save_notify()
         else:
             # image or *.1sc file
@@ -833,7 +833,7 @@ class ImageWindow(wx.Frame):
 
         # get path from file_history
         img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
-        self.load_ccofile_from_path(img_path)
+        self.load_mcmfile_from_path(img_path)
         self.save_filepath = img_path
         # we just loaded, so have nothing to save
         self.save_notify()
@@ -841,11 +841,11 @@ class ImageWindow(wx.Frame):
         self.file_history.AddFileToHistory(img_path)
 
     @debug_fxn
-    def load_ccofile_from_path(self, imdata_path):
-        """Load native app .cco file
+    def load_mcmfile_from_path(self, imdata_path):
+        """Load native app .mcm file
 
         Args:
-            imdata_path (str): path to .cco file to open
+            imdata_path (str): path to .mcm file to open
         """
         # init img_ok to False in case we don't load image
         img_ok = False
@@ -886,7 +886,7 @@ class ImageWindow(wx.Frame):
                         self.img_panel.mark_point_list(marks)
             if img_ok:
                 self.img_panel.init_image(img)
-                # reset filepath for cco file to nothing if we load new image
+                # reset filepath for mcm file to nothing if we load new image
                 # self.img_path if from zip is list, zipfile, member_name
                 self.img_path = [imdata_path, img_name]
                 self.save_filepath = None
@@ -935,7 +935,7 @@ class ImageWindow(wx.Frame):
         if img_ok:
             self.img_panel.init_image(img)
             self.statusbar.SetStatusText("Image " + img_file + " loaded OK.")
-            # reset filepath for cco file to nothing if we load new image
+            # reset filepath for mcm file to nothing if we load new image
             self.img_path = img_file
             self.save_filepath = None
         else:
@@ -968,7 +968,7 @@ class ImageWindow(wx.Frame):
 
         # reset edit history
         self.app_history.reset()
-        # reset filepath for cco file to nothing on close
+        # reset filepath for mcm file to nothing on close
         self.save_filepath = None
         # reset content_saved in case user didn't save
         self.content_saved = True
@@ -1012,11 +1012,11 @@ class ImageWindow(wx.Frame):
             (img_path_root, _) = os.path.splitext(
                     os.path.basename(img_path)
                     )
-            default_save_path = img_path_root + ".cco"
+            default_save_path = img_path_root + ".mcm"
             (default_dir, default_filename) = os.path.split(default_save_path)
         with wx.FileDialog(
                 self,
-                "Save CCO file", wildcard="CCO files (*.cco)|*.cco",
+                "Save MCM file", wildcard="MCM files (*.mcm)|*.mcm",
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 defaultDir=default_dir,
                 defaultFile=default_filename,
@@ -1134,7 +1134,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def save_img_data(self, imdata_path):
-        """Save image and mark locations to .cco zipfile
+        """Save image and mark locations to .mcm zipfile
 
         Args:
             imdata_path (str): full path to filename to save to
@@ -1148,7 +1148,7 @@ class ImageWindow(wx.Frame):
             with open(self.img_path, 'rb') as img_fh:
                 temp_img.write(img_fh.read())
         else:
-            # zipfile cco file
+            # zipfile mcm file
             with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
                 temp_img.write(container_fh.open(self.img_path[1]).read())
         temp_img.close()
