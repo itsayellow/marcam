@@ -6,7 +6,6 @@ Usage:
 """
 
 import sys
-from marcam import const
 
 
 # global
@@ -20,7 +19,7 @@ data_files = [
         'marcam/help_selectmode_off.png',
         'marcam/marcam_doc.icns'
         ]
-version = const.VERSION_STR
+version = "0.3.0"
 
 
 if sys.platform == 'darwin':
