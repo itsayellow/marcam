@@ -354,7 +354,7 @@ class DropTarget(wx.FileDropTarget):
 
 
 class ImageWindow(wx.Frame):
-    def __init__(self, srcfile, *args, **kwargs):
+    def __init__(self, parent, srcfile, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # internal state
@@ -363,6 +363,7 @@ class ImageWindow(wx.Frame):
         self.img_path = None
         self.save_filepath = None
         self.temp_scroll_zoom_state = None
+        self.parent = parent
 
         # GUI-related
         self.html = None
@@ -609,11 +610,7 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        is_closed = self.on_close(None)
-
-        if is_closed:
-            # save file history to config
-            self.Close()
+        self.parent.quit_app()
 
     @debug_fxn
     def on_key_down(self, evt):
@@ -778,11 +775,7 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        # first close current image (if it exists)
-        is_closed = self.on_close(None)
-
-        if not is_closed:
-            return
+        # TODO: open new window if this window is not blank
 
         # create wildcard for:
         #   native *.mcm files
@@ -804,6 +797,14 @@ class ImageWindow(wx.Frame):
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
 
+        # TODO: img_panel needs fxn to ask if no image
+        if self.img_panel.img_dc is not None:
+            self.parent.new_frame_open_file(img_path)
+        else:
+            self.open_image(img_path)
+
+    @debug_fxn
+    def open_image(self, img_path):
         (_, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".mcm":
             self.load_mcmfile_from_path(img_path)
@@ -818,6 +819,7 @@ class ImageWindow(wx.Frame):
             # TODO: make it think it needs save immediately
 
 
+
     @debug_fxn
     def on_open_recent(self, evt):
         """File->Open Recent-> <File> menu handler for Main Window
@@ -825,6 +827,8 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
+        # TODO: open new window if this window is not blank
+
         # first close current image (if it exists)
         is_closed = self.on_close(None)
 
@@ -945,6 +949,10 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_close(self, evt):
+        self.parent.close_frame(self.GetId())
+
+    @debug_fxn
+    def close_image(self, keep_win_open=False):
         """Close Image menu handler for Main Window
 
         Args:
@@ -964,18 +972,17 @@ class ImageWindow(wx.Frame):
             elif save_query_response == wx.ID_CANCEL:
                 return False
 
-        # else: proceed asking to the user the new file to open
-
-        # reset edit history
-        self.app_history.reset()
-        # reset filepath for mcm file to nothing on close
-        self.save_filepath = None
-        # reset content_saved in case user didn't save
-        self.content_saved = True
-        # make scrolled window show no image
-        self.img_panel.set_no_image()
-        # update statusbar text
-        self.statusbar.SetStatusText('Ready.')
+        if keep_win_open:
+            # reset edit history
+            self.app_history.reset()
+            # reset filepath for mcm file to nothing on close
+            self.save_filepath = None
+            # reset content_saved in case user didn't save
+            self.content_saved = True
+            # make scrolled window show no image
+            self.img_panel.set_no_image()
+            # update statusbar text
+            self.statusbar.SetStatusText('Ready.')
 
         return True
 
@@ -1223,7 +1230,7 @@ class MarcamApp(wx.App):
         self.file_windows = []
         for open_file in open_files:
             # add to file_windows list of file windows
-            self.file_windows.append(ImageWindow(open_file, None))
+            self.file_windows.append(ImageWindow(self, open_file, None))
 
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
@@ -1250,6 +1257,33 @@ class MarcamApp(wx.App):
         for file_window in self.file_windows:
             if file_window.IsActive():
                 file_window.on_key_up(evt)
+
+    @debug_fxn
+    def close_frame(self, frame_to_close_id, force_close=False):
+        frame_closed = False
+
+        for frame in self.file_windows:
+            if frame.GetId() == frame_to_close_id:
+                keep_win_open = not force_close and not len(self.file_windows) > 1
+                frame_closed = frame.close_image(keep_win_open)
+
+                if not keep_win_open and frame_closed:
+                    self.file_windows.remove(frame)
+                    frame.Close()
+                break
+        return frame_closed
+
+    @debug_fxn
+    def new_frame_open_file(self, open_file):
+        self.file_windows.append(ImageWindow(self, open_file, None))
+
+    @debug_fxn
+    def quit_app(self):
+        open_windows = self.file_windows.copy()
+        for frame in open_windows:
+            frame_closed = self.close_frame(frame.GetId(), force_close=True)
+            if not frame_closed:
+                break
 
 
 def process_command_line(argv):
