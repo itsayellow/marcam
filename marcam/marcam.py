@@ -1325,8 +1325,10 @@ class MarcamApp(wx.App):
         Args:
             fileNames: list of file names to open
         """
-        # TODO: why on startup do we get the last command-line argument
-        #   sent to this?  Can be the script name
+        # NOTE: works great in bundled app,
+        #   but cmd-line invocation causes fileNames to be last argument
+        #       of cmd-line, even if that's the script name
+        # TODO: figure out how to ignore bad openFiles from command-line
         LOGGER.debug(fileNames)
         for open_file in fileNames:
             # add to file_windows list of file windows
