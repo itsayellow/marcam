@@ -113,24 +113,23 @@ def logging_setup(log_level=logging.DEBUG):
 def create_config_file(config_filepath):
     config_data = {}
     config_data['winsize'] = [800, 600]
+    config_data['debug'] = False
 
     try:
-        config_fh = open(config_filepath, 'w')
+        with open(config_filepath, 'w') as config_fh:
+            json.dump(
+                    config_data,
+                    config_fh,
+                    )
     except:
         # TODO specific exception
         LOGGER.warn("Can't create config file: %s", config_filepath)
         return config_data
 
-    json.dump(
-            config_data,
-            config_fh,
-            )
-    config_fh.close()
-
     return config_data
 
 @debug_fxn
-def init_config():
+def load_config():
     config_data = None
 
     # create config dir if necessary
@@ -149,6 +148,32 @@ def init_config():
         config_data = create_config_file(config_filepath)
 
     return config_data 
+
+@debug_fxn
+def save_config(config_data):
+    config_data = None
+
+    # create config dir if necessary
+    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
+
+    config_filepath = os.path.join(
+            const.USER_CONFIG_DIR,
+            "config.json"
+            )
+    # if no config.json file, create
+    try:
+        with open(config_filepath, 'w') as config_fh:
+            config_data = json.dump(
+                    config_data,
+                    config_fh
+                    )
+        status = True
+    except:
+        # TODO specific exception
+        LOGGER.warn("Can't save config file: %s", config_filepath)
+        status = False
+
+    return status
 
 @debug_fxn
 def file1sc_to_Image(file1sc_file):
@@ -568,7 +593,7 @@ class ImageWindow(wx.Frame):
         # finally render app
         self.SetSize((800, 600))
         self.SetTitle('Marcam')
-        self.Centre()
+        #self.Centre()
 
         #self.img_panel.subpanel.Centre()
 
@@ -1222,12 +1247,19 @@ class HelpFrame(wx.Frame):
 
 # TODO: investigate wx.PyApp, including wx.PyApp.Mac* functions
 class MarcamApp(wx.App):
-    def __init__(self, open_files, *args, **kwargs):
+    @debug_fxn
+    def __init__(self, open_files, config_data, *args, **kwargs):
+        # reset this before calling super().__init__(), which calls
+        #   MacOpenFiles()
+        self.file_windows = []
+
         super().__init__(*args, **kwargs)
+
+        self.config_data = config_data
+
         if not open_files:
             open_files = [None,]
 
-        self.file_windows = []
         for open_file in open_files:
             # add to file_windows list of file windows
             self.file_windows.append(ImageWindow(self, open_file, None))
@@ -1285,6 +1317,20 @@ class MarcamApp(wx.App):
             if not frame_closed:
                 break
 
+    @debug_fxn
+    def MacOpenFiles(self, fileNames):
+        """wx.PyApp standard function, over-ridden to accept Cocoa
+        "openFiles" events
+
+        Args:
+            fileNames: list of file names to open
+        """
+        # TODO: why on startup do we get the last command-line argument
+        #   sent to this?  Can be the script name
+        LOGGER.debug(fileNames)
+        for open_file in fileNames:
+            # add to file_windows list of file windows
+            self.file_windows.append(ImageWindow(self, open_file, None))
 
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
@@ -1361,7 +1407,7 @@ def main(argv=None):
     logging_setup(log_level)
 
     # fetch configuration from file
-    config_data = init_config()
+    config_data = load_config()
 
     # get basic debug info
     debug_main()
@@ -1370,7 +1416,7 @@ def main(argv=None):
     LOGGER.info(repr(args))
 
     # setup main wx event loop
-    myapp = MarcamApp(args.srcfiles)
+    myapp = MarcamApp(args.srcfiles, config_data)
     myapp.MainLoop()
 
     # return 0 to indicate "status OK"
