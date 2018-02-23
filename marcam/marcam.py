@@ -1334,7 +1334,7 @@ class MarcamApp(wx.App):
             # open in blank window, or
             #   add to file_windows list of file windows
             # TODO: img_panel needs fxn to ask if no image
-            if self.file_windows[0].has_image():
+            if not self.file_windows or self.file_windows[0].has_image():
                 self.new_frame_open_file(open_file)
             else:
                 self.file_windows[0].open_image(open_file)
