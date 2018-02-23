@@ -26,7 +26,7 @@ if sys.platform == 'darwin':
     from setuptools import setup
     # Mac and py2app
     py2app_options = {
-            'argv_emulation':True, # if enabled makes app start minimized (?)
+            #'argv_emulation':True, # if enabled makes app start minimized (?)
             'iconfile':'marcam/marcam.icns',
             'optimize':1, # try one level of optimization?
             'plist':{

@@ -800,8 +800,6 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        # TODO: open new window if this window is not blank
-
         # create wildcard for:
         #   native *.mcm files
         #   Image files
@@ -1331,8 +1329,13 @@ class MarcamApp(wx.App):
         # TODO: figure out how to ignore bad openFiles from command-line
         LOGGER.debug(fileNames)
         for open_file in fileNames:
-            # add to file_windows list of file windows
-            self.file_windows.append(ImageWindow(self, open_file, None))
+            # open in blank window, or
+            #   add to file_windows list of file windows
+            # TODO: img_panel needs fxn to ask if no image
+            if self.file_windows[0].img_dc is not None:
+                self.new_frame_open_file(img_path)
+            else:
+                self.file_windows[0].open_image(img_path)
 
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
