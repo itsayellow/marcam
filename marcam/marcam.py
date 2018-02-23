@@ -619,6 +619,10 @@ class ImageWindow(wx.Frame):
         self.marks_num_display.SetLabel("%d"%mark_total)
 
     @debug_fxn
+    def has_image(self):
+        return self.img_panel.img_dc is not None
+    
+    @debug_fxn
     def on_evt_close(self, evt):
         """EVT_CLOSE Handler: anytime user quits program in any way
 
@@ -840,8 +844,6 @@ class ImageWindow(wx.Frame):
             # image or *.1sc file
             self.load_image_from_file(img_path)
             # TODO: make it think it needs save immediately
-
-
 
     @debug_fxn
     def on_open_recent(self, evt):
@@ -1332,7 +1334,7 @@ class MarcamApp(wx.App):
             # open in blank window, or
             #   add to file_windows list of file windows
             # TODO: img_panel needs fxn to ask if no image
-            if self.file_windows[0].img_dc is not None:
+            if self.file_windows[0].has_image():
                 self.new_frame_open_file(open_file)
             else:
                 self.file_windows[0].open_image(open_file)
