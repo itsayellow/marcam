@@ -1257,7 +1257,7 @@ class MarcamApp(wx.App):
 
         self.config_data = config_data
 
-        if not open_files:
+        if not self.file_windows and not open_files:
             open_files = [None,]
 
         for open_file in open_files:
