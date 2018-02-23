@@ -13,7 +13,3 @@ python3 -m venv virt
 source virt/bin/activate
 # install required python packages into virtual environment
 pip3 install -r requirements.txt
-
-# patch py2app so it doesn't start hidden
-# https://bitbucket.org/ronaldoussoren/py2app/issues/140/app-starts-minimized#comment-35628007
-patch virt/lib/python3.6/site-packages/py2app/bootstrap/argv_emulation.py build_scripts/argv_emulation.patch 
