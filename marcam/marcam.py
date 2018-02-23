@@ -1333,9 +1333,9 @@ class MarcamApp(wx.App):
             #   add to file_windows list of file windows
             # TODO: img_panel needs fxn to ask if no image
             if self.file_windows[0].img_dc is not None:
-                self.new_frame_open_file(img_path)
+                self.new_frame_open_file(open_file)
             else:
-                self.file_windows[0].open_image(img_path)
+                self.file_windows[0].open_image(open_file)
 
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
