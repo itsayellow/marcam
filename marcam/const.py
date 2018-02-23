@@ -1,13 +1,19 @@
+import sys
 import wx 
 import appdirs
 
-# version string
+APP_NAME = 'Marcam'
 VERSION_STR = "0.3.0"
 
-# OS-dependent application directories
-APP_NAME = 'Marcam'
+# OS-dependent
 USER_CONFIG_DIR = appdirs.user_config_dir(APP_NAME)
 USER_LOG_DIR = appdirs.user_log_dir(APP_NAME)
+if sys.platform == 'darwin':
+    PLATFORM = 'mac'
+elif sys.platform == 'win32':
+    PLATFORM = 'win'
+else:
+    PLATFORM = 'unix'
 
 # what is one step of zoom? (1.2 might be better)
 MAG_STEP = 1.1
