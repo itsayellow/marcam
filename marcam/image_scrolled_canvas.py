@@ -172,6 +172,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.Update()
 
     @debug_fxn
+    def has_no_image(self):
+        return self.img_dc is None
+
+    @debug_fxn
     def needs_save(self):
         """poll self and children to determine if we need to save document
 
@@ -308,7 +312,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             wx.CallAfter(evt.Skip)
             return
 
@@ -362,7 +366,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             wx.CallAfter(evt.Skip)
             return
 
@@ -419,7 +423,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             wx.CallAfter(evt.Skip)
             return
 
@@ -464,7 +468,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             wx.CallAfter(evt.Skip)
             return
 
@@ -598,7 +602,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             evt (wx.ScrollWinEvent): obj returned from scrolled window event
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             wx.CallAfter(evt.Skip)
             return
 
@@ -912,7 +916,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             rect (tuple): coordinates to refresh (window coordinates)
         """
         # if no image, fill area with background color
-        if self.img_dc is None:
+        if self.has_no_image():
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
             dc.SetBrush(dc.GetBackground())
             dc.DrawRectangle(rect)
@@ -1146,7 +1150,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
 
         # return early if no image or we can't zoom any more
-        if self.img_dc is None:
+        if self.has_no_image():
             return None
         if zoom_amt > 0 and self.zoom_idx == len(self.zoom_list)-1:
             return self.zoom_val
@@ -1211,7 +1215,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 None, if no image
         """
         # return early if no image or we can't zoom any more
-        if self.img_dc is None:
+        if self.has_no_image():
             return None
         if zoom_amt > 0 and self.zoom_idx == len(self.zoom_list)-1:
             return self.zoom_val
@@ -1254,7 +1258,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             None
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             return
 
         # NOTE: we don't use SetScrollPos here because that requires a
@@ -1284,7 +1288,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             None
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             return
 
         # NOTE: we don't use SetScrollPos here because that requires a
@@ -1403,7 +1407,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             evt (wx.MouseEvent): obj returned from mouse event
         """
         # return early if no image
-        if self.img_dc is None:
+        if self.has_no_image():
             wx.CallAfter(evt.Skip)
             return
 
@@ -1480,7 +1484,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         """
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
-        if self.img_dc is None or self.mark_mode:
+        if self.has_no_image() or self.mark_mode:
             wx.CallAfter(evt.Skip)
             return
 
@@ -1592,7 +1596,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         """
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
-        if self.img_dc is None or self.mark_mode:
+        if self.has_no_image() or self.mark_mode:
             wx.CallAfter(evt.Skip)
             return
 
@@ -1916,7 +1920,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             dc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
-        if self.img_dc is None:
+        if self.has_no_image():
             dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
             dc.SetBrush(dc.GetBackground())
             dc.DrawRectangle(rect)

@@ -620,7 +620,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def has_image(self):
-        return self.img_panel.img_dc is not None
+        return not self.img_panel.has_no_image()
     
     @debug_fxn
     def on_evt_close(self, evt):
@@ -824,11 +824,10 @@ class ImageWindow(wx.Frame):
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
 
-        # TODO: img_panel needs fxn to ask if no image
-        if self.img_panel.img_dc is not None:
-            self.parent.new_frame_open_file(img_path)
-        else:
+        if self.img_panel.has_no_image():
             self.open_image(img_path)
+        else:
+            self.parent.new_frame_open_file(img_path)
 
     @debug_fxn
     def open_image(self, img_path):
