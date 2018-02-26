@@ -1505,7 +1505,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 # delete orig loc of dragged mark from normal list of marks
                 #   at start of drag
                 if self.mouse_left_down['mark_pt'] in self.marks:
-                    self.delete_mark(self.mouse_left_down['mark_pt'])
+                    self.delete_mark(self.mouse_left_down['mark_pt'], internal=True)
                     # update selection flag now that we know we're in drag
                     self.mark_dragging_is_sel = self.mouse_left_down['mark_pt_is_sel']
                     # set old mark location to mark_dragging
@@ -1635,24 +1635,18 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 # TODO necessary?
                 self.Update()
             else:
-                # delete orig position of dragged mark from normal list of marks
-                #   if still present
-                if self.mouse_left_down['mark_pt'] in self.marks:
-                    self.delete_mark(self.mouse_left_down['mark_pt'])
-                    # set old mark location to mark_dragging
-                    self.mark_dragging = self.mouse_left_down['mark_pt']
-                # refresh old mark location
-                self.refresh_mark_area(self.mark_dragging)
-
-                # finish moving mark by placing it in mark list
+                # get mouse location of left_up
                 (img_x, img_y) = self.win2img_coord(evt_pos)
                 mark_new_loc = (int(img_x), int(img_y))
-                self.mark_point(mark_new_loc, internal=True)
-                # if dragged mark was selected, add to marks_selected too
-                if self.mark_dragging_is_sel:
-                    self.marks_selected.append(mark_new_loc)
-                # TODO necessary?
-                self.Update()
+                # Move a mark
+                self.move_mark(
+                        self.mouse_left_down['mark_pt'],
+                        mark_new_loc,
+                        self.mark_dragging_is_sel
+                        )
+                # MOVE_MARK from_coord to_coord
+                self.history.new(['MOVE_MARK', self.mouse_left_down['mark_pt'], mark_new_loc])
+
         else:
             # finish click by selecting at point with args from on_left_down
             # NOTE: if this was a double click, then mouse_left_down is None
@@ -1680,6 +1674,23 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # continue processing click, for example shifting focus to app
         evt.Skip()
+
+    @debug_fxn
+    def move_mark(self, from_mark_pt, to_mark_pt, is_selected):
+        # delete orig position of dragged mark from normal list of marks
+        #   if still present
+        if from_mark_pt in self.marks:
+            self.delete_mark(from_mark_pt, internal=True)
+        # refresh old mark location
+        self.refresh_mark_area(from_mark_pt)
+
+        # finish moving mark by placing it in mark list
+        self.mark_point(to_mark_pt, internal=True)
+        # if dragged mark was selected, add to marks_selected too
+        if is_selected:
+            self.marks_selected.append(to_mark_pt)
+        # TODO necessary?
+        self.Update()
 
     @debug_fxn
     def refresh_mark_area(self, mark_pt):

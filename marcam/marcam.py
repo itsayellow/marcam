@@ -1111,6 +1111,8 @@ class ImageWindow(wx.Frame):
             self.img_panel.delete_mark(action[1], internal=False)
         if action[0] == 'DELETE_MARK_LIST':
             self.img_panel.mark_point_list(action[1])
+        if action[0] == 'MOVE_MARK':
+            self.img_panel.move_mark(action[2], action[1], is_selected=False)
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel
@@ -1131,6 +1133,8 @@ class ImageWindow(wx.Frame):
             self.img_panel.mark_point(action[1])
         if action[0] == 'DELETE_MARK_LIST':
             self.img_panel.delete_mark_point_list(action[1])
+        if action[0] == 'MOVE_MARK':
+            self.img_panel.move_mark(action[1], action[2], is_selected=False)
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel
