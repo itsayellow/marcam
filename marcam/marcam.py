@@ -618,17 +618,21 @@ class ImageWindow(wx.Frame):
         """
         self.marks_num_display.SetLabel("%d"%mark_total)
 
-    @debug_fxn
     def has_image(self):
         return not self.img_panel.has_no_image()
     
     @debug_fxn
     def on_evt_close(self, evt):
-        """EVT_CLOSE Handler: anytime user quits program in any way
+        """EVT_CLOSE Handler: anytime user closes frame in any way
 
         Args:
             evt (wx.): TODO
         """
+        #TODO: save window size to settings
+        winsize = self.GetSize()
+        #print(winsize)
+        self.parent.config_data['winsize'] = list(winsize)
+        # TODO: parent app needs to save config_data to file on quit
         self.file_history.Save(self.config)
         evt.Skip()
 
@@ -1256,6 +1260,8 @@ class MarcamApp(wx.App):
         #   MacOpenFiles()
         self.file_windows = []
 
+        # may call MacOpenFiles and add files to self.file_windows and make
+        #   new frames
         super().__init__(*args, **kwargs)
 
         self.config_data = config_data
