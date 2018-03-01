@@ -146,8 +146,6 @@ def load_config():
     except:
         # TODO specific exception
         config_data = create_config_file(config_filepath)
-        print("in exception")
-        print(config_data)
 
     return config_data 
 
@@ -630,6 +628,7 @@ class ImageWindow(wx.Frame):
         """
         #TODO: save window size to settings
         winsize = self.GetSize()
+        # DEBUG DELETEME 
         print(winsize)
         print(self.parent)
         print(self.parent.config_data)
@@ -1267,6 +1266,7 @@ class MarcamApp(wx.App):
         super().__init__(*args, **kwargs)
 
         self.config_data = config_data
+        # DEBUG DELETEME 
         print(self.config_data)
 
         if not self.file_windows and not open_files:
@@ -1438,6 +1438,7 @@ def main(argv=None):
 
     # fetch configuration from file
     config_data = load_config()
+    # DEBUG DELETEME 
     print(config_data)
 
     # get basic debug info
