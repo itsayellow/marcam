@@ -146,13 +146,13 @@ def load_config():
     except:
         # TODO specific exception
         config_data = create_config_file(config_filepath)
+        print("in exception")
+        print(config_data)
 
     return config_data 
 
 @debug_fxn
 def save_config(config_data):
-    config_data = None
-
     # create config dir if necessary
     os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
 
@@ -630,7 +630,9 @@ class ImageWindow(wx.Frame):
         """
         #TODO: save window size to settings
         winsize = self.GetSize()
-        #print(winsize)
+        print(winsize)
+        print(self.parent)
+        print(self.parent.config_data)
         self.parent.config_data['winsize'] = list(winsize)
         # TODO: parent app needs to save config_data to file on quit
         self.file_history.Save(self.config)
@@ -1265,6 +1267,7 @@ class MarcamApp(wx.App):
         super().__init__(*args, **kwargs)
 
         self.config_data = config_data
+        print(self.config_data)
 
         if not self.file_windows and not open_files:
             open_files = [None,]
@@ -1348,6 +1351,17 @@ class MarcamApp(wx.App):
             else:
                 self.file_windows[0].open_image(open_file)
 
+    def OnExit(self):
+        # save config_data right before app is about to exit
+        save_config(self.config_data)
+        return super().OnExit()
+
+    # TODO: can use this to determine if last closed window shuts down app
+    #def SetExitOnFrameDelete(self, flag)
+    # TODO: this fxn is called on app exit, override to do something
+    #def OnExit(self)
+    # (inherited from wx.AppConsole.OnExit() )
+
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
 
@@ -1424,6 +1438,7 @@ def main(argv=None):
 
     # fetch configuration from file
     config_data = load_config()
+    print(config_data)
 
     # get basic debug info
     debug_main()
