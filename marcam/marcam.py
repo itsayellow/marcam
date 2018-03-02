@@ -405,7 +405,6 @@ class ImageWindow(wx.Frame):
 
         self.init_ui()
         if srcfile is not None:
-            # TODO: are we able to load more than one file?
             if srcfile.endswith(".mcm"):
                 self.load_mcmfile_from_path(srcfile)
             else:
@@ -1247,9 +1246,7 @@ class HelpFrame(wx.Frame):
         self.SetTitle("Marcam Help")
         self.SetSize((500, 600))
 
-# TODO: investigate wx.PyApp, including wx.PyApp.Mac* functions
-# TODO: when does changing a window size affect default size of future windows?
-#       after reopen of app?  or after close of sized window?
+# NOTE: closing window saves size, opening new window uses saved size
 class MarcamApp(wx.App):
     @debug_fxn
     def __init__(self, open_files, config_data, *args, **kwargs):
@@ -1284,13 +1281,11 @@ class MarcamApp(wx.App):
         self.Bind(wx.EVT_KEY_UP, self.on_key_up)
 
     def on_key_down(self, evt):
-        # TODO: handle App global events: Quit, New..., Open...
         for file_window in self.file_windows:
             if file_window.IsActive():
                 file_window.on_key_down(evt)
 
     def on_key_up(self, evt):
-        # TODO: handle App global events: Quit, New..., Open...
         for file_window in self.file_windows:
             if file_window.IsActive():
                 file_window.on_key_up(evt)
@@ -1338,7 +1333,6 @@ class MarcamApp(wx.App):
         for open_file in fileNames:
             # open in blank window, or
             #   add to file_windows list of file windows
-            # TODO: img_panel needs fxn to ask if no image
             if not self.file_windows or self.file_windows[0].has_image():
                 self.new_frame_open_file(open_file)
             else:
@@ -1351,9 +1345,6 @@ class MarcamApp(wx.App):
 
     # TODO: can use this to determine if last closed window shuts down app
     #def SetExitOnFrameDelete(self, flag)
-    # TODO: this fxn is called on app exit, override to do something
-    #def OnExit(self)
-    # (inherited from wx.AppConsole.OnExit() )
 
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
