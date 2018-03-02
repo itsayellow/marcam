@@ -589,7 +589,7 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
 
         # finally render app
-        self.SetSize((800, 600))
+        self.SetSize(self.parent.config_data.get('winsize',(800, 600)))
         self.SetTitle('Marcam')
         #self.Centre()
 
@@ -626,14 +626,8 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        #TODO: save window size to settings
         winsize = self.GetSize()
-        # DEBUG DELETEME 
-        print(winsize)
-        print(self.parent)
-        print(self.parent.config_data)
         self.parent.config_data['winsize'] = list(winsize)
-        # TODO: parent app needs to save config_data to file on quit
         self.file_history.Save(self.config)
         evt.Skip()
 
@@ -1254,20 +1248,19 @@ class HelpFrame(wx.Frame):
         self.SetSize((500, 600))
 
 # TODO: investigate wx.PyApp, including wx.PyApp.Mac* functions
+# TODO: when does changing a window size affect default size of future windows?
+#       after reopen of app?  or after close of sized window?
 class MarcamApp(wx.App):
     @debug_fxn
     def __init__(self, open_files, config_data, *args, **kwargs):
         # reset this before calling super().__init__(), which calls
         #   MacOpenFiles()
         self.file_windows = []
+        self.config_data = config_data
 
         # may call MacOpenFiles and add files to self.file_windows and make
         #   new frames
         super().__init__(*args, **kwargs)
-
-        self.config_data = config_data
-        # DEBUG DELETEME 
-        print(self.config_data)
 
         if not self.file_windows and not open_files:
             open_files = [None,]
@@ -1438,8 +1431,6 @@ def main(argv=None):
 
     # fetch configuration from file
     config_data = load_config()
-    # DEBUG DELETEME 
-    print(config_data)
 
     # get basic debug info
     debug_main()
