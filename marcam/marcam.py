@@ -377,8 +377,9 @@ class DropTarget(wx.FileDropTarget):
 
 
 class ImageWindow(wx.Frame):
-    def __init__(self, parent, srcfile, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, srcfile, **kwargs):
+        # no parent window, so use None as only *arg
+        super().__init__(None, **kwargs)
 
         # internal state
         self.app_history = EditHistory()
@@ -587,13 +588,9 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
 
-        # finally render app
-        self.SetSize(self.parent.config_data.get('winsize',(800, 600)))
         self.SetTitle('Marcam')
-        #self.Centre()
 
-        #self.img_panel.subpanel.Centre()
-
+        # finally render app
         self.Show(True)
 
         LOGGER.info(
@@ -1259,12 +1256,30 @@ class MarcamApp(wx.App):
         #   new frames
         super().__init__(*args, **kwargs)
 
+        # TODO
+        # this next statement can only be after calling __init__ of wx.App
+        # gives entire screen size
+        print(wx.DisplaySize())
+        # this next statement can only be after calling __init__ of wx.App
+        # gives entire screen size
+        print(wx.GetDisplaySize())
+        # this next statement can only be after calling __init__ of wx.App
+        # gives just window-placeable screen area
+        self.display_size = wx.Display().GetClientArea().GetSize()
+        print(self.display_size)
+
         if not self.file_windows and not open_files:
             open_files = [None,]
 
         for open_file in open_files:
             # add to file_windows list of file windows
-            self.file_windows.append(ImageWindow(self, open_file, None))
+            self.file_windows.append(
+                    ImageWindow(
+                        self,
+                        open_file,
+                        size=wx.Size(self.config_data['winsize'])
+                        )
+                    )
 
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
@@ -1307,7 +1322,13 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def new_frame_open_file(self, open_file):
-        self.file_windows.append(ImageWindow(self, open_file, None))
+        self.file_windows.append(
+                ImageWindow(
+                    self,
+                    open_file,
+                    size=wx.Size(self.config_data['winsize'])
+                    )
+                )
 
     @debug_fxn
     def quit_app(self):
