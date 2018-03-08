@@ -1262,12 +1262,6 @@ class MarcamApp(wx.App):
 
         # TODO
         # this next statement can only be after calling __init__ of wx.App
-        # gives entire screen size
-        print(wx.DisplaySize())
-        # this next statement can only be after calling __init__ of wx.App
-        # gives entire screen size
-        print(wx.GetDisplaySize())
-        # this next statement can only be after calling __init__ of wx.App
         # gives just window-placeable screen area
         self.display_size = wx.Display().GetClientArea().GetSize()
         print(self.display_size)
