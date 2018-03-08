@@ -29,10 +29,14 @@ import common
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
-
-EXE_DIR = os.path.dirname(os.path.realpath(__file__))
-# for now the paths are the same
-ICON_DIR = EXE_DIR
+if getattr(sys, 'frozen', False):
+    EXE_DIR = sys._MEIPASS
+    # pyinstaller puts imgs, html in media/
+    ICON_DIR = os.path.join(EXE_DIR, 'media')
+else:
+    EXE_DIR = os.path.dirname(os.path.realpath(__file__))
+    # for now the paths are the same
+    ICON_DIR = EXE_DIR
 
 # which modules are we logging
 LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
