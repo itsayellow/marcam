@@ -8,17 +8,17 @@
 ;--------------------------------
 
 ; The name of the installer
-Name "Example2"
+Name "Marcam"
 
 ; The file to write
-OutFile "example2.exe"
+OutFile "Marcam Installer.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\Example2
+InstallDir $PROGRAMFILES\Marcam
 
 ; Registry key to check for directory (so if you install again, it will 
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\NSIS_Example2" "Install_Dir"
+InstallDirRegKey HKLM "Software\Marcam" "Install_Dir"
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
@@ -37,24 +37,24 @@ UninstPage instfiles
 ;--------------------------------
 
 ; The stuff to install
-Section "Example2 (required)"
+Section "Marcam (required)"
 
   SectionIn RO
   
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
   
-  ; Put file there
-  File "example2.nsi"
+  ; Put files there
+  File "dist/"
   
   ; Write the installation path into the registry
-  WriteRegStr HKLM SOFTWARE\NSIS_Example2 "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM SOFTWARE\Marcam "Install_Dir" "$INSTDIR"
   
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Example2" "DisplayName" "NSIS Example2"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Example2" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Example2" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Example2" "NoRepair" 1
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "DisplayName" "Marcam"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "NoModify" 1
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
   
 SectionEnd
@@ -62,9 +62,9 @@ SectionEnd
 ; Optional section (can be disabled by the user)
 Section "Start Menu Shortcuts"
 
-  CreateDirectory "$SMPROGRAMS\Example2"
-  CreateShortcut "$SMPROGRAMS\Example2\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-  CreateShortcut "$SMPROGRAMS\Example2\Example2 (MakeNSISW).lnk" "$INSTDIR\example2.nsi" "" "$INSTDIR\example2.nsi" 0
+  CreateDirectory "$SMPROGRAMS\Marcam"
+  CreateShortcut "$SMPROGRAMS\Marcam\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortcut "$SMPROGRAMS\Marcam\Marcam (MakeNSISW).lnk" "$INSTDIR\example2.nsi" "" "$INSTDIR\example2.nsi" 0
   
 SectionEnd
 
@@ -75,18 +75,18 @@ SectionEnd
 Section "Uninstall"
   
   ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Example2"
-  DeleteRegKey HKLM SOFTWARE\NSIS_Example2
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam"
+  DeleteRegKey HKLM SOFTWARE\Marcam
 
   ; Remove files and uninstaller
   Delete $INSTDIR\example2.nsi
   Delete $INSTDIR\uninstall.exe
 
   ; Remove shortcuts, if any
-  Delete "$SMPROGRAMS\Example2\*.*"
+  Delete "$SMPROGRAMS\Marcam\*.*"
 
   ; Remove directories used
-  RMDir "$SMPROGRAMS\Example2"
+  RMDir "$SMPROGRAMS\Marcam"
   RMDir "$INSTDIR"
 
 SectionEnd
