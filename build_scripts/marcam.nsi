@@ -11,7 +11,7 @@
 Name "Marcam"
 
 ; The file to write
-OutFile "Marcam Installer.exe"
+OutFile "..\dist\Marcam Installer.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\Marcam
@@ -45,7 +45,7 @@ Section "Marcam (required)"
   SetOutPath $INSTDIR
   
   ; Put files there
-  File /r "dist\marcam\*"
+  File /r "..\dist\marcam\*"
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\Marcam "Install_Dir" "$INSTDIR"
