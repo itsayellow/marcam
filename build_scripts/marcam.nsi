@@ -45,7 +45,7 @@ Section "Marcam (required)"
   SetOutPath $INSTDIR
   
   ; Put files there
-  File "dist/"
+  File /r "dist\marcam\*"
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\Marcam "Install_Dir" "$INSTDIR"
@@ -64,7 +64,7 @@ Section "Start Menu Shortcuts"
 
   CreateDirectory "$SMPROGRAMS\Marcam"
   CreateShortcut "$SMPROGRAMS\Marcam\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-  CreateShortcut "$SMPROGRAMS\Marcam\Marcam (MakeNSISW).lnk" "$INSTDIR\example2.nsi" "" "$INSTDIR\example2.nsi" 0
+  CreateShortcut "$SMPROGRAMS\Marcam\Marcam.lnk" "$INSTDIR\marcam.exe" "" "$INSTDIR\marcam.exe" 0
   
 SectionEnd
 
