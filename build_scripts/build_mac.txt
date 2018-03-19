@@ -1,0 +1,6 @@
+
+# from Terminal in marcam top directory:
+make clean_all
+make virt
+make app
+make dmg

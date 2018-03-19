@@ -1,0 +1,2 @@
+Install MSYS2
+pacman -S make
