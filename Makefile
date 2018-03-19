@@ -9,6 +9,8 @@ app: dist/Marcam.app
 
 dmg: dist/Marcam.dmg
 
+exe: dist/marcam/Marcam.exe
+
 virt: requirements.txt
 	@echo ""
 	@echo "---------------------------------------------------------------"
@@ -31,11 +33,11 @@ dist/Marcam.dmg: dist/Marcam.app
 	@echo ""
 	./build_scripts/gen_dmg
 
-dist/Marcam.exe: marcam/* virt
+dist/marcam/Marcam.exe: marcam/* virt
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make exe (Windows)"
 	@echo ""
-	./build_scripts/gen_winexe.bat
+	./build_scripts/gen_winexe
 
 # vim: nowrap noexpandtab sw=8 sts=0
