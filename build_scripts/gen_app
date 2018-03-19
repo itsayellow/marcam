@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# make sure we're on Mac
+ostype="$(uname >/dev/null 2>&1)" && ostype="UNKNOWN"
+if [ "$ostype" != "Darwin" ] ; then
+    echo "ERROR: OS is not macOS.  gen_app only applicable to macOS"
+    echo "Aborting."
+    exit 1
+fi
+
 # add current git hash to VERSION_STR in const.py, saving backup file
 githash=(`git rev-parse --short HEAD`)
 cp marcam/const.py marcam/const.py.bak
