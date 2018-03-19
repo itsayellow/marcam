@@ -20,15 +20,22 @@ virt: requirements.txt
 dist/Marcam.app: marcam/* virt
 	@echo ""
 	@echo "---------------------------------------------------------------"
-	@echo "Make app"
+	@echo "Make app (MacOS)"
 	@echo ""
 	./build_scripts/gen_app
 
 dist/Marcam.dmg: dist/Marcam.app
 	@echo ""
 	@echo "---------------------------------------------------------------"
-	@echo "Make dmg"
+	@echo "Make dmg (MacOS)"
 	@echo ""
 	./build_scripts/gen_dmg
+
+dist/Marcam.exe: marcam/* virt
+	@echo ""
+	@echo "---------------------------------------------------------------"
+	@echo "Make exe (Windows)"
+	@echo ""
+	./build_scripts/gen_winexe.bat
 
 # vim: nowrap noexpandtab sw=8 sts=0
