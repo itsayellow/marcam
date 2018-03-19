@@ -1,2 +1,13 @@
 Install MSYS2
-pacman -S make
+
+Install Python from the installer downloadable from python.org
+    * make sure you click "Customize"
+    * make sure it's available for all users
+    * make sure it's installed in C:\Program Files (x86) for 32-bit Python
+        available to all users
+Make python3 script in /usr/local/bin of MSYS2
+    #!/bin/bash
+    winpty python.exe $*
+
+In MSYS2 install make package
+    pacman -S make

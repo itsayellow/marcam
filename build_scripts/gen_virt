@@ -10,6 +10,16 @@ mkdir virt
 # python3 native venv
 python3 -m venv virt
 # activate virtual environment
-source virt/bin/activate
+if [ -e "virt/bin/activate" ]; then
+    source virt/bin/activate
+elif [ -e "virt/Scripts/activate" ]; then
+    source virt/Scripts/activate
+else
+    echo "No virt/bin/activate or virt/Scripts/activate found. Exiting"
+    exit 1
+fi
+
 # install required python packages into virtual environment
-pip3 install -r requirements.txt
+# use python3 -m pip instead of pip3, because only thing that works on
+#   stupid Windows
+python3 -m pip install -r requirements.txt
