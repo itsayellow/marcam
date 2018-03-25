@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# make sure we're on Mac
+ostype="$(uname >/dev/null 2>&1)" && ostype="UNKNOWN"
+if [ "$ostype" != "Darwin" ] ; then
+    echo "ERROR: OS is not macOS.  gen_dmg only applicable to macOS"
+    echo "Aborting."
+    exit 1
+fi
+
+# dmgbuild
+dmgbuild build_scripts dmgbuild_settings.py "Marcam" Marcam.dmg
