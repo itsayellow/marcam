@@ -27,6 +27,17 @@ To make a new icon
 * export to png
 * read in png file and then downsize to 32x32 and save as png
 
+Requirements on Build System
+----------------------------
+
+macOS
+~~~~~
+* ``pip3 install dmgbuild``
+
+Windows
+~~~~~~~
+* Install NSIS
+
 Notes
 --------
 Application preferences on Mac stored at: "~/Library/Preferences/Marcam Preferences"
