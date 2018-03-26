@@ -29,7 +29,7 @@ import common
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
-if getattr(sys, 'frozen', False):
+if getattr(sys, 'frozen', False) and getattr(sys, '_MEIPASS', False):
     EXE_DIR = sys._MEIPASS
     # pyinstaller puts imgs, html in media/
     ICON_DIR = os.path.join(EXE_DIR, 'media')
