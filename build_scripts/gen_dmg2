@@ -16,4 +16,4 @@ if [ "$ostype" != "Darwin" ] ; then
 fi
 
 # dmgbuild
-dmgbuild build_scripts dmgbuild_settings.py "Marcam" Marcam.dmg
+dmgbuild -s build_scripts/dmgbuild_settings.py "Marcam" dist/Marcam.dmg
