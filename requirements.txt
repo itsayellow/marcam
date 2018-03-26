@@ -11,8 +11,6 @@ Pillow==5.0.0
 pip==9.0.3
 py2app==0.14
 PyInstaller==3.3.1
-pypiwin32==223
-pywin32==223
 setuptools==39.0.1
 six==1.11.0
 wxPython==4.0.1
