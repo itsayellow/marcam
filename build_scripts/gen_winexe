@@ -1,9 +1,16 @@
 #!/bin/bash
 
+# first test if uname is present
+if hash uname 2>/dev/null ; then
+    # uname is present, use it to find ostype
+    ostype="$(uname)"
+else
+    # uname is not present, where are we??
+    ostype="UNKNOWN"
+fi
 # make sure we're on Windows
-ostype="$(uname >/dev/null 2>&1)" && ostype="UNKNOWN"
 if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
-    echo "ERROR: OS is not Windows.  gen_winexe only applicable to Windows"
+    echo "ERROR: OS is not Windows.  gen_wininstaller is only applicable to Windows"
     echo "Aborting."
     exit 1
 fi

@@ -9,6 +9,21 @@
 #
 # requires graphicsmagick
 
+# first test if uname is present
+if hash uname 2>/dev/null ; then
+    # uname is present, use it to find ostype
+    ostype="$(uname)"
+else
+    # uname is not present, where are we??
+    ostype="UNKNOWN"
+fi
+# make sure we're on Mac
+if [ "$ostype" != "Darwin" ] ; then
+    echo "ERROR: OS is not macOS.  gen_app only applicable to macOS"
+    echo "Aborting."
+    exit 1
+fi
+
 # simple usage info
 if [ "$#" -lt 1 ]; then
     echo "Usage: $0 <sourcefile>.png"
