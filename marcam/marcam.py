@@ -1260,11 +1260,9 @@ class MarcamApp(wx.App):
         #   new frames
         super().__init__(*args, **kwargs)
 
-        # TODO
         # this next statement can only be after calling __init__ of wx.App
         # gives just window-placeable screen area
         self.display_size = wx.Display().GetClientArea().GetSize()
-        print(self.display_size)
 
         if not self.file_windows and not open_files:
             open_files = [None,]
