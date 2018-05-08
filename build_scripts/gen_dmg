@@ -10,10 +10,13 @@ else
 fi
 # make sure we're on Mac
 if [ "$ostype" != "Darwin" ] ; then
-    echo "ERROR: OS is not macOS.  gen_app only applicable to macOS"
+    echo "ERROR: OS is not macOS.  gen_dmg only applicable to macOS"
     echo "Aborting."
     exit 1
 fi
+
+# activate virtual environment for python to get dmgbuild
+source virt/bin/activate
 
 # dmgbuild
 dmgbuild -s build_scripts/dmgbuild_settings.py "Marcam" dist/Marcam.dmg
