@@ -13,5 +13,10 @@ pipeline {
                 sh 'make app'
             }
         }
+        stage('Deploy') {
+            steps {
+                sh 'make dmg'
+            }
+        }
     }
 }
