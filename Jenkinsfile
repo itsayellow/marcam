@@ -17,6 +17,11 @@ pipeline {
             steps {
                 sh 'make dmg'
             }
+            post {
+                success {
+                    archiveArtifacts 'dist/Marcam.dmg'
+                }
+            }
         }
     }
 }
