@@ -8,8 +8,8 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'make clean_all'
-                sh 'make virt'
+                //sh 'make clean_all'
+                //sh 'make virt'
                 sh 'make app'
             }
         }
