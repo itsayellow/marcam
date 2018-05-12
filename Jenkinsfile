@@ -19,7 +19,7 @@ pipeline {
             post {
                 success {
                     archiveArtifacts 'dist/Marcam.dmg'
-                    sh 'cp dist/Marcam.dmg ~'
+                    sh 'cp dist/Marcam.dmg "/Users/mclapp/Google Drive/Project Bio Manu/Marcam_latest.dmg"'
                 }
             }
         }
