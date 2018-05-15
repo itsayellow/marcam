@@ -1,0 +1,19 @@
+# INFO: Mac buttons:
+#   regular: monochrome
+#   activated: blue fg
+#   bg color: 243, 243, 243
+#   fg color: 115, 115, 115
+#   button outline color: 165, 165, 165 ?
+#   size: ~82w x48h including single pixel outline
+#       width can be variable (78w seen)
+#   in wx pixels use 24h x >24w
+#   rounded corners: pixel radius is 1/4 of height
+
+# To Make:
+# Create a photoshop image 960x960 pixels
+# Use 243,243,243 as bg
+# Make a rounded rectangle on top layer
+#   240 px corner raidus
+#   2pt, black
+# Draw inside with color 115,115,115 as "black"
+# downsize to 24hx?w or hopefully someday 48hx?w for retina @2
