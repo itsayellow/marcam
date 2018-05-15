@@ -481,7 +481,23 @@ class ImageWindow(wx.Frame):
         self.app_history.register_undo_menu_item(undoitem)
         self.app_history.register_redo_menu_item(redoitem)
 
-        # toolbar stuff
+        # For marks display, find text width of "9999", to leave enough
+        #   padding to have space to contain "999"
+        screen_dc = wx.ScreenDC()
+        screen_dc.SetFont(self.GetFont())
+        (text_width_px, _) = screen_dc.GetTextExtent("9999")
+        del screen_dc
+
+        # Toolbar
+        # INFO: Mac buttons:
+        #   regular: monochrome
+        #   activated: blue fg
+        #   bg color: 243, 243, 243
+        #   fg color: 115, 115, 115
+        #   button outline color: 165, 165, 165 ?
+        #   size: ~82w x46h including single pixel outline
+        #       width can be variable (78w seen)
+        #   rounded corners
         self.toolbar = self.CreateToolBar()
         LOGGER.info("MSC:ICON_DIR=%s", ICON_DIR)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
@@ -492,6 +508,17 @@ class ImageWindow(wx.Frame):
         markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'marktool32.png'))
         marktool = self.toolbar.AddRadioTool(wx.ID_ANY, 'Mark Mode', markbmp)
         self.mark_tool_id = marktool.GetId()
+        self.toolbar.AddStretchableSpace()
+        # Create marks tally text control
+        # init marks_num_display before ImageScrolledCanvas so ISC can
+        #   update number on its init
+        # using TextCtrl to allow copy to clipboard
+        self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
+        self.marks_num_display = wx.TextCtrl(
+                self.toolbar, wx.ID_ANY, size=wx.Size(text_width_px, -1),
+                style=wx.TE_READONLY | wx.BORDER_NONE
+                )
+        self.toolbar.AddControl(self.marks_num_display)
         self.toolbar.Realize()
 
         # status bar stuff
@@ -502,26 +529,6 @@ class ImageWindow(wx.Frame):
         #   also accepts key focus
         #   probably with more than one Panel we need to worry about which
         #       has keyboard focus
-
-        # find text width of "9999", to leave enough padding to have space
-        #   to contain "999"
-        screen_dc = wx.ScreenDC()
-        screen_dc.SetFont(self.GetFont())
-        (text_width_px, _) = screen_dc.GetTextExtent("9999")
-        del screen_dc
-
-        # init marks_num_display before ImageScrolledCanvas so ISC can
-        #   update number on its init
-        # using TextCtrl to allow copy to clipboard
-        self.marks_num_display = wx.TextCtrl(
-                self, wx.ID_ANY, size=wx.Size(text_width_px, -1),
-                style=wx.TE_READONLY | wx.BORDER_NONE
-                )
-        # set color to be the same as background color
-        #self.marks_num_display.SetBackgroundColour(
-        #        wx.SystemSettings().GetColour(wx.SYS_COLOUR_BACKGROUND)
-        #        )
-
         # ImageScrolledCanvas is the cleanest, fastest implementation for
         #   what we need
         self.img_panel = ImageScrolledCanvasMarks(
@@ -532,35 +539,13 @@ class ImageWindow(wx.Frame):
         # make ImageScrolledCanvas Drag and Drop Target
         self.img_panel.SetDropTarget(DropTarget(self.img_panel))
 
-        # Horizontal sizer for home-made toolbar to allow for mark count
-        mytoolbar = wx.BoxSizer(wx.HORIZONTAL)
-        #but1 = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT)
-        #but1.SetBitmap(obmp)
-        #but2 = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT)
-        #but2.SetBitmap(markbmp)
-        #mytoolbar.Add(
-        #        but1,
-        #        proportion=0, flag=0, border=0
-        #        )
-        #mytoolbar.Add(
-        #        but2,
-        #        proportion=0, flag=0, border=0
-        #        )
-        mytoolbar.AddStretchSpacer(1)
-        mytoolbar.Add(
-                wx.StaticText(self, wx.ID_ANY, "Marks:"),
-                proportion=0, flag=0, border=0)
-        mytoolbar.Add(self.marks_num_display, proportion=0, flag=0, border=0)
-
         # Vertical top-level sizer for main window
-        mybox = wx.BoxSizer(wx.VERTICAL)
-        # Don't stretch vertical of toolbar,
-        #   expand horiz to fill window width
-        mybox.Add(mytoolbar, proportion=0, flag=wx.EXPAND)
-        # Fully stretch vertical of img panel to fill window,
-        #   expand horiz to fill window width
-        mybox.Add(self.img_panel, proportion=1, flag=wx.EXPAND)
-        self.SetSizer(mybox)
+        #   unnecessary because Frame has only one child (self.img_panel) and
+        #   so it automatically takes up entire window (except for toolbar,
+        #   statusbar)
+        #mybox = wx.BoxSizer(wx.VERTICAL) # MAC
+        #mybox.Add(self.img_panel, proportion=1, flag=wx.EXPAND) # MAC
+        #self.SetSizer(mybox) # MAC
 
         # setup event handlers for Frame events
         self.Bind(wx.EVT_CLOSE, self.on_evt_close)
