@@ -35,7 +35,7 @@ if sys.platform == 'darwin':
                 'CFBundleIdentifier':'com.itsayellow.osx.marcam',
                 'CFBundleVersion':version,
                 'CFBundleShortVersionString':version,
-                'NSHumanReadableCopyright': u"Copyright © 2017, " \
+                'NSHumanReadableCopyright': u"Copyright © 2018, " \
                         "Matthew A. Clapp, All Rights Reserved",
                 'CFBundleDocumentTypes':[
                     {
