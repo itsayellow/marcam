@@ -1,19 +1,25 @@
-# INFO: Mac buttons:
-#   regular: monochrome
-#   activated: blue fg
-#   bg color: 243, 243, 243
-#   fg color: 115, 115, 115
-#   button outline color: 165, 165, 165 ?
-#   size: ~82w x48h including single pixel outline
-#       width can be variable (78w seen)
-#   in wx pixels use 24h x >24w
-#   rounded corners: pixel radius is 1/4 of height
+Screen grabs from retina screen are 2x pixels vs. non-retina bmps
 
-# To Make:
-# Create a photoshop image 960x960 pixels
-# Use 243,243,243 as bg
-# Make a rounded rectangle on top layer
-#   240 px corner raidus
-#   2pt, black
-# Draw inside with color 115,115,115 as "black"
-# downsize to 24hx?w or hopefully someday 48hx?w for retina @2
+Mac buttons:
+    regular: monochrome
+    activated: blue fg
+    bg color: 243, 243, 243
+    fg color: 115, 115, 115
+    button outline color: 165, 165, 165 ?
+    size: ~82w x48h including single pixel outline
+      width can be variable (78w seen)
+    in wx pixels use 24h x >24w
+    rounded corners: pixel radius is 1/4 of height
+
+Mac button (flush, like iTunes play, ffwd, etc.)
+    fg 76,76,76
+    big: 44px h (actual retina play button top-to-bottom)
+    regular: 26 h (actual retina ffwd button)
+To Make:
+Create a photoshop image 960x960 pixels
+Use 243,243,243 as bg
+Make a rounded rectangle on top layer
+    240 px corner raidus
+    2pt, black
+Draw inside with color 115,115,115 as "black"
+downsize to 24hx?w or hopefully someday 48hx?w for retina @2
