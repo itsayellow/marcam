@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# first test if uname is present
+if hash uname 2>/dev/null ; then
+    # uname is present, use it to find ostype
+    ostype="$(uname)"
+else
+    # uname is not present, where are we??
+    ostype="UNKNOWN"
+fi
+# make sure we're on Mac
+if [ "$ostype" != "Darwin" ] ; then
+    echo "ERROR: OS is not macOS.  gen_app only applicable to macOS"
+    echo "Aborting."
+    exit 1
+fi
+
+# add current git hash to VERSION_STR in const.py, saving backup file
+githash=(`git rev-parse --short HEAD`)
+cp marcam/const.py marcam/const.py.bak
+perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" marcam/const.py
+
+# check if const.py got corrupted
+syntax_error=(`python3 -m py_compile marcam/const.py`)
+if [ ! -z "$syntax_error" ]; then
+    echo "gen_app corrupted marcam/const.py"
+    exit 1
+fi
+
+# activate virtual environment for python
+source virt/bin/activate
+
+## build app using py2app
+#python3 setup.py py2app
+#
+## move back original const.py file
+#mv marcam/const.py.bak marcam/const.py
+
+# build app using pyinstaller
+pyinstaller \
+    -y \
+    --paths ./marcam \
+    --windowed \
+    --icon=marcam.icns \
+    --osx-bundle-identifier='com.itsayellow.osx.marcam' \
+    --add-data 'marcam/marktool32.png:media' \
+    --add-data 'marcam/pointer32.png:media' \
+    --add-data 'marcam/marcam_help.html:media' \
+    --add-data 'marcam/help_markmode_off.png:media' \
+    --add-data 'marcam/help_selectmode_off.png:media' \
+    marcam/marcam.py
