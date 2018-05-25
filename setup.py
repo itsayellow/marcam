@@ -12,12 +12,12 @@ import sys
 mainscript = 'marcam/marcam.py'
 app_name = 'Marcam'
 data_files = [
-        'marcam/pointer32.png',
-        'marcam/marktool32.png',
-        'marcam/marcam_help.html',
-        'marcam/help_markmode_off.png',
-        'marcam/help_selectmode_off.png',
-        'marcam/marcam_doc.icns'
+        'marcam/media/pointer32.png',
+        'marcam/media/marktool32.png',
+        'marcam/media/marcam_help.html',
+        'marcam/media/help_markmode_off.png',
+        'marcam/media/help_selectmode_off.png',
+        'marcam/media/marcam_doc.icns'
         ]
 version = "0.3.0"
 
@@ -41,7 +41,7 @@ if sys.platform == 'darwin':
                     {
                         'CFBundleTypeName':'Marcam Image Data File',
                         'CFBundleTypeRole':'Editor',
-                        'CFBundleTypeIconFile':'marcam_doc.icns',
+                        'CFBundleTypeIconFile':'media/marcam_doc.icns',
                         'LSHandlerRank': "Owner",
                         'LSItemContentTypes': ["com.itsayellow.mcm"],
                         },
