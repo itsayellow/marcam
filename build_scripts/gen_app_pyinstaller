@@ -32,9 +32,6 @@ source virt/bin/activate
 
 ## build app using py2app
 #python3 setup.py py2app
-#
-## move back original const.py file
-#mv marcam/const.py.bak marcam/const.py
 
 # build app using pyinstaller
 pyinstaller \
@@ -49,3 +46,6 @@ pyinstaller \
     --add-data 'marcam/help_markmode_off.png:media' \
     --add-data 'marcam/help_selectmode_off.png:media' \
     marcam/marcam.py
+
+# move back original const.py file
+mv marcam/const.py.bak marcam/const.py
