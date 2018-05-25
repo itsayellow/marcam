@@ -6,7 +6,7 @@ import argparse
 import json
 import logging
 import os
-import os.path
+import os.path # TODO: consider pathlib
 import platform
 import sys
 import tempfile
@@ -31,7 +31,10 @@ import common
 
 if getattr(sys, 'frozen', False) and getattr(sys, '_MEIPASS', False):
     EXE_DIR = sys._MEIPASS
-    # pyinstaller puts imgs, html in media/
+    # EXE_DIR is the same dir where the executable lives
+    #   on mac: "Marcam.app/Contents/MacOS/"
+    #   on win: "Marcam/"
+    # mac has symlink in EXE_DIR to media in "Marcam.app/Contents/Resources"
     ICON_DIR = os.path.join(EXE_DIR, 'media')
 else:
     EXE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -495,17 +498,21 @@ class ImageWindow(wx.Frame):
         #   bg color: 243, 243, 243
         #   fg color: 115, 115, 115
         #   button outline color: 165, 165, 165 ?
-        #   size: ~82w x46h including single pixel outline
+        #   size: ~82w x48h including single pixel outline
         #       width can be variable (78w seen)
+        #   in wx pixels use 24h x >24w
         #   rounded corners
-        self.toolbar = self.CreateToolBar()
+        # TODO: wx.PlatformInformation to get whether mac or not
         LOGGER.info("MSC:ICON_DIR=%s", ICON_DIR)
+        selectbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pointer_mac24f.png'))
+        markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'marktool24.png'))
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
+
+        self.toolbar = self.CreateToolBar()
+        #self.toolbar.SetToolBitmapSize(wx.Size(24,24))
         #otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', obmp)
-        selectbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pointer32.png'))
         selecttool = self.toolbar.AddRadioTool(wx.ID_ANY, 'Select Mode', selectbmp)
         self.select_tool_id = selecttool.GetId()
-        markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'marktool32.png'))
         marktool = self.toolbar.AddRadioTool(wx.ID_ANY, 'Mark Mode', markbmp)
         self.mark_tool_id = marktool.GetId()
         self.toolbar.AddStretchableSpace()
