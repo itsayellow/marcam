@@ -26,7 +26,7 @@ if sys.platform == 'darwin':
     from setuptools import setup
     # Mac and py2app
     py2app_options = {
-            'iconfile':'marcam/marcam.icns',
+            'iconfile':'marcam/media/marcam.icns',
             'optimize':1, # try one level of optimization?
             'plist':{
                 'CFBundleName':app_name,
