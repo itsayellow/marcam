@@ -8,11 +8,11 @@ a = Analysis(
         pathex=['marcam', '.'],
         binaries=[],
         datas=[
-            ('../marcam/marktool24.png', 'media'),
-            ('../marcam/pointer_mac24f.png', 'media'),
-            ('../marcam/marcam_help.html', 'media'),
-            ('../marcam/help_markmode_off.png', 'media'),
-            ('../marcam/help_selectmode_off.png', 'media')
+            ('../marcam/media/marktool24.png', 'media'),
+            ('../marcam/media/pointer_mac24f.png', 'media'),
+            ('../marcam/media/marcam_help.html', 'media'),
+            ('../marcam/media/help_markmode_off.png', 'media'),
+            ('../marcam/media/help_selectmode_off.png', 'media')
             ],
         hiddenimports=[],
         hookspath=[],
@@ -37,7 +37,7 @@ exe = EXE(
         strip=False,
         upx=True,
         console=False,
-        icon='marcam/marcam.icns'
+        icon='marcam/media/marcam.icns'
         )
 
 coll = COLLECT(
@@ -53,7 +53,7 @@ coll = COLLECT(
 app = BUNDLE(
         coll,
         name='Marcam.app',
-        icon='marcam/marcam.icns',
+        icon='marcam/media/marcam.icns',
         bundle_identifier='com.itsayellow.osx.marcam',
         info_plist={
                 'CFBundleName':'Marcam',
@@ -69,7 +69,7 @@ app = BUNDLE(
                     {
                         'CFBundleTypeName':'Marcam Image Data File',
                         'CFBundleTypeRole':'Editor',
-                        'CFBundleTypeIconFile':'marcam_doc.icns',
+                        'CFBundleTypeIconFile':'media/marcam_doc.icns',
                         'LSHandlerRank': "Owner",
                         'LSItemContentTypes': ["com.itsayellow.mcm"],
                         },

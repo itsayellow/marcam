@@ -38,13 +38,13 @@ pyinstaller \
     -y \
     --paths ./marcam \
     --windowed \
-    --icon=marcam.icns \
+    --icon='media/marcam.icns' \
     --osx-bundle-identifier='com.itsayellow.osx.marcam' \
-    --add-data 'marcam/marktool32.png:media' \
-    --add-data 'marcam/pointer32.png:media' \
-    --add-data 'marcam/marcam_help.html:media' \
-    --add-data 'marcam/help_markmode_off.png:media' \
-    --add-data 'marcam/help_selectmode_off.png:media' \
+    --add-data 'marcam/media/marktool32.png:media' \
+    --add-data 'marcam/media/pointer32.png:media' \
+    --add-data 'marcam/media/marcam_help.html:media' \
+    --add-data 'marcam/media/help_markmode_off.png:media' \
+    --add-data 'marcam/media/help_selectmode_off.png:media' \
     marcam/marcam.py
 
 # move back original const.py file
