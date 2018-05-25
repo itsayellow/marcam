@@ -4,15 +4,15 @@ block_cipher = None
 
 
 a = Analysis(
-        ['marcam/marcam.py'],
-        pathex=['./marcam', '/Users/mclapp/git/marcam'],
+        ['../marcam/marcam.py'],
+        pathex=['marcam', '.'],
         binaries=[],
         datas=[
-            ('marcam/marktool32.png', 'media'),
-            ('marcam/pointer32.png', 'media'),
-            ('marcam/marcam_help.html', 'media'),
-            ('marcam/help_markmode_off.png', 'media'),
-            ('marcam/help_selectmode_off.png', 'media')
+            ('../marcam/marktool24.png', 'media'),
+            ('../marcam/pointer_mac24f.png', 'media'),
+            ('../marcam/marcam_help.html', 'media'),
+            ('../marcam/help_markmode_off.png', 'media'),
+            ('../marcam/help_selectmode_off.png', 'media')
             ],
         hiddenimports=[],
         hookspath=[],
@@ -62,6 +62,7 @@ app = BUNDLE(
                 'CFBundleIdentifier':'com.itsayellow.osx.marcam',
                 'CFBundleVersion':'0.3.0',
                 'CFBundleShortVersionString':'0.3.0',
+                'NSPrincipalClass':'NSApplication',
                 'NSHumanReadableCopyright': u"Copyright © 2018, " \
                         "Matthew A. Clapp, All Rights Reserved",
                 'CFBundleDocumentTypes':[
