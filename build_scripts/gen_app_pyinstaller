@@ -47,5 +47,8 @@ pyinstaller \
     --add-data 'marcam/media/help_selectmode_off.png:media' \
     build_scripts/marcam_macos.spec
 
+# copy original Info.plist
+#cp build_scripts/Info.plist dist/Marcam.app/Contents/
+
 # move back original const.py file
 mv marcam/const.py.bak marcam/const.py
