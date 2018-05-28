@@ -63,7 +63,7 @@ app = BUNDLE(
                 'CFBundleVersion':'0.3.0',
                 'CFBundleShortVersionString':'0.3.0',
                 'NSPrincipalClass':'NSApplication',
-                'NSHumanReadableCopyright': u"Copyright © 2018, " \
+                'NSHumanReadableCopyright': u"Copyright \u00A9 2018, " \
                         "Matthew A. Clapp, All Rights Reserved",
                 'CFBundleDocumentTypes':[
                     {
