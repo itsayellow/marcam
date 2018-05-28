@@ -56,12 +56,13 @@ app = BUNDLE(
         icon='marcam/media/marcam.icns',
         bundle_identifier='com.itsayellow.osx.marcam',
         info_plist={
-                'CFBundleName':'Marcam',
+                'CFBundleDevelopmentRegion':'English',
                 'CFBundleDisplayName':'Marcam',
                 'CFBundleGetInfoString':'Count objects in images',
                 'CFBundleIdentifier':'com.itsayellow.osx.marcam',
-                'CFBundleVersion':'0.3.0',
+                'CFBundleName':'Marcam',
                 'CFBundleShortVersionString':'0.3.0',
+                'CFBundleVersion':'0.3.0',
                 'NSPrincipalClass':'NSApplication',
                 'NSHumanReadableCopyright': u"Copyright \u00A9 2018, " \
                         "Matthew A. Clapp, All Rights Reserved",
