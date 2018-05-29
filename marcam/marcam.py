@@ -35,11 +35,10 @@ if getattr(sys, 'frozen', False) and getattr(sys, '_MEIPASS', False):
     #   on mac: "Marcam.app/Contents/MacOS/"
     #   on win: "Marcam/"
     # mac has symlink in EXE_DIR to media in "Marcam.app/Contents/Resources"
-    ICON_DIR = os.path.join(EXE_DIR, 'media')
 else:
     EXE_DIR = os.path.dirname(os.path.realpath(__file__))
     # for now the paths are the same
-    ICON_DIR = EXE_DIR
+ICON_DIR = os.path.join(EXE_DIR, 'media')
 
 # which modules are we logging
 LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
