@@ -504,7 +504,7 @@ class ImageWindow(wx.Frame):
         # TODO: wx.PlatformInformation to get whether mac or not
         LOGGER.info("MSC:ICON_DIR=%s", ICON_DIR)
         selectbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pointerg_mac_24.png'))
-        markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pencil6_mac_24.png'))
+        markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pencil6c_mac_24.png'))
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
 
         self.toolbar = self.CreateToolBar()
