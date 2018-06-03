@@ -1,19 +1,33 @@
 # -*- mode: python -*-
 
+import os
+import os.path
+import sys
+
+# add ./marcam to PYTHONPATH to allow loading const.py
+sys.path.append(os.path.abspath('marcam'))
+import const
+
 block_cipher = None
 
+marcam_datas = [
+            ('../marcam/media/marcam_help.html', 'media'),
+            ('../marcam/media/help_markmode_off.png', 'media'),
+            ('../marcam/media/help_selectmode_off.png', 'media')
+            ]
+# make sure toolbar icons are added
+marcam_datas.append(
+        (os.path.relpath(const.SELECTBMP_FNAME, start='build_scripts'), 'media')
+        )
+marcam_datas.append(
+        (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media')
+        )
 
 a = Analysis(
         ['../marcam/marcam.py'],
         pathex=['marcam', '.'],
         binaries=[],
-        datas=[
-            ('../marcam/media/pointerg_mac_24.png', 'media'),
-            ('../marcam/media/pencil6c_mac_24.png', 'media'),
-            ('../marcam/media/marcam_help.html', 'media'),
-            ('../marcam/media/help_markmode_off.png', 'media'),
-            ('../marcam/media/help_selectmode_off.png', 'media')
-            ],
+        datas=marcam_datas,
         hiddenimports=[],
         hookspath=[],
         runtime_hooks=[],
