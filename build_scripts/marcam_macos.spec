@@ -8,8 +8,8 @@ a = Analysis(
         pathex=['marcam', '.'],
         binaries=[],
         datas=[
-            ('../marcam/media/marktool24.png', 'media'),
-            ('../marcam/media/pointer_mac24f.png', 'media'),
+            ('../marcam/media/pointerg_mac_24.png', 'media'),
+            ('../marcam/media/pencil6c_mac_24.png', 'media'),
             ('../marcam/media/marcam_help.html', 'media'),
             ('../marcam/media/help_markmode_off.png', 'media'),
             ('../marcam/media/help_selectmode_off.png', 'media')

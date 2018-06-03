@@ -29,22 +29,13 @@ import common
 
 # NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
-if getattr(sys, 'frozen', False) and getattr(sys, '_MEIPASS', False):
-    EXE_DIR = sys._MEIPASS
-    # EXE_DIR is the same dir where the executable lives
-    #   on mac: "Marcam.app/Contents/MacOS/"
-    #   on win: "Marcam/"
-    # mac has symlink in EXE_DIR to media in "Marcam.app/Contents/Resources"
-else:
-    EXE_DIR = os.path.dirname(os.path.realpath(__file__))
-    # for now the paths are the same
-ICON_DIR = os.path.join(EXE_DIR, 'media')
-
 # which modules are we logging
 LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
 
 # global logger obj for this file
 LOGGER = logging.getLogger(__name__)
+
+LOGGER.info("MSC:ICON_DIR=%s", const.ICON_DIR)
 
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER)
@@ -502,9 +493,12 @@ class ImageWindow(wx.Frame):
         #   in wx pixels use 24h x >24w
         #   rounded corners
         # TODO: wx.PlatformInformation to get whether mac or not
-        LOGGER.info("MSC:ICON_DIR=%s", ICON_DIR)
-        selectbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pointerg_mac_24.png'))
-        markbmp = wx.Bitmap(os.path.join(ICON_DIR, 'pencil6c_mac_24.png'))
+        if not os.path.exists(const.SELECTBMP_FNAME):
+            LOGGER.error("MSC:Icon doesn't exist: " + const.SELECTBMP_FNAME)
+        if not os.path.exists(const.MARKBMP_FNAME):
+            LOGGER.error("MSC:Icon doesn't exist: " + const.MARKBMP_FNAME)
+        selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
+        markbmp = wx.Bitmap(const.MARKBMP_FNAME)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
 
         self.toolbar = self.CreateToolBar()
@@ -1233,7 +1227,7 @@ class HelpFrame(wx.Frame):
         super().__init__(*args, **kwargs)
         # use wx.html2 to allow better rendering (and CSS in future)
         self.html = wx.html2.WebView.New(self)
-        self.html.LoadURL('file://' + os.path.join(ICON_DIR, 'marcam_help.html'))
+        self.html.LoadURL('file://' + os.path.join(const.ICON_DIR, 'marcam_help.html'))
 
         self.SetTitle("Marcam Help")
         self.SetSize((500, 600))
