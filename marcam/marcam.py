@@ -107,10 +107,21 @@ def logging_setup(log_level=logging.DEBUG):
             )
 
 @debug_fxn
-def create_config_file(config_filepath):
+def default_config_data():
+    """Canonical default config data
+
+    Used when creating new config data file, or as defaults when reading
+    From an old config data file with fewer keys.
+    """
     config_data = {}
     config_data['winsize'] = [800, 600]
     config_data['debug'] = False
+
+    return config_data
+
+@debug_fxn
+def create_config_file(config_filepath):
+    config_data = default_config_data()
 
     try:
         with open(config_filepath, 'w') as config_fh:
@@ -121,13 +132,11 @@ def create_config_file(config_filepath):
     except:
         # TODO specific exception
         LOGGER.warn("Can't create config file: %s", config_filepath)
-        return config_data
-
-    return config_data
 
 @debug_fxn
 def load_config():
-    config_data = None
+    # start with defaults, override later with any/all actual config data
+    config_data = default_config_data()
 
     # create config dir if necessary
     os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
@@ -139,10 +148,10 @@ def load_config():
     # if no config.json file, create
     try:
         with open(config_filepath, 'r') as config_fh:
-            config_data = json.load(config_fh)
+            config_data.update(json.load(config_fh))
     except:
         # TODO specific exception
-        config_data = create_config_file(config_filepath)
+        create_config_file(config_filepath)
 
     return config_data 
 
