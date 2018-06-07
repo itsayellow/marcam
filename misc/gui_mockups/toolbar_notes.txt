@@ -1,0 +1,12 @@
+bitmap size     retina toolbar screengrab size
+16x16           48x48
+20x20           48x48
+24x24           48x48
+28x28           64x64
+32x32           64x64
+36x36           64x64
+48x48           64x64
+64x64           64x64
+84x84           64x64
+100x100         64x64
+128x128         64x64   

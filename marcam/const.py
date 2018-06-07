@@ -1,6 +1,7 @@
 import sys
 import wx 
 import appdirs
+import os.path
 
 APP_NAME = 'Marcam'
 VERSION_STR = "0.3.0"
@@ -14,6 +15,20 @@ elif sys.platform == 'win32':
     PLATFORM = 'win'
 else:
     PLATFORM = 'unix'
+
+# Determine exe and icon dir, for frozen/nonfrozen
+#   EXE_DIR is the same dir where the executable lives
+if getattr(sys, 'frozen', False) and getattr(sys, '_MEIPASS', False):
+    EXE_DIR = sys._MEIPASS
+    #   on mac: "Marcam.app/Contents/MacOS/"
+    #   on win: "Marcam/"
+    # mac has symlink in EXE_DIR to media in "Marcam.app/Contents/Resources"
+else:
+    EXE_DIR = os.path.dirname(os.path.realpath(__file__))
+    # for now the paths are the same
+ICON_DIR = os.path.join(EXE_DIR, 'media')
+SELECTBMP_FNAME = os.path.join(ICON_DIR, 'pointerg_mac_24.png')
+MARKBMP_FNAME = os.path.join(ICON_DIR, 'pencil6c_mac_24.png')
 
 # what is one step of zoom? (1.2 might be better)
 MAG_STEP = 1.1
