@@ -491,6 +491,8 @@ class ImageWindow(wx.Frame):
         del screen_dc
 
         # Toolbar
+        # INFO: wx toolbar buttons
+        #   Mac: seem to be either 24x24 (retina 48x48) or 32x32 (retina 64x64)
         # INFO: Mac buttons:
         #   regular: monochrome
         #   activated: blue fg
