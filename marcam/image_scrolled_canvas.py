@@ -14,7 +14,8 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
 
 # create debug function using this file's logger
-debug_fxn = common.debug_fxn_factory(LOGGER)
+debug_fxn = common.debug_fxn_factory(LOGGER.info)
+debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 
 def ceil(num):
@@ -171,7 +172,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             #   without this, repainting will happen next iteration of event loop
             self.Update()
 
-    @debug_fxn
+    @debug_fxn_debug
     def has_no_image(self):
         return self.img_dc is None
 

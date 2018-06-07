@@ -1,11 +1,12 @@
 """Common functions used by multiple modules
 """
 
-def debug_fxn_factory(logger):
+def debug_fxn_factory(logger_fxn):
     """Factory to produce debug_fxn that logs to specified logger object
 
     Args:
-        logger (logging.Logger): Logger object to send info msgs to
+        logger_fxn (logging.Logger.{info,debug,warning,error): Logger function
+            send info msgs to.  Typically logging.Logger.info
     """
 
     # debug decorator that announces function call/entry and lists args
@@ -20,7 +21,7 @@ def debug_fxn_factory(logger):
             for key in kwargs:
                 log_string += "    " + key + "=" + repr(kwargs[key]) + ",\n"
             log_string += "    )"
-            logger.info(log_string)
+            logger_fxn(log_string)
             return func(*args, **kwargs)
         return func_wrapper
 
