@@ -27,8 +27,13 @@ else:
     EXE_DIR = os.path.dirname(os.path.realpath(__file__))
     # for now the paths are the same
 ICON_DIR = os.path.join(EXE_DIR, 'media')
-SELECTBMP_FNAME = os.path.join(ICON_DIR, 'pointerg_mac_24.png')
-MARKBMP_FNAME = os.path.join(ICON_DIR, 'pencil6c_mac_24.png')
+
+if PLATFORM == 'mac':
+    SELECTBMP_FNAME = os.path.join(ICON_DIR, 'pointerg_mac_24.png')
+    MARKBMP_FNAME = os.path.join(ICON_DIR, 'pencil6c_mac_24.png')
+else:
+    SELECTBMP_FNAME = os.path.join(ICON_DIR, 'pointer32.png')
+    MARKBMP_FNAME = os.path.join(ICON_DIR, 'marktool32.png')
 
 # what is one step of zoom? (1.2 might be better)
 MAG_STEP = 1.1
