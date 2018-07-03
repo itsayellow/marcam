@@ -6,12 +6,16 @@ Summary
 
 Marcam - a cross-platform application to automate counting of objects in images.  
 
-Copyright 2017-2018 Matthew A. Clapp
+Copyright |copy| 2017-2018 Matthew A. Clapp
+
+.. |copy| unicode:: 0xA9 .. copyright sign
 
 Building
 --------
 
-Requires python > 3.6
+Requires python |gteq| 3.6
+
+.. |gteq| unicode:: 0x2265 .. greater than or equal to
 
 macOS
 ~~~~~
