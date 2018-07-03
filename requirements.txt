@@ -1,8 +1,8 @@
 # requirements for marcam app and building
 appdirs==1.4.3
 biorad1sc-reader==0.6
-numpy==1.14.2
-Pillow==5.0.0
+numpy==1.14.5
+Pillow==5.2.0
 wxPython==4.0.3
 py2app==0.14
 PyInstaller==3.3.1
