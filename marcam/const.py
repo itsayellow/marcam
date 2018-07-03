@@ -4,7 +4,7 @@ import appdirs
 import os.path
 
 APP_NAME = 'Marcam'
-VERSION_STR = "0.3.0"
+VERSION_STR = "0.4.0"
 
 # OS-dependent
 USER_CONFIG_DIR = appdirs.user_config_dir(APP_NAME)

@@ -75,8 +75,8 @@ app = BUNDLE(
                 'CFBundleGetInfoString':'Count objects in images',
                 'CFBundleIdentifier':'com.itsayellow.osx.marcam',
                 'CFBundleName':'Marcam',
-                'CFBundleShortVersionString':'0.3.0',
-                'CFBundleVersion':'0.3.0',
+                'CFBundleShortVersionString':'0.4.0',
+                'CFBundleVersion':'0.4.0',
                 'NSPrincipalClass':'NSApplication',
                 'NSHumanReadableCopyright': u"Copyright \u00A9 2018, " \
                         "Matthew A. Clapp, All Rights Reserved",
