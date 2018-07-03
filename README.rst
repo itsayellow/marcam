@@ -11,36 +11,37 @@ Copyright 2017-2018 Matthew A. Clapp
 Building
 --------
 
-#. ``make clean`` to remove all build directories and files.
-#. ``make app`` to make the Mac application
+Requires python > 3.6
+
+macOS
+~~~~~
+
+#. ``make clean_all`` to remove all build directories and files.
 #. ``make dmg`` to make the Mac .dmg bundle containing application and
-   Applications alias
+   Applications directory alias
 
-To generate a new requirements.txt::
+Windows
+~~~~~~~
 
-    source virt/bin/activate
-    pip3 freeze --all > requirements.txt
+#. Install NSIS
+#. ``make clean_all`` to remove all build directories and files.
+#. ``make wininstall`` to make the Windows installer
+
+Notes
+--------
+Application preferences on Mac stored at: "~/Library/Preferences/Marcam Preferences"
+
+Developer Reference Notes
+-------------------------
+
+Creating a Mac Icon
+~~~~~~~~~~~~~~~~~~~
 
 To make a new icon
 
 * create a photoshop psd document at 512x512
 * export to png
 * read in png file and then downsize to 32x32 and save as png
-
-Requirements on Build System
-----------------------------
-
-macOS
-~~~~~
-* ``pip3 install dmgbuild``
-
-Windows
-~~~~~~~
-* Install NSIS
-
-Notes
---------
-Application preferences on Mac stored at: "~/Library/Preferences/Marcam Preferences"
 
 References
 ----------
