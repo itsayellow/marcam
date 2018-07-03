@@ -20,7 +20,8 @@ Requires python |gteq| 3.6
 macOS
 ~~~~~
 
-#. ``make clean_all`` to remove all build directories and files.
+#. ``make clean_all`` to remove all build directories and files (including
+   removal of virtual environment).
 #. ``make dmg`` to make the Mac .dmg bundle containing application and
    Applications directory alias
 
@@ -28,7 +29,8 @@ Windows
 ~~~~~~~
 
 #. Install NSIS
-#. ``make clean_all`` to remove all build directories and files.
+#. ``make clean_all`` to remove all build directories and files (including
+   removal of virtual environment).
 #. ``make wininstall`` to make the Windows installer
 
 Notes
@@ -38,8 +40,8 @@ Application preferences on Mac stored at: "~/Library/Preferences/Marcam Preferen
 Developer Reference Notes
 -------------------------
 
-Creating a Mac Icon
-~~~~~~~~~~~~~~~~~~~
+Creating a Mac Toolbar Icon
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To make a new icon
 
