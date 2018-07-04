@@ -33,6 +33,7 @@ source virt/Scripts/activate
 
 pyinstaller \
     -y \
+    --icon 'marcam/media/marcam.ico' \
     --windowed \
     --paths ./marcam \
     --add-data 'marcam/media/marktool32.png;media' \
