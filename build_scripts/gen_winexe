@@ -36,6 +36,7 @@ pyinstaller \
     --icon 'marcam/media/marcam.ico' \
     --windowed \
     --paths ./marcam \
+    --add-data 'marcam/media/marcam.ico;media' \
     --add-data 'marcam/media/marktool32.png;media' \
     --add-data 'marcam/media/pointer32.png;media' \
     --add-data 'marcam/media/marcam_help.html;media' \
