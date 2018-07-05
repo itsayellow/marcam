@@ -19,7 +19,7 @@
 #   alpha channel.
 # from starting image file, create icns file
 #
-# usage: gen_icon <src_image_file>
+# usage: gen_icns <src_image_file>
 #
 # requires graphicsmagick
 
