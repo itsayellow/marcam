@@ -604,6 +604,10 @@ class ImageWindow(wx.Frame):
 
         self.SetTitle('Marcam')
 
+        # set icon in title bar for Windows (and unix?)
+        my_icon_bundle = wx.IconBundle(os.path.join(const.ICON_DIR, 'marcam.ico'))
+        self.SetIcons(my_icon_bundle)
+
         # finally render app
         self.Show(True)
 
