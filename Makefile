@@ -26,7 +26,7 @@ dist/Marcam.app: marcam/* virt
 	@echo "---------------------------------------------------------------"
 	@echo "Make app (MacOS)"
 	@echo ""
-	./build_scripts/gen_app_pyinstaller
+	./build_scripts/gen_app
 
 dist/Marcam.dmg: dist/Marcam.app
 	@echo ""

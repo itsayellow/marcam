@@ -44,8 +44,11 @@ fi
 # activate virtual environment for python
 source virt/bin/activate
 
-# build app using py2app
-python3 setup.py py2app
+# build app using pyinstaller
+pyinstaller build_scripts/marcam_macos.spec
+
+# copy original Info.plist
+cp build_scripts/Info.plist dist/Marcam.app/Contents/
 
 # move back original const.py file
 mv marcam/const.py.bak marcam/const.py
