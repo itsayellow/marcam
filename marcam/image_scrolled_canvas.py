@@ -766,6 +766,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # TODO: do we need dc = wx.GCDC(dc) for Windows for transparency of
         #   rubberband box?
+        # TODO: do we need dc = wx.GraphicsContext(dc) for Windows for
+        #   transparency of rubberband box?
 
         paint_dc = wx.PaintDC(self)
         # for scrolled window
