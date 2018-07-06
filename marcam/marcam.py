@@ -455,7 +455,7 @@ class ImageWindow(wx.Frame):
                 'Save Image Data As...\tShift+Ctrl+S',
                 'Save .mcm image and data file'
                 )
-        eiitem = file_menu.Append(wx.ID_SAVEAS,
+        eiitem = file_menu.Append(wx.ID_ANY,
                 'Export Image...\tCtrl+E',
                 'Export image with marks to image file'
                 )
