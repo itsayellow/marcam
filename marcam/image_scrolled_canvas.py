@@ -1,3 +1,6 @@
+"""Image viewing/manipulation workhorse widget.
+"""
+
 # Copyright 2017-2018 Matthew A. Clapp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -446,11 +449,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             # use last rubberband_refresh_rect
             refresh_rect = self.rubberband_refresh_rect
             self.RefreshRect(refresh_rect)
-            self.Update()
+            # reset all drag info so update doesn't add back drag rectangle
+            self.is_dragging = False
+            self.rubberband_refresh_rect = None
+            self.rubberband_draw_rect = None
 
             # finish drag by selecting everything in box
             # In this function the following code does nothing, so commented out
-
             #box_corner2_win = evt.GetPosition()
             #box_corner1_img = (
             #        self.mouse_left_down['img_x'],
@@ -766,6 +771,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # TODO: do we need dc = wx.GCDC(dc) for Windows for transparency of
         #   rubberband box?
+        # TODO: do we need dc = wx.GraphicsContext(dc) for Windows for
+        #   transparency of rubberband box?
 
         paint_dc = wx.PaintDC(self)
         # for scrolled window
@@ -988,27 +995,42 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             dc (wx.DC): typically wx.PaintDC, DC on which to draw drag rect
         """
-        # Set the pen, for the box's border
-        # Mac Native selecting on background:
-        #   white at 56.8% opacity (255, 255, 255, 145)
-        dc.SetPen(
-                wx.Pen(
-                    colour=wx.Colour(0xff, 0xff, 0xff, 145),
-                     width=1,
-                     style=wx.SOLID
-                     )
-                )
-        # Create a brush (for the box's interior) with the same colour,
-        # but 50% transparency.
-        # Mac Native selecting on background:
-        #   white at 14.5% opacity (255, 255, 255, 37)
-        dc.SetBrush(
-                wx.Brush(
-                    colour=wx.Colour(0xff, 0xff, 0xff, 37),
-                    style=wx.BRUSHSTYLE_SOLID
+        graphics_dc = wx.GraphicsContext.Create(dc)
+
+        if graphics_dc:
+            if const.PLATFORM == 'win':
+                # Windows 10 drag color
+                #   \HKEY_CURRENT_USER\Control Panel\Colors\HotTrackingColor
+                #   0 102 204
+                pen_color = wx.Colour(0, 102, 204, 145)
+                brush_color = wx.Colour(0, 102, 204, 37)
+            elif const.PLATFORM == 'mac':
+                # Mac Native pen selecting on background:
+                #   white at 56.8% opacity (255, 255, 255, 145)
+                # Mac Native brush selecting on background:
+                #   white at 14.5% opacity (255, 255, 255, 37)
+                pen_color = wx.Colour(0xff, 0xff, 0xff, 145)
+                brush_color = wx.Colour(0xff, 0xff, 0xff, 37)
+            else:
+                pen_color = wx.Colour(0xff, 0xff, 0xff, 145)
+                brush_color = wx.Colour(0xff, 0xff, 0xff, 37)
+
+            # Set the pen, for the box's border
+            graphics_dc.SetPen(
+                    wx.Pen(colour=pen_color, width=1, style=wx.SOLID)
                     )
-                )
-        dc.DrawRectangle(self.rubberband_draw_rect)
+            # Create a brush (for the box's interior)
+            graphics_dc.SetBrush(
+                    wx.Brush(colour=brush_color, style=wx.BRUSHSTYLE_SOLID)
+                    )
+            # for some reason GraphicsContext.DrawRectangle will not accept
+            #   wx.Rect as argument, so break out separate dimensions
+            graphics_dc.DrawRectangle(
+                    self.rubberband_draw_rect.x,
+                    self.rubberband_draw_rect.y,
+                    self.rubberband_draw_rect.width,
+                    self.rubberband_draw_rect.height,
+                    )
 
     @debug_fxn
     def win2img_coord(self, win_coord, scale_dc=1):
@@ -1618,12 +1640,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         evt_pos = evt.GetPosition()
         if self.is_dragging:
             if self.rubberband_refresh_rect is not None:
-                # use last rubberband_refresh_rect
-                # TODO: do we need these?  Shouldn't we stop drawing the 
-                #   rubberband_draw_rect?
+                # use last rubberband_refresh_rect to refresh all marks
+                #   in selection box, and selection box area (to erase
+                #   rubber band box after resetting rubber_band vars)
                 refresh_rect = self.rubberband_refresh_rect
                 self.RefreshRect(refresh_rect)
-                self.Update()
 
                 # finish drag by selecting everything in box
                 box_corner1_img = (
@@ -1644,14 +1665,24 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     marks_new_selected = [
                             x for x in marks_in_box if x not in self.marks_selected]
                     self.marks_selected = marks_in_box
-                    for mark in marks_new_selected + marks_unselected:
+                    # marks_new_selected already in refresh_rect box, so
+                    #   no need to refresh them individually.
+                    #   Just refresh mark areas outside of the rubber band box
+                    for mark in marks_unselected:
                         self.refresh_mark_area(mark)
                 else:
                     for mark in marks_in_box:
                         if mark not in self.marks_selected:
                             self.marks_selected.append(mark)
-                            self.refresh_mark_area(mark)
-                # TODO necessary?
+                            # marks_selected already in refresh_rect box, so
+                            #   no need to refresh them individually.
+
+                # reset all drag info before updating refresh rects
+                self.mouse_left_down = None
+                self.is_dragging = False
+                self.rubberband_refresh_rect = None
+                self.rubberband_draw_rect = None
+                # Finally update all refresh rects
                 self.Update()
             else:
                 # get mouse location of left_up

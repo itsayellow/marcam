@@ -24,8 +24,10 @@ APP_NAME = 'Marcam'
 VERSION_STR = "0.5.0"
 
 # OS-dependent
-USER_CONFIG_DIR = appdirs.user_config_dir(APP_NAME)
-USER_LOG_DIR = appdirs.user_log_dir(APP_NAME)
+# Use appauthor=False (only applicable to Windows) to indicate only one
+#   dir level with name appname
+USER_CONFIG_DIR = appdirs.user_config_dir(appname=APP_NAME, appauthor=False)
+USER_LOG_DIR = appdirs.user_log_dir(appname=APP_NAME, appauthor=False)
 if sys.platform == 'darwin':
     PLATFORM = 'mac'
 elif sys.platform == 'win32':
