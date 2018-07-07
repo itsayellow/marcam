@@ -778,11 +778,15 @@ class ImageWindow(wx.Frame):
             # option key - release temporary zoom
         if key_code == 32:
             # space bar - release temporary zoom
-            LOGGER.debug("Option key up")
+            LOGGER.debug("Space key up")
 
             self.img_panel.set_scroll_zoom_state(
                     self.temp_scroll_zoom_state
                     )
+            # update statusbar zoom message
+            zoom = self.img_panel.zoom_list[self.temp_scroll_zoom_state[1]]
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+
             # indicate end of temp zoom state
             self.started_temp_zoom = False
 
