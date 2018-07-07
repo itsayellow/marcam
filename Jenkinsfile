@@ -18,7 +18,7 @@ pipeline {
             }
             post {
                 success {
-                    sh 'cp dist/Marcam.dmg "/Users/mclapp/Google Drive/Marcam/Marcam_mac_latest.dmg"'
+                    sh 'cp dist/Marcam.dmg "/Users/mclapp/Google Drive/Marcam/Marcam Mac Latest.dmg"'
                     archiveArtifacts 'dist/Marcam.dmg'
                 }
             }
