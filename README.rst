@@ -10,6 +10,12 @@ Copyright |copy| 2017-2018 Matthew A. Clapp
 
 .. |copy| unicode:: 0xA9 .. copyright sign
 
+Installing
+----------
+
+Fetch the latest stable release (Windows installer, Mac dmg bundle, or
+source) from https://github.com/itsayellow/marcam/releases
+
 Building
 --------
 
@@ -34,8 +40,25 @@ Windows
 #. ``make wininstall`` to make the Windows installer
 
 Notes
---------
-Application preferences on Mac stored at: "~/Library/Preferences/Marcam Preferences"
+-----
+
+macOS
+~~~~~
+
+Application Log files stored in the directory:
+"~/Library/Logs/Marcam"
+
+Application preferences stored in the file:
+"~/Library/Application Support/Marcam/config.json"
+
+Windows
+~~~~~~~
+
+Application Log files stored in the directory:
+"C:\\Users\\<username>\\AppData\\Local\\Marcam"
+
+Application preferences stored in the file:
+"C:\\Users\\<username>\\Appdata\\Local\\Marcam\\config.json"
 
 Developer Reference Notes
 -------------------------
