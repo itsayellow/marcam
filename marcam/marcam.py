@@ -416,6 +416,7 @@ class ImageWindow(wx.Frame):
         self.mark_menu_item = None
         self.select_menu_item = None
         self.toolbar = None
+        self.started_temp_zoom = False
 
         # App configuration
         self.config = wx.Config("Marcam", "itsayellow.com")
@@ -710,19 +711,31 @@ class ImageWindow(wx.Frame):
             deleted_marks = self.img_panel.delete_selected_marks()
             self.app_history.new(['DELETE_MARK_LIST', deleted_marks])
 
-        if key_code == 307:
+        #if key_code == 307:
             # option key - initiate temporary zoom
-            LOGGER.debug("Option key down")
+            #LOGGER.debug("Option key down")
+        if key_code == 32:
+            # space bar
+            LOGGER.debug("Space key down")
 
-            # save zoom / scroll state
-            self.temp_scroll_zoom_state = self.img_panel.get_scroll_zoom_state()
+            if not self.started_temp_zoom:
+                # only temp zoom if this is the first Key Down event without
+                #   a Key Up event
 
-            zoom = self.img_panel.zoom_point(
-                    const.TEMP_ZOOM,
-                    evt.GetPosition()
-                    )
-            if zoom:
-                self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+                # save zoom / scroll state
+                self.temp_scroll_zoom_state = self.img_panel.get_scroll_zoom_state()
+
+                zoom = self.img_panel.zoom_point(
+                        const.TEMP_ZOOM,
+                        evt.GetPosition()
+                        )
+                if zoom:
+                    self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+
+                # indicate we have actually initiated a temp zoom (so we
+                #   don't keep zooming if user holds down temp zoom key
+                #   and we get repeated Key Down events.)
+                self.started_temp_zoom = True
 
         if key_code == 366:
             # PAGE UP
@@ -761,13 +774,17 @@ class ImageWindow(wx.Frame):
                 key_code, evt.GetRawKeyCode(), evt.GetPosition()
                 )
 
-        if key_code == 307:
+        #if key_code == 307:
             # option key - release temporary zoom
+        if key_code == 32:
+            # space bar - release temporary zoom
             LOGGER.debug("Option key up")
 
             self.img_panel.set_scroll_zoom_state(
                     self.temp_scroll_zoom_state
                     )
+            # indicate end of temp zoom state
+            self.started_temp_zoom = False
 
         evt.Skip()
 
