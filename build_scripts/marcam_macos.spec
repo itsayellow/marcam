@@ -26,9 +26,7 @@ block_cipher = None
 
 marcam_datas = [
             ('../marcam/media/marcam.ico', 'media'),
-            ('../marcam/media/marcam_help.html', 'media'),
-            ('../marcam/media/help_markmode_off.png', 'media'),
-            ('../marcam/media/help_selectmode_off.png', 'media')
+            ('../marcam/media/marcam_help_mac.html', 'media'),
             ]
 # make sure toolbar icons are added
 marcam_datas.append(

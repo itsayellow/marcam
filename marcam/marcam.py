@@ -1271,9 +1271,17 @@ class HelpFrame(wx.Frame):
     def __init__(self, *args, **kwargs):
         """Constructor"""
         super().__init__(*args, **kwargs)
+
+        if const.PLATFORM == 'mac':
+            help_filename = 'marcam_help_mac.html'
+        else:
+            help_filename = 'marcam_help.html'
+
         # use wx.html2 to allow better rendering (and CSS in future)
         self.html = wx.html2.WebView.New(self)
-        self.html.LoadURL('file://' + os.path.join(const.ICON_DIR, 'marcam_help.html'))
+        self.html.LoadURL(
+                'file://' + os.path.join(const.ICON_DIR, help_filename)
+                )
 
         self.SetTitle("Marcam Help")
         self.SetSize((500, 600))
