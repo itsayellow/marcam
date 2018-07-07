@@ -444,6 +444,9 @@ class ImageWindow(wx.Frame):
         oitem = file_menu.Append(wx.ID_OPEN,
                 'Open Image...\tCtrl+O', 'Open image file'
                 )
+        # TODO:
+        #marcam/marcam.py:448: DeprecationWarning: Menu.Append() is deprecated
+        #  'Open Recent', open_recent_menu, 'Open recent .mcm files')
         orecentitem = file_menu.Append(wx.ID_ANY,
                 'Open Recent', open_recent_menu, 'Open recent .mcm files')
         citem = file_menu.Append(wx.ID_CLOSE,
@@ -518,21 +521,28 @@ class ImageWindow(wx.Frame):
         #       width can be variable (78w seen)
         #   in wx pixels use 24h x >24w
         #   rounded corners
-        # TODO: wx.PlatformInformation to get whether mac or not
         if not os.path.exists(const.SELECTBMP_FNAME):
             LOGGER.error("MSC:Icon doesn't exist: " + const.SELECTBMP_FNAME)
         if not os.path.exists(const.MARKBMP_FNAME):
             LOGGER.error("MSC:Icon doesn't exist: " + const.MARKBMP_FNAME)
         selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
         markbmp = wx.Bitmap(const.MARKBMP_FNAME)
+        # TODO: black blank bitmap placeholder.  Needs real button bitmap
+        toclipbmp = wx.Bitmap(24,24)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
 
         self.toolbar = self.CreateToolBar()
         #self.toolbar.SetToolBitmapSize(wx.Size(24,24))
         #otool = self.toolbar.AddTool(wx.ID_OPEN, 'Open', obmp)
-        selecttool = self.toolbar.AddRadioTool(wx.ID_ANY, 'Select Mode', selectbmp)
+        selecttool = self.toolbar.AddRadioTool(
+                wx.ID_ANY, 'Select Mode', selectbmp, wx.NullBitmap,
+                'Enter Select Mode'
+                )
         self.select_tool_id = selecttool.GetId()
-        marktool = self.toolbar.AddRadioTool(wx.ID_ANY, 'Mark Mode', markbmp)
+        marktool = self.toolbar.AddRadioTool(
+                wx.ID_ANY, 'Mark Mode', markbmp, wx.NullBitmap,
+                'Enter Mark Mode'
+                )
         self.mark_tool_id = marktool.GetId()
         self.toolbar.AddStretchableSpace()
         # Create marks tally text control
@@ -540,11 +550,18 @@ class ImageWindow(wx.Frame):
         #   update number on its init
         # using TextCtrl to allow copy to clipboard
         self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
+        # TODO: think about putting border (invisible somehow?) back in
+        #   so that count is justified with "Marks" label
         self.marks_num_display = wx.TextCtrl(
                 self.toolbar, wx.ID_ANY, size=wx.Size(text_width_px, -1),
                 style=wx.TE_READONLY | wx.BORDER_NONE
                 )
         self.toolbar.AddControl(self.marks_num_display)
+        tocliptool = self.toolbar.AddTool(
+                wx.ID_ANY, 'Copy', toclipbmp,
+                'Copy to Clipboard'
+                )
+        self.toclip_tool_id = tocliptool.GetId()
         self.toolbar.Realize()
 
         # status bar stuff
@@ -579,6 +596,7 @@ class ImageWindow(wx.Frame):
         # setup event handlers for toolbar
         self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
         self.Bind(wx.EVT_TOOL, self.on_markmode, marktool)
+        self.Bind(wx.EVT_TOOL, self.on_toclip, tocliptool)
 
         # setup event handlers for menus
         # File menu items
@@ -830,6 +848,24 @@ class ImageWindow(wx.Frame):
         # exiting select mode so no marks can be selected
         self.img_panel.deselect_all_marks()
         self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
+
+    @debug_fxn
+    def on_toclip(self, evt):
+        """When pressing the "To Clipboard" button next to Marks Tally display
+
+        Copy the total number of marks to the Clipboard.
+
+        Args:
+            evt (wx.): TODO
+        """
+        marks_total_text = self.marks_num_display.GetLineText(0)
+        if wx.TheClipboard.Open():
+            wx.TheClipboard.SetData(wx.TextDataObject(marks_total_text))
+            # to ensure text stays on clipboard even after app exits?
+            #wx.TheClipboard.Flush()
+            wx.TheClipboard.Close()
+        #print("self.marks_num_display.GetLineText(0) = '%s'"%marks_total_text)
+        #print("len(self.img_panel.marks) = %d"%(len(self.img_panel.marks)))
 
     @debug_fxn
     def on_open(self, evt):
