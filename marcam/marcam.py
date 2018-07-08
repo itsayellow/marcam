@@ -551,7 +551,8 @@ class ImageWindow(wx.Frame):
         #   so that count is justified with "Marks" label
         self.marks_num_display = wx.TextCtrl(
                 self.toolbar, wx.ID_ANY, size=wx.Size(text_width_px, -1),
-                style=wx.TE_READONLY | wx.BORDER_NONE
+                #style=wx.TE_READONLY | wx.BORDER_NONE
+                style=wx.TE_READONLY
                 )
         self.toolbar.AddControl(self.marks_num_display)
         tocliptool = self.toolbar.AddTool(
