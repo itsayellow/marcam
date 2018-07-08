@@ -74,7 +74,7 @@ symlinks = { 'Applications': '/Applications' }
 # image, *or* you can define badge_icon, in which case the icon file you specify
 # will be used to badge the system's Removable Disk icon
 #
-icon = 'misc/marcam_drive.icns'
+icon = 'misc/installer_images/marcam_drive.icns'
 #badge_icon = icon_from_app(application)
 
 # Where to put the icons
