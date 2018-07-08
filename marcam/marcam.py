@@ -444,11 +444,8 @@ class ImageWindow(wx.Frame):
         oitem = file_menu.Append(wx.ID_OPEN,
                 'Open Image...\tCtrl+O', 'Open image file'
                 )
-        # TODO:
-        #marcam/marcam.py:448: DeprecationWarning: Menu.Append() is deprecated
-        #  'Open Recent', open_recent_menu, 'Open recent .mcm files')
-        orecentitem = file_menu.Append(wx.ID_ANY,
-                'Open Recent', open_recent_menu, 'Open recent .mcm files')
+        orecentitem = file_menu.AppendSubMenu(
+                open_recent_menu, 'Open Recent', 'Open recent .mcm files')
         citem = file_menu.Append(wx.ID_CLOSE,
                 'Close\tCtrl+W', 'Close image'
                 )
