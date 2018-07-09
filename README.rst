@@ -4,7 +4,7 @@ Marcam
 Summary
 -------
 
-Marcam - a cross-platform application to automate counting of objects in images.  
+Marcam - a cross-platform application to automate marking and counting objects in images.  
 
 Copyright |copy| 2017-2018 Matthew A. Clapp
 
