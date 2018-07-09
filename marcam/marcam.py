@@ -860,8 +860,10 @@ class ImageWindow(wx.Frame):
         marks_total_text = self.marks_num_display.GetLineText(0)
         if wx.TheClipboard.Open():
             wx.TheClipboard.SetData(wx.TextDataObject(marks_total_text))
-            # to ensure text stays on clipboard even after app exits?
-            #wx.TheClipboard.Flush()
+            # to ensure text stays on clipboard even after app exits
+            #   Necessary for Windows.
+            #   Not necessary for Mac.
+            wx.TheClipboard.Flush()
             wx.TheClipboard.Close()
         #print("self.marks_num_display.GetLineText(0) = '%s'"%marks_total_text)
         #print("len(self.img_panel.marks) = %d"%(len(self.img_panel.marks)))
