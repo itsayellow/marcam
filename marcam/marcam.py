@@ -522,10 +522,11 @@ class ImageWindow(wx.Frame):
             LOGGER.error("MSC:Icon doesn't exist: " + const.SELECTBMP_FNAME)
         if not os.path.exists(const.MARKBMP_FNAME):
             LOGGER.error("MSC:Icon doesn't exist: " + const.MARKBMP_FNAME)
+        if not os.path.exists(const.TOCLIPBMP_FNAME):
+            LOGGER.error("MSC:Icon doesn't exist: " + const.TOCLIPBMP_FNAME)
         selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
         markbmp = wx.Bitmap(const.MARKBMP_FNAME)
-        # TODO: black blank bitmap placeholder.  Needs real button bitmap
-        toclipbmp = wx.Bitmap(24,24)
+        toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
 
         self.toolbar = self.CreateToolBar()
