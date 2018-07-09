@@ -54,7 +54,7 @@ if PLATFORM == 'mac':
 else:
     SELECTBMP_FNAME = os.path.join(ICON_DIR, 'pointer32.png')
     MARKBMP_FNAME = os.path.join(ICON_DIR, 'marktool32.png')
-    TOCLIPBMP_FNAME = os.path.join(ICON_DIR, 'toclip24_mac.png')
+    TOCLIPBMP_FNAME = os.path.join(ICON_DIR, 'toclip32.png')
 
 # what is one step of zoom? (1.2 might be better)
 MAG_STEP = 1.1

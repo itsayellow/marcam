@@ -35,6 +35,9 @@ marcam_datas.append(
 marcam_datas.append(
         (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media')
         )
+marcam_datas.append(
+        (os.path.relpath(const.TOCLIPBMP_FNAME, start='build_scripts'), 'media')
+        )
 
 a = Analysis(
         ['../marcam/marcam.py'],
