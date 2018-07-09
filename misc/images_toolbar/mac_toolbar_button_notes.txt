@@ -1,5 +1,19 @@
 Screen grabs from retina screen are 2x pixels vs. non-retina bmps
 
+Our buttons
+-----------
+Mac
+    Dimensions: 24px x 24px
+    Lines:
+        color: 76,76,76 or 0x4c,0x,0x4c
+    Procedure:
+        1. Create a vector-drawn version
+        2. Rasterize to a high resolution
+        3. Reduce image to proper button bitmap size
+        4. Clean up individual pixels with pencil and eraser in photoshop
+
+Research
+--------
 Mac buttons:
     regular: monochrome
     activated: blue fg
