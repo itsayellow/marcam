@@ -467,12 +467,19 @@ class ImageWindow(wx.Frame):
         menubar.Append(file_menu, '&File')
         # Edit
         edit_menu = wx.Menu()
+        copyitem = edit_menu.Append(wx.ID_COPY,
+                'Copy Marks Total\tCtrl+C',
+                'Copy total marks number to Clipboard.'
+                )
         undoitem = edit_menu.Append(wx.ID_UNDO,
-                'Undo\tCtrl+Z', 'Undo last action')
+                'Undo\tCtrl+Z', 'Undo last action'
+                )
         redoitem = edit_menu.Append(wx.ID_REDO,
-                'Redo\tShift+Ctrl+Z', 'Redo last undone action')
+                'Redo\tShift+Ctrl+Z', 'Redo last undone action'
+                )
         self.selallitem = edit_menu.Append(wx.ID_SELECTALL,
-                'Select All\tCtrl+A', 'Select all marks')
+                'Select All\tCtrl+A', 'Select all marks'
+                )
         menubar.Append(edit_menu, '&Edit')
         # Tools
         tools_menu = wx.Menu()
@@ -610,6 +617,7 @@ class ImageWindow(wx.Frame):
                 id=wx.ID_FILE1, id2=wx.ID_FILE9
                 )
         # Edit menu items
+        self.Bind(wx.EVT_MENU, self.on_toclip, copyitem)
         self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
         self.Bind(wx.EVT_MENU, self.on_select_all, self.selallitem)
