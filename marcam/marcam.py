@@ -372,8 +372,8 @@ class EditHistory():
         self._update_menu_items()
 
 
-class DropTarget(wx.FileDropTarget):
-    """DropTarget Facilitating dragging file into window to open
+class FileDropTarget(wx.FileDropTarget):
+    """FileDropTarget Facilitating dragging file into window to open
     """
     def __init__(self, window_target, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -390,7 +390,10 @@ class DropTarget(wx.FileDropTarget):
         """
         filename = filenames[0]
         LOGGER.info("MSC:Drag and Drop filename:\n    %s", repr(filename))
-        self.window_target.init_image_from_file(filename)
+        # Close any existing image
+        self.window_target.parent.close_image(keep_win_open=True)
+        # Open Drag-and-Dropped image file
+        self.window_target.parent.open_image(filename)
 
         # TODO: which one of these??
         #return wx.DragCopy
@@ -605,7 +608,7 @@ class ImageWindow(wx.Frame):
                 self.marks_num_update
                 )
         # make ImageScrolledCanvas Drag and Drop Target
-        self.img_panel.SetDropTarget(DropTarget(self.img_panel))
+        self.img_panel.SetDropTarget(FileDropTarget(self.img_panel))
 
         # Vertical top-level sizer for main window
         #   unnecessary because Frame has only one child (self.img_panel) and
