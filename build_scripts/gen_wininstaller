@@ -30,3 +30,5 @@ if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
 fi
 
 makensis build_scripts/marcam.nsi
+
+mv "dist/Marcam Installer.exe" "dist/Marcam Windows Installer.exe"
