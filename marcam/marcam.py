@@ -482,6 +482,20 @@ class ImageWindow(wx.Frame):
                 'Select All\tCtrl+A', 'Select all marks'
                 )
         menubar.Append(edit_menu, '&Edit')
+        # View
+        view_menu = wx.Menu()
+        zoominitem = view_menu.Prepend(wx.ID_ZOOM_IN,
+                'Zoom In\t]',
+                'Increase image magnification.'
+                )
+        zoomoutitem = view_menu.Prepend(wx.ID_ZOOM_OUT,
+                'Zoom Out\t[',
+                'Decrease image magnification.'
+                )
+        # TODO: Can we add View menu in Mac without having System menu
+        #   items? (e.g. "Show Tab Bar")
+        #menubar.Append(view_menu, '&View')
+
         # Tools
         tools_menu = wx.Menu()
         self.select_menu_item = tools_menu.Append(wx.ID_ANY, "&Select Mode\tCtrl+T")
@@ -941,12 +955,6 @@ class ImageWindow(wx.Frame):
             evt (wx.): TODO
         """
         # TODO: open new window if this window is not blank
-
-        # first close current image (if it exists)
-        is_closed = self.on_close(None)
-
-        if not is_closed:
-            return
 
         # get path from file_history
         img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
