@@ -30,7 +30,7 @@ if [ "$ostype" != "Darwin" ] ; then
 fi
 
 # add current git hash to VERSION_STR in const.py, saving backup file
-githash=(`git rev-parse --short HEAD`)
+githash=(`git describe --tags`)
 cp marcam/const.py marcam/const.py.bak
 perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" marcam/const.py
 
