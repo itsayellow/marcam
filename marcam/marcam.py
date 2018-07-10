@@ -22,6 +22,7 @@ import logging
 import os
 import os.path # TODO: consider pathlib
 import platform
+import re
 import sys
 import tempfile
 import time
@@ -887,10 +888,19 @@ class ImageWindow(wx.Frame):
         #   native *.mcm files
         #   Image files
         #   *.1sc files (Bio-Rad)
+        image_wildcards = wx.Image.GetImageExtWildcard()
+        image_exts = re.search(r"\(([^)]+)\)", image_wildcards).group(1)
+        image_exts = "*.mcm;*.1sc;" + image_exts
+
+        # wildcard_all is technically redundant, but is useful for Windows
+        #   which has a pulldown menu filtering for each category of files.
+        #   Thus the first "category" will show all applicable files.
+        wildcard_all = "All openable files (" + image_exts + ")|" + \
+                image_exts + "|"
         wildcard_mcm = "Marcam Image Data files (*.mcm)|*.mcm|"
-        wildcard_img = "Image Files " + wx.Image.GetImageExtWildcard() + "|"
+        wildcard_img = "Image Files " + image_wildcards + "|"
         wildcard_1sc = "Bio-Rad 1sc Files|*.1sc"
-        wildcard = wildcard_mcm + wildcard_img + wildcard_1sc
+        wildcard = wildcard_all + wildcard_mcm + wildcard_img + wildcard_1sc
         open_file_dialog = wx.FileDialog(self,
                 "Open Image file",
                 wildcard=wildcard,
