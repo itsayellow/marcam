@@ -29,6 +29,18 @@ if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
     exit 1
 fi
 
+# add current git hash to VERSION_STR in const.py, saving backup file
+githash=(`git describe --tags`)
+cp marcam/const.py marcam/const.py.bak
+perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" marcam/const.py
+
+# check if const.py got corrupted
+syntax_error=(`python3 -m py_compile marcam/const.py`)
+if [ ! -z "$syntax_error" ]; then
+    echo "gen_app corrupted marcam/const.py"
+    exit 1
+fi
+
 source virt/Scripts/activate
 
 pyinstaller \
@@ -44,3 +56,6 @@ pyinstaller \
     --add-data 'marcam/media/help_markmode_off.png;media' \
     --add-data 'marcam/media/help_selectmode_off.png;media' \
     marcam/marcam.py
+
+# move back original const.py file
+mv marcam/const.py.bak marcam/const.py
