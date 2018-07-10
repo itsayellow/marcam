@@ -437,6 +437,10 @@ class ImageWindow(wx.Frame):
     def init_ui(self):
         """Initialize the GUI widgets of the main window
         """
+        # Save original size so that we can make sure we are still that
+        #   size after adding toolbar.  Toolbar on Mac adds 35 to height.
+        orig_size = self.GetSize()
+
         # menu bar stuff
         menubar = wx.MenuBar()
         # File
@@ -648,6 +652,11 @@ class ImageWindow(wx.Frame):
         # set icon in title bar for Windows (and unix?)
         my_icon_bundle = wx.IconBundle(os.path.join(const.ICON_DIR, 'marcam.ico'))
         self.SetIcons(my_icon_bundle)
+
+        # Make sure we are the same size we meant to be at start of this fxn.
+        # So that adding a toolbar won't make us taller than we were specified
+        #   to be.
+        self.SetSize(orig_size)
 
         # finally render app
         self.Show(True)
