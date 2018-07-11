@@ -1301,7 +1301,9 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_zoomfit(self, evt):
-        print("Zoom to Fit!")
+        zoom = self.img_panel.zoom_fit()
+        if zoom:
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
     def on_select_all(self, evt):

@@ -1149,27 +1149,52 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             LOGGER.info("TIM:Create MemoryDCs: %.3fs", staticdc_eltime)
 
         # set zoom_idx to scaling that will fit image in window
-        #   or 1.0 if max_zoom > 1.0
-        win_size = self.GetSize()
-
-        max_zoom = min(
-                1.000001,
-                (win_size.x / self.img_size_x),
-                (win_size.y / self.img_size_y)
-                )
-        ok_zooms = [x for x in self.zoom_list if x < max_zoom]
-        self.zoom_idx = self.zoom_list.index(max(ok_zooms))
-        self.zoom_val = self.zoom_list[self.zoom_idx]
-
-        self.set_virt_size_with_min()
-
-        # start w/ image center at window center
-        self.img_at_wincenter_x = self.img_size_x/2
-        self.img_at_wincenter_y = self.img_size_y/2
+        #   (with 1.0x zoom maximum)
+        self.zoom_fit(max_zoom=1.0, do_refresh=False)
 
         # force a paint event with Refresh and Update
         self.Refresh()
         self.Update()
+
+    @debug_fxn
+    def zoom_fit(self, max_zoom=None, do_refresh=True):
+        # return early if no image
+        if self.has_no_image():
+            return None
+
+        if max_zoom is None:
+            # no max zoom, so set max_zoom to 10x biggest zoom possible
+            max_zoom = self.zoom_list[-1]*10
+        else:
+            # max_zoom needs to be slightly bigger than desired final max zoom
+            max_zoom += 0.000001
+
+        # set zoom_idx to scaling that will fit image in window
+        win_size = self.GetSize()
+        max_fit_zoom = min(
+                max_zoom,
+                (win_size.x / self.img_size_x),
+                (win_size.y / self.img_size_y)
+                )
+        ok_zooms = [x for x in self.zoom_list if x < max_fit_zoom]
+        self.zoom_idx = self.zoom_list.index(max(ok_zooms))
+
+        # record floating point zoom
+        self.zoom_val = self.zoom_list[self.zoom_idx]
+
+        # expand virtual window size
+        self.set_virt_size_with_min()
+
+        # set image center at window center
+        self.img_at_wincenter_x = self.img_size_x/2
+        self.img_at_wincenter_y = self.img_size_y/2
+
+        if do_refresh:
+            # force a paint event with Refresh and Update
+            self.Refresh()
+            self.Update()
+
+        return self.zoom_val
 
     @debug_fxn
     def zoom_point(self, zoom_amt, win_coords=None, do_refresh=True):
