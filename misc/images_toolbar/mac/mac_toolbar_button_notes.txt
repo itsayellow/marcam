@@ -8,9 +8,20 @@ Mac
         color: 76,76,76 or 0x4c,0x,0x4c
     Procedure:
         1. Create a vector-drawn version
-        2. Rasterize to a high resolution
-        3. Reduce image to proper button bitmap size
+            A. Vectr: canvas size 640px x 640px
+            B. Line width 26px
+            C. Fill canvas
+        2. Rasterize to a high resolution (choose 300dpi, default size)
+        3. Make canvas exactly square (make smaller dimension same size
+            as larger dimension)
+        3. Reduce image to proper button bitmap size (24 x 24 for Mac)
+            A. Bilinear method yields good reduction
         4. Clean up individual pixels with pencil and eraser in photoshop
+            A. Make all vertical and horizontal lines full darkness
+            B. Erase some fuzz off of vertical and horizontal lines
+            C. Artistically clean up other areas (draw/erase)
+            D. Always use color (76, 76, 76) but can use transparency for
+                lighter colors.
 
     Zoom to fit:
         30 x 26 w x h overall
