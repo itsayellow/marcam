@@ -499,9 +499,9 @@ class ImageWindow(wx.Frame):
                 'Zoom Out\t[',
                 'Decrease image magnification.'
                 )
-        # TODO: Can we add View menu in Mac without having System menu
-        #   items? (e.g. "Show Tab Bar")
-        #menubar.Append(view_menu, '&View')
+        # SUPER STOOPID HACK: Call this menu "View " instead of "View" to
+        #   disable Mac inserting OS menu items for "Show Tab Bar", etc.
+        menubar.Append(view_menu, '&View ')
 
         # Tools
         tools_menu = wx.Menu()
