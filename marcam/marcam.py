@@ -491,13 +491,17 @@ class ImageWindow(wx.Frame):
         menubar.Append(edit_menu, '&Edit')
         # View
         view_menu = wx.Menu()
-        zoominitem = view_menu.Prepend(wx.ID_ZOOM_IN,
+        zoomoutitem = view_menu.Append(wx.ID_ZOOM_OUT,
+                'Zoom Out\t[',
+                'Decrease image magnification.'
+                )
+        zoominitem = view_menu.Append(wx.ID_ZOOM_IN,
                 'Zoom In\t]',
                 'Increase image magnification.'
                 )
-        zoomoutitem = view_menu.Prepend(wx.ID_ZOOM_OUT,
-                'Zoom Out\t[',
-                'Decrease image magnification.'
+        zoomfititem = view_menu.Append(wx.ID_ZOOM_FIT,
+                'Zoom to Fit\tCtrl+0',
+                'Zoom image to fill window.'
                 )
         # SUPER STOOPID HACK: Call this menu "View " instead of "View" to
         #   disable Mac inserting OS menu items for "Show Tab Bar", etc.
@@ -537,6 +541,7 @@ class ImageWindow(wx.Frame):
         # Toolbar
         # INFO: wx toolbar buttons
         #   Mac: seem to be either 24x24 (retina 48x48) or 32x32 (retina 64x64)
+        #   Mac: only those two sizes, and only square
         # INFO: Mac buttons:
         #   regular: monochrome
         #   activated: blue fg
@@ -547,15 +552,30 @@ class ImageWindow(wx.Frame):
         #       width can be variable (78w seen)
         #   in wx pixels use 24h x >24w
         #   rounded corners
-        if not os.path.exists(const.SELECTBMP_FNAME):
+        try:
+            selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
+        except:
             LOGGER.error("MSC:Icon doesn't exist: " + const.SELECTBMP_FNAME)
-        if not os.path.exists(const.MARKBMP_FNAME):
+        try:
+            markbmp = wx.Bitmap(const.MARKBMP_FNAME)
+        except:
             LOGGER.error("MSC:Icon doesn't exist: " + const.MARKBMP_FNAME)
-        if not os.path.exists(const.TOCLIPBMP_FNAME):
+        try:
+            toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
+        except:
             LOGGER.error("MSC:Icon doesn't exist: " + const.TOCLIPBMP_FNAME)
-        selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
-        markbmp = wx.Bitmap(const.MARKBMP_FNAME)
-        toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
+        try:
+            zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
+        except:
+            LOGGER.error("MSC:Icon doesn't exist: " + const.ZOOMOUTBMP_FNAME)
+        try:
+            zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
+        except:
+            LOGGER.error("MSC:Icon doesn't exist: " + const.ZOOMFITBMP_FNAME)
+        try:
+            zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
+        except:
+            LOGGER.error("MSC:Icon doesn't exist: " + const.ZOOMINBMP_FNAME)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
 
         self.toolbar = self.CreateToolBar()
@@ -571,6 +591,19 @@ class ImageWindow(wx.Frame):
                 'Enter Mark Mode'
                 )
         self.mark_tool_id = marktool.GetId()
+        self.toolbar.AddStretchableSpace()
+        zoomouttool = self.toolbar.AddTool(
+                wx.ID_ANY, 'Zoom Out', zoomoutbmp,
+                'Zoom Out'
+                )
+        zoomintool = self.toolbar.AddTool(
+                wx.ID_ANY, 'Zoom In', zoominbmp,
+                'Zoom In'
+                )
+        zoomfittool = self.toolbar.AddTool(
+                wx.ID_ANY, 'Zoom to Fit', zoomfitbmp,
+                'Zoom to Fit'
+                )
         self.toolbar.AddStretchableSpace()
         # Create marks tally text control
         # init marks_num_display before ImageScrolledCanvas so ISC can
@@ -625,6 +658,9 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
         self.Bind(wx.EVT_TOOL, self.on_markmode, marktool)
         self.Bind(wx.EVT_TOOL, self.on_toclip, tocliptool)
+        self.Bind(wx.EVT_TOOL, self.on_zoomout, zoomouttool)
+        self.Bind(wx.EVT_TOOL, self.on_zoomin, zoomintool)
+        self.Bind(wx.EVT_TOOL, self.on_zoomfit, zoomfittool)
 
         # setup event handlers for menus
         # File menu items
@@ -643,6 +679,10 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
         self.Bind(wx.EVT_MENU, self.on_select_all, self.selallitem)
+        # View menu items
+        self.Bind(wx.EVT_MENU, self.on_zoomout, zoomoutitem)
+        self.Bind(wx.EVT_MENU, self.on_zoomin, zoominitem)
+        self.Bind(wx.EVT_MENU, self.on_zoomfit, zoomfititem)
         # Tools menu items
         self.Bind(wx.EVT_MENU, self.on_selectmode, self.select_menu_item)
         self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
@@ -724,22 +764,19 @@ class ImageWindow(wx.Frame):
                 key_code, evt.GetRawKeyCode(), evt.GetPosition()
                 )
 
-        if key_code == 91:
-            # [ key
-            #  key_code: 91
-            #  RawKeyCode: 33
-            # zoom out
-            zoom = self.img_panel.zoom(-1)
-            if zoom:
-                self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
-        if key_code == 93:
-            # ] key
-            #  key_code: 93
-            #  RawKeyCode: 30
-            # zoom in
-            zoom = self.img_panel.zoom(1)
-            if zoom:
-                self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+        # Don't need these anymore since we have menu keystrokes
+        #if key_code == 91:
+        #    # [ key
+        #    #  key_code: 91
+        #    #  RawKeyCode: 33
+        #    # zoom out
+        #    self.on_zoomout(self, evt)
+        #if key_code == 93:
+        #    # ] key
+        #    #  key_code: 93
+        #    #  RawKeyCode: 30
+        #    # zoom in
+        #    self.on_zoomin(self, evt)
 
         # keys usually scroll, so down arrow makes image go up, etc.
         # "arrow keys move virtual viewport over image"
@@ -1249,6 +1286,22 @@ class ImageWindow(wx.Frame):
         if self.app_history.is_saved():
             self.content_saved = True
             self.img_panel.save_notify()
+
+    @debug_fxn
+    def on_zoomout(self, evt):
+        zoom = self.img_panel.zoom(-1)
+        if zoom:
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+
+    @debug_fxn
+    def on_zoomin(self, evt):
+        zoom = self.img_panel.zoom(1)
+        if zoom:
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+
+    @debug_fxn
+    def on_zoomfit(self, evt):
+        print("Zoom to Fit!")
 
     @debug_fxn
     def on_select_all(self, evt):
