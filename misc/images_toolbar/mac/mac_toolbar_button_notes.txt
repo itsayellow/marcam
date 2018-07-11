@@ -12,6 +12,12 @@ Mac
         3. Reduce image to proper button bitmap size
         4. Clean up individual pixels with pencil and eraser in photoshop
 
+    Zoom to fit:
+        30 x 26 w x h overall
+         6 x  6 w x h each arrow 
+         6 x  6 w x h arrowhead
+        18 x 14 w x h rectangle in the middle
+
 Research
 --------
 Mac buttons:
