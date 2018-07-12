@@ -38,6 +38,15 @@ marcam_datas.append(
 marcam_datas.append(
         (os.path.relpath(const.TOCLIPBMP_FNAME, start='build_scripts'), 'media')
         )
+marcam_datas.append(
+        (os.path.relpath(const.ZOOMOUTBMP_FNAME, start='build_scripts'), 'media')
+        )
+marcam_datas.append(
+        (os.path.relpath(const.ZOOMINBMP_FNAME, start='build_scripts'), 'media')
+        )
+marcam_datas.append(
+        (os.path.relpath(const.ZOOMFITBMP_FNAME, start='build_scripts'), 'media')
+        )
 
 a = Analysis(
         ['../marcam/marcam.py'],
