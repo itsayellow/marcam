@@ -9,7 +9,8 @@ Mac
     Procedure:
         1. Create a vector-drawn version
             A. Vectr: canvas size 640px x 640px
-            B. Line width 26px
+            B. Line width 26px (1/24 of canvas edge size, in order
+                for lines to be 1px wide in final 24 x 24 bitmap.)
             C. Fill canvas
         2. Rasterize to a high resolution (choose 300dpi, default size)
         3. Make canvas exactly square (make smaller dimension same size
