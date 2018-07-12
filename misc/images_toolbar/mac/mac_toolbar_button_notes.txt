@@ -6,7 +6,7 @@ Mac
     Dimensions: 24px x 24px
     Lines:
         color: 76,76,76 or 0x4c,0x,0x4c
-    Procedure:
+    Original Procedure:
         1. Create a vector-drawn version
             A. Vectr: canvas size 640px x 640px
             B. Line width 26px (1/24 of canvas edge size, in order
@@ -24,6 +24,23 @@ Mac
             D. Always use color (76, 76, 76) but can use transparency for
                 lighter colors.
 
+    New Procedure:
+        1. Create a vector-drawn version (e.g. with LibreOffice Draw, etc.)
+            A. Create e.g. a 24in. x 24in sized canvas
+            B. Use a grid of 1in., or corresponding to one grid per pixel
+                of the final rasterized image
+            C. Make sure any horizontal and vertical lines are exactly in
+                the grid, i.e. they are in sized and positioned correctly
+                i. width of 1in. = 72pt
+                ii. centers on (n+0.5)" where n is an integer
+            D. Fill canvas as much as possible
+            D. Write out EPS, because svg seems to be problemmatic (!)
+        2. Rasterize
+            A. use imagemagick to convert to 24px x 24px image with "box"
+                filter, which takes average color under pixel area:
+                convert -colorspace sRGB -background transparent input.eps
+                        -filter box -resize 24x24 PNG32:output.png
+        3. Clean up resulting png if necessary
     Zoom to fit:
         30 x 26 w x h overall
          6 x  6 w x h each arrow 
