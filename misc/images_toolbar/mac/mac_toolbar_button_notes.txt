@@ -19,6 +19,7 @@ Mac
             D. Fill canvas as much as possible
             E. Use color 76,76,76 or #4c4c4c
             D. Write out SVG or EPS
+                i. EPS: Level 2 color, no tiff preview
         2. Rasterize
             A. use imagemagick to convert to 24px x 24px image with "box"
                 filter, which takes average color under pixel area:
@@ -42,6 +43,8 @@ Specific Bitmap Notes
              6 x  6 w x h arrowhead
             18 x 14 w x h rectangle in the middle
 
+    To Clipboard:
+        Real-life clipboard is 9in x 12.5in, or 18 x 25
 
 Research
 --------
