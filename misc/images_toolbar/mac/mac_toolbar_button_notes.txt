@@ -6,25 +6,8 @@ Mac
     Dimensions: 24px x 24px
     Lines:
         color: 76,76,76 or 0x4c,0x,0x4c
-    Original Procedure:
-        1. Create a vector-drawn version
-            A. Vectr: canvas size 640px x 640px
-            B. Line width 26px (1/24 of canvas edge size, in order
-                for lines to be 1px wide in final 24 x 24 bitmap.)
-            C. Fill canvas
-        2. Rasterize to a high resolution (choose 300dpi, default size)
-        3. Make canvas exactly square (make smaller dimension same size
-            as larger dimension)
-        3. Reduce image to proper button bitmap size (24 x 24 for Mac)
-            A. Bilinear method yields good reduction
-        4. Clean up individual pixels with pencil and eraser in photoshop
-            A. Make all vertical and horizontal lines full darkness
-            B. Erase some fuzz off of vertical and horizontal lines
-            C. Artistically clean up other areas (draw/erase)
-            D. Always use color (76, 76, 76) but can use transparency for
-                lighter colors.
 
-    New Procedure:
+    Procedure:
         1. Create a vector-drawn version (e.g. with LibreOffice Draw, etc.)
             A. Create e.g. a 24in. x 24in sized canvas
             B. Use a grid of 1in., or corresponding to one grid per pixel
@@ -34,18 +17,31 @@ Mac
                 i. width of 1in. = 72pt
                 ii. centers on (n+0.5)" where n is an integer
             D. Fill canvas as much as possible
-            D. Write out EPS, because svg seems to be problemmatic (!)
+            E. Use color 76,76,76 or #4c4c4c
+            D. Write out SVG or EPS
         2. Rasterize
             A. use imagemagick to convert to 24px x 24px image with "box"
                 filter, which takes average color under pixel area:
-                convert -colorspace sRGB -background transparent input.eps
+                ../../../build_scripts/vec2png 24 *.svg
+                    -or-
+                convert -colorspace sRGB -background transparent input.{eps,svg}
                         -filter box -resize 24x24 PNG32:output.png
         3. Clean up resulting png if necessary
+            A. For pixels partially overlapping original lines, use
+                same color but variable transparency, do NOT use lighter color
+
+
+Specific Bitmap Notes
+---------------------
     Zoom to fit:
-        30 x 26 w x h overall
-         6 x  6 w x h each arrow 
-         6 x  6 w x h arrowhead
-        18 x 14 w x h rectangle in the middle
+        Erase corner of square at tail of arrows
+        
+        Mac preview zoom-to-fit toolbar image:
+            30 x 26 w x h overall
+             6 x  6 w x h each arrow 
+             6 x  6 w x h arrowhead
+            18 x 14 w x h rectangle in the middle
+
 
 Research
 --------
