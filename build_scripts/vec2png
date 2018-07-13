@@ -7,7 +7,7 @@
 #
 # where output resolution is <resolution>px x <resolution>px
 
-if [[ $# -eq 0 ]]; then
+if [[ $# -lt 2 ]]; then
     echo "Usage:"
     echo "    $0 <resolution> <in_file1> [<in_file2> ...]"
     echo ""
