@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [[ $# -eq 0 ]]; then
+    echo "$0 <resolution> <in_file1> [<in_file2> ...]"
+    exit 1
+fi
+
+resolution=$1
+shift
+echo Converting to $resolution x $resolution
+for infile in $@
+do
+    if [[ $infile == *".svg" ]]; then
+        outfile=${infile%svg}png
+        echo "$infile -> $outfile"
+        convert -colorspace sRGB -background transparent $infile -filter box \
+            -resize $resolutionx$resolution PNG32:$outfile
+    fi
+    if [[ $infile == *".eps" ]]; then
+        outfile=${infile%eps}png
+        echo "$infile -> $outfile"
+        convert -colorspace sRGB -background transparent $infile -filter box \
+            -resize $resolutionx$resolution PNG32:$outfile
+    fi
+done
+
+
