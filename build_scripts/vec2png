@@ -1,7 +1,18 @@
 #!/bin/bash
 
+# vec2png
+# convert square vector image file (e.g. svg or eps) to png file
+#
+# vec2png <resolution> <in_file1> [<in_file2> ...]
+#
+# where output resolution is <resolution>px x <resolution>px
+
 if [[ $# -eq 0 ]]; then
-    echo "$0 <resolution> <in_file1> [<in_file2> ...]"
+    echo "Usage:"
+    echo "    $0 <resolution> <in_file1> [<in_file2> ...]"
+    echo ""
+    echo "Convert each input image file to png file with output"
+    echo "  resolution <resolution>px x <resolution>px"
     exit 1
 fi
 
