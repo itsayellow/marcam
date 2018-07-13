@@ -58,44 +58,44 @@
      <g class="Page">
       <g class="com.sun.star.drawing.LineShape">
        <g id="id3">
-        <rect class="BoundingBox" stroke="none" fill="none" x="1641" y="1641" width="10689" height="10689"/>
-        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 2540,2540 L 11430,11430"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="1641" y="1641" width="13229" height="13229"/>
+        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 2540,2540 L 13970,13970"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.LineShape">
        <g id="id4">
-        <rect class="BoundingBox" stroke="none" fill="none" x="0" y="0" width="10161" height="2541"/>
-        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 0,1270 L 10160,1270"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="0" y="0" width="12701" height="2541"/>
+        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 0,1270 L 12700,1270"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.LineShape">
        <g id="id5">
-        <rect class="BoundingBox" stroke="none" fill="none" x="0" y="0" width="2541" height="10161"/>
-        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 1270,10160 L 1270,0"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="0" y="0" width="2541" height="12701"/>
+        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 1270,12700 L 1270,0"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.LineShape">
        <g id="id6">
-        <rect class="BoundingBox" stroke="none" fill="none" x="50800" y="43180" width="2541" height="10161"/>
-        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 52070,53340 L 52070,43180"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="58420" y="48260" width="2541" height="12701"/>
+        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 59690,60960 L 59690,48260"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id7">
-        <rect class="BoundingBox" stroke="none" fill="none" x="10160" y="10160" width="33021" height="33021"/>
-        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 26670,41910 L 11430,41910 11430,11430 41910,11430 41910,41910 26670,41910 Z"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="12700" y="12700" width="35561" height="35561"/>
+        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 30480,46990 L 13970,46990 13970,13970 46990,13970 46990,46990 30480,46990 Z"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.LineShape">
        <g id="id8">
-        <rect class="BoundingBox" stroke="none" fill="none" x="43180" y="50800" width="10161" height="2541"/>
-        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 43180,52070 L 53340,52070"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="48260" y="58420" width="12701" height="2541"/>
+        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 48260,59690 L 60960,59690"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.LineShape">
        <g id="id9">
-        <rect class="BoundingBox" stroke="none" fill="none" x="41011" y="41011" width="10689" height="10689"/>
-        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 41910,41910 L 50800,50800"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="46091" y="46091" width="14499" height="14499"/>
+        <path fill="none" stroke="rgb(76,76,76)" stroke-width="2540" stroke-linejoin="miter" d="M 46990,46990 L 59690,59690"/>
        </g>
       </g>
      </g>
