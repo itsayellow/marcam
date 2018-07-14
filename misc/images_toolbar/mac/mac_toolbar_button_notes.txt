@@ -18,7 +18,7 @@ Mac
                 ii. centers on (n+0.5)" where n is an integer
             D. Fill canvas as much as possible
             E. Use color 76,76,76 or #4c4c4c
-            D. Write out SVG or EPS
+            D. Write out SVG or EPS (EPS prefereable, bugs with SVG readers)
                 i. EPS: Level 2 color, no tiff preview
         2. Rasterize
             A. use imagemagick to convert to 24px x 24px image with "box"
@@ -35,7 +35,8 @@ Mac
 Specific Bitmap Notes
 ---------------------
     Zoom to fit:
-        Erase corner of square at tail of arrows
+        On small PNG:
+            Erase corner of square at tail of arrows
         
         Mac preview zoom-to-fit toolbar image:
             30 x 26 w x h overall
@@ -43,8 +44,17 @@ Specific Bitmap Notes
              6 x  6 w x h arrowhead
             18 x 14 w x h rectangle in the middle
 
+    Mark Mode:
+        On small PNG:
+            Erase line across tip-to-body boundary
+            Darken pixels to create nub
+
     To Clipboard:
-        Real-life clipboard is 9in x 12.5in, or 18 x 25
+        On small PNG:
+            Erase pixels of clipboard on top and bottom of arrow where it
+                crosses the clipboard boundary line.
+
+        Real-life clipboard is 9in x 12.5in, or 18 x 25 or 1:1.39
 
 Research
 --------
