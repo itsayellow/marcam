@@ -59,9 +59,9 @@ else:
     MARKBMP_FNAME = os.path.join(ICON_DIR, 'marktool32.png')
     TOCLIPBMP_FNAME = os.path.join(ICON_DIR, 'toclip32.png')
     # TODO: Windows toolbar bitmaps
-    ZOOMOUTBMP_FNAME = os.path.join(ICON_DIR, 'zoomout24_mac.png')
-    ZOOMINBMP_FNAME = os.path.join(ICON_DIR, 'zoomin24_mac.png')
-    ZOOMFITBMP_FNAME = os.path.join(ICON_DIR, 'zoomfit24_mac.png')
+    ZOOMOUTBMP_FNAME = os.path.join(ICON_DIR, 'zoomout32.png')
+    ZOOMINBMP_FNAME = os.path.join(ICON_DIR, 'zoomin32.png')
+    ZOOMFITBMP_FNAME = os.path.join(ICON_DIR, 'zoomfit32.png')
 
 # what is one step of zoom? (1.2 might be better)
 MAG_STEP = 1.1
