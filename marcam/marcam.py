@@ -503,9 +503,15 @@ class ImageWindow(wx.Frame):
                 'Zoom to Fit\tCtrl+0',
                 'Zoom image to fill window.'
                 )
-        # SUPER STOOPID HACK: Call this menu "View " instead of "View" to
-        #   disable Mac inserting OS menu items for "Show Tab Bar", etc.
-        menubar.Append(view_menu, '&View ')
+        if const.PLATFORM == 'mac':
+            # SUPER STOOPID HACK: Call this menu "View " instead of "View" to
+            #   disable Mac inserting OS menu items for "Show Tab Bar", etc.
+            #   which currently is non-functional. (We don't manage tabs.)
+            # Note on Mac the trailing space is not visible.
+            menubar.Append(view_menu, '&View ')
+        else:
+            # Normal menu name for everyone else.
+            menubar.Append(view_menu, '&View')
 
         # Tools
         tools_menu = wx.Menu()
