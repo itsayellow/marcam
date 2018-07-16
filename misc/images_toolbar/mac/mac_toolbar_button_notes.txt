@@ -7,23 +7,27 @@ Mac
     Lines:
         color: 76,76,76 or 0x4c,0x,0x4c
 
+    Summary:
+        *.odg (LibreOffice Draw) -> *.eps (Export)
+            -> *24_mac.png (vec2png 24 *.eps)
+
     Procedure:
         1. Create a vector-drawn version (e.g. with LibreOffice Draw, etc.)
             A. Create e.g. a 24in. x 24in sized canvas
             B. Use a grid of 1in., or corresponding to one grid per pixel
                 of the final rasterized image
             C. Make sure any horizontal and vertical lines are exactly in
-                the grid, i.e. they are in sized and positioned correctly
+                the grid, i.e. they are sized and positioned correctly
                 i. width of 1in. = 72pt
                 ii. centers on (n+0.5)" where n is an integer
             D. Fill canvas as much as possible
             E. Use color 76,76,76 or #4c4c4c
-            D. Write out SVG or EPS (EPS prefereable, bugs with SVG readers)
+            D. Write out EPS (EPS prefereable, bugs with SVG readers)
                 i. EPS: Level 2 color, no tiff preview
         2. Rasterize
             A. use imagemagick to convert to 24px x 24px image with "box"
                 filter, which takes average color under pixel area:
-                ../../../build_scripts/vec2png 24 *.svg
+                ../../../build_scripts/vec2png 24 *.eps
                     -or-
                 convert -colorspace sRGB -background transparent input.{eps,svg}
                         -filter box -resize 24x24 PNG32:output.png

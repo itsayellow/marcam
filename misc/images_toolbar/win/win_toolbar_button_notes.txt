@@ -1,0 +1,53 @@
+Our buttons
+-----------
+Windows / Unix
+    Dimensions: 32px x 32px
+    Lines:
+        color: default to black 0,0,0 or 0x00,0x00,0x00
+                but other colors ok
+
+    Summary:
+        *.odg (LibreOffice Draw) -> *.eps (Export) -> *32.png (vec2png 32 *.eps)
+
+    Procedure:
+        1. Create a vector-drawn version (e.g. with LibreOffice Draw, etc.)
+            A. Create e.g. a 32in. x 32in sized canvas
+            B. Use a grid of 1in., or corresponding to one grid per pixel
+                of the final rasterized image
+            C. Make sure any horizontal and vertical lines are exactly in
+                the grid, i.e. they are sized and positioned correctly
+                i. width of 1in. = 72pt
+                ii. centers on (n+0.5)" where n is an integer
+            D. Fill canvas as much as possible
+            E. Use color 0,0,0 or #000000 as default
+            D. Write out EPS (EPS prefereable, bugs with SVG readers)
+                i. EPS: Level 2 color, no tiff preview
+        2. Rasterize
+            A. use imagemagick to convert to 32px x 32px image with "box"
+                filter, which takes average color under pixel area:
+                ../../../build_scripts/vec2png 32 *.eps
+                    -or-
+                convert -colorspace sRGB -background transparent input.{eps,svg}
+                        -filter box -resize 32x32 PNG32:output.png
+        3. Clean up resulting png if necessary
+            A. For pixels partially overlapping original lines, use
+                same color but variable transparency, do NOT use lighter color
+
+
+Specific Bitmap Notes
+---------------------
+    Zoom to fit:
+        On small PNG:
+            Erase corner of square at tail of arrows
+        
+    Mark Mode:
+        On small PNG:
+            Erase line across tip-to-body boundary
+            Erase and Darken pixels to create marker nib
+
+    To Clipboard:
+        On small PNG:
+            Erase pixels of clipboard on top and bottom of arrow where it
+                crosses the clipboard boundary line.
+
+        Real-life clipboard is 9in x 12.5in, or 18 x 25 or 1:1.39
