@@ -63,17 +63,8 @@ Application Log files stored in the directory:
 Application preferences stored in the file:
 "C:\\Users\\<username>\\Appdata\\Local\\Marcam\\config.json"
 
-Creating a Mac Toolbar Icon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To make a new icon
-
-* create a photoshop psd document at 512x512
-* export to png
-* read in png file and then downsize to 32x32 and save as png
-
-References
-----------
+reStructuredText References
+---------------------------
 
 * `reStructuredText Main Page <http://docutils.sourceforge.net/rst.html>`_
 * `reStructuredText Markup Spec <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_
