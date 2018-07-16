@@ -39,6 +39,26 @@ Windows
    removal of virtual environment).
 #. ``make wininstall`` to make the Windows installer
 
+Linux
+~~~~~
+
+(Preliminary.  Still a work in progress.)
+
+The following almost works, but dumps core after the user mouses over the app.
+
+#. sudo apt-get install python3-venv
+#. sudo apt-get install python3-wxgtk4.0
+#. sudo apt-get install python3-wxgtk-webview4.0
+#. python3 -m venv --system-site-packages virt
+#. source virt/bin/activate
+#. pip3 install wheel
+#. pip3 install
+    a. appdirs==1.4.3
+    a. biorad1sc-reader==0.6
+    a. numpy==1.14.5
+    a. Pillow==5.2.0
+    a. PyInstaller==3.3.1
+
 Configuration / Log File Locations
 ----------------------------------
 
