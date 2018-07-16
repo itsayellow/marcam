@@ -39,14 +39,11 @@ Windows
    removal of virtual environment).
 #. ``make wininstall`` to make the Windows installer
 
-Developer Reference Notes
--------------------------
-
 Configuration / Log File Locations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 macOS
-"""""
+~~~~~
 
 Application Log files stored in the directory:
 "~/Library/Logs/Marcam"
@@ -55,7 +52,7 @@ Application preferences stored in the file:
 "~/Library/Application Support/Marcam/config.json"
 
 Windows
-"""""""
+~~~~~~~
 
 Application Log files stored in the directory:
 "C:\\Users\\<username>\\AppData\\Local\\Marcam"
