@@ -11,7 +11,7 @@ dmg: dist/Marcam.dmg
 
 exe: dist/marcam/Marcam.exe
 
-wininstall: dist/Marcam\\ Installer.exe
+wininstall: dist/Marcam_Installer.exe
 
 virt: requirements.txt
 	@echo ""
@@ -42,7 +42,7 @@ dist/marcam/Marcam.exe: marcam/* virt
 	@echo ""
 	./build_scripts/gen_winexe
 
-dist/Marcam\\ Installer.exe: dist/marcam/Marcam.exe
+dist/Marcam_Installer.exe: dist/marcam/Marcam.exe
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make installer (Windows)"

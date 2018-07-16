@@ -26,7 +26,7 @@
 Name "Marcam"
 
 ; The file to write
-OutFile "..\dist\Marcam Installer.exe"
+OutFile "..\dist\Marcam_Installer.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\Marcam

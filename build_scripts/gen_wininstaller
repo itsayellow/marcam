@@ -31,4 +31,4 @@ fi
 
 makensis build_scripts/marcam.nsi
 
-mv "dist/Marcam Installer.exe" "dist/Marcam Windows Installer.exe"
+cp "dist/Marcam_Installer.exe" "dist/Marcam Windows Installer.exe"
