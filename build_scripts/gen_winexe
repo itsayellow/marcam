@@ -49,12 +49,12 @@ pyinstaller \
     --windowed \
     --paths ./marcam \
     --add-data 'marcam/media/marcam.ico;media' \
+    --add-data 'marcam/media/selectmode32.png;media' \
     --add-data 'marcam/media/marktool32.png;media' \
-    --add-data 'marcam/media/pointer32.png;media' \
-    --add-data 'marcam/media/toclip32.png;media' \
-    --add-data 'marcam/media/zoomin32.png;media' \
     --add-data 'marcam/media/zoomout32.png;media' \
+    --add-data 'marcam/media/zoomin32.png;media' \
     --add-data 'marcam/media/zoomfit32.png;media' \
+    --add-data 'marcam/media/toclip32.png;media' \
     --add-data 'marcam/media/marcam_help.html;media' \
     --add-data 'marcam/media/help_markmode_off.png;media' \
     --add-data 'marcam/media/help_selectmode_off.png;media' \

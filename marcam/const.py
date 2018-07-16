@@ -55,7 +55,7 @@ if PLATFORM == 'mac':
     ZOOMINBMP_FNAME = os.path.join(ICON_DIR, 'zoomin24_mac.png')
     ZOOMFITBMP_FNAME = os.path.join(ICON_DIR, 'zoomfit24_mac.png')
 else:
-    SELECTBMP_FNAME = os.path.join(ICON_DIR, 'pointer32.png')
+    SELECTBMP_FNAME = os.path.join(ICON_DIR, 'selectmode32.png')
     MARKBMP_FNAME = os.path.join(ICON_DIR, 'marktool32.png')
     TOCLIPBMP_FNAME = os.path.join(ICON_DIR, 'toclip32.png')
     # TODO: Windows toolbar bitmaps
