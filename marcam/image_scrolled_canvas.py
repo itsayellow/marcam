@@ -1163,6 +1163,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
     @debug_fxn
+    def image_manipulation(self, img):
+        my_bitmap = self.img_dc.GetAsBitmap()
+        my_image = my_bitmap.ConvertToImage()
+        my_image_data = my_image.GetData()
+        
+
+    @debug_fxn
     def zoom_fit(self, max_zoom=None, do_refresh=True):
         # return early if no image
         if self.has_no_image():
