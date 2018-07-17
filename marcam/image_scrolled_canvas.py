@@ -1121,6 +1121,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_y = img.GetHeight()
         self.img_size_x = img.GetWidth()
 
+        if img.HasAlpha():
+            print("Image has an alpha channel")
+            # TODO
+            #   make white image of same size
+            #   paste alpha image on top with Image.Paste(img,0,0)
+
         if LOGGER.isEnabledFor(logging.DEBUG):
             staticdc_start = time.time()
 
