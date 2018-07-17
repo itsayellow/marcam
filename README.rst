@@ -54,11 +54,11 @@ The following almost works, but dumps core after the user mouses over the app.
 #. pip3 install wheel
 #. pip3 install
 
-    a. appdirs==1.4.3
-    b. biorad1sc-reader==0.6
-    c. numpy==1.14.5
-    d. Pillow==5.2.0
-    e. PyInstaller==3.3.1
+   a. appdirs==1.4.3
+   b. biorad1sc-reader==0.6
+   c. numpy==1.14.5
+   d. Pillow==5.2.0
+   e. PyInstaller==3.3.1
 
 Configuration / Log File Locations
 ----------------------------------
