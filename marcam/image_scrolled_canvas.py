@@ -793,11 +793,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   * use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
         #       (also style=wx.BUFFER_VIRTUAL_AREA ?)
 
-        # TODO: do we need dc = wx.GCDC(dc) for Windows for transparency of
-        #   rubberband box?
-        # TODO: do we need dc = wx.GraphicsContext(dc) for Windows for
-        #   transparency of rubberband box?
-
         paint_dc = wx.PaintDC(self)
         # for scrolled window
         self.DoPrepareDC(paint_dc)
