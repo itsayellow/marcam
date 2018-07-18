@@ -731,7 +731,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         virt_size_new_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
         virt_size_new_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
         if (virt_size_new_x != virt_size_x) or (virt_size_new_y != virt_size_y):
+            # This happens, when e.g.
+            #   if we enlarge image so that img_y > win_y but img_x < win_x
+            #       therefore, a new vertical scrollbar is added
+            #       therefore, client size becomes smaller in x
+            #       therefore, we need less x padding, or else we will
+            #           get a needless horiz scrollbar too, just from the
+            #           padding
             self.SetVirtualSize(virt_size_new_x, virt_size_new_y)
+            LOGGER.debug("Virtual size was: (%d,%d)"%(virt_size_x, virt_size_y))
+            LOGGER.debug("Virtual size is: (%d,%d)"%(virt_size_new_x, virt_size_new_y))
 
         # center image if Virtual Size is larger than image
 
