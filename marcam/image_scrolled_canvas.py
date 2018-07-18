@@ -851,13 +851,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             rects_to_draw.append(
                     (rect_pos_log.x, dest_lr.y, rect_size.x, bottom_gap)
                     )
+        # for left_gap, right_gap y-size, import to use dest_size.y,
+        #   NOT rect_size.y - top_gap - bottom_gap
+        # dest_size is padded to account for the fact that dest_pos is
+        #   made slightly smaller to make sure it is on a pixel boundary
+        # if you don't use dest_size.y here, rect_size.y value will be not
+        #   quite large enough to account for the slightly
+        #   too small dest_pos.y
+        # Also, dest_size.y is exactly the height of the image if we have
+        #   top_gap and bottom_gap
         if left_gap > 0:
             rects_to_draw.append(
-                    (rect_pos_log.x, dest_pos.y, left_gap, rect_size.y - top_gap - bottom_gap)
+                    (rect_pos_log.x, dest_pos.y, left_gap, dest_size.y)
                     )
         if right_gap > 0:
             rects_to_draw.append(
-                    (dest_lr.x, dest_pos.y, right_gap, rect_size.y - top_gap - bottom_gap)
+                    (dest_lr.x, dest_pos.y, right_gap, dest_size.y)
                     )
         return rects_to_draw
 
