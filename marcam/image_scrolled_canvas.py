@@ -73,20 +73,23 @@ def clip(num, num_min=None, num_max=None):
         return num
 
 
-def image_alpha2opaque_bitmap(in_image):
-    # create temporary DC to draw into its source bitmap
-    temp_dc = wx.MemoryDC()
-    # make white image of same size
-    bg_img = wx.Image(in_image.GetWidth(), in_image.GetHeight())
-    bg_img.Clear(value=b'\xff')
-    img_bmp = wx.Bitmap(bg_img)
-    # use temp_dc to draw into img_bmp
-    temp_dc.SelectObject(img_bmp)
-    temp_dc.DrawBitmap(wx.Bitmap(in_image), 0, 0)
-    # release img_bmp from temp_dc (could just delete temp_dc?)
-    #temp_dc.SelectObject(wx.NullBitmap)
-    # img_bmp now has img drawn on white background
-    return img_bmp
+def image2memorydc(in_image, white_bg=False):
+    # Create MemoryDC to return
+    image_dc = wx.MemoryDC()
+    # convert image to bitmap
+    img_bmp = wx.Bitmap(in_image)
+    if white_bg:
+        # make white image of same size
+        bg_img = wx.Image(in_image.GetWidth(), in_image.GetHeight())
+        bg_img.Clear(value=b'\xff')
+        bg_bmp = wx.Bitmap(bg_img)
+        # use image_dc to draw onto bg_bmp
+        image_dc.SelectObject(bg_bmp)
+        image_dc.DrawBitmap(img_bmp, 0, 0)
+    else:
+        image_dc.SelectObject(img_bmp)
+
+    return image_dc
 
 
 def wximage2pilimage(wx_image):
@@ -1147,37 +1150,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_size_x = img.GetWidth()
 
         # create wx.Bitmaps from wx.Image
-        if img.HasAlpha():
-            print("Image has an alpha channel")
-            # img_bmp now has img drawn on white background
-            img_bmp = image_alpha2opaque_bitmap(img)
-            img_bmp_half = image_alpha2opaque_bitmap(
-                    img.Scale(self.img_size_x/2, self.img_size_y/2)
-                    )
-            img_bmp_quarter = image_alpha2opaque_bitmap(
-                    img.Scale(self.img_size_x/4, self.img_size_y/4)
-                    )
-        else:
-            img_bmp = wx.Bitmap(img)
-            img_bmp_half = wx.Bitmap(
-                    img.Scale(self.img_size_x/2, self.img_size_y/2)
-                    )
-            img_bmp_quarter = wx.Bitmap(
-                    img.Scale(self.img_size_x/4, self.img_size_y/4)
-                    )
+        white_bg = img.HasAlpha()
+        if white_bg:
+            LOGGER.info("Image has an alpha channel")
 
-        # store image data into a static DCs
-        # full-size static DC
-        self.img_dc = wx.MemoryDC()
-        self.img_dc.SelectObject(img_bmp)
-
-        # half-size static DC
-        self.img_dc_div2 = wx.MemoryDC()
-        self.img_dc_div2.SelectObject(img_bmp_half)
-
-        # quarter-size static DC
-        self.img_dc_div4 = wx.MemoryDC()
-        self.img_dc_div4.SelectObject(img_bmp_quarter)
+        self.img_dc = image2memorydc(
+                img,
+                white_bg=white_bg
+                )
+        self.img_dc_div2 = image2memorydc(
+                img.Scale(self.img_size_x/2, self.img_size_y/2),
+                white_bg=white_bg
+                )
+        self.img_dc_div4 = image2memorydc(
+                img.Scale(self.img_size_x/4, self.img_size_y/4),
+                white_bg=white_bg
+                )
 
         if LOGGER.isEnabledFor(logging.DEBUG):
             staticdc_eltime = time.time() - staticdc_start
