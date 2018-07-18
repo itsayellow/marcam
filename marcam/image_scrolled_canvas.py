@@ -721,8 +721,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.img_coord_xlation_y
         """
         (win_clsize_x, win_clsize_y) = self.GetClientSize()
-            LOGGER.debug("Virtual size was: (%d,%d)"%(virt_size_x, virt_size_y))
-            LOGGER.debug("Virtual size is: (%d,%d)"%(virt_size_new_x, virt_size_new_y))
         virt_size_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
         virt_size_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
         self.SetVirtualSize(virt_size_x, virt_size_y)
