@@ -725,15 +725,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         virt_size_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
         self.SetVirtualSize(virt_size_x, virt_size_y)
 
-        # check and see if Client Size changed after setting VirtualSize
-        #   e.g. for loss or addition of a Scrollbar
-        (win_clsize_new_x, win_clsize_new_y) = self.GetClientSize()
-        if (win_clsize_new_x != win_clsize_x) or (win_clsize_new_y != win_clsize_y):
-            win_clsize_x = win_clsize_new_x
-            win_clsize_y = win_clsize_new_y
-            virt_size_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
-            virt_size_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
-            self.SetVirtualSize(virt_size_x, virt_size_y)
+        # check and see if Virtual Size changed, due to Client Size changing
+        #   after setting VirtualSize e.g. for loss or addition of a Scrollbar
+        (win_clsize_x, win_clsize_y) = self.GetClientSize()
+        virt_size_new_x = max([self.img_size_x * self.zoom_val, win_clsize_x])
+        virt_size_new_y = max([self.img_size_y * self.zoom_val, win_clsize_y])
+        if (virt_size_new_x != virt_size_x) or (virt_size_new_y != virt_size_y):
+            self.SetVirtualSize(virt_size_new_x, virt_size_new_y)
 
         # center image if Virtual Size is larger than image
 
