@@ -727,48 +727,59 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             evt.Skip()
 
     @debug_fxn
-    def _erase_lowerright_corner(self, skip_virt_size=False):
-        scroll_width = 20
+    def debug_paint_client_area(self):
+        # DEBUG: Make whole background red for debug (allows us to see
+        #   what parts are not getting subsequently repainted)
+        (size_x, size_y) = self.GetSize()
+        self.SetVirtualSizeNoSizeEvt(size_x, size_y)
+        client_dc = wx.ClientDC(self)
+        client_dc.SetPen(
+                wx.Pen(colour=wx.Colour(0,0,0),width=1, style=wx.TRANSPARENT)
+                )
+        client_dc.SetBrush(
+                wx.Brush(
+                    colour=wx.Colour(255,0,0),
+                    style=wx.BRUSHSTYLE_SOLID
+                    )
+                )
+        client_dc.DrawRectangle(0, 0, size_x, size_y)
 
+    @debug_fxn
+    def _erase_lowerright_corner(self, skip_virt_size=False):
         # Can't get ScreenDC to draw to screen, so to erase the
         #   lower right corner between scrollbars, resize virtual area
         #   to window size and draw to ClientDC
-        # set debug_red = False for normal operation,
-        # set debug_red = True to see what parts of window are not subsequently
-        #   drawn (red shows through)
-        debug_red = True
+        # Color lower right corner of client area background color, to erase it
 
+        # TODO: at init time find width of scrollbar and make that the
+        #   edge size of this square.  Can find width of scrollbar by
+        #   enlarging virtual area huge, then measure difference in
+        #   self.GetSize() and self.GetClientSize()
+        edge_width = 20
+
+        (size_x, size_y) = self.GetSize()
         if not skip_virt_size:
-            (size_x, size_y) = self.GetSize()
+            # if we currently have scrollbars, we need to resize virtual size
+            #   to size of window so we can draw into lower right corner
             self.SetVirtualSizeNoSizeEvt(size_x, size_y)
+
+        # init Client DC
         client_dc = wx.ClientDC(self)
-        client_dc.SetPen(wx.Pen(colour=wx.Colour(0,0,0),width=1, style=wx.TRANSPARENT))
-        if debug_red:
-            # DEBUG: Make whole background red for debug (allows us to see
-            #   what parts are not getting subsequently repainted)
-            (size_x, size_y) = self.GetSize()
-            client_dc.SetBrush(
-                    wx.Brush(
-                        colour=wx.Colour(255,0,0),
-                        style=wx.BRUSHSTYLE_SOLID
-                        )
-                    )
-            client_dc.DrawRectangle(0, 0, size_x, size_y)
-        # Normal Operation: Color lower right corner of client area
-        #   background color, to erase it
+        # invisible pen
+        client_dc.SetPen(
+                wx.Pen(colour=wx.Colour(0,0,0),width=1, style=wx.TRANSPARENT)
+                )
+        # background-colored brush for area
         client_dc.SetBrush(
                 wx.Brush(
                     colour=self.GetBackgroundColour(),
                     style=wx.BRUSHSTYLE_SOLID
                     )
                 )
-        # TODO: at init time find width of scrollbar and make that the
-        #   edge size of this square.  Can find width of scrollbar by
-        #   enlarging virtual area huge, then measure difference in
-        #   self.GetSize() and self.GetClientSize()
+        # draw square in lower-right corner with edge size edge_width
         client_dc.DrawRectangle(
-                size_x-scroll_width, size_y-scroll_width,
-                scroll_width, scroll_width
+                size_x-edge_width, size_y-edge_width,
+                edge_width, edge_width
                 )
 
     @debug_fxn
@@ -787,6 +798,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.img_coord_xlation_x
             self.img_coord_xlation_y
         """
+
+        # Paint entire client area red to debug repaint problems.
+        #   (Can see red if we're not repainting something.)
+        if False:
+            self.debug_paint_client_area()
 
         # NICE: self.GetSize() always returns maximum size of client area
         #           as it would be sized without scrollbars.
@@ -854,6 +870,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             skip_virt_size = False
 
         # erase the corner between scroll bars
+        #   NOTE: only need to do this if window has
+        #       self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self._erase_lowerright_corner(skip_virt_size=skip_virt_size)
         # set new virtual size
         self.SetVirtualSizeNoSizeEvt(virt_size)
