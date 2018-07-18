@@ -812,25 +812,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         x_scrolled = self.img_size_x * self.zoom_val > win_size.GetWidth()
         y_scrolled = self.img_size_y * self.zoom_val > win_size.GetHeight()
+        only_one_scrolled = x_scrolled != y_scrolled
+        both_or_none_scrolled = x_scrolled == y_scrolled
 
-        if x_scrolled and y_scrolled:
+        if both_or_none_scrolled:
             virt_size = wx.Size(
-                    self.img_size_x * self.zoom_val,
-                    self.img_size_y * self.zoom_val,
+                    max(self.img_size_x * self.zoom_val, win_size.GetWidth()),
+                    max(self.img_size_y * self.zoom_val, win_size.GetHeight())
                     )
-            # erase the corner between scroll bars
-            self._erase_lowerright_corner(skip_virt_size=orig_has_no_scrollbars)
-            # set new virtual size
-            self.SetVirtualSizeNoSizeEvt(virt_size)
-        elif not x_scrolled and not y_scrolled:
-            virt_size = wx.Size(
-                    win_size.GetWidth(),
-                    win_size.GetHeight()
-                    )
-            # erase the corner between scroll bars
-            self._erase_lowerright_corner(skip_virt_size=orig_has_no_scrollbars)
-            # set new virtual size
-            self.SetVirtualSizeNoSizeEvt(virt_size)
+            # for erase the corner between scroll bars
+            skip_virt_size=orig_has_no_scrollbars
         else:
             # only one of x_scrolled, y_scrolled is true (xor)
 
@@ -852,10 +843,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     max(self.img_size_x * self.zoom_val, new_client_size.GetWidth()),
                     max(self.img_size_y * self.zoom_val, new_client_size.GetHeight())
                     )
-            # erase the corner between scroll bars
-            self._erase_lowerright_corner(skip_virt_size=False)
-            # set new virtual size
-            self.SetVirtualSizeNoSizeEvt(virt_size)
+            skip_virt_size = False
+
+        # erase the corner between scroll bars
+        self._erase_lowerright_corner(skip_virt_size=skip_virt_size)
+        # set new virtual size
+        self.SetVirtualSizeNoSizeEvt(virt_size)
 
         # center image if Virtual Size is larger than image
 
