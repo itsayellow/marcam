@@ -795,7 +795,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #       Seems to always have position at (0,0), but width, height are 
         #           good.
         # USELESS: self.GetMaxClientSize() always = (-1,-1)
-        # USELESS: self.GetMaxSize() always = (-1,-1) 
+        # USELESS: self.GetMaxSize() always = (-1,-1)
 
         # Max size of client (without scrollbars)
         win_size = self.GetSize()
