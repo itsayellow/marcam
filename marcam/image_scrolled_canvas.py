@@ -727,7 +727,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             evt.Skip()
 
     @debug_fxn
-    def debug_paint_client_area(self):
+    def _debug_paint_client_area(self):
         # DEBUG: Make whole background red for debug (allows us to see
         #   what parts are not getting subsequently repainted)
         (size_x, size_y) = self.GetSize()
@@ -802,7 +802,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # Paint entire client area red to debug repaint problems.
         #   (Can see red if we're not repainting something.)
         if False:
-            self.debug_paint_client_area()
+            self._debug_paint_client_area()
 
         # NICE: self.GetSize() always returns maximum size of client area
         #           as it would be sized without scrollbars.
