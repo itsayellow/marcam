@@ -73,7 +73,7 @@ Application Log files stored in the directory:
 "C:\\Users\\<username>\\AppData\\Local\\Marcam"
 
 Application preferences stored in the file:
-"C:\\Users\\<username>\\Appdata\\Local\\Marcam\\config.json"
+"C:\\Users\\<username>\\AppData\\Local\\Marcam\\config.json"
 
 reStructuredText References
 ---------------------------
