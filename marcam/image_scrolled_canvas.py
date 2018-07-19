@@ -17,8 +17,11 @@
 
 import logging
 import time
+
 import wx
 import numpy as np
+from PIL import Image
+from PIL import ImageStat
 
 import const
 import common
@@ -73,6 +76,7 @@ def clip(num, num_min=None, num_max=None):
         return num
 
 
+@debug_fxn
 def image2memorydc(in_image, white_bg=False):
     # Create MemoryDC to return
     image_dc = wx.MemoryDC()
@@ -92,11 +96,31 @@ def image2memorydc(in_image, white_bg=False):
     return image_dc
 
 
-def wximage2pilimage(wx_image):
-    pass
+@debug_fxn
+def wximagedc2pilimage(wx_imagedc):
+    wx_bitmap = wx_imagedc.GetAsBitmap()
+    return wxbitmap2pilimage(wx_bitmap)
 
+@debug_fxn
+def wxbitmap2pilimage(wx_bitmap):
+    wx_image = wx_bitmap.ConvertToImage()
+    return wximage2pilimage(wx_image)
+
+@debug_fxn
+def wximage2pilimage(wx_image):
+    image_data = wx_image.GetData()
+    #pil_image = Image.new('RGB', (wx_image.GetWidth(), wx_image.GetHeight()))
+    pil_image = Image.frombytes(
+            'RGB',
+            (wx_image.GetWidth(), wx_image.GetHeight()),
+            bytes(image_data)
+            )
+    return pil_image
+
+@debug_fxn
 def pilimage2wximage(pil_image):
     pass
+
 
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
@@ -799,7 +823,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.img_coord_xlation_y
         """
 
-        # Paint entire client area red to debug repaint problems.
+        # Paint entire client area red to debug possible repaint problems.
         #   (Can see red if we're not repainting something.)
         if False:
             self._debug_paint_client_area()
@@ -849,7 +873,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     max(self.img_size_x * self.zoom_val, orig_client_size.GetWidth()),
                     max(self.img_size_y * self.zoom_val, orig_client_size.GetHeight())
                     )
-            # No need to recompute virt size
+            # No need to recompute virt size:
             #   if orig_x_scrolled to x_scrolled only
             #       (then y client size stays the same)
             #   or if orig_y_scrolled to y_scrolled only
@@ -1323,10 +1347,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_manipulation(self, img):
-        my_bitmap = self.img_dc.GetAsBitmap()
-        my_image = my_bitmap.ConvertToImage()
-        my_image_data = my_image.GetData()
+        pil_image = wximagedc2pilimage(self.img_dc)
         
+    @debug_fxn
+    def get_image_info(self):
+        print("get_image_info!")
+        pil_image = wximagedc2pilimage(self.img_dc)
+        # DEBUG:
+        #pil_image.save("test.png")
+        image_stats = ImageStat.Stat(pil_image)
+        print(image_stats.extrema)
 
     @debug_fxn
     def zoom_fit(self, max_zoom=None, do_refresh=True):

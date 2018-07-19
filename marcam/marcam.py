@@ -506,8 +506,8 @@ class ImageWindow(wx.Frame):
         if const.PLATFORM == 'mac':
             # SUPER STOOPID HACK: Call this menu "View " instead of "View" to
             #   disable Mac inserting OS menu items for "Show Tab Bar", etc.
-            #   which currently is non-functional. (We don't manage tabs.)
-            # Note on Mac the trailing space is not visible.
+            #   which currently are non-functional. (We don't manage tabs.)
+            # Note on Mac the trailing space is not visible in menu.
             menubar.Append(view_menu, '&View ')
         else:
             # Normal menu name for everyone else.
@@ -519,6 +519,8 @@ class ImageWindow(wx.Frame):
         # we start in select mode, so disable menu to enable select mode
         self.select_menu_item.Enable(False)
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
+        tools_menu.Append(wx.ID_SEPARATOR)
+        imginfoitem = tools_menu.Append(wx.ID_ANY, "&Image Info Print\tCtrl+I")
         menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
@@ -692,6 +694,7 @@ class ImageWindow(wx.Frame):
         # Tools menu items
         self.Bind(wx.EVT_MENU, self.on_selectmode, self.select_menu_item)
         self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
+        self.Bind(wx.EVT_MENU, self.on_imginfo, imginfoitem)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
@@ -717,6 +720,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def register_key_bind(self, key_bind_fxn):
+        # TODO: what is this for??
         self.key_bind_fxn = key_bind_fxn
 
     @debug_fxn
@@ -1294,6 +1298,15 @@ class ImageWindow(wx.Frame):
             self.img_panel.save_notify()
 
     @debug_fxn
+    def on_select_all(self, evt):
+        """Edit->Select All handler
+
+        Args:
+            evt (wx.): TODO
+        """
+        self.img_panel.select_all_marks()
+
+    @debug_fxn
     def on_zoomout(self, evt):
         zoom = self.img_panel.zoom(-1)
         if zoom:
@@ -1312,13 +1325,8 @@ class ImageWindow(wx.Frame):
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
-    def on_select_all(self, evt):
-        """Edit->Select All handler
-
-        Args:
-            evt (wx.): TODO
-        """
-        self.img_panel.select_all_marks()
+    def on_imginfo(self, evt):
+        self.img_panel.get_image_info()
 
     @debug_fxn
     def save_notify(self):
