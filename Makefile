@@ -13,7 +13,7 @@ exe: dist/marcam/Marcam.exe
 
 wininstall: dist/Marcam_Installer.exe
 
-virt: requirements.txt
+virt: requirements.txt requirements_mac.txt
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make virtual environment"
