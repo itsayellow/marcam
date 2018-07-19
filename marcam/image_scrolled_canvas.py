@@ -799,7 +799,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.img_coord_xlation_y
         """
 
-        # Paint entire client area red to debug repaint problems.
+        # Paint entire client area red to debug possible repaint problems.
         #   (Can see red if we're not repainting something.)
         if False:
             self._debug_paint_client_area()
@@ -849,7 +849,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     max(self.img_size_x * self.zoom_val, orig_client_size.GetWidth()),
                     max(self.img_size_y * self.zoom_val, orig_client_size.GetHeight())
                     )
-            # No need to recompute virt size
+            # No need to recompute virt size:
             #   if orig_x_scrolled to x_scrolled only
             #       (then y client size stays the same)
             #   or if orig_y_scrolled to y_scrolled only

@@ -506,8 +506,8 @@ class ImageWindow(wx.Frame):
         if const.PLATFORM == 'mac':
             # SUPER STOOPID HACK: Call this menu "View " instead of "View" to
             #   disable Mac inserting OS menu items for "Show Tab Bar", etc.
-            #   which currently is non-functional. (We don't manage tabs.)
-            # Note on Mac the trailing space is not visible.
+            #   which currently are non-functional. (We don't manage tabs.)
+            # Note on Mac the trailing space is not visible in menu.
             menubar.Append(view_menu, '&View ')
         else:
             # Normal menu name for everyone else.
