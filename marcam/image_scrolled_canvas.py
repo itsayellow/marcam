@@ -974,7 +974,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   * use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
         #       (also style=wx.BUFFER_VIRTUAL_AREA ?)
 
-        paint_dc = wx.PaintDC(self)
+        paint_dc = wx.AutoBufferedPaintDC(self)
         # for scrolled window
         self.DoPrepareDC(paint_dc)
 
