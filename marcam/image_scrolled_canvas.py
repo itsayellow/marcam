@@ -824,7 +824,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
 
         # Paint entire client area red to debug possible repaint problems.
-        #   (Can see red if we're not repainting something.)
+        #   (Can see red if we're not repainting over something.)
         if False:
             self._debug_paint_client_area()
 
@@ -832,6 +832,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   playing around with the Virtual Size and scrolling to move to
         #   center.
         self.Freeze()
+        LOGGER.debug("Freeze()")
 
         # NICE: self.GetSize() always returns maximum size of client area
         #           as it would be sized without scrollbars.
@@ -939,6 +940,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # Finally, allow drawing of window again
         self.Thaw()
+        LOGGER.debug("Thaw()")
 
     @debug_fxn
     def on_size(self, evt):
