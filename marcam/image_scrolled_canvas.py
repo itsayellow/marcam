@@ -843,6 +843,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         orig_client_size = self.GetClientSize()
         # Boolean whether originally we have no scrollbars
         orig_has_no_scrollbars = win_size == orig_client_size
+        # NOTE: do not depend on self.HasScrollbar, because it can be updated
+        #   immediately on resize even when orig_client_size == win_size
+        #   showing no scrollbar width
         orig_x_scrolled = win_size.GetWidth() != orig_client_size.GetWidth()
         orig_y_scrolled = win_size.GetHeight() != orig_client_size.GetHeight()
 
@@ -852,6 +855,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #        max(self.img_size_y * self.zoom_val, win_size.GetHeight())
         #        )
 
+        # TODO: if one of these is True, the other might be incorrect
+        #       (need to compare not to win_size, but win_size - scroll width)
         x_scrolled = self.img_size_x * self.zoom_val > win_size.GetWidth()
         y_scrolled = self.img_size_y * self.zoom_val > win_size.GetHeight()
         only_one_scrolled = x_scrolled != y_scrolled
@@ -879,7 +884,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             #   or if orig_y_scrolled to y_scrolled only
             #       (then x client size stays the same)
             #   and we use client_size for max in virt_size above
-            if (not orig_x_scrolled and x_scrolled) or (not orig_y_scrolled and y_scrolled):
+            if (x_scrolled and not orig_x_scrolled) or (y_scrolled and not orig_y_scrolled):
                 # set new virtual size
                 self.SetVirtualSizeNoSizeEvt(virt_size)
                 # re-compute virtual size with new client size,
@@ -894,9 +899,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             skip_virt_size = False
 
         # erase the corner between scroll bars
-        #   NOTE: only need to do this if window has
+        #   NOTE: only need to do this on mac, and if window has
         #       self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
-        self._erase_lowerright_corner(skip_virt_size=skip_virt_size)
+        if const.PLATFORM == 'mac':
+            # strictly speaking, this should be x_scrolled and y_scrolled,
+            #   but to predict if the following SetVirtualSize will make both
+            #   scrollbars, we'd need to know scrollbar width
+            if x_scrolled or y_scrolled:
+                # only need to erase if corner is inaccessible to client
+                self._erase_lowerright_corner(skip_virt_size=skip_virt_size)
         # set new virtual size
         self.SetVirtualSizeNoSizeEvt(virt_size)
 
