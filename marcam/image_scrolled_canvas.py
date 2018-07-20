@@ -975,10 +975,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if LOGGER.isEnabledFor(logging.DEBUG):
             start_onpaint = time.time()
 
-        # TODO: flicker is a problem in Windows.
-        #   * use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
-        #       (also style=wx.BUFFER_VIRTUAL_AREA ?)
-
+        # use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
+        #   to try and avoid flicker in systems without double-buffered DC.
+        #   (also style=wx.BUFFER_VIRTUAL_AREA ?)
+        # TODO: still helpful? on which platforms?
         paint_dc = wx.AutoBufferedPaintDC(self)
         # for scrolled window
         self.DoPrepareDC(paint_dc)
