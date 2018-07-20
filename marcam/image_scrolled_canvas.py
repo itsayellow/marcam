@@ -828,6 +828,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if False:
             self._debug_paint_client_area()
 
+        # Don't allow the window to update anything while we do a ton of
+        #   playing around with the Virtual Size and scrolling to move to
+        #   center.
+        self.Freeze()
+
         # NICE: self.GetSize() always returns maximum size of client area
         #           as it would be sized without scrollbars.
         # NICE: self.GetRect() always returns maximum size of client area
@@ -931,6 +936,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom, divide by div_scale to get to img coordinates
+
+        # Finally, allow drawing of window again
+        self.Thaw()
 
     @debug_fxn
     def on_size(self, evt):
