@@ -521,6 +521,7 @@ class ImageWindow(wx.Frame):
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         tools_menu.Append(wx.ID_SEPARATOR)
         imginfoitem = tools_menu.Append(wx.ID_ANY, "&Image Info Print\tCtrl+I")
+        imgautocontrastitem = tools_menu.Append(wx.ID_ANY, "Image &Auto-Contrast\tCtrl+J")
         menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
@@ -695,6 +696,7 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_selectmode, self.select_menu_item)
         self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
         self.Bind(wx.EVT_MENU, self.on_imginfo, imginfoitem)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast, imgautocontrastitem)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
@@ -1327,6 +1329,10 @@ class ImageWindow(wx.Frame):
     @debug_fxn
     def on_imginfo(self, evt):
         self.img_panel.get_image_info()
+
+    @debug_fxn
+    def on_imgautocontrast(self, evt):
+        self.img_panel.image_autocontrast()
 
     @debug_fxn
     def save_notify(self):

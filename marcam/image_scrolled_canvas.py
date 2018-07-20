@@ -20,8 +20,9 @@ import time
 
 import wx
 import numpy as np
-from PIL import Image
-from PIL import ImageStat
+import PIL.Image
+import PIL.ImageStat
+import PIL.ImageOps
 
 import const
 import common
@@ -109,8 +110,8 @@ def wxbitmap2pilimage(wx_bitmap):
 @debug_fxn
 def wximage2pilimage(wx_image):
     image_data = wx_image.GetData()
-    #pil_image = Image.new('RGB', (wx_image.GetWidth(), wx_image.GetHeight()))
-    pil_image = Image.frombytes(
+    #pil_image = PIL.Image.new('RGB', (wx_image.GetWidth(), wx_image.GetHeight()))
+    pil_image = PIL.Image.frombytes(
             'RGB',
             (wx_image.GetWidth(), wx_image.GetHeight()),
             bytes(image_data)
@@ -119,8 +120,10 @@ def wximage2pilimage(wx_image):
 
 @debug_fxn
 def pilimage2wximage(pil_image):
-    pass
-
+    (width, height) = pil_image.size
+    pil_image_data = pil_image.tobytes()
+    wx_image = wx.Image(width, height, pil_image_data)
+    return wx_image
 
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
@@ -1323,7 +1326,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def init_image(self, img):
-        """Load and initialize image given its full path
+        """Load and initialize image
 
         Args:
             img (wx.Image): wx Image to display in window
@@ -1365,16 +1368,29 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
     @debug_fxn
-    def image_manipulation(self, img):
+    def image_autocontrast(self):
+        # return early if no image
+        if self.has_no_image():
+            return None
+
         pil_image = wximagedc2pilimage(self.img_dc)
-        
+        new_pil_image = PIL.ImageOps.autocontrast(pil_image)
+        # DEBUG:
+        #new_pil_image.save("test.png")
+        wx_image = pilimage2wximage(new_pil_image)
+        self.init_image(wx_image)
+
     @debug_fxn
     def get_image_info(self):
+        # return early if no image
+        if self.has_no_image():
+            return None
+
         print("get_image_info!")
         pil_image = wximagedc2pilimage(self.img_dc)
         # DEBUG:
         #pil_image.save("test.png")
-        image_stats = ImageStat.Stat(pil_image)
+        image_stats = PIL.ImageStat.Stat(pil_image)
         print(image_stats.extrema)
 
     @debug_fxn
