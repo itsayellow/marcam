@@ -73,7 +73,7 @@ fi
 # check if $file_to_mod got corrupted
 #attempt didn't work: https://github.com/rprichard/winpty/issues/100
 #syntax_error=(`winpty -Xallow-non-tty python3 -m py_compile marcam/const.py`)
-# TODO: the following line causes: "stdout is not a tty"
+# TODO: the following line causes: "stdout is not a tty" on Windows
 syntax_error=(`python3 -m py_compile "$file_to_mod"`)
 if [ ! -z "$syntax_error" ]; then
     echo "gen_app corrupted $file_to_mod"
