@@ -41,24 +41,11 @@ if [ ! -z "$syntax_error" ]; then
     exit 1
 fi
 
+# activate virtual environment for python
 source virt/Scripts/activate
 
-pyinstaller \
-    -y \
-    --icon 'marcam/media/marcam.ico' \
-    --windowed \
-    --paths ./marcam \
-    --add-data 'marcam/media/marcam.ico;media' \
-    --add-data 'marcam/media/selectmode32.png;media' \
-    --add-data 'marcam/media/marktool32.png;media' \
-    --add-data 'marcam/media/zoomout32.png;media' \
-    --add-data 'marcam/media/zoomin32.png;media' \
-    --add-data 'marcam/media/zoomfit32.png;media' \
-    --add-data 'marcam/media/toclip32.png;media' \
-    --add-data 'marcam/media/marcam_help.html;media' \
-    --add-data 'marcam/media/help_markmode_off.png;media' \
-    --add-data 'marcam/media/help_selectmode_off.png;media' \
-    marcam/marcam.py
+# build app using pyinstaller
+pyinstaller build_scripts/marcam_win.spec
 
 # move back original const.py file
 mv marcam/const.py.bak marcam/const.py
