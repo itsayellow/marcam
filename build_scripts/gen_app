@@ -44,7 +44,17 @@ else
     # Non-empty git tag means we are on a release.  Indicate that
     githash="RELEASE $gittag"
 fi
+
+# make backup of orig const.py
 cp marcam/const.py marcam/const.py.bak
+
+# modify const.py VERSION_STR = ""
+# perl switches:
+#   -i edit file in place
+#   -p construct while (<>) { <one-line-prog> } continue { print }
+#   -e execute the following line, accepting multiple arguments after
+# after escaping to get through bash "", the regex will be to perl:
+#   s/VERSION_STR = .*$/VERSION_STR = "$githash"/
 perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" marcam/const.py
 
 # check if const.py got corrupted
