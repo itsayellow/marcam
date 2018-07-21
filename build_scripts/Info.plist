@@ -10,7 +10,7 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeIconFile</key>
-			<string>marcam_doc.icns</string>
+                        <string>media/marcam_doc.icns</string>
 			<key>CFBundleTypeName</key>
 			<string>Marcam Image Data File</string>
 			<key>CFBundleTypeRole</key>
