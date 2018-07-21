@@ -30,46 +30,8 @@ if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
     exit 1
 fi
 
-# get "v<last-tag>-<commits-since>-g<current-hash> from
-#githash=(`git describe --tags`)
-
-# Get tag if current hash itself is tagged
-gittag=(`git tag --points-at HEAD`)
-if [[ -z "$gittag" ]]; then
-    # Empty git tag means we are not on a release.  Provide short hash.
-    githash=(`git rev-parse --short HEAD`)
-else
-    # Non-empty git tag means we are on a release.  Indicate that
-    githash="RELEASE $gittag"
-fi
-
-# if there are un-pushed modifications to rcs-controlled files, indicate
-if [[ ! -z `git status -s -uno` ]]; then
-    githash="$githash + mods"
-fi
-
-# make backup of orig const.py
-cp marcam/const.py marcam/const.py.bak
-
-# modify const.py VERSION_STR = ""
-# perl switches:
-#   -i edit file in place
-#   -p construct while (<>) { <one-line-prog> } continue { print }
-#   -e execute the following line, accepting multiple arguments after
-# after escaping to get through bash "", the regex will be to perl:
-#   s/(VERSION_STR\s*=\s*["'])([^"']+)(["'])$/$1$2 (<githash>)$3/
-perl -i -pe "s/(VERSION_STR\s*=\s*[\"'])([^\"']+)([\"'])$/\$1\$2 ($githash)\$3/" marcam/const.py
-# '"
-
-# check if const.py got corrupted
-#attempt didn't work: https://github.com/rprichard/winpty/issues/100
-#syntax_error=(`winpty -Xallow-non-tty python3 -m py_compile marcam/const.py`)
-# TODO: the following line causes: "stdout is not a tty"
-syntax_error=(`python3 -m py_compile marcam/const.py`)
-if [ ! -z "$syntax_error" ]; then
-    echo "gen_app corrupted marcam/const.py"
-    exit 1
-fi
+# Add git info to VERSION_STR in marcam/const.py
+build_scripts/git_version_str win marcam/const.py
 
 # activate virtual environment for python
 source virt/Scripts/activate
