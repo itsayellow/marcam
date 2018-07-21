@@ -1,5 +1,6 @@
 # python compiled files
 *.pyc
+__pycache__
 # Mac internal Finder state
 .DS_Store
 # vim swap files
