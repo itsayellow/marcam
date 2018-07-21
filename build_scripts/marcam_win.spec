@@ -14,24 +14,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os.path
+import sys
+
+# add ./marcam to PYTHONPATH to allow loading const.py
+#   relative to execute dir (./)
+sys.path.append(os.path.abspath('marcam'))
+import const
+
 block_cipher = None
 
+# datas relative to dir of this file (./build_scripts)
+marcam_datas = [
+        ('../marcam/media/marcam.ico', 'media'),
+        ('../marcam/media/selectmode32.png', 'media'),
+        ('../marcam/media/marktool32.png', 'media'),
+        ('../marcam/media/zoomout32.png', 'media'),
+        ('../marcam/media/zoomin32.png', 'media'),
+        ('../marcam/media/zoomfit32.png', 'media'),
+        ('../marcam/media/toclip32.png', 'media'),
+        ('../marcam/media/marcam_help.html', 'media'),
+        ('../marcam/media/help_markmode_off.png', 'media'),
+        ('../marcam/media/help_selectmode_off.png', 'media')
+        ]
+
 a = Analysis(
-        ['marcam\\marcam.py'],
+        # relative to dir of this file (./build_scripts)
+        ['..\\marcam\\marcam.py'],
         pathex=['./marcam', 'C:\\Users\\mclapp\\git\\marcam'],
         binaries=[],
-        datas=[
-            ('marcam/media/marcam.ico', 'media'),
-            ('marcam/media/selectmode32.png', 'media'),
-            ('marcam/media/marktool32.png', 'media'),
-            ('marcam/media/zoomout32.png', 'media'),
-            ('marcam/media/zoomin32.png', 'media'),
-            ('marcam/media/zoomfit32.png', 'media'),
-            ('marcam/media/toclip32.png', 'media'),
-            ('marcam/media/marcam_help.html', 'media'),
-            ('marcam/media/help_markmode_off.png', 'media'),
-            ('marcam/media/help_selectmode_off.png', 'media')
-            ],
+        datas=marcam_datas,
         hiddenimports=[],
         hookspath=[],
         runtime_hooks=[],
