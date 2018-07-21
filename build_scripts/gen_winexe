@@ -29,10 +29,30 @@ if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
     exit 1
 fi
 
-# add current git hash to VERSION_STR in const.py, saving backup file
-githash=(`git describe --tags`)
+# get "v<last-tag>-<commits-since>-g<current-hash> from
+#githash=(`git describe --tags`)
+
+# Get tag if current hash itself is tagged
+gittag=(`git tag --points-at HEAD`)
+if [[ -z "$gittag" ]]; then
+    # Empty git tag means we are not on a release.  Provide short hash.
+    githash=(`git rev-parse --short HEAD`)
+else
+    # Non-empty git tag means we are on a release.  Indicate that
+    githash="RELEASE $gittag"
+fi
+
+# make backup of orig const.py
 cp marcam/const.py marcam/const.py.bak
-perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" marcam/const.py
+
+# modify const.py VERSION_STR = ""
+# perl switches:
+#   -i edit file in place
+#   -p construct while (<>) { <one-line-prog> } continue { print }
+#   -e execute the following line, accepting multiple arguments after
+# after escaping to get through bash "", the regex will be to perl:
+#   s/(VERSION_STR\s*=\s*["'])([^"']+)(["'])$/$1$2 (<githash>)$3/
+perl -i -pe "s/(VERSION_STR\s*=\s*[\"'])([^\"']+)([\"'])$/\$1\$2 ($githash)\$3/" marcam/const.py
 
 # check if const.py got corrupted
 syntax_error=(`python3 -m py_compile marcam/const.py`)
