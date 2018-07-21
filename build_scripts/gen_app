@@ -29,11 +29,21 @@ if [ "$ostype" != "Darwin" ] ; then
     exit 1
 fi
 
-# add current git hash to VERSION_STR in const.py, saving backup file
 # TODO: use 'git describe --tags' if we can figure out how to get Jenkins
 #   to not do a shallow clone, and have tags.
 # https://stackoverflow.com/a/45993185
-githash=(`git rev-parse --short HEAD`)
+
+# add current git hash to VERSION_STR in const.py, saving backup file
+
+# Get tag if current hash itself is tagged
+gittag=(`git tag --points-at HEAD`)
+if [[ -z "$gittag" ]]; then
+    # Empty git tag means we are not on a release.  Provide short hash.
+    githash=(`git rev-parse --short HEAD`)
+else
+    # Non-empty git tag means we are on a release.  Indicate that
+    githash="RELEASE $gittag"
+fi
 cp marcam/const.py marcam/const.py.bak
 perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" marcam/const.py
 
