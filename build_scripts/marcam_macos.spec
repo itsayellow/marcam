@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import os.path
 import sys
 
@@ -27,28 +26,16 @@ block_cipher = None
 
 # datas are sources relative to dir of this file (./build_scripts)
 marcam_datas = [
-            ('../marcam/media/marcam.ico', 'media'),
-            ('../marcam/media/marcam_help_mac.html', 'media'),
-            ]
-# make sure toolbar icons are added
-marcam_datas.append(
-        (os.path.relpath(const.SELECTBMP_FNAME, start='build_scripts'), 'media')
-        )
-marcam_datas.append(
-        (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media')
-        )
-marcam_datas.append(
-        (os.path.relpath(const.TOCLIPBMP_FNAME, start='build_scripts'), 'media')
-        )
-marcam_datas.append(
-        (os.path.relpath(const.ZOOMOUTBMP_FNAME, start='build_scripts'), 'media')
-        )
-marcam_datas.append(
-        (os.path.relpath(const.ZOOMINBMP_FNAME, start='build_scripts'), 'media')
-        )
-marcam_datas.append(
-        (os.path.relpath(const.ZOOMFITBMP_FNAME, start='build_scripts'), 'media')
-        )
+        ('../marcam/media/marcam.ico', 'media'),
+        ('../marcam/media/marcam_help_mac.html', 'media'),
+# toolbar icons
+        (os.path.relpath(const.SELECTBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.TOCLIPBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.ZOOMOUTBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.ZOOMINBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.ZOOMFITBMP_FNAME, start='build_scripts'), 'media'),
+        ]
 
 a = Analysis(
         # relative to dir of this file (./build_scripts)
