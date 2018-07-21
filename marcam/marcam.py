@@ -522,7 +522,7 @@ class ImageWindow(wx.Frame):
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         tools_menu.Append(wx.ID_SEPARATOR)
         imginfoitem = tools_menu.Append(
-                wx.ID_ANY, "&Image Info Print (Experimental)\tCtrl+I"
+                wx.ID_ANY, "&Image Info (Experimental)\tCtrl+I"
                 )
         imgautocontrastitem = tools_menu.Append(
                 wx.ID_ANY, "Image &Auto-Contrast (Experimental)\tCtrl+J"
