@@ -29,7 +29,7 @@ marcam_datas = [
         ('../marcam/media/marcam.ico', 'media'),
         ('../marcam/media/marcam_help.html', 'media'),
         ('../marcam/media/help_markmode_off.png', 'media'),
-        ('../marcam/media/help_selectmode_off.png', 'media')
+        ('../marcam/media/help_selectmode_off.png', 'media'),
         # toolbar icons
         (os.path.relpath(const.SELECTBMP_FNAME, start='build_scripts'), 'media'),
         (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media'),
