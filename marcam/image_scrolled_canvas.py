@@ -1371,6 +1371,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_autocontrast(self):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
+
         # return early if no image
         if self.has_no_image():
             return None
@@ -1388,12 +1391,40 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.has_no_image():
             return None
 
-        print("get_image_info!")
+        return_text = ""
+
+        # convert image to PIL.Image
         pil_image = wximagedc2pilimage(self.img_dc)
-        # DEBUG:
-        #pil_image.save("test.png")
+
+        # get band names
+        band_names = pil_image.getbands()
+        bands_num = len(band_names)
+
+        # get Statistics from PIL
+
+        # Brightness Extrema
         image_stats = PIL.ImageStat.Stat(pil_image)
-        print(image_stats.extrema)
+        return_text += "Brightness\n"
+        return_text += "----------\n"
+        for (i, extreme) in enumerate(image_stats.extrema):
+            return_text += band_names[i] + " (Min., Max.): " + repr(extreme) + "\n"
+
+        # Histogram
+        histogram = pil_image.histogram()
+        return_text += "\n"
+        return_text += "Histogram" + ("s" if bands_num > 1 else "") + "\n"
+        return_text += "---------" + ("-" if bands_num > 1 else "") + "\n"
+        # band_hist_len should be 256, but we'll double-check to be sure
+        band_hist_len = int(len(histogram)/bands_num)
+        print(len(histogram))
+        print(band_hist_len)
+        histograms = [
+                histogram[i*band_hist_len:(i+1)*band_hist_len] for i in range(bands_num)
+                ]
+        for (i, hist) in enumerate(histograms):
+            return_text += band_names[i] + ": " + repr(hist) + "\n"
+
+        return return_text
 
     @debug_fxn
     def zoom_fit(self, max_zoom=None, do_refresh=True):

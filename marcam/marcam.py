@@ -31,6 +31,7 @@ import zipfile
 import wx
 import wx.adv
 import wx.html2
+import wx.lib.dialogs
 import numpy as np
 
 import biorad1sc_reader
@@ -520,8 +521,12 @@ class ImageWindow(wx.Frame):
         self.select_menu_item.Enable(False)
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         tools_menu.Append(wx.ID_SEPARATOR)
-        imginfoitem = tools_menu.Append(wx.ID_ANY, "&Image Info Print\tCtrl+I")
-        imgautocontrastitem = tools_menu.Append(wx.ID_ANY, "Image &Auto-Contrast\tCtrl+J")
+        imginfoitem = tools_menu.Append(
+                wx.ID_ANY, "&Image Info Print (Experimental)\tCtrl+I"
+                )
+        imgautocontrastitem = tools_menu.Append(
+                wx.ID_ANY, "Image &Auto-Contrast (Experimental)\tCtrl+J"
+                )
         menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
@@ -1328,10 +1333,21 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_imginfo(self, evt):
-        self.img_panel.get_image_info()
+        image_info_text = self.img_panel.get_image_info()
+        image_dialog = wx.lib.dialogs.ScrolledMessageDialog(
+                parent=self,
+                msg=image_info_text,
+                caption="Image Info",
+                size=(800,600),
+                )
+        image_dialog.ShowModal()
+
+        #print(image_info_text)
 
     @debug_fxn
     def on_imgautocontrast(self, evt):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
         self.img_panel.image_autocontrast()
 
     @debug_fxn
@@ -1439,6 +1455,7 @@ class HelpFrame(wx.Frame):
 
         self.SetTitle("Marcam Help")
         self.SetSize((500, 600))
+
 
 # NOTE: closing window saves size, opening new window uses saved size
 class MarcamApp(wx.App):
