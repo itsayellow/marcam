@@ -42,4 +42,4 @@ pyinstaller build_scripts/marcam_macos.spec
 cp build_scripts/Info.plist dist/Marcam.app/Contents/
 
 # move back original const.py file
-#mv marcam/const.py.bak marcam/const.py
+mv marcam/const.py.bak marcam/const.py
