@@ -1411,18 +1411,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # Histogram
         histogram = pil_image.histogram()
-        return_text += "\n"
+        return_text += "\n\n"
         return_text += "Histogram" + ("s" if bands_num > 1 else "") + "\n"
         return_text += "---------" + ("-" if bands_num > 1 else "") + "\n"
         # band_hist_len should be 256, but we'll double-check to be sure
         band_hist_len = int(len(histogram)/bands_num)
-        print(len(histogram))
-        print(band_hist_len)
         histograms = [
                 histogram[i*band_hist_len:(i+1)*band_hist_len] for i in range(bands_num)
                 ]
         for (i, hist) in enumerate(histograms):
-            return_text += band_names[i] + ": " + repr(hist) + "\n"
+            return_text += band_names[i] + ": " + repr(hist) + "\n\n"
 
         return return_text
 
