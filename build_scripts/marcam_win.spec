@@ -27,15 +27,16 @@ block_cipher = None
 # datas relative to dir of this file (./build_scripts)
 marcam_datas = [
         ('../marcam/media/marcam.ico', 'media'),
-        ('../marcam/media/selectmode32.png', 'media'),
-        ('../marcam/media/marktool32.png', 'media'),
-        ('../marcam/media/zoomout32.png', 'media'),
-        ('../marcam/media/zoomin32.png', 'media'),
-        ('../marcam/media/zoomfit32.png', 'media'),
-        ('../marcam/media/toclip32.png', 'media'),
         ('../marcam/media/marcam_help.html', 'media'),
         ('../marcam/media/help_markmode_off.png', 'media'),
         ('../marcam/media/help_selectmode_off.png', 'media')
+        # toolbar icons
+        (os.path.relpath(const.SELECTBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.TOCLIPBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.ZOOMOUTBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.ZOOMINBMP_FNAME, start='build_scripts'), 'media'),
+        (os.path.relpath(const.ZOOMFITBMP_FNAME, start='build_scripts'), 'media'),
         ]
 
 a = Analysis(
