@@ -27,8 +27,9 @@ block_cipher = None
 # datas are sources relative to dir of this file (./build_scripts)
 marcam_datas = [
         ('../marcam/media/marcam.ico', 'media'),
+        ('../marcam/media/marcam_doc.icns', 'media'),
         ('../marcam/media/marcam_help_mac.html', 'media'),
-# toolbar icons
+        # toolbar icons
         (os.path.relpath(const.SELECTBMP_FNAME, start='build_scripts'), 'media'),
         (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media'),
         (os.path.relpath(const.TOCLIPBMP_FNAME, start='build_scripts'), 'media'),
@@ -149,4 +150,4 @@ app = BUNDLE(
             },
         )
 
-# vim: filetype=python
+# vim: filetype=python nowrap
