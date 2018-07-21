@@ -22,6 +22,7 @@ else
     # uname is not present, where are we??
     ostype="UNKNOWN"
 fi
+
 # make sure we're on Windows
 if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
     echo "ERROR: OS is not Windows.  gen_wininstaller is only applicable to Windows"
@@ -42,6 +43,11 @@ else
     githash="RELEASE $gittag"
 fi
 
+# if there are un-pushed modifications to rcs-controlled files, indicate
+if [[ ! -z `git status -s -uno` ]]; then
+    githash="$githash + mods"
+fi
+
 # make backup of orig const.py
 cp marcam/const.py marcam/const.py.bak
 
@@ -53,8 +59,12 @@ cp marcam/const.py marcam/const.py.bak
 # after escaping to get through bash "", the regex will be to perl:
 #   s/(VERSION_STR\s*=\s*["'])([^"']+)(["'])$/$1$2 (<githash>)$3/
 perl -i -pe "s/(VERSION_STR\s*=\s*[\"'])([^\"']+)([\"'])$/\$1\$2 ($githash)\$3/" marcam/const.py
+# '"
 
 # check if const.py got corrupted
+#attempt didn't work: https://github.com/rprichard/winpty/issues/100
+#syntax_error=(`winpty -Xallow-non-tty python3 -m py_compile marcam/const.py`)
+# TODO: the following line causes: "stdout is not a tty"
 syntax_error=(`python3 -m py_compile marcam/const.py`)
 if [ ! -z "$syntax_error" ]; then
     echo "gen_app corrupted marcam/const.py"
