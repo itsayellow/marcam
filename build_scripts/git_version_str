@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Copyright 2018 Matthew A. Clapp
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# simple usage info
+if [ "$#" -lt 2 ]; then
+    echo "Usage:"
+    echo "    $0 <method> <file_to_mod>"
+    echo ""
+    echo "  Modify <file_to_mod>'s VERSION_STR to contain git info"
+    echo ""
+    echo "  <method> can be \"mac\" or anything else"
+    echo ""
+    echo "  Saves backup to <file_to_mod>.bak"
+    exit 1
+fi
+
+method=$1
+file_to_mod=$2
+
+if [[ ! -f "$file_to_mod" ]]; then
+    echo "File not found: $file_to_mod"
+    exit 1
+fi
+
+# get v<last-tag>-<commits-since>-g<current-hash> from
+#githash=(`git describe --tags`)
+
+# Get tag if current hash itself is tagged
+gittag=(`git tag --points-at HEAD`)
+if [[ -z "$gittag" ]]; then
+    # Empty git tag means we are not on a release.  Provide short hash.
+    githash=(`git rev-parse --short HEAD`)
+else
+    # Non-empty git tag means we are on a release.  Indicate that
+    githash="RELEASE $gittag"
+fi
+
+# if there are un-pushed modifications to rcs-controlled files, indicate
+if [[ ! -z `git status -s -uno` ]]; then
+    githash="$githash + mods"
+fi
+
+# make backup of orig file
+cp "${file_to_mod}" "${file_to_mod}.bak"
+
+# modify $file_to_mod's VERSION_STR = ""
+# perl switches:
+#   -i edit file in place
+#   -p construct while (<>) { <one-line-prog> } continue { print }
+#   -e execute the following line, accepting multiple arguments after
+# after escaping to get through bash "", the regex will be to perl:
+#   s/(VERSION_STR\s*=\s*["'])([^"']+)(["'])$/$1$2 (<githash>)$3/
+if [[ $method == "mac" ]]; then
+    perl -i -pe "s/VERSION_STR = .*$/VERSION_STR = \"$githash\"/" $file_to_mod
+else 
+    perl -i -pe "s/(VERSION_STR\s*=\s*[\"'])([^\"']+)([\"'])$/\$1\$2 ($githash)\$3/" "$file_to_mod"
+    # '"
+fi
+
+# check if $file_to_mod got corrupted
+#attempt didn't work: https://github.com/rprichard/winpty/issues/100
+#syntax_error=(`winpty -Xallow-non-tty python3 -m py_compile marcam/const.py`)
+# TODO: the following line causes: "stdout is not a tty"
+syntax_error=(`python3 -m py_compile "$file_to_mod"`)
+if [ ! -z "$syntax_error" ]; then
+    echo "gen_app corrupted $file_to_mod"
+    exit 1
+fi
