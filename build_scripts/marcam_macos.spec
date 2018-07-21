@@ -19,11 +19,13 @@ import os.path
 import sys
 
 # add ./marcam to PYTHONPATH to allow loading const.py
+#   relative to execute dir (./)
 sys.path.append(os.path.abspath('marcam'))
 import const
 
 block_cipher = None
 
+# datas are sources relative to dir of this file (./build_scripts)
 marcam_datas = [
             ('../marcam/media/marcam.ico', 'media'),
             ('../marcam/media/marcam_help_mac.html', 'media'),
@@ -49,7 +51,9 @@ marcam_datas.append(
         )
 
 a = Analysis(
+        # relative to dir of this file (./build_scripts)
         ['../marcam/marcam.py'],
+        # relative to execute dir (./)
         pathex=['marcam', '.'],
         binaries=[],
         datas=marcam_datas,
@@ -76,6 +80,7 @@ exe = EXE(
         strip=False,
         upx=True,
         console=False,
+        # relative to execute dir (./)
         icon='marcam/media/marcam.icns'
         )
 
@@ -92,6 +97,7 @@ coll = COLLECT(
 app = BUNDLE(
         coll,
         name='Marcam.app',
+        # relative to execute dir (./)
         icon='marcam/media/marcam.icns',
         bundle_identifier='com.itsayellow.osx.marcam',
         info_plist={
