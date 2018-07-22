@@ -19,8 +19,8 @@ source) from https://github.com/itsayellow/marcam/releases
 Using
 -----
 
-Try pushing the space bar at any time for a temporary zoom.  Useful for 
-detailed examination or marking.
+Try pushing and holding the space bar at any time for a temporary zoom.
+Useful for detailed examination or marking.
 
 The help from the help menu is short but useful.  You can view it to quickly
 understand the basic functionality of the application.
