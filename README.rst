@@ -23,7 +23,7 @@ Try pushing and holding the space bar at any time for a temporary zoom,
 centered where the mouse pointer is.
 Useful for detailed examination or marking.
 
-The help from the help menu is short but useful.  You can view it to quickly
+The help from the help menu is short and useful.  You can view it to quickly
 understand the basic functionality of the application.
 
 Building
