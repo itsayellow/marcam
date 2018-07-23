@@ -810,6 +810,23 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
 
     @debug_fxn
+    def set_virt_size_and_pos(self):
+        # Freeze before changing virtual size and moving image
+        #   so we don't see window jittering with updates
+        self.Freeze()
+
+        # expand virtual window size
+        self.set_virt_size_with_min()
+
+        # scroll so center of image at same point it used to be
+        if self.GetSize() != self.GetClientSize():
+            # only scroll if we have at least one scrollbar
+            self.scroll_to_img_at_wincenter()
+
+        # Now Thaw after changing virtual size and moving image
+        self.Thaw()
+
+    @debug_fxn
     def set_virt_size_with_min(self):
         """Set size of unscrolled canvas for image_size, making virtual size
         same as image if image is zoomed larger than window, or as large as
@@ -952,10 +969,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.ScrollWinEvent): obj returned from scrolled window event
         """
-        self.set_virt_size_with_min()
-
-        # scroll so center of image at same point it used to be
-        self.scroll_to_img_at_wincenter()
+        # set new virtual window size and scroll position based on new window
+        #   size
+        self.set_virt_size_and_pos()
 
         # TODO: on Windows we need a Refresh/Update cycle as well,
         #   should we skip on Mac (and possibly unix?)
@@ -1479,7 +1495,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             self.zoom_val (float): resulting zoom ratio (1.00 is 1x zoom)
         """
-
         # return early if no image or we can't zoom any more
         if self.has_no_image():
             return None
@@ -1510,9 +1525,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
 
-        # expand virtual window size for new zoom value
-        self.set_virt_size_with_min()
-
         # set img centerpoint coords so img coords and win coords from mouse
         #   point are still the same
         delta_x_new = delta_x_orig * zoom_orig / self.zoom_val
@@ -1520,8 +1532,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_at_wincenter_x = img_x - delta_x_new
         self.img_at_wincenter_y = img_y - delta_y_new
 
-        # scroll so center of image at same point it used to be
-        self.scroll_to_img_at_wincenter()
+        # set new virtual window size and scroll position based on new zoom and
+        #   new position
+        self.set_virt_size_and_pos()
 
         if do_refresh:
             # force a paint event with Refresh and Update
@@ -1565,11 +1578,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
 
-        # expand virtual window size
-        self.set_virt_size_with_min()
-
-        # scroll so center of image at same point it used to be
-        self.scroll_to_img_at_wincenter()
+        # set new virtual window size and scroll position based on new zoom
+        self.set_virt_size_and_pos()
 
         if do_refresh:
             # force a paint event with Refresh and Update
