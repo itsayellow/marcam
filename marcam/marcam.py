@@ -995,6 +995,10 @@ class ImageWindow(wx.Frame):
 
         if self.img_panel.has_no_image():
             self.open_image(img_path)
+            if const.PLATFORM == 'mac':
+                # on Mac we hide the last frame we close.  So when opening
+                #   we need to show it again
+                self.Show()
         else:
             self.parent.new_frame_open_file(img_path)
 
@@ -1523,6 +1527,10 @@ class MarcamApp(wx.App):
                 if not keep_win_open and frame_closed:
                     self.file_windows.remove(frame)
                     frame.Close()
+                else:
+                    if const.PLATFORM == 'mac':
+                        # on Mac we hide the last frame we close.
+                        frame.Hide()
                 break
         return frame_closed
 
