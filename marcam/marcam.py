@@ -652,7 +652,12 @@ class ImageWindow(wx.Frame):
         self.img_panel = ImageScrolledCanvasMarks(
                 self,
                 self.app_history,
-                self.marks_num_update
+                self.marks_num_update,
+                # the following always makes scrollbars,
+                #   Mac: they appear tiny and all the way to 0 (not
+                #       disabled, and bad looking)
+                #   Win: they appear properly disabled when canvas not bigger
+                #style=wx.HSCROLL|wx.VSCROLL|wx.ALWAYS_SHOW_SB
                 )
         # make ImageScrolledCanvas Drag and Drop Target
         self.img_panel.SetDropTarget(FileDropTarget(self.img_panel))
