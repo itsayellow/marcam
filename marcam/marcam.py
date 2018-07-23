@@ -169,7 +169,7 @@ def load_config():
         # TODO specific exception
         create_config_file(config_filepath)
 
-    return config_data 
+    return config_data
 
 @debug_fxn
 def save_config(config_data):
@@ -747,7 +747,7 @@ class ImageWindow(wx.Frame):
 
     def has_image(self):
         return not self.img_panel.has_no_image()
-    
+
     @debug_fxn
     def on_evt_close(self, evt):
         """EVT_CLOSE Handler: anytime user closes frame in any way
@@ -755,6 +755,7 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
+        # TODO: harmonize this with on_close
         winsize = self.GetSize()
         self.parent.config_data['winsize'] = list(winsize)
         self.file_history.Save(self.config)
@@ -1145,6 +1146,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_close(self, evt):
+        # TODO: harmonize this with on_evt_close
         self.parent.close_frame(self.GetId())
 
     @debug_fxn
@@ -1474,6 +1476,7 @@ class MarcamApp(wx.App):
         #   MacOpenFiles()
         self.file_windows = []
         self.config_data = config_data
+        self.last_frame_pos = wx.DefaultPosition
 
         # may call MacOpenFiles and add files to self.file_windows and make
         #   new frames
@@ -1488,13 +1491,31 @@ class MarcamApp(wx.App):
 
         for open_file in open_files:
             # add to file_windows list of file windows
+            new_size = wx.Size(self.config_data['winsize'])
+            if self.last_frame_pos == wx.DefaultPosition:
+                new_pos = self.last_frame_pos
+            else:
+                new_pos = wx.Point(
+                        self.last_frame_pos.x + const.NEW_FRAME_OFFSET,
+                        self.last_frame_pos.y + const.NEW_FRAME_OFFSET
+                        )
+                x_too_big = new_pos.x + new_size.x > self.display_size.x
+                y_too_big = new_pos.y + new_size.y > self.display_size.y
+                if x_too_big and y_too_big:
+                    new_pos = wx.DefaultPosition
+                elif x_too_big:
+                    new_pos.y = 0
+                elif y_too_big:
+                    new_pos.x = 0
             self.file_windows.append(
                     ImageWindow(
                         self,
                         open_file,
-                        size=wx.Size(self.config_data['winsize'])
+                        size=new_size,
+                        pos=new_pos
                         )
                     )
+            self.last_frame_pos = self.file_windows[-1].GetPosition()
 
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
@@ -1541,13 +1562,31 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def new_frame_open_file(self, open_file):
+        new_size = wx.Size(self.config_data['winsize'])
+        if self.last_frame_pos == wx.DefaultPosition:
+            new_pos = self.last_frame_pos
+        else:
+            new_pos = wx.Point(
+                    self.last_frame_pos.x + const.NEW_FRAME_OFFSET,
+                    self.last_frame_pos.y + const.NEW_FRAME_OFFSET
+                    )
+            x_too_big = new_pos.x + new_size.x > self.display_size.x
+            y_too_big = new_pos.y + new_size.y > self.display_size.y
+            if x_too_big and y_too_big:
+                new_pos = wx.DefaultPosition
+            elif x_too_big:
+                new_pos.x = 0
+            elif y_too_big:
+                new_pos.y = 0
         self.file_windows.append(
                 ImageWindow(
                     self,
                     open_file,
-                    size=wx.Size(self.config_data['winsize'])
+                    size=new_size,
+                    pos=new_pos
                     )
                 )
+        self.last_frame_pos = self.file_windows[-1].GetPosition()
 
     @debug_fxn
     def quit_app(self):

@@ -73,6 +73,9 @@ SCROLL_WHEEL_SPEED = 2
 # how much to scroll for an keypress
 SCROLL_KEY_SPEED = 20
 
+# how many pixels to offset a new window position from last window opened
+NEW_FRAME_OFFSET = 20
+
 # how close can click to a mark to say we clicked on it (win pixels)
 PROXIMITY_PX = 6
 
