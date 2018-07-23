@@ -952,10 +952,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.ScrollWinEvent): obj returned from scrolled window event
         """
+        # Freeze before changing virtual size and moving image
+        #   so we don't see window jittering with updates
+        self.Freeze()
+
         self.set_virt_size_with_min()
 
         # scroll so center of image at same point it used to be
         self.scroll_to_img_at_wincenter()
+
+        # Now Thaw after changing virtual size and moving image
+        self.Thaw()
 
         # TODO: on Windows we need a Refresh/Update cycle as well,
         #   should we skip on Mac (and possibly unix?)
@@ -1510,6 +1517,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
 
+        # Freeze before changing virtual size and moving image
+        #   so we don't see window jittering with updates
+        self.Freeze()
+
         # expand virtual window size for new zoom value
         self.set_virt_size_with_min()
 
@@ -1522,6 +1533,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # scroll so center of image at same point it used to be
         self.scroll_to_img_at_wincenter()
+
+        # Now Thaw after changing virtual size and moving image
+        self.Thaw()
 
         if do_refresh:
             # force a paint event with Refresh and Update
@@ -1565,11 +1579,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
 
+        # Freeze before changing virtual size and moving image
+        #   so we don't see window jittering with updates
+        self.Freeze()
+
         # expand virtual window size
         self.set_virt_size_with_min()
 
         # scroll so center of image at same point it used to be
         self.scroll_to_img_at_wincenter()
+
+        # Now Thaw after changing virtual size and moving image
+        self.Thaw()
 
         if do_refresh:
             # force a paint event with Refresh and Update
