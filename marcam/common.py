@@ -27,15 +27,22 @@ def debug_fxn_factory(logger_fxn):
         """Function decorator that prints the function name and the arguments used
         in the function call before executing the function
         """
+        # store initial depth attribute
+        debug_fxn.depth = 0
         def func_wrapper(*args, **kwargs):
-            log_string = "FXN:" + func.__qualname__ + "(\n"
+            # TODO: for depth, possibly a function attribute to remember
+            #   depth across function calls?
+            debug_fxn.depth += 1
+            log_string = "FXN%d:"%debug_fxn.depth + func.__qualname__ + "(\n"
             for arg in args[1:]:
                 log_string += "    " + repr(arg) + ",\n"
             for key in kwargs:
                 log_string += "    " + key + "=" + repr(kwargs[key]) + ",\n"
             log_string += "    )"
             logger_fxn(log_string)
-            return func(*args, **kwargs)
+            return_vals = func(*args, **kwargs)
+            debug_fxn.depth -= 1
+            return return_vals
         return func_wrapper
 
     return debug_fxn
