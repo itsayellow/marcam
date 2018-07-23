@@ -1532,7 +1532,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_at_wincenter_x = img_x - delta_x_new
         self.img_at_wincenter_y = img_y - delta_y_new
 
-        # set new virtual window size and scroll position based on new zoom
+        # set new virtual window size and scroll position based on new zoom and
+        #   new position
         self.set_virt_size_and_pos()
 
         if do_refresh:
