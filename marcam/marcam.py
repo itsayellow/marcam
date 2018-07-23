@@ -975,8 +975,6 @@ class ImageWindow(wx.Frame):
             #   Not necessary for Mac.
             wx.TheClipboard.Flush()
             wx.TheClipboard.Close()
-        #print("self.marks_num_display.GetLineText(0) = '%s'"%marks_total_text)
-        #print("len(self.img_panel.marks) = %d"%(len(self.img_panel.marks)))
 
     @debug_fxn
     def on_open(self, evt):
@@ -1365,8 +1363,6 @@ class ImageWindow(wx.Frame):
                 size=(800,600),
                 )
         image_dialog.ShowModal()
-
-        #print(image_info_text)
 
     @debug_fxn
     def on_imgautocontrast(self, evt):
