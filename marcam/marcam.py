@@ -750,16 +750,31 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_evt_close(self, evt):
-        """EVT_CLOSE Handler: anytime user closes frame in any way
+        """EVT_CLOSE Handler: anytime user or prog closes frame in any way
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CloseEvt): 
         """
-        # TODO: harmonize this with on_close
-        winsize = self.GetSize()
-        self.parent.config_data['winsize'] = list(winsize)
-        self.file_history.Save(self.config)
-        evt.Skip()
+        veto_close = self.parent.shutdown_frame(
+                self.GetId(),
+                force_close=not evt.CanVeto()
+                )
+        if veto_close:
+            # don't close window
+            evt.Veto()
+        else:
+            # normally close window
+            winsize = self.GetSize()
+            self.parent.config_data['winsize'] = list(winsize)
+            self.file_history.Save(self.config)
+            # continue with normal event handling
+            evt.Skip()
+
+
+    @debug_fxn
+    def on_close(self, evt):
+        # send EVT_CLOSE event, next is on_evt_close()
+        self.Close()
 
     @debug_fxn
     def on_quit(self, evt):
@@ -1145,16 +1160,14 @@ class ImageWindow(wx.Frame):
                     )
 
     @debug_fxn
-    def on_close(self, evt):
-        # TODO: harmonize this with on_evt_close
-        self.parent.close_frame(self.GetId())
-
-    @debug_fxn
     def close_image(self, keep_win_open=False):
         """Close Image menu handler for Main Window
 
         Args:
             evt (wx.): TODO
+
+        Returns:
+            bool: Whether the image was closed.
         """
         if self.needs_save():
             save_query = wx.MessageDialog(
@@ -1477,6 +1490,7 @@ class MarcamApp(wx.App):
         self.file_windows = []
         self.config_data = config_data
         self.last_frame_pos = wx.DefaultPosition
+        self.trying_to_quit = False
 
         # may call MacOpenFiles and add files to self.file_windows and make
         #   new frames
@@ -1542,23 +1556,45 @@ class MarcamApp(wx.App):
                 file_window.on_key_up(evt)
 
     @debug_fxn
-    def close_frame(self, frame_to_close_id, force_close=False):
-        frame_closed = False
+    def shutdown_frame(self, frame_to_close_id, force_close=False):
+        """
+        Args:
+
+        Returns:
+            bool: Whether caller should veto closing of this window
+        """
+        veto_close = True
 
         for frame in self.file_windows:
             if frame.GetId() == frame_to_close_id:
-                keep_win_open = not force_close and not len(self.file_windows) > 1
-                frame_closed = frame.close_image(keep_win_open)
+                last_frame_keep_open = (
+                        (not force_close) and
+                        (not len(self.file_windows) > 1) and
+                        (not self.trying_to_quit)
+                        )
+                image_closed = frame.close_image(last_frame_keep_open)
 
-                if not keep_win_open and frame_closed:
-                    self.file_windows.remove(frame)
-                    frame.Close()
+                if image_closed:
+                    # image closed
+                    if not last_frame_keep_open:
+                        # this is not the last frame, so no special treatment,
+                        #   go ahead and remove it
+                        self.file_windows.remove(frame)
+                        veto_close = False
+                    else:
+                        # This is the last open frame, so we don't close it
+                        veto_close = True
+                        if const.PLATFORM == 'mac':
+                            # on Mac we hide the last frame we close.
+                            frame.Hide()
                 else:
-                    if const.PLATFORM == 'mac':
-                        # on Mac we hide the last frame we close.
-                        frame.Hide()
+                    # if image wasn't closed, keep frame open
+                    veto_close = True
+
+                # we've found the frame we want, so exit search loop
                 break
-        return frame_closed
+
+        return veto_close
 
     @debug_fxn
     def new_frame_open_file(self, open_file):
@@ -1590,11 +1626,13 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def quit_app(self):
+        self.trying_to_quit = True
         open_windows = self.file_windows.copy()
         for frame in open_windows:
-            frame_closed = self.close_frame(frame.GetId(), force_close=True)
+            frame_closed = frame.Close()
             if not frame_closed:
                 break
+        self.trying_to_quit = False
 
     @debug_fxn
     def MacOpenFiles(self, fileNames):
