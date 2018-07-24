@@ -1120,9 +1120,10 @@ class ImageWindow(wx.Frame):
                 self.statusbar.SetStatusText(
                         "Image Data " + imdata_path + " loaded OK."
                         )
-                # TODO: EXPERIMENTAL
+                # Set window title to filename
                 self.SetTitle(os.path.basename(imdata_path))
-                # specifically helps for Mac
+                # on Mac sets file icon in titlebar with right-click showing
+                #   dir hierarchy
                 self.SetRepresentedFilename(imdata_path)
             else:
                 self.statusbar.SetStatusText(
@@ -1169,9 +1170,10 @@ class ImageWindow(wx.Frame):
             # reset filepath for mcm file to nothing if we load new image
             self.img_path = img_file
             self.save_filepath = None
-            # TODO: EXPERIMENTAL
+            # Set window title to filename
             self.SetTitle(os.path.basename(img_file))
-            # specifically helps for Mac
+            # on Mac sets file icon in titlebar with right-click showing
+            #   dir hierarchy
             self.SetRepresentedFilename(img_file)
         else:
             self.statusbar.SetStatusText(
@@ -1214,7 +1216,7 @@ class ImageWindow(wx.Frame):
             self.img_panel.set_no_image()
             # update statusbar text
             self.statusbar.SetStatusText('Ready.')
-            # TODO: EXPERIMENTAL
+            # Set window title to generic app name
             self.SetTitle('Marcam')
 
         return True
@@ -1274,9 +1276,10 @@ class ImageWindow(wx.Frame):
             self.save_notify()
             # add successful file save as to file history
             self.file_history.AddFileToHistory(pathname)
-            # TODO: EXPERIMENTAL
+            # Set window title to newly-saved filename
             self.SetTitle(os.path.basename(pathname))
-            # specifically helps for Mac
+            # on Mac sets file icon in titlebar with right-click showing
+            #   dir hierarchy
             self.SetRepresentedFilename(pathname)
 
     @debug_fxn
@@ -1620,7 +1623,6 @@ class MarcamApp(wx.App):
         #               else:
         #                   self.file_windows.remove(frame)
         #                   close_window = True
-        #
 
         for frame in self.file_windows:
             if frame.GetId() == frame_to_close_id:
@@ -1630,6 +1632,7 @@ class MarcamApp(wx.App):
         # keep_win_open tells close_image() if it should reset the frame's
         #   settings if it successfully closes the image (in anticipation of
         #   keeping the frame open).
+        # Logic is identical to close_window if image_closed=True
         # Strictly speaking there is no problem with this being True always,
         #   except that it might possibly take more time.
         keep_win_open = not (
