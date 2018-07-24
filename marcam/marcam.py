@@ -1632,7 +1632,7 @@ class MarcamApp(wx.App):
         # keep_win_open tells close_image() if it should reset the frame's
         #   settings if it successfully closes the image (in anticipation of
         #   keeping the frame open).
-        # Logic is identical to close_window if image_closed=True
+        # Logic is identical to (not close_window) with image_closed=True
         # Strictly speaking there is no problem with this being True always,
         #   except that it might possibly take more time.
         keep_win_open = not (
