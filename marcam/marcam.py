@@ -528,6 +528,9 @@ class ImageWindow(wx.Frame):
         imgautocontrastitem = tools_menu.Append(
                 wx.ID_ANY, "Image &Auto-Contrast (Experimental)\tCtrl+J"
                 )
+        imginvertitem = tools_menu.Append(
+                wx.ID_ANY, "I&nvert Image (Experimental)\tCtrl+N"
+                )
         menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
@@ -708,6 +711,7 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
         self.Bind(wx.EVT_MENU, self.on_imginfo, imginfoitem)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast, imgautocontrastitem)
+        self.Bind(wx.EVT_MENU, self.on_imginvert, imginvertitem)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
@@ -1394,6 +1398,12 @@ class ImageWindow(wx.Frame):
                 size=(800,600),
                 )
         image_dialog.ShowModal()
+
+    @debug_fxn
+    def on_imginvert(self, evt):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
+        self.img_panel.image_invert()
 
     @debug_fxn
     def on_imgautocontrast(self, evt):

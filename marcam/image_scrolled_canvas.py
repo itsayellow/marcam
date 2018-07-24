@@ -1386,6 +1386,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
     @debug_fxn
+    def image_invert(self):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
+
+        # return early if no image
+        if self.has_no_image():
+            return None
+
+        pil_image = wximagedc2pilimage(self.img_dc)
+        new_pil_image = PIL.ImageOps.invert(pil_image)
+        wx_image = pilimage2wximage(new_pil_image)
+        self.init_image(wx_image)
+
+    @debug_fxn
     def image_autocontrast(self):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
@@ -1396,8 +1410,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         pil_image = wximagedc2pilimage(self.img_dc)
         new_pil_image = PIL.ImageOps.autocontrast(pil_image)
-        # DEBUG:
-        #new_pil_image.save("test.png")
         wx_image = pilimage2wximage(new_pil_image)
         self.init_image(wx_image)
 
