@@ -413,6 +413,7 @@ class ImageWindow(wx.Frame):
         self.save_filepath = None
         self.temp_scroll_zoom_state = None
         self.parent = parent
+        self.close_source = None
 
         # GUI-related
         self.html = None
@@ -752,12 +753,19 @@ class ImageWindow(wx.Frame):
     def on_evt_close(self, evt):
         """EVT_CLOSE Handler: anytime user or prog closes frame in any way
 
+        Causes of this event:
+            System Close button
+            System Close command
+            wx.Window.Close()
+
         Args:
             evt (wx.CloseEvt): 
         """
         veto_close = self.parent.shutdown_frame(
                 self.GetId(),
                 force_close=not evt.CanVeto()
+                from_close_menu=self.close_source=='close_menu'
+                from_quit_menu=self.close_source=='quit_menu'
                 )
         if veto_close:
             # don't close window
@@ -770,10 +778,14 @@ class ImageWindow(wx.Frame):
             # continue with normal event handling
             evt.Skip()
 
+        # reset self.close_source
+        self.close_source = None
+
 
     @debug_fxn
     def on_close(self, evt):
         # send EVT_CLOSE event, next is on_evt_close()
+        self.close_source = 'close_menu'
         self.Close()
 
     @debug_fxn
@@ -1552,9 +1564,14 @@ class MarcamApp(wx.App):
                 file_window.on_key_up(evt)
 
     @debug_fxn
-    def shutdown_frame(self, frame_to_close_id, force_close=False):
+    def shutdown_frame(self, frame_to_close_id, force_close=False,
+            from_close_menu=False, from_quit_menu=False):
         """
         Args:
+            frame_to_close_id: window id of frame to close
+            force_close: True if we must close frame no matter what
+            from_close_menu: origin of CloseEvt was File->Close
+            from_quit_menu: origin of CloseEvt was File->Quit
 
         Returns:
             bool: Whether caller should veto closing of this window
@@ -1625,6 +1642,7 @@ class MarcamApp(wx.App):
         self.trying_to_quit = True
         open_windows = self.file_windows.copy()
         for frame in open_windows:
+            frame.close_source = 'quit_menu'
             frame_closed = frame.Close()
             if not frame_closed:
                 break

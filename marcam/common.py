@@ -28,10 +28,10 @@ def debug_fxn_factory(logger_fxn):
         in the function call before executing the function
         """
         # store initial depth attribute
+        # TODO: consider using logger_fxn.marcam_depth instead of debug_fxn.depth?
+        #       If this is allowed, depth can be global across all modules.
         debug_fxn.depth = 0
         def func_wrapper(*args, **kwargs):
-            # TODO: for depth, possibly a function attribute to remember
-            #   depth across function calls?
             debug_fxn.depth += 1
             log_string = "FXN%d:"%debug_fxn.depth + func.__qualname__ + "(\n"
             for arg in args[1:]:
