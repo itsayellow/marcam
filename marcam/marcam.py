@@ -773,6 +773,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_close(self, evt):
+        self.menu_close_file = True
         # send EVT_CLOSE event, next is on_evt_close()
         self.Close()
 
@@ -1559,6 +1560,23 @@ class MarcamApp(wx.App):
         Returns:
             bool: Whether caller should veto closing of this window
         """
+        # if force_close:
+        #   veto_close = False
+        # else:
+        #   if len(self.file_windows) > 1:
+        #       if image_closed:
+        #           veto_close = False
+        #       else:
+        #           veto_close = True
+        #   else:
+        #       if self.trying_to_quit and image_closed:
+        #           veto_close = False
+        #       elif not self.trying_to_quit and image_closed:
+        #           veto_close = True
+        #       elif self.trying_to_quit and not image_closed:
+        #           veto_close = True
+        #       elif not self.trying_to_quit and not image_closed:
+        #           veto_close = True
         veto_close = True
 
         for frame in self.file_windows:
