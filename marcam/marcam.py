@@ -1122,6 +1122,8 @@ class ImageWindow(wx.Frame):
                         )
                 # TODO: EXPERIMENTAL
                 self.SetTitle(os.path.basename(imdata_path))
+                # specifically helps for Mac
+                self.SetRepresentedFilename(imdata_path)
             else:
                 self.statusbar.SetStatusText(
                         "Image " + imdata_path+ " loading ERROR."
@@ -1169,6 +1171,8 @@ class ImageWindow(wx.Frame):
             self.save_filepath = None
             # TODO: EXPERIMENTAL
             self.SetTitle(os.path.basename(img_file))
+            # specifically helps for Mac
+            self.SetRepresentedFilename(img_file)
         else:
             self.statusbar.SetStatusText(
                     "Image " + img_file + " loading ERROR."
@@ -1272,6 +1276,8 @@ class ImageWindow(wx.Frame):
             self.file_history.AddFileToHistory(pathname)
             # TODO: EXPERIMENTAL
             self.SetTitle(os.path.basename(pathname))
+            # specifically helps for Mac
+            self.SetRepresentedFilename(pathname)
 
     @debug_fxn
     def on_export_image(self, evt):
