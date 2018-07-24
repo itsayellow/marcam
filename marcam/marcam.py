@@ -1117,10 +1117,10 @@ class ImageWindow(wx.Frame):
                         self.img_panel.mark_point_list(marks)
             if img_ok:
                 self.img_panel.init_image(img)
-                # reset filepath for mcm file to nothing if we load new image
+                # set save_filepath to path of mcm file we loaded
                 # self.img_path if from zip is list, zipfile, member_name
                 self.img_path = [imdata_path, img_name]
-                self.save_filepath = None
+                self.save_filepath = imdata_path
                 self.statusbar.SetStatusText(
                         "Image Data " + imdata_path + " loaded OK."
                         )
@@ -1143,7 +1143,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def load_image_from_file(self, img_file):
-        """Given full img_file, load image into app
+        """Given full (non *.mcm) img_file, load image into app
 
         Separate from on_open so we can use this with argv_emulation
 
