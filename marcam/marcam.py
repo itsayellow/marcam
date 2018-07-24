@@ -1578,52 +1578,82 @@ class MarcamApp(wx.App):
             bool: Whether caller should veto closing of this window
         """
         # if force_close:
-        #   veto_close = False
+        #   self.file_windows.remove(frame)
+        #   close_window = True
         # else:
         #   if len(self.file_windows) > 1:
         #       if image_closed:
-        #           veto_close = False
+        #           self.file_windows.remove(frame)
+        #           close_window = True
         #       else:
-        #           veto_close = True
+        #           close_window = False
         #   else:
-        #       if self.trying_to_quit and image_closed:
-        #           veto_close = False
-        #       elif not self.trying_to_quit and image_closed:
-        #           veto_close = True
-        #       elif self.trying_to_quit and not image_closed:
-        #           veto_close = True
-        #       elif not self.trying_to_quit and not image_closed:
-        #           veto_close = True
-        veto_close = True
+        #       if not image_closed:
+        #           close_window = False
+        #       else:
+        #           if from_quit_menu:
+        #               self.file_windows.remove(frame)
+        #               close_window = True
+        #           elif from_close_menu:
+        #               if const.PLATFORM == 'mac':
+        #                   frame.Hide()
+        #               close_window = False
+        #           else:
+        #               if const.PLATFORM == 'mac':
+        #                   frame.Hide()
+        #                   close_window = False
+        #               else:
+        #                   self.file_windows.remove(frame)
+        #                   close_window = True
+        #
+        # close_window = (
+        #   force_close or
+        #   (len(self.file_windows) > 1 and image_closed) or
+        #   (len(self.file_windows) == 1 and from_quit_menu
+        #   (len(self.file_windows) == 1 and not from_quit_menu and not from_close_menu
+        # )
+        #
+        # hide_window = (
+        #   (const.PLATFORM == 'mac') and
+        #   (len(self.file_windows == 1) and
+        #   image_closed and
+        #   not from_quit_menu
+        # )
+        # 
+        #
 
         for frame in self.file_windows:
             if frame.GetId() == frame_to_close_id:
-                last_frame_keep_open = (
-                        (not force_close) and
-                        (not len(self.file_windows) > 1) and
-                        (not self.trying_to_quit)
-                        )
-                image_closed = frame.close_image(last_frame_keep_open)
-
-                if image_closed:
-                    # image closed
-                    if not last_frame_keep_open:
-                        # this is not the last frame, so no special treatment,
-                        #   go ahead and remove it
-                        self.file_windows.remove(frame)
-                        veto_close = False
-                    else:
-                        # This is the last open frame, so we don't close it
-                        veto_close = True
-                        if const.PLATFORM == 'mac':
-                            # on Mac we hide the last frame we close.
-                            frame.Hide()
-                else:
-                    # if image wasn't closed, keep frame open
-                    veto_close = True
-
-                # we've found the frame we want, so exit search loop
+                # we've found frame to close in 'frame'
                 break
+
+        veto_close = True
+
+        last_frame_keep_open = (
+                (not force_close) and
+                (not len(self.file_windows) > 1) and
+                (not self.trying_to_quit)
+                )
+        image_closed = frame.close_image(last_frame_keep_open)
+
+        if image_closed:
+            # image closed
+            if not last_frame_keep_open:
+                # this is not the last frame, so no special treatment,
+                #   go ahead and remove it
+                self.file_windows.remove(frame)
+                veto_close = False
+            else:
+                # This is the last open frame, so we don't close it
+                veto_close = True
+                if const.PLATFORM == 'mac':
+                    # on Mac we hide the last frame we close.
+                    frame.Hide()
+        else:
+            # if image wasn't closed, keep frame open
+            veto_close = True
+
+        # we've found the frame we want, so exit search loop
 
         return veto_close
 
