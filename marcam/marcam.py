@@ -1120,6 +1120,8 @@ class ImageWindow(wx.Frame):
                 self.statusbar.SetStatusText(
                         "Image Data " + imdata_path + " loaded OK."
                         )
+                # TODO: EXPERIMENTAL
+                self.SetTitle(os.path.basename(imdata_path))
             else:
                 self.statusbar.SetStatusText(
                         "Image " + imdata_path+ " loading ERROR."
@@ -1165,6 +1167,8 @@ class ImageWindow(wx.Frame):
             # reset filepath for mcm file to nothing if we load new image
             self.img_path = img_file
             self.save_filepath = None
+            # TODO: EXPERIMENTAL
+            self.SetTitle(os.path.basename(img_file))
         else:
             self.statusbar.SetStatusText(
                     "Image " + img_file + " loading ERROR."
@@ -1206,6 +1210,8 @@ class ImageWindow(wx.Frame):
             self.img_panel.set_no_image()
             # update statusbar text
             self.statusbar.SetStatusText('Ready.')
+            # TODO: EXPERIMENTAL
+            self.SetTitle('Marcam')
 
         return True
 
@@ -1264,6 +1270,8 @@ class ImageWindow(wx.Frame):
             self.save_notify()
             # add successful file save as to file history
             self.file_history.AddFileToHistory(pathname)
+            # TODO: EXPERIMENTAL
+            self.SetTitle(os.path.basename(pathname))
 
     @debug_fxn
     def on_export_image(self, evt):
