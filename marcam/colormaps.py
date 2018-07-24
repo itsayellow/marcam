@@ -1042,7 +1042,7 @@ _viridis_data = [[0.267004, 0.004874, 0.329415],
                  [0.983868, 0.904867, 0.136897],
                  [0.993248, 0.906157, 0.143936]]
 
-from matplotlib.colors import ListedColormap
+#from matplotlib.colors import ListedColormap
 
 cmaps = {}
 for (name, data) in (('magma', _magma_data),
@@ -1050,9 +1050,10 @@ for (name, data) in (('magma', _magma_data),
                      ('plasma', _plasma_data),
                      ('viridis', _viridis_data)):
 
-    cmaps[name] = ListedColormap(data, name=name)
+    #    cmaps[name] = ListedColormap(data, name=name)
+    cmaps[name] = data
 
-magma = cmaps['magma']
-inferno = cmaps['inferno']
-plasma = cmaps['plasma']
-viridis = cmaps['viridis']
+#magma = cmaps['magma']
+#inferno = cmaps['inferno']
+#plasma = cmaps['plasma']
+#viridis = cmaps['viridis']
