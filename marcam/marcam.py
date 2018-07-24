@@ -763,8 +763,8 @@ class ImageWindow(wx.Frame):
         """
         veto_close = self.parent.shutdown_frame(
                 self.GetId(),
-                force_close=not evt.CanVeto()
-                from_close_menu=self.close_source=='close_menu'
+                force_close=not evt.CanVeto(),
+                from_close_menu=self.close_source=='close_menu',
                 from_quit_menu=self.close_source=='quit_menu'
                 )
         if veto_close:
@@ -1194,6 +1194,7 @@ class ImageWindow(wx.Frame):
             elif save_query_response == wx.ID_CANCEL:
                 return False
 
+        # if image is closed, do we still keep this frame open?
         if keep_win_open:
             # reset edit history
             self.app_history.reset()
@@ -1606,54 +1607,68 @@ class MarcamApp(wx.App):
         #                   self.file_windows.remove(frame)
         #                   close_window = True
         #
-        # close_window = (
-        #   force_close or
-        #   (len(self.file_windows) > 1 and image_closed) or
-        #   (len(self.file_windows) == 1 and from_quit_menu
-        #   (len(self.file_windows) == 1 and not from_quit_menu and not from_close_menu
-        # )
-        #
-        # hide_window = (
-        #   (const.PLATFORM == 'mac') and
-        #   (len(self.file_windows == 1) and
-        #   image_closed and
-        #   not from_quit_menu
-        # )
-        # 
-        #
 
         for frame in self.file_windows:
             if frame.GetId() == frame_to_close_id:
                 # we've found frame to close in 'frame'
                 break
 
-        veto_close = True
-
-        last_frame_keep_open = (
-                (not force_close) and
-                (not len(self.file_windows) > 1) and
-                (not self.trying_to_quit)
+        # keep_win_open tells close_image() if it should reset the frame's
+        #   settings if it successfully closes the image (in anticipation of
+        #   keeping the frame open).
+        # Strictly speaking there is no problem with this being True always,
+        #   except that it might possibly take more time.
+        keep_win_open = not (
+                force_close or
+                (len(self.file_windows) > 1 ) or
+                (len(self.file_windows) == 1 and from_quit_menu) or
+                (
+                    len(self.file_windows) == 1 and
+                    not from_quit_menu and
+                    not from_close_menu and
+                    const.PLATFORM != 'mac'
+                    )
                 )
-        image_closed = frame.close_image(last_frame_keep_open)
 
-        if image_closed:
-            # image closed
-            if not last_frame_keep_open:
-                # this is not the last frame, so no special treatment,
-                #   go ahead and remove it
-                self.file_windows.remove(frame)
-                veto_close = False
-            else:
-                # This is the last open frame, so we don't close it
-                veto_close = True
-                if const.PLATFORM == 'mac':
-                    # on Mac we hide the last frame we close.
-                    frame.Hide()
-        else:
-            # if image wasn't closed, keep frame open
-            veto_close = True
+        # image_closed is False if user clicked "Cancel" when asked to save
+        #   otherwise it is True
+        image_closed = frame.close_image(keep_win_open=keep_win_open)
 
-        # we've found the frame we want, so exit search loop
+        # this tells whether we should continue in the process of closing window
+        #   after the return of this function
+        close_window = (
+                force_close or
+                (len(self.file_windows) > 1 and image_closed) or
+                (len(self.file_windows) == 1 and image_closed and from_quit_menu) or
+                (
+                    len(self.file_windows) == 1 and
+                    image_closed and
+                    not from_quit_menu and
+                    not from_close_menu and
+                    const.PLATFORM != 'mac'
+                    )
+                )
+
+        # on Mac, which conditions cause the last window to stay open and hid
+        hide_window = (
+            not force_close and
+            (len(self.file_windows) == 1) and
+            image_closed and
+            not from_quit_menu and
+            (const.PLATFORM == 'mac')
+        )
+
+        # if hide_window is True, close_window must also be False
+        assert (hide_window and not close_window) or not hide_window
+
+        if close_window:
+            self.file_windows.remove(frame)
+
+        if hide_window:
+            # on Mac we hide the last frame we close.
+            frame.Hide()
+
+        veto_close = not close_window
 
         return veto_close
 
