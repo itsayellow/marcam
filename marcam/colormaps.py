@@ -1,18 +1,31 @@
-# New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt,
-# and (in the case of viridis) Eric Firing.
+"""Colormaps to apply to grayscale data (from matplotlib project)
+"""
+# Copyright 2018 Matthew A. Clapp (modifications to original code)
 #
-# This file and the colormaps in it are released under the CC0 license /
-# public domain dedication. We would appreciate credit if you use or
-# redistribute these colormaps, but do not impose any legal restrictions.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# To the extent possible under law, the persons who associated CC0 with
-# mpl-colormaps have waived all copyright and related or neighboring rights
-# to mpl-colormaps.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the CC0 legalcode along with this
-# work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-__all__ = ['magma', 'inferno', 'plasma', 'viridis']
+# Original version released to Public Domain via CC0
+#   <http://creativecommons.org/publicdomain/zero/1.0/>
+#   by Stéfan van der Walt (@stefanv), Nathaniel Smith (@njsmith),
+#   and (in the case of viridis) Eric Firing.
+# Created for the matplotlib project.
+# If you want to know more about the science behind the creation of these
+#   color maps, you can watch this presentation of viridis by their authors at
+#   SciPy 2015.
+# Original code at:
+# https://github.com/bids/colormap (colormap.py)
+
+#__all__ = ['magma', 'inferno', 'plasma', 'viridis']
 
 _magma_data = [[0.001462, 0.000466, 0.013866],
                [0.002258, 0.001295, 0.018331],
