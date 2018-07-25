@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Original version released to Public Domain via CC0
+# Original colormap.py code released to Public Domain via CC0
 #   <http://creativecommons.org/publicdomain/zero/1.0/>
 #   by Stéfan van der Walt (@stefanv), Nathaniel Smith (@njsmith),
 #   and (in the case of viridis) Eric Firing.
