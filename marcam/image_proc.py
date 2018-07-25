@@ -117,10 +117,12 @@ def image_remap_colormap(img_dc):
 
     image_data = wx_image.GetData()
     new_image_data = [
-            colormaps.VIRIDIS_DATA_24BIT[x] for x in image_data[::3]
+            colormaps.VIRIDIS_DATA_24BIT[int(x)] for x in image_data[::3]
             ]
     # flatten new_image_data which is now a list of triples
-    new_image_data = [x for sublist in l for l in new_image_data]
+    new_image_data = bytearray(
+            [x for sublist in new_image_data for x in sublist]
+            )
     wx_image = wx.Image(width, height, new_image_data)
     return wx_image
 
