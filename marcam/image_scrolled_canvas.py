@@ -78,54 +78,6 @@ def clip(num, num_min=None, num_max=None):
         return num
 
 
-@debug_fxn
-def image2memorydc(in_image, white_bg=False):
-    # Create MemoryDC to return
-    image_dc = wx.MemoryDC()
-    # convert image to bitmap
-    img_bmp = wx.Bitmap(in_image)
-    if white_bg:
-        # make white image of same size
-        bg_img = wx.Image(in_image.GetWidth(), in_image.GetHeight())
-        bg_img.Clear(value=b'\xff')
-        bg_bmp = wx.Bitmap(bg_img)
-        # use image_dc to draw onto bg_bmp
-        image_dc.SelectObject(bg_bmp)
-        image_dc.DrawBitmap(img_bmp, 0, 0)
-    else:
-        image_dc.SelectObject(img_bmp)
-
-    return image_dc
-
-
-@debug_fxn
-def wximagedc2pilimage(wx_imagedc):
-    wx_bitmap = wx_imagedc.GetAsBitmap()
-    return wxbitmap2pilimage(wx_bitmap)
-
-@debug_fxn
-def wxbitmap2pilimage(wx_bitmap):
-    wx_image = wx_bitmap.ConvertToImage()
-    return wximage2pilimage(wx_image)
-
-@debug_fxn
-def wximage2pilimage(wx_image):
-    image_data = wx_image.GetData()
-    #pil_image = PIL.Image.new('RGB', (wx_image.GetWidth(), wx_image.GetHeight()))
-    pil_image = PIL.Image.frombytes(
-            'RGB',
-            (wx_image.GetWidth(), wx_image.GetHeight()),
-            bytes(image_data)
-            )
-    return pil_image
-
-@debug_fxn
-def pilimage2wximage(pil_image):
-    (width, height) = pil_image.size
-    pil_image_data = pil_image.tobytes()
-    wx_image = wx.Image(width, height, pil_image_data)
-    return wx_image
-
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
     """Window (in the wx sense) widget that displays an image, zooms in and
@@ -1361,15 +1313,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if white_bg:
             LOGGER.info("Image has an alpha channel")
 
-        self.img_dc = image2memorydc(
+        self.img_dc = image_proc.image2memorydc(
                 img,
                 white_bg=white_bg
                 )
-        self.img_dc_div2 = image2memorydc(
+        self.img_dc_div2 = image_proc.image2memorydc(
                 img.Scale(self.img_size_x/2, self.img_size_y/2),
                 white_bg=white_bg
                 )
-        self.img_dc_div4 = image2memorydc(
+        self.img_dc_div4 = image_proc.image2memorydc(
                 img.Scale(self.img_size_x/4, self.img_size_y/4),
                 white_bg=white_bg
                 )
