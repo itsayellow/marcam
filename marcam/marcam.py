@@ -535,7 +535,7 @@ class ImageWindow(wx.Frame):
                 wx.ID_ANY, "I&nvert Image (Experimental)\tShift+Ctrl+N"
                 )
         imgremapcoloritem = tools_menu.Append(
-                wx.ID_ANY, "Re&map Colors in Image (Experimental)\tAlt+Ctrl+M"
+                wx.ID_ANY, "Re&map Colors in Image (Experimental)\tShift+Ctrl+M"
                 )
         menubar.Append(tools_menu, "&Tools")
         # Help
