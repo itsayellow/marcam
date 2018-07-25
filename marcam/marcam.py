@@ -470,9 +470,9 @@ class ImageWindow(wx.Frame):
                 'Export Image...\tCtrl+E',
                 'Export image with marks to image file'
                 )
-        # TODO: On Windows Ctrl+Q doesn't appear, need to be Alt-F4?
         quititem = file_menu.Append(wx.ID_EXIT,
-                'Quit', 'Quit application\tCtrl+Q'
+                'Quit\tCtrl+Q',
+                'Quit application'
                 )
         menubar.Append(file_menu, '&File')
         # Edit
