@@ -40,8 +40,13 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 # TODO: may want to use threads for some time-consuming operations
 
+#-----------------------
+# Image data conversions
+
 @debug_fxn
 def image2memorydc(in_image, white_bg=False):
+    """Converts wx.Image to wx.MemoryDC
+    """
     # Create MemoryDC to return
     image_dc = wx.MemoryDC()
     # convert image to bitmap
@@ -87,6 +92,8 @@ def pilimage2wximage(pil_image):
     wx_image = wx.Image(width, height, pil_image_data)
     return wx_image
 
+#-----------------------
+# Image processing
 
 @debug_fxn
 def image_invert(img_dc):
@@ -101,6 +108,24 @@ def image_autocontrast(img_dc):
     new_pil_image = PIL.ImageOps.autocontrast(pil_image)
     wx_image = pilimage2wximage(new_pil_image)
     return wx_image
+
+def image_remap_colormap(img_dc):
+    wx_bitmap = img_dc.GetAsBitmap()
+    wx_image = wx_bitmap.ConvertToImage()
+    width = wx_image.GetWidth()
+    height = wx_image.GetHeight()
+
+    image_data = wx_image.GetData()
+    new_image_data = [
+            colormaps.VIRIDIS_DATA_24BIT[x] for x in image_data[::3]
+            ]
+    # flatten new_image_data which is now a list of triples
+    new_image_data = [x for sublist in l for l in new_image_data]
+    wx_image = wx.Image(width, height, new_image_data)
+    return wx_image
+
+#-----------------------
+# Image information
 
 @debug_fxn
 def get_image_info(img_dc):

@@ -1339,6 +1339,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
     @debug_fxn
+    def image_remap_colormap(self):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
+
+        # return early if no image
+        if self.has_no_image():
+            return None
+
+        self.init_image(image_proc.image_remap_colormap(self.img_dc))
+
+    @debug_fxn
     def image_invert(self):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
