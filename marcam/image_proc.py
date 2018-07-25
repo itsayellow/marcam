@@ -110,6 +110,10 @@ def image_autocontrast(img_dc):
     return wx_image
 
 def image_remap_colormap(img_dc):
+    """Remap colormap to Viridis color map
+
+    Intended to give false color to Black and White images.
+    """
     wx_bitmap = img_dc.GetAsBitmap()
     wx_image = wx_bitmap.ConvertToImage()
     width = wx_image.GetWidth()
