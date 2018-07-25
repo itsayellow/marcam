@@ -16,6 +16,10 @@
 
 # GUI for displaying an image and counting cells
 
+# TODO: Mac OS X specific things to possibly try:
+#   wx.TopLevelWindow.OSXSetModified()
+#   wx.Window.SetWindowVariant()
+
 import argparse
 import json
 import logging
@@ -523,16 +527,16 @@ class ImageWindow(wx.Frame):
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         tools_menu.Append(wx.ID_SEPARATOR)
         imginfoitem = tools_menu.Append(
-                wx.ID_ANY, "&Image Info (Experimental)\tCtrl+I"
+                wx.ID_ANY, "&Image Info (Experimental)\tShift+Ctrl+I"
                 )
         imgautocontrastitem = tools_menu.Append(
-                wx.ID_ANY, "Image &Auto-Contrast (Experimental)\tCtrl+J"
+                wx.ID_ANY, "Image &Auto-Contrast (Experimental)\tShift+Ctrl+J"
                 )
         imginvertitem = tools_menu.Append(
-                wx.ID_ANY, "I&nvert Image (Experimental)\tCtrl+N"
+                wx.ID_ANY, "I&nvert Image (Experimental)\tShift+Ctrl+N"
                 )
         imgremapcoloritem = tools_menu.Append(
-                wx.ID_ANY, "Re&map Colors in Image (Experimental)\tCtrl+M"
+                wx.ID_ANY, "Re&map Colors in Image (Experimental)\tAlt+Ctrl+M"
                 )
         menubar.Append(tools_menu, "&Tools")
         # Help
