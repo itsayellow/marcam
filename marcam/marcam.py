@@ -18,7 +18,6 @@
 
 # TODO: Mac OS X specific things to possibly try:
 #   wx.TopLevelWindow.OSXSetModified()
-#   wx.Window.SetWindowVariant()
 
 import argparse
 import json
