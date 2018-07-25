@@ -24,7 +24,6 @@ import PIL.Image
 import PIL.ImageStat
 import PIL.ImageOps
 
-import const
 import common
 import colormaps
 
@@ -40,44 +39,6 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 # TODO: may want to use threads for some time-consuming operations
-
-def ceil(num):
-    """Simple numerical ceiling function.
-
-    Args:
-        num (float): input number
-
-    Returns:
-        int: if num is non-integer: (int(num) + 1), else: num
-    """
-    if int(num) < num:
-        return int(num) + 1
-    else:
-        return int(num)
-
-
-def clip(num, num_min=None, num_max=None):
-    """Clip to max and/or min values.  To not use limit, give argument None
-
-    Args:
-        num (float): input number
-        num_min (float): minimum value, if less than this return this num
-            Use None to designate no minimum value.
-        num_max (float): maximum value, if more than this return this num
-            Use None to designate no maximum value.
-
-    Returns
-        float: clipped version of input number
-    """
-    if num_min is not None and num_max is not None:
-        return min(max(num, num_min), num_max)
-    elif num_min is not None:
-        return max(num, num_min)
-    elif num_max is not None:
-        return min(num, num_max)
-    else:
-        return num
-
 
 @debug_fxn
 def image2memorydc(in_image, white_bg=False):
@@ -97,7 +58,6 @@ def image2memorydc(in_image, white_bg=False):
         image_dc.SelectObject(img_bmp)
 
     return image_dc
-
 
 @debug_fxn
 def wximagedc2pilimage(wx_imagedc):
