@@ -1342,6 +1342,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def image_remap_colormap(self):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
+        # TODO: save modified image
 
         # return early if no image
         if self.has_no_image():
@@ -1353,6 +1354,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def image_invert(self):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
+        # TODO: save modified image
 
         # return early if no image
         if self.has_no_image():
@@ -1364,6 +1366,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def image_autocontrast(self):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
+        # TODO: save modified image
 
         # return early if no image
         if self.has_no_image():
