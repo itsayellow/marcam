@@ -115,7 +115,7 @@ def image_autocontrast(wx_image, cutoff=0):
     return wx_image
 
 @debug_fxn
-def image_remap_colormap(wx_image):
+def image_remap_colormap(wx_image, map='viridis'):
     """Remap colormap to Viridis color map
 
     Intended to give false color to Black and White images.
@@ -124,9 +124,25 @@ def image_remap_colormap(wx_image):
     height = wx_image.GetHeight()
 
     image_data = wx_image.GetData()
-    new_image_data = [
-            colormaps.VIRIDIS_DATA_24BIT[int(x)] for x in image_data[::3]
-            ]
+    if map=='viridis':
+        new_image_data = [
+                colormaps.VIRIDIS_DATA_24BIT[int(x)] for x in image_data[::3]
+                ]
+    elif map=='plasma':
+        new_image_data = [
+                colormaps.PLASMA_DATA_24BIT[int(x)] for x in image_data[::3]
+                ]
+    elif map=='magma':
+        new_image_data = [
+                colormaps.MAGMA_DATA_24BIT[int(x)] for x in image_data[::3]
+                ]
+    elif map=='inferno':
+        new_image_data = [
+                colormaps.INFERNO_DATA_24BIT[int(x)] for x in image_data[::3]
+                ]
+    else:
+        raise Exception("Internal Error: unknown colormap")
+
     # flatten new_image_data which is now a list of triples
     new_image_data = bytearray(
             [x for sublist in new_image_data for x in sublist]

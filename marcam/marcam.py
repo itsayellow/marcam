@@ -553,8 +553,17 @@ class ImageWindow(wx.Frame):
         imgautocontrast6item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 6",
                 )
-        imgremapcoloritem = tools_menu.Append(wx.ID_ANY,
+        imgfalsecolorviridisitem = tools_menu.Append(wx.ID_ANY,
                 "Image False Color (Viridis)\tShift+Ctrl+C",
+                )
+        imgfalsecolorplasmaitem = tools_menu.Append(wx.ID_ANY,
+                "Image False Color (Plasma)",
+                )
+        imgfalsecolormagmaitem = tools_menu.Append(wx.ID_ANY,
+                "Image False Color (Magma)",
+                )
+        imgfalsecolorinfernoitem = tools_menu.Append(wx.ID_ANY,
+                "Image False Color (Inferno)",
                 )
         menubar.Append(tools_menu, "&Tools")
         # Help
@@ -746,7 +755,10 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast2, imgautocontrast2item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast4, imgautocontrast4item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast6, imgautocontrast6item)
-        self.Bind(wx.EVT_MENU, self.on_imgremapcolor, imgremapcoloritem)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorviridis, imgfalsecolorviridisitem)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorplasma, imgfalsecolorplasmaitem)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolormagma, imgfalsecolormagmaitem)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorinferno, imgfalsecolorinfernoitem)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
         self.Bind(wx.EVT_MENU, self.on_help, helpitem)
@@ -1481,14 +1493,44 @@ class ImageWindow(wx.Frame):
         self.img_panel.image_invert()
 
     @debug_fxn
-    def on_imgremapcolor(self, evt):
+    def on_imgfalsecolorviridis(self, evt):
         """Tools->False Color menu item
 
         Args:
             evt (wx.CommandEvent): TODO
         """
         # TODO: allow save of image mods
-        self.img_panel.image_remap_colormap()
+        self.img_panel.image_remap_colormap(map='viridis')
+
+    @debug_fxn
+    def on_imgfalsecolorplasma(self, evt):
+        """Tools->False Color menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
+        # TODO: allow save of image mods
+        self.img_panel.image_remap_colormap(map='plasma')
+
+    @debug_fxn
+    def on_imgfalsecolormagma(self, evt):
+        """Tools->False Color menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
+        # TODO: allow save of image mods
+        self.img_panel.image_remap_colormap(map='magma')
+
+    @debug_fxn
+    def on_imgfalsecolorinferno(self, evt):
+        """Tools->False Color menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
+        # TODO: allow save of image mods
+        self.img_panel.image_remap_colormap(map='inferno')
 
     @debug_fxn
     def on_imgautocontrast0(self, evt):

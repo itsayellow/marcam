@@ -1602,7 +1602,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
-    def image_remap_colormap(self):
+    def image_remap_colormap(self, map='viridis'):
         # TODO: save modified image
 
         # return early if no image
@@ -1610,7 +1610,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return None
 
         wx_image_orig = image_proc.memorydc2image(self.img_dc)
-        wx_image_new = image_proc.image_remap_colormap(wx_image_orig)
+        wx_image_new = image_proc.image_remap_colormap(wx_image_orig, map=map)
         # TODO: specifying orig,new for every image xform is redundant
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
