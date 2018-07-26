@@ -554,7 +554,7 @@ class ImageWindow(wx.Frame):
                 "Image &Auto-Contrast 6",
                 )
         imgremapcoloritem = tools_menu.Append(wx.ID_ANY,
-                "Re&map Colors in Image (False Color)\tShift+Ctrl+M",
+                "Image False Color (Viridis)\tShift+Ctrl+C",
                 )
         menubar.Append(tools_menu, "&Tools")
         # Help
@@ -823,6 +823,11 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_close(self, evt):
+        """File->Close menu handler
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         self.menu_close_file = True
         # send EVT_CLOSE event, next is on_evt_close()
         self.close_source = 'close_menu'
@@ -830,10 +835,10 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_quit(self, evt):
-        """Handler for menu Quit
+        """File->Quit menu handler
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         self.parent.quit_app()
 
@@ -977,7 +982,7 @@ class ImageWindow(wx.Frame):
         Go into Select Mode.
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         # SELECT MODE
         self.img_panel.mark_mode = False
@@ -996,7 +1001,7 @@ class ImageWindow(wx.Frame):
         Go into Mark Mode.
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         # MARK MODE
         self.img_panel.mark_mode = True
@@ -1012,12 +1017,12 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_toclip(self, evt):
-        """When pressing the "To Clipboard" button next to Marks Tally display
+        """Edit->Copy Marks Total menu/toolbar button handler
 
         Copy the total number of marks to the Clipboard.
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         marks_total_text = self.marks_num_display.GetLineText(0)
         if wx.TheClipboard.Open():
@@ -1033,7 +1038,7 @@ class ImageWindow(wx.Frame):
         """File->Open Image Data... menu handler for Main Window
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         # create wildcard for:
         #   native *.mcm files
@@ -1090,7 +1095,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_open_recent(self, evt):
-        """File->Open Recent-> <File> menu handler for Main Window
+        """File->Open Recent-> sub-menu handler for Main Window
 
         Args:
             evt (wx.): TODO
@@ -1221,10 +1226,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def close_image(self, keep_win_open=False):
-        """Close Image menu handler for Main Window
-
-        Args:
-            evt (wx.): TODO
+        """Closes image in window
 
         Returns:
             bool: Whether the image was closed.
@@ -1262,10 +1264,10 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_save(self, evt):
-        """Save menu handler for Main Window
+        """File->Save menu handler for Main Window
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         if self.save_filepath is None:
             # we've never "Save As..." so do that instead
@@ -1278,10 +1280,10 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_saveas(self, evt):
-        """Save As... menu handler for Main Window
+        """File->Save As... menu handler for Main Window
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         if self.save_filepath:
             (default_dir, default_filename) = os.path.split(self.save_filepath)
@@ -1323,6 +1325,11 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_export_image(self, evt):
+        """File->Export Image... menu handler for Main Window
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         if self.save_filepath:
             (default_dir, default_filename) = os.path.split(self.save_filepath)
         else:
@@ -1362,7 +1369,7 @@ class ImageWindow(wx.Frame):
             ['MOVE_MARK', <src mark coordinate>, <dest mark coordinate>]
             ['IMAGE_XFORM', <orig image>, <modified image>]
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         action = self.win_history.undo()
         LOGGER.info("MSC:undo: %s", repr(action))
@@ -1386,7 +1393,7 @@ class ImageWindow(wx.Frame):
         """Edit->Redo handler
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         action = self.win_history.redo()
         LOGGER.info("MSC:redo: %s", repr(action))
@@ -1410,30 +1417,50 @@ class ImageWindow(wx.Frame):
         """Edit->Select All handler
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         self.img_panel.select_all_marks()
 
     @debug_fxn
     def on_zoomout(self, evt):
+        """View->Zoom Out menu/toolbar button handler
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         zoom = self.img_panel.zoom(-1)
         if zoom:
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
     def on_zoomin(self, evt):
+        """View->Zoom In menu/toolbar button handler
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         zoom = self.img_panel.zoom(1)
         if zoom:
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
     def on_zoomfit(self, evt):
+        """View->Zoom to Fit menu/toolbar button handler
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         zoom = self.img_panel.zoom_fit()
         if zoom:
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
     def on_imginfo(self, evt):
+        """Tools->Image Info menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         image_info_text = self.img_panel.get_image_info()
         image_dialog = wx.lib.dialogs.ScrolledMessageDialog(
                 parent=self,
@@ -1444,39 +1471,48 @@ class ImageWindow(wx.Frame):
         image_dialog.ShowModal()
 
     @debug_fxn
-    def on_imgremapcolor(self, evt):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
-        self.img_panel.image_remap_colormap()
-
-    @debug_fxn
     def on_imginvert(self, evt):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
+        """Tools->Invert Image menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
+        # TODO: allow save of image mods
         self.img_panel.image_invert()
 
     @debug_fxn
+    def on_imgremapcolor(self, evt):
+        """Tools->False Color menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
+        # TODO: allow save of image mods
+        self.img_panel.image_remap_colormap()
+
+    @debug_fxn
     def on_imgautocontrast0(self, evt):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
+        """Tools->Image Auto-Contrast 0 menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
+        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=0)
 
     @debug_fxn
     def on_imgautocontrast2(self, evt):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
+        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=2)
 
     @debug_fxn
     def on_imgautocontrast4(self, evt):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
+        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=4)
 
     @debug_fxn
     def on_imgautocontrast6(self, evt):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
+        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=6)
 
     @debug_fxn
