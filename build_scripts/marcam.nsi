@@ -1,5 +1,5 @@
-; example2.nsi
-
+; Original code (http://nsis.sourceforge.net/Examples/example2.nsi)
+; Modified by Matthew A. Clapp
 ; Copyright 2017-2018 Matthew A. Clapp
 ;
 ; Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,14 @@
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
 
-;
-; This script is based on example1.nsi, but it remember the directory, 
+; from example2.nsi (http://nsis.sourceforge.net/Examples/example2.nsi)
+; This script is based on example1.nsi, but it remember the directory,
 ; has uninstall support and (optionally) installs start menu shortcuts.
 ;
 ; It will install example2.nsi into a directory that the user selects,
 
 ;--------------------------------
+!include "FileAssoc.nsh"
 
 ; The name of the installer
 Name "Marcam"
@@ -31,7 +32,7 @@ OutFile "..\dist\Marcam_Installer.exe"
 ; The default installation directory
 InstallDir $PROGRAMFILES\Marcam
 
-; Registry key to check for directory (so if you install again, it will 
+; Registry key to check for directory (so if you install again, it will
 ; overwrite the old one automatically)
 InstallDirRegKey HKLM "Software\Marcam" "Install_Dir"
 
@@ -55,23 +56,26 @@ UninstPage instfiles
 Section "Marcam (required)"
 
   SectionIn RO
-  
+
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
-  
+
   ; Put files there
   File /r "..\dist\marcam\*"
-  
+
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\Marcam "Install_Dir" "$INSTDIR"
-  
+
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "DisplayName" "Marcam"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
-  
+
+; APP_ASSOCIATE EXT FILECLASS DESCRIPTION ICON COMMANDTEXT COMMAND
+  !insertmacro APP_ASSOCIATE "mcm" "Marcam.ImageData" "Marcam Image Data" "$INSTDIR\Marcam.exe,0" "Open with Marcam" "$INSTDIR\Marcam.exe $\"%1$\""
+
 SectionEnd
 
 ; Optional section (can be disabled by the user)
@@ -80,7 +84,7 @@ Section "Start Menu Shortcuts"
   CreateDirectory "$SMPROGRAMS\Marcam"
   CreateShortcut "$SMPROGRAMS\Marcam\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortcut "$SMPROGRAMS\Marcam\Marcam.lnk" "$INSTDIR\marcam.exe" "" "$INSTDIR\marcam.exe" 0
-  
+
 SectionEnd
 
 ;--------------------------------
@@ -88,20 +92,21 @@ SectionEnd
 ; Uninstaller
 
 Section "Uninstall"
-  
+
   ; Remove registry keys
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam"
   DeleteRegKey HKLM SOFTWARE\Marcam
+  ;APP_UNASSOCIATE EXT FILECLASS
+  !insertmacro APP_UNASSOCIATE "mcm" "Marcam.ImageData"
 
   ; Remove files and uninstaller
-  Delete $INSTDIR\example2.nsi
-  Delete $INSTDIR\uninstall.exe
+  Delete $INSTDIR\*.*
 
   ; Remove shortcuts, if any
   Delete "$SMPROGRAMS\Marcam\*.*"
 
   ; Remove directories used
-  RMDir "$SMPROGRAMS\Marcam"
-  RMDir "$INSTDIR"
+  RMDir /r "$SMPROGRAMS\Marcam"
+  RMDir /r "$INSTDIR"
 
 SectionEnd
