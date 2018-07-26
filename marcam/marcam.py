@@ -455,15 +455,21 @@ class ImageWindow(wx.Frame):
         open_recent_menu = wx.Menu()
         file_menu = wx.Menu()
         oitem = file_menu.Append(wx.ID_OPEN,
-                'Open Image...\tCtrl+O', 'Open image file'
+                'Open Image...\tCtrl+O',
+                'Open image file'
                 )
-        orecentitem = file_menu.AppendSubMenu(
-                open_recent_menu, 'Open Recent', 'Open recent .mcm files')
+        orecentitem = file_menu.AppendSubMenu(open_recent_menu,
+                'Open Recent',
+                'Open recent .mcm files'
+                )
+        file_menu.Append(wx.ID_SEPARATOR)
         citem = file_menu.Append(wx.ID_CLOSE,
-                'Close\tCtrl+W', 'Close image'
+                'Close\tCtrl+W',
+                'Close image'
                 )
         sitem = file_menu.Append(wx.ID_SAVE,
-                'Save Image Data\tCtrl+S', 'Save .mcm image and data file'
+                'Save Image Data\tCtrl+S',
+                'Save .mcm image and data file'
                 )
         saitem = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S',
@@ -480,18 +486,22 @@ class ImageWindow(wx.Frame):
         menubar.Append(file_menu, '&File')
         # Edit
         edit_menu = wx.Menu()
+        undoitem = edit_menu.Append(wx.ID_UNDO,
+                'Undo\tCtrl+Z',
+                'Undo last action'
+                )
+        redoitem = edit_menu.Append(wx.ID_REDO,
+                'Redo\tShift+Ctrl+Z',
+                'Redo last undone action'
+                )
+        edit_menu.Append(wx.ID_SEPARATOR)
         copyitem = edit_menu.Append(wx.ID_COPY,
                 'Copy Marks Total\tCtrl+C',
                 'Copy total marks number to Clipboard.'
                 )
-        undoitem = edit_menu.Append(wx.ID_UNDO,
-                'Undo\tCtrl+Z', 'Undo last action'
-                )
-        redoitem = edit_menu.Append(wx.ID_REDO,
-                'Redo\tShift+Ctrl+Z', 'Redo last undone action'
-                )
         self.selallitem = edit_menu.Append(wx.ID_SELECTALL,
-                'Select All\tCtrl+A', 'Select all marks'
+                'Select All\tCtrl+A',
+                'Select all marks'
                 )
         menubar.Append(edit_menu, '&Edit')
         # View
@@ -525,24 +535,30 @@ class ImageWindow(wx.Frame):
         self.select_menu_item.Enable(False)
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         tools_menu.Append(wx.ID_SEPARATOR)
-        imginfoitem = tools_menu.Append(
-                wx.ID_ANY, "&Image Info (Experimental)\tShift+Ctrl+I"
+        imginfoitem = tools_menu.Append(wx.ID_ANY,
+                "&Image Info (Experimental)\tShift+Ctrl+I",
                 )
-        imgautocontrastitem = tools_menu.Append(
-                wx.ID_ANY, "Image &Auto-Contrast (Experimental)\tShift+Ctrl+J"
+        imgautocontrastitem = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast (Experimental)\tShift+Ctrl+J",
                 )
-        imginvertitem = tools_menu.Append(
-                wx.ID_ANY, "I&nvert Image (Experimental)\tShift+Ctrl+N"
+        imginvertitem = tools_menu.Append(wx.ID_ANY,
+                "I&nvert Image (Experimental)\tShift+Ctrl+N",
                 )
-        imgremapcoloritem = tools_menu.Append(
-                wx.ID_ANY, "Re&map Colors in Image (Experimental)\tShift+Ctrl+M"
+        imgremapcoloritem = tools_menu.Append(wx.ID_ANY,
+                "Re&map Colors in Image (Experimental)\tShift+Ctrl+M",
                 )
         menubar.Append(tools_menu, "&Tools")
         # Help
         help_menu = wx.Menu()
-        aboutitem = help_menu.Append(wx.ID_ABOUT, "&About Marcam")
-        helpitem = help_menu.Append(wx.ID_HELP, "&Marcam Help")
-        menubar.Append(help_menu, "&Help")
+        aboutitem = help_menu.Append(wx.ID_ABOUT,
+                "&About Marcam"
+                )
+        helpitem = help_menu.Append(wx.ID_HELP,
+                "&Marcam Help"
+                )
+        menubar.Append(help_menu,
+                "&Help"
+                )
 
         self.SetMenuBar(menubar)
 
@@ -704,9 +720,9 @@ class ImageWindow(wx.Frame):
                 id=wx.ID_FILE1, id2=wx.ID_FILE9
                 )
         # Edit menu items
-        self.Bind(wx.EVT_MENU, self.on_toclip, copyitem)
         self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
         self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
+        self.Bind(wx.EVT_MENU, self.on_toclip, copyitem)
         self.Bind(wx.EVT_MENU, self.on_select_all, self.selallitem)
         # View menu items
         self.Bind(wx.EVT_MENU, self.on_zoomout, zoomoutitem)
