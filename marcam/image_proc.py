@@ -108,12 +108,13 @@ def image_invert(wx_image):
     return wx_image
 
 @debug_fxn
-def image_autocontrast(wx_image):
+def image_autocontrast(wx_image, cutoff=0):
     pil_image = wximage2pilimage(wx_image)
-    new_pil_image = PIL.ImageOps.autocontrast(pil_image)
+    new_pil_image = PIL.ImageOps.autocontrast(pil_image, cutoff=cutoff)
     wx_image = pilimage2wximage(new_pil_image)
     return wx_image
 
+@debug_fxn
 def image_remap_colormap(wx_image):
     """Remap colormap to Viridis color map
 

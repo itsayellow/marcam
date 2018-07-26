@@ -1296,7 +1296,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return (win_x, win_y)
 
     @debug_fxn
-    def init_image(self, img):
+    def init_image(self, img, do_zoom_fit=True):
         """Load and initialize image
 
         Args:
@@ -1330,9 +1330,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             staticdc_eltime = time.time() - staticdc_start
             LOGGER.info("TIM:Create MemoryDCs: %.3fs", staticdc_eltime)
 
-        # set zoom_idx to scaling that will fit image in window
-        #   (with 1.0x zoom maximum)
-        self.zoom_fit(max_zoom=1.0, do_refresh=False)
+        if do_zoom_fit:
+            # set zoom_idx to scaling that will fit image in window
+            #   (with 1.0x zoom maximum)
+            self.zoom_fit(max_zoom=1.0, do_refresh=False)
 
         # force a paint event with Refresh and Update
         self.Refresh()
@@ -1598,7 +1599,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
         self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
-        self.init_image(wx_image_new)
+        self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
     def image_remap_colormap(self):
@@ -1615,10 +1616,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
         self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
-        self.init_image(wx_image_new)
+        self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
-    def image_autocontrast(self):
+    def image_autocontrast(self, cutoff=0):
         # TODO: save modified image
 
         # return early if no image
@@ -1626,13 +1627,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return None
 
         wx_image_orig = image_proc.memorydc2image(self.img_dc)
-        wx_image_new = image_proc.image_autocontrast(wx_image_orig)
+        wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=0)
         # TODO: specifying orig,new for every image xform is redundant
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
         self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
-        self.init_image(wx_image_new)
+        self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
     def get_image_info(self):

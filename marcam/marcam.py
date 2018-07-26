@@ -536,16 +536,25 @@ class ImageWindow(wx.Frame):
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         tools_menu.Append(wx.ID_SEPARATOR)
         imginfoitem = tools_menu.Append(wx.ID_ANY,
-                "&Image Info (Experimental)\tShift+Ctrl+I",
-                )
-        imgautocontrastitem = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast (Experimental)\tShift+Ctrl+J",
+                "&Image Info\tShift+Ctrl+I",
                 )
         imginvertitem = tools_menu.Append(wx.ID_ANY,
-                "I&nvert Image (Experimental)\tShift+Ctrl+N",
+                "I&nvert Image\tShift+Ctrl+N",
+                )
+        imgautocontrast0item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast 0\tShift+Ctrl+J",
+                )
+        imgautocontrast5item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast 5",
+                )
+        imgautocontrast10item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast 10",
+                )
+        imgautocontrast15item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast 15",
                 )
         imgremapcoloritem = tools_menu.Append(wx.ID_ANY,
-                "Re&map Colors in Image (Experimental)\tShift+Ctrl+M",
+                "Re&map Colors in Image (False Color)\tShift+Ctrl+M",
                 )
         menubar.Append(tools_menu, "&Tools")
         # Help
@@ -732,8 +741,11 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_selectmode, self.select_menu_item)
         self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
         self.Bind(wx.EVT_MENU, self.on_imginfo, imginfoitem)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast, imgautocontrastitem)
         self.Bind(wx.EVT_MENU, self.on_imginvert, imginvertitem)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast0, imgautocontrast0item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast5, imgautocontrast5item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast10, imgautocontrast10item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast15, imgautocontrast15item)
         self.Bind(wx.EVT_MENU, self.on_imgremapcolor, imgremapcoloritem)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
@@ -1361,7 +1373,7 @@ class ImageWindow(wx.Frame):
         if action[0] == 'MOVE_MARK':
             self.img_panel.move_mark(action[2], action[1], is_selected=False)
         if action[0] == 'IMAGE_XFORM':
-            self.img_panel.init_image(action[1])
+            self.img_panel.init_image(action[1], do_zoom_fit=False)
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel
@@ -1385,7 +1397,7 @@ class ImageWindow(wx.Frame):
         if action[0] == 'MOVE_MARK':
             self.img_panel.move_mark(action[1], action[2], is_selected=False)
         if action[0] == 'IMAGE_XFORM':
-            self.img_panel.init_image(action[2])
+            self.img_panel.init_image(action[2], do_zoom_fit=False)
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel
@@ -1444,10 +1456,28 @@ class ImageWindow(wx.Frame):
         self.img_panel.image_invert()
 
     @debug_fxn
-    def on_imgautocontrast(self, evt):
+    def on_imgautocontrast0(self, evt):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
-        self.img_panel.image_autocontrast()
+        self.img_panel.image_autocontrast(cutoff=0)
+
+    @debug_fxn
+    def on_imgautocontrast5(self, evt):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
+        self.img_panel.image_autocontrast(cutoff=5)
+
+    @debug_fxn
+    def on_imgautocontrast10(self, evt):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
+        self.img_panel.image_autocontrast(cutoff=10)
+
+    @debug_fxn
+    def on_imgautocontrast15(self, evt):
+        # TODO: keep track of image operations to save to mcm image and
+        #   allow undo
+        self.img_panel.image_autocontrast(cutoff=15)
 
     @debug_fxn
     def save_notify(self):
