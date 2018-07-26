@@ -1339,50 +1339,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
     @debug_fxn
-    def image_remap_colormap(self):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
-        # TODO: save modified image
-
-        # return early if no image
-        if self.has_no_image():
-            return None
-
-        self.init_image(image_proc.image_remap_colormap(self.img_dc))
-
-    @debug_fxn
-    def image_invert(self):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
-        # TODO: save modified image
-
-        # return early if no image
-        if self.has_no_image():
-            return None
-
-        self.init_image(image_proc.image_invert(self.img_dc))
-
-    @debug_fxn
-    def image_autocontrast(self):
-        # TODO: keep track of image operations to save to mcm image and
-        #   allow undo
-        # TODO: save modified image
-
-        # return early if no image
-        if self.has_no_image():
-            return None
-
-        self.init_image(image_proc.image_autocontrast(self.img_dc))
-
-    @debug_fxn
-    def get_image_info(self):
-        # return early if no image
-        if self.has_no_image():
-            return None
-
-        return image_proc.get_image_info(self.img_dc)
-
-    @debug_fxn
     def zoom_fit(self, max_zoom=None, do_refresh=True):
         # return early if no image
         if self.has_no_image():
@@ -1626,6 +1582,66 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         img = bmp.ConvertToImage()
         #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
         return img
+
+    @debug_fxn
+    def image_invert(self):
+        # TODO: save modified image
+
+        # return early if no image
+        if self.has_no_image():
+            return None
+
+        wx_image_orig = image_proc.memorydc2image(self.img_dc)
+        wx_image_new = image_proc.image_invert(wx_image_orig)
+        # TODO: specifying orig,new for every image xform is redundant
+        #   (find a way to not duplicate image data in EditHistory)
+        #   Can possibly reference images in another holding area,
+        #       where only unique images saved.
+        self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
+        self.init_image(wx_image_new)
+
+    @debug_fxn
+    def image_remap_colormap(self):
+        # TODO: save modified image
+
+        # return early if no image
+        if self.has_no_image():
+            return None
+
+        wx_image_orig = image_proc.memorydc2image(self.img_dc)
+        wx_image_new = image_proc.image_remap_colormap(wx_image_orig)
+        # TODO: specifying orig,new for every image xform is redundant
+        #   (find a way to not duplicate image data in EditHistory)
+        #   Can possibly reference images in another holding area,
+        #       where only unique images saved.
+        self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
+        self.init_image(wx_image_new)
+
+    @debug_fxn
+    def image_autocontrast(self):
+        # TODO: save modified image
+
+        # return early if no image
+        if self.has_no_image():
+            return None
+
+        wx_image_orig = image_proc.memorydc2image(self.img_dc)
+        wx_image_new = image_proc.image_autocontrast(wx_image_orig)
+        # TODO: specifying orig,new for every image xform is redundant
+        #   (find a way to not duplicate image data in EditHistory)
+        #   Can possibly reference images in another holding area,
+        #       where only unique images saved.
+        self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
+        self.init_image(wx_image_new)
+
+    @debug_fxn
+    def get_image_info(self):
+        # return early if no image
+        if self.has_no_image():
+            return None
+
+        return image_proc.get_image_info(self.img_dc)
+
 
 # really a Scrolled Window
 class ImageScrolledCanvasMarks(ImageScrolledCanvas):

@@ -1344,6 +1344,11 @@ class ImageWindow(wx.Frame):
     def on_undo(self, evt):
         """Edit->Undo handler
 
+        Possible actions:
+            ['MARK', <one new mark coordinate>]
+            ['DELETE_MARK_LIST', <list of mark coordinates deleted>]
+            ['MOVE_MARK', <src mark coordinate>, <dest mark coordinate>]
+            ['IMAGE_XFORM', <orig image>, <modified image>]
         Args:
             evt (wx.): TODO
         """
@@ -1355,6 +1360,8 @@ class ImageWindow(wx.Frame):
             self.img_panel.mark_point_list(action[1])
         if action[0] == 'MOVE_MARK':
             self.img_panel.move_mark(action[2], action[1], is_selected=False)
+        if action[0] == 'IMAGE_XFORM':
+            self.img_panel.init_image(action[1])
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel
@@ -1377,6 +1384,8 @@ class ImageWindow(wx.Frame):
             self.img_panel.delete_mark_point_list(action[1])
         if action[0] == 'MOVE_MARK':
             self.img_panel.move_mark(action[1], action[2], is_selected=False)
+        if action[0] == 'IMAGE_XFORM':
+            self.img_panel.init_image(action[2])
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel

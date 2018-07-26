@@ -50,19 +50,24 @@ def image2memorydc(in_image, white_bg=False):
     # Create MemoryDC to return
     image_dc = wx.MemoryDC()
     # convert image to bitmap
-    img_bmp = wx.Bitmap(in_image)
+    image_bmp = wx.Bitmap(in_image)
     if white_bg:
         # make white image of same size
-        bg_img = wx.Image(in_image.GetWidth(), in_image.GetHeight())
-        bg_img.Clear(value=b'\xff')
-        bg_bmp = wx.Bitmap(bg_img)
+        bg_image = wx.Image(in_image.GetWidth(), in_image.GetHeight())
+        bg_image.Clear(value=b'\xff')
+        bg_bmp = wx.Bitmap(bg_image)
         # use image_dc to draw onto bg_bmp
         image_dc.SelectObject(bg_bmp)
-        image_dc.DrawBitmap(img_bmp, 0, 0)
+        image_dc.DrawBitmap(image_bmp, 0, 0)
     else:
-        image_dc.SelectObject(img_bmp)
+        image_dc.SelectObject(image_bmp)
 
     return image_dc
+
+@debug_fxn
+def memorydc2image(wx_imagedc):
+    wx_bitmap = wx_imagedc.GetAsBitmap()
+    return wx_bitmap.ConvertToImage()
 
 @debug_fxn
 def wximagedc2pilimage(wx_imagedc):
@@ -96,26 +101,24 @@ def pilimage2wximage(pil_image):
 # Image processing
 
 @debug_fxn
-def image_invert(img_dc):
-    pil_image = wximagedc2pilimage(img_dc)
+def image_invert(wx_image):
+    pil_image = wximage2pilimage(wx_image)
     new_pil_image = PIL.ImageOps.invert(pil_image)
     wx_image = pilimage2wximage(new_pil_image)
     return wx_image
 
 @debug_fxn
-def image_autocontrast(img_dc):
-    pil_image = wximagedc2pilimage(img_dc)
+def image_autocontrast(wx_image):
+    pil_image = wximage2pilimage(wx_image)
     new_pil_image = PIL.ImageOps.autocontrast(pil_image)
     wx_image = pilimage2wximage(new_pil_image)
     return wx_image
 
-def image_remap_colormap(img_dc):
+def image_remap_colormap(wx_image):
     """Remap colormap to Viridis color map
 
     Intended to give false color to Black and White images.
     """
-    wx_bitmap = img_dc.GetAsBitmap()
-    wx_image = wx_bitmap.ConvertToImage()
     width = wx_image.GetWidth()
     height = wx_image.GetHeight()
 
@@ -134,11 +137,11 @@ def image_remap_colormap(img_dc):
 # Image information
 
 @debug_fxn
-def get_image_info(img_dc):
+def get_image_info(image_dc):
     return_text = ""
 
     # convert image to PIL.Image
-    pil_image = wximagedc2pilimage(img_dc)
+    pil_image = wximagedc2pilimage(image_dc)
 
     # get band names
     band_names = pil_image.getbands()
