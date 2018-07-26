@@ -1502,16 +1502,31 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_imgautocontrast2(self, evt):
+        """Tools->Image Auto-Contrast 2 menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=2)
 
     @debug_fxn
     def on_imgautocontrast4(self, evt):
+        """Tools->Image Auto-Contrast 4 menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=4)
 
     @debug_fxn
     def on_imgautocontrast6(self, evt):
+        """Tools->Image Auto-Contrast 6 menu item
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
         # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=6)
 
