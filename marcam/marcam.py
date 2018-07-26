@@ -410,7 +410,7 @@ class ImageWindow(wx.Frame):
         super().__init__(None, **kwargs)
 
         # internal state
-        self.app_history = EditHistory()
+        self.win_history = EditHistory()
         self.content_saved = True
         self.img_path = None
         self.save_filepath = None
@@ -568,8 +568,8 @@ class ImageWindow(wx.Frame):
 
         # register Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
-        self.app_history.register_undo_menu_item(undoitem)
-        self.app_history.register_redo_menu_item(redoitem)
+        self.win_history.register_undo_menu_item(undoitem)
+        self.win_history.register_redo_menu_item(redoitem)
 
         # For marks display, find text width of "9999", to leave enough
         #   padding to have space to contain "999"
@@ -677,7 +677,7 @@ class ImageWindow(wx.Frame):
         #   what we need
         self.img_panel = ImageScrolledCanvasMarks(
                 self,
-                self.app_history,
+                self.win_history,
                 self.marks_num_update,
                 # the following always makes scrollbars,
                 #   Mac: they appear tiny and all the way to 0 (not
@@ -876,7 +876,7 @@ class ImageWindow(wx.Frame):
         if key_code == 127 or key_code == 8:
             # Delete (127) or Backspace (8)
             deleted_marks = self.img_panel.delete_selected_marks()
-            self.app_history.new(['DELETE_MARK_LIST', deleted_marks])
+            self.win_history.new(['DELETE_MARK_LIST', deleted_marks])
 
         #if key_code == 307:
             # option key - initiate temporary zoom
@@ -1234,7 +1234,7 @@ class ImageWindow(wx.Frame):
         # if image is closed, do we still keep this frame open?
         if keep_win_open:
             # reset edit history
-            self.app_history.reset()
+            self.win_history.reset()
             # reset filepath for mcm file to nothing on close
             self.save_filepath = None
             # reset content_saved in case user didn't save
@@ -1347,7 +1347,7 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        action = self.app_history.undo()
+        action = self.win_history.undo()
         LOGGER.info("MSC:undo: %s", repr(action))
         if action[0] == 'MARK':
             self.img_panel.delete_mark(action[1], internal=False)
@@ -1358,7 +1358,7 @@ class ImageWindow(wx.Frame):
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel
-        if self.app_history.is_saved():
+        if self.win_history.is_saved():
             self.content_saved = True
             self.img_panel.save_notify()
 
@@ -1369,7 +1369,7 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        action = self.app_history.redo()
+        action = self.win_history.redo()
         LOGGER.info("MSC:redo: %s", repr(action))
         if action[0] == 'MARK':
             self.img_panel.mark_point(action[1])
@@ -1380,7 +1380,7 @@ class ImageWindow(wx.Frame):
 
         # if we now are in a point in history that was saved, notify self
         #   and img_panel
-        if self.app_history.is_saved():
+        if self.win_history.is_saved():
             self.content_saved = True
             self.img_panel.save_notify()
 
@@ -1445,7 +1445,7 @@ class ImageWindow(wx.Frame):
         # tell self and children data was saved now
         self.content_saved = True
         self.img_panel.save_notify()
-        self.app_history.save_notify()
+        self.win_history.save_notify()
 
     @debug_fxn
     def needs_save(self):

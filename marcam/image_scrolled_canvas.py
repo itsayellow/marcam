@@ -85,13 +85,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     big enough.  If image is smaller than window it is auto-centered
     """
     @debug_fxn
-    def __init__(self, parent, app_history, id_=wx.ID_ANY, *args, **kwargs):
+    def __init__(self, parent, win_history, id_=wx.ID_ANY, *args, **kwargs):
         super().__init__(parent, id_, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
         #   proper init)
         self.content_saved = True
-        self.history = app_history
+        self.history = win_history
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
         self.img_coord_xlation_x = None
@@ -1635,9 +1635,9 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     Also allow for setting, selecting, deleting, marks.
     """
     @debug_fxn
-    def __init__(self, parent, app_history, marks_num_update_fxn,
+    def __init__(self, parent, win_history, marks_num_update_fxn,
             id_=wx.ID_ANY, *args, **kwargs):
-        super().__init__(parent, app_history, id_, *args, **kwargs)
+        super().__init__(parent, win_history, id_, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
         #   proper init)
