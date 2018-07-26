@@ -1062,16 +1062,16 @@ VIRIDIS_DATA = [
         ]
 
 MAGMA_DATA_24BIT = [
-        [int(x[0]*255), int(x[1]*255), int(x[2]*255)] for x in MAGMA_DATA
+        [round(x[0]*255), round(x[1]*255), round(x[2]*255)] for x in MAGMA_DATA
         ]
 INFERNO_DATA_24BIT = [
-        [int(x[0]*255), int(x[1]*255), int(x[2]*255)] for x in INFERNO_DATA
+        [round(x[0]*255), round(x[1]*255), round(x[2]*255)] for x in INFERNO_DATA
         ]
 PLASMA_DATA_24BIT = [
-        [int(x[0]*255), int(x[1]*255), int(x[2]*255)] for x in PLASMA_DATA
+        [round(x[0]*255), round(x[1]*255), round(x[2]*255)] for x in PLASMA_DATA
         ]
 VIRIDIS_DATA_24BIT = [
-        [int(x[0]*255), int(x[1]*255), int(x[2]*255)] for x in VIRIDIS_DATA
+        [round(x[0]*255), round(x[1]*255), round(x[2]*255)] for x in VIRIDIS_DATA
         ]
 
 cmaps = {}
