@@ -544,14 +544,14 @@ class ImageWindow(wx.Frame):
         imgautocontrast0item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 0\tShift+Ctrl+J",
                 )
-        imgautocontrast5item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 5",
+        imgautocontrast2item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast 2",
                 )
-        imgautocontrast10item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 10",
+        imgautocontrast4item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast 4",
                 )
-        imgautocontrast15item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 15",
+        imgautocontrast6item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast 6",
                 )
         imgremapcoloritem = tools_menu.Append(wx.ID_ANY,
                 "Re&map Colors in Image (False Color)\tShift+Ctrl+M",
@@ -743,9 +743,9 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_imginfo, imginfoitem)
         self.Bind(wx.EVT_MENU, self.on_imginvert, imginvertitem)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast0, imgautocontrast0item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast5, imgautocontrast5item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast10, imgautocontrast10item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast15, imgautocontrast15item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast2, imgautocontrast2item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast4, imgautocontrast4item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast6, imgautocontrast6item)
         self.Bind(wx.EVT_MENU, self.on_imgremapcolor, imgremapcoloritem)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
@@ -1462,22 +1462,22 @@ class ImageWindow(wx.Frame):
         self.img_panel.image_autocontrast(cutoff=0)
 
     @debug_fxn
-    def on_imgautocontrast5(self, evt):
+    def on_imgautocontrast2(self, evt):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
-        self.img_panel.image_autocontrast(cutoff=5)
+        self.img_panel.image_autocontrast(cutoff=2)
 
     @debug_fxn
-    def on_imgautocontrast10(self, evt):
+    def on_imgautocontrast4(self, evt):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
-        self.img_panel.image_autocontrast(cutoff=10)
+        self.img_panel.image_autocontrast(cutoff=4)
 
     @debug_fxn
-    def on_imgautocontrast15(self, evt):
+    def on_imgautocontrast6(self, evt):
         # TODO: keep track of image operations to save to mcm image and
         #   allow undo
-        self.img_panel.image_autocontrast(cutoff=15)
+        self.img_panel.image_autocontrast(cutoff=6)
 
     @debug_fxn
     def save_notify(self):

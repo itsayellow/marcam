@@ -1627,7 +1627,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return None
 
         wx_image_orig = image_proc.memorydc2image(self.img_dc)
-        wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=0)
+        wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=cutoff)
         # TODO: specifying orig,new for every image xform is redundant
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
