@@ -74,7 +74,7 @@ Section "Marcam (required)"
   WriteUninstaller "uninstall.exe"
 
 ; APP_ASSOCIATE EXT FILECLASS DESCRIPTION ICON COMMANDTEXT COMMAND
-  !insertmacro APP_ASSOCIATE "mcm" "Marcam.ImageData" "Marcam Image Data" "$INSTDIR\Marcam.exe,0" "Open with Marcam" "$INSTDIR\Marcam.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "mcm" "Marcam.ImageData" "Marcam Image Data" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
 
 SectionEnd
 
