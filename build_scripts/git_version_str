@@ -36,20 +36,20 @@ if [[ ! -f "$file_to_mod" ]]; then
 fi
 
 # get v<last-tag>-<commits-since>-g<current-hash> from
-#githash=(`git describe --tags`)
+#githash=$(git describe --tags)
 
 # Get tag if current hash itself is tagged
-gittag=(`git tag --points-at HEAD`)
+gittag=$(git tag --points-at HEAD)
 if [[ -z "$gittag" ]]; then
     # Empty git tag means we are not on a release.  Provide short hash.
-    githash=(`git rev-parse --short HEAD`)
+    githash=$(git rev-parse --short HEAD)
 else
     # Non-empty git tag means we are on a release.  Indicate that
     githash="RELEASE $gittag"
 fi
 
 # if there are un-pushed modifications to rcs-controlled files, indicate
-if [[ ! -z `git status -s -uno` ]]; then
+if [[ ! -z $(git status -s -uno) ]]; then
     githash="$githash + mods"
 fi
 
@@ -72,9 +72,9 @@ fi
 
 # check if $file_to_mod got corrupted
 #attempt didn't work: https://github.com/rprichard/winpty/issues/100
-#syntax_error=(`winpty -Xallow-non-tty python3 -m py_compile marcam/const.py`)
+#syntax_error=$(winpty -Xallow-non-tty python3 -m py_compile marcam/const.py)
 # TODO: the following line causes: "stdout is not a tty" on Windows
-syntax_error=(`python3 -m py_compile "$file_to_mod"`)
+syntax_error=$(python3 -m py_compile "$file_to_mod")
 if [ ! -z "$syntax_error" ]; then
     echo "gen_app corrupted $file_to_mod"
     exit 1

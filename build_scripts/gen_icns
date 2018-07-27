@@ -51,7 +51,7 @@ fi
 mytempdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX")
 
 srcfile=$1
-srcfile_info=(`gm identify $1`)
+srcfile_info=$(gm identify $1)
 srcfile_size=${srcfile_info[2]}
 srcfile_base=${srcfile##*/}
 iconset_dir=$mytempdir/${srcfile_base%.*}.iconset
