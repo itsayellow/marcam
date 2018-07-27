@@ -14,6 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# simple usage info
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <sourcefile>.ico [outputdir]"
+    echo ""
+    echo "  Convert <sourcefile>.ico to directory of PNG images."
+    echo "  If argument <outputdir> is present, use as output dir."
+    echo "  if argument <outputdir> is not present, output to"
+    echo "  dir: <sourcefile>.dir"
+    exit
+fi
+
 input_ico=$1
 if [[ -z "$2" ]]; then
     output_dir="${1%.ico}"
