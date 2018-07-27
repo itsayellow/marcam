@@ -37,9 +37,12 @@ mytempdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX")
 echo $mytempdir
 
 # get just filenames with no dirs preceding
-baselayer_icns_base=${baselayer_icns##*/}
-upperlayer_icns_base=${upperlayer_icns##*/}
-output_icns_base=${output_icns##*/}
+baselayer_icns_base=`basename "${baselayer_icns}"`
+upperlayer_icns_base=`basename "${upperlayer_icns}"`
+output_icns_base=`basename "${output_icns}"`
+#baselayer_icns_base=${baselayer_icns##*/}
+#upperlayer_icns_base=${upperlayer_icns##*/}
+#output_icns_base=${output_icns##*/}
 
 # get version of filenames with .iconset suffix instead of .icns
 baselayer_iconset=$mytempdir/${baselayer_icns_base%.*}.iconset
