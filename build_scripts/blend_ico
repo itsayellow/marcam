@@ -27,6 +27,8 @@ fi
 
 # get directory of this script
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+# add script directory to path so we can call other scripts in this dir
+PATH=$PATH:$script_dir
 
 baselayer_ico=$1
 upperlayer_ico=$2
@@ -39,7 +41,8 @@ echo "Output:      $output_ico"
 # create safe temp dir
 mytempdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX")
 
-echo $mytempdir
+# DEBUG
+#echo $mytempdir
 
 # get just filenames with no dirs preceding
 baselayer_ico_base="$(basename "${baselayer_ico}")"
@@ -51,25 +54,27 @@ baselayer_dir="$mytempdir/${baselayer_ico_base%.*}.dir"
 upperlayer_dir="$mytempdir/${upperlayer_ico_base%.*}.dir"
 output_dir="$mytempdir/${output_ico_base%.*}.dir"
 
-echo $baselayer_dir
-echo $upperlayer_dir
-echo $output_dir
+# DEBUG
+#echo $baselayer_dir
+#echo $upperlayer_dir
+#echo $output_dir
 
 # create image dirs in temp dir, and make empty dir for output image dir
-$script_dir/ico2dir "$baselayer_ico" "$baselayer_dir"
-$script_dir/ico2dir "$upperlayer_ico" "$upperlayer_dir"
+ico2dir "$baselayer_ico" "$baselayer_dir"
+ico2dir "$upperlayer_ico" "$upperlayer_dir"
 mkdir "$output_dir"
 
 # composite every matching png file in baselayer and upper layer and put into
 #   output_dir dir
+echo "Blending component images:"
 for this_image_path in $baselayer_dir/*; do
     this_image=$(basename "${this_image_path}")
-    echo $this_image
+    echo "    $this_image"
     gm composite $upperlayer_dir/$this_image $baselayer_dir/$this_image $output_dir/$this_image
 done
 
 # write out final ico file
-$script_dir/gen_ico $output_dir $output_ico 
+gen_ico $output_dir $output_ico
 
 # remove tempdir
 rm -rf $mytempdir
