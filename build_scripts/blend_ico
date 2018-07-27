@@ -42,9 +42,9 @@ mytempdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX")
 echo $mytempdir
 
 # get just filenames with no dirs preceding
-baselayer_ico_base=$(basename "${baselayer_ico}")
-upperlayer_ico_base=$(basename "${upperlayer_ico}")
-output_ico_base=$(basename "${output_ico}")
+baselayer_ico_base="$(basename "${baselayer_ico}")"
+upperlayer_ico_base="$(basename "${upperlayer_ico}")"
+output_ico_base="$(basename "${output_ico}")"
 
 # get version of filenames with .dir suffix instead of .ico
 baselayer_dir="$mytempdir/${baselayer_ico_base%.*}.dir"
