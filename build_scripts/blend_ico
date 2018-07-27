@@ -25,6 +25,9 @@ if [ "$#" -lt 3 ]; then
     exit
 fi
 
+# get directory of this script
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 baselayer_ico=$1
 upperlayer_ico=$2
 output_ico=$3
@@ -53,8 +56,8 @@ echo $upperlayer_dir
 echo $output_dir
 
 # create image dirs in temp dir, and make empty dir for output image dir
-ico2dir "$baselayer_ico" "$baselayer_dir"
-ico2dir "$upperlayer_ico" "$upperlayer_dir"
+$script_dir/ico2dir "$baselayer_ico" "$baselayer_dir"
+$script_dir/ico2dir "$upperlayer_ico" "$upperlayer_dir"
 mkdir "$output_dir"
 
 # composite every matching png file in baselayer and upper layer and put into
@@ -66,7 +69,7 @@ for this_image_path in $baselayer_dir/*; do
 done
 
 # write out final ico file
-iconutil -c ico -o $output_ico $output_dir
+$script_dir/gen_ico $output_dir $output_ico 
 
 # remove tempdir
 rm -rf $mytempdir
