@@ -1,3 +1,3 @@
 ## Screenshots
 
-![Mac Screenshot][github.io/marcam_main_mac.png]
+![Mac Screenshot](/github.io/marcam_main_mac.png)
