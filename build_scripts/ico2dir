@@ -26,9 +26,9 @@ convert "${input_ico}" "${output_dir}/icon.png"
 
 for img_file in ${output_dir}/*
 do
-    img_file_dir=`dirname "${img_file}"`
-    img_res_id=`identify "${img_file}" | perl -lpe 's/^.+PNG\s(\S+).+$/\1/'`
-    img_file_new="${img_file_dir}/icon${img_res_id}.png"
+    img_file_dir=$(dirname "${img_file}")
+    img_res_id=$(identify "${img_file}" | perl -lpe 's/^.+PNG\s(\S+).+$/\1/')
+    img_file_new="${img_file_dir}/icon_${img_res_id}.png"
     mv ${img_file} ${img_file_new}
 done
 
