@@ -17,11 +17,11 @@
 # For creation of Mac icon from source image file
 # Source image file should be 1024x1024 or larger, preferably PNG with
 #   alpha channel.
-# from starting image file, create icns file
+# from starting image file, create ico file
 #
-# usage: gen_icns <src_image_file>
+# usage: gen_ico <src_image_file>
 #
-# requires graphicsmagick
+# requires imagemagick
 
 # first test if uname is present
 if hash uname 2>/dev/null ; then
@@ -33,7 +33,7 @@ else
 fi
 # make sure we're on Mac
 if [ "$ostype" != "Darwin" ] ; then
-    echo "ERROR: OS is not macOS.  gen_app only applicable to macOS"
+    echo "ERROR: OS is not macOS.  $0 only applicable to macOS"
     echo "Aborting."
     exit 1
 fi
