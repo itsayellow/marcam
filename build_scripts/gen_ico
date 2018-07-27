@@ -14,12 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# For creation of Mac icon from source image file
-# Source image file should be 1024x1024 or larger, preferably PNG with
-#   alpha channel.
-# from starting image file, create ico file
+# For creation of Windows icon from source image dir
+# Dir should contain resolutions e.g.: 
+#   icon256x256.png
+#   icon64x64.png
+#   icon48x48.png
+#   icon40x40.png
+#   icon32x32.png
+#   icon24x24.png
+#   icon20x20.png
+#   icon16x16.png
 #
-# usage: gen_ico <src_image_file>
+# usage: gen_ico <src_image_dir> <dest_ico_file>
 #
 # requires imagemagick
 
