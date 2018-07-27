@@ -27,6 +27,7 @@ block_cipher = None
 # datas relative to dir of this file (./build_scripts)
 marcam_datas = [
         ('../marcam/media/marcam.ico', 'media'),
+        ('../marcam/media/marcam_doc.ico', 'media'),
         ('../marcam/media/marcam_help.html', 'media'),
         ('../marcam/media/help_markmode_off.png', 'media'),
         ('../marcam/media/help_selectmode_off.png', 'media'),
@@ -81,4 +82,4 @@ coll = COLLECT(
         name='marcam'
         )
 
-# vim: filetype=python
+# vim: filetype=python nowrap
