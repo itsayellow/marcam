@@ -55,4 +55,5 @@ fi
 srcdir=$1
 destfile=$2
 
-convert $srcdir/icon_256x256.png $srcdir/icon_128x128.png $srcdir/icon_32x32\@2x.png $srcdir/icon_32x32.png $srcdir/icon_16x16.png $destfile
+#convert $srcdir/icon_256x256.png $srcdir/icon_128x128.png $srcdir/icon_32x32\@2x.png $srcdir/icon_32x32.png $srcdir/icon_16x16.png $destfile
+convert $srcdir/* $destfile
