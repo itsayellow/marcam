@@ -1,18 +1,45 @@
 Creating a Document Icon on Mac
 ===============================
-Mac Location of Blank Document Icon:
+
+Mac Location of Blank Document Icon
+-----------------------------------
+
 /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericDocumentIcon.icns
 
-marcam_icon55_layer.icns is the marcam main application icon, resized to 55%
-of its full size, and lowered.
+
+Create Marcam Upper Layer Icon
+------------------------------
+
+iconutil -c iconset GenericDocumentIcon.icns
+Open GenericDocumentIcon.iconset/icon_512x512@2x.png in photoshop
+on a new layer, position a 55% sized version of app.icon on top
+    position icon so distance to sides is the same as distance to bottom
+    of GenericDocumentIcon img
+In this new icon layer, Select-All, and Copy
+
+In new blank image with transparent bg (1024x1024)
+    Paste Special->Paste in place
+Export image (just the icon with placement) as its own
+    png file, marcam_icon55_layer.png
+
+gen_icns marcam_icon55_layer.png
+    (to make marcam_icon55_layer.icns)
 
 Make sure that marcam_icon55_layer.icns has all of the same size constituent
 images as GenericDocumentIcon.icns 
 
-build_scripts/blend_icns GenericDocumentIcon.icns marcam_icon55_layer.icns marcam_doc.icns
+
+Blend Generic Doc and Marcam Layers into New Icon
+-------------------------------------------------
+
+blend_icns GenericDocumentIcon.icns marcam_icon55_layer.icns marcam_doc.icns
+
 
 Creating a Drive Icon on Mac
 ============================
-Mac Location of Blank Removable Drive Icon:
+
+Mac Location of Blank Removable Drive Icon
+------------------------------------------
+
 /System/Library/Extensions/IOStorageFamily.kext/Contents/Resources/Removable.icns
 
