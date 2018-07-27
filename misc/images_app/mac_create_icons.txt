@@ -1,3 +1,8 @@
+Creating a Document Icon on Mac
+===============================
+Mac Location of Blank Document Icon:
+/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericDocumentIcon.icns
+
 marcam_icon55_layer.icns is the marcam main application icon, resized to 55%
 of its full size, and lowered.
 
@@ -5,3 +10,9 @@ Make sure that marcam_icon55_layer.icns has all of the same size constituent
 images as GenericDocumentIcon.icns 
 
 build_scripts/blend_icns GenericDocumentIcon.icns marcam_icon55_layer.icns marcam_doc.icns
+
+Creating a Drive Icon on Mac
+============================
+Mac Location of Blank Removable Drive Icon:
+/System/Library/Extensions/IOStorageFamily.kext/Contents/Resources/Removable.icns
+
