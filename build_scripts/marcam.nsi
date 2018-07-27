@@ -68,7 +68,7 @@ Section "Marcam (required)"
 
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "DisplayName" "Marcam"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "UninstallString" '"$INSTDIR\uninstall.exe" /S'
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
