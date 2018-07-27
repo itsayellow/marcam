@@ -1,0 +1,7 @@
+marcam_icon55_layer.icns is the marcam main application icon, resized to 55%
+of its full size, and lowered.
+
+Make sure that marcam_icon55_layer.icns has all of the same size constituent
+images as GenericDocumentIcon.icns 
+
+build_scripts/blend_icns GenericDocumentIcon.icns marcam_icon55_layer.icns marcam_doc.icns
