@@ -1,7 +1,46 @@
-marcam_icon55_layer.icns is the marcam main application icon, resized to 55%
+Creating a Document Icon on Windows
+===================================
+
+Get Windows Blank Document Icon
+-------------------------------
+
+C:\WINDOWS\system32\shell32.dll,1
+
+Use NirSoft IconsExtract to extract Windows generic document icon from
+shell32.dll,1
+Save this to win_generic_file.ico
+
+
+Create Marcam Upper Layer Icon
+------------------------------
+
+Can just convert marcam_icon55_layer.icns to marcam_icon55_layer.ico
+
+OR:
+ico2dir win_generic_file.ico
+
+Open win_generic_file.dir/icon_256x256.png in photoshop
+on a new layer, position a 55% sized version of app.icon on top
+    position icon so distance to sides is the same as distance to bottom
+    of win_generic_file img
+In this new icon layer, Select-All, and Copy
+
+In new blank image with transparent bg (1024x1024)
+    Paste Special->Paste in place
+Export image (just the icon with placement) as its own
+    png file, marcam_icon55_layer.png
+
+gen_ico marcam_icon55_layer.png
+    (to make marcam_icon55_layer.ico)
+
+marcam_icon55_layer.ico is the marcam main application icon, resized to 55%
 of its full size, and lowered.
 
 Make sure that marcam_icon55_layer.ico has all of the same size constituent
 images as win_generic_file.ico
+
+
+Blend Generic Doc and Marcam Layers into New Icon
+-------------------------------------------------
 
 build_scripts/blend_ico win_generic_file.ico marcam_icon55_layer.ico marcam_doc.ico
