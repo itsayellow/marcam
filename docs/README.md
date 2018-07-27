@@ -8,4 +8,4 @@
 ### Windows
 
 ## Download
-![Releases](https://github.com/itsayellow/marcam/releases)
+[Releases](https://github.com/itsayellow/marcam/releases)
