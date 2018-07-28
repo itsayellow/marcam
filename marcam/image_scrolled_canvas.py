@@ -948,7 +948,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   to try and avoid flicker in systems without double-buffered DC.
         #   (also style=wx.BUFFER_VIRTUAL_AREA ?)
         # TODO: still helpful? on which platforms?
-        paint_dc = wx.AutoBufferedPaintDC(self)
+        #paint_dc = wx.AutoBufferedPaintDC(self)
+        # TODO: currently (7/27/2018) using AutoBufferedPaintDC makes
+        #   our drag rubberband box fail.
+        #   Possibly related to wx.GraphicsContext ??
+        paint_dc = wx.PaintDC(self)
         # for scrolled window
         self.DoPrepareDC(paint_dc)
 
