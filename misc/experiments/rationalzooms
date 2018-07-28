@@ -13,6 +13,9 @@ def closest_to(val, ok_list):
     min_error = min(error)
     return ok_list[error.index(min_error)]
 
+def closest_to_list(want_list, ok_list):
+    return [closest_to(x, ok_list) for x in want_list]
+
 def compute_rational_zooms(max_numdenom=64, mag_step=1.1, mag_len_half=34,
         verbose = False):
 
@@ -52,7 +55,7 @@ def compute_rational_zooms(max_numdenom=64, mag_step=1.1, mag_len_half=34,
         print_floats(zoom_list)
 
     # ----------------------------------------
-    rational_zoom_list = [closest_to(x, ratios) for x in zoom_list]
+    rational_zoom_list = closest_to_list(zoom_list, ok_list=ratios)
     if verbose:
         print("\nClosest rational zoom ratios")
         print_floats(rational_zoom_list)
@@ -103,8 +106,20 @@ def best_mag_step(max_numdenom=32, mag_len_half=34):
         possible_mag_steps.pop(min_error_i)
         all_zoom_errors.pop(min_error_i)
 
+#   for max_numdenom in range(24,65):
+#       best_mag_step(
+#               max_numdenom=max_numdenom,
+#               mag_len_half=34
+#               )
+
+print("")
+print("mag_step=1.1")
+print("mag_len_half=34")
 for max_numdenom in range(24,65):
-    best_mag_step(
+    max_perc_err = compute_rational_zooms(
             max_numdenom=max_numdenom,
-            mag_len_half=34
+            mag_step=1.1,
+            mag_len_half=34,
+            verbose=False
             )
+    print("max_numdenom = %d, max_perc_err = %.2f%%"%(max_numdenom, max_perc_err))
