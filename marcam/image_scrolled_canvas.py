@@ -1866,7 +1866,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
                 self.rubberband_draw_rect = draw_rect
                 last_refresh_rect = self.rubberband_refresh_rect
-                self.rubberband_refresh_rect = refresh_rect
+                # get a COPY of refresh_rect, so self.rubberband_refresh_rect
+                #   isn't still pointing to refresh_rect object, and
+                #   isn't affected with Union below
+                self.rubberband_refresh_rect = wx.Rect(refresh_rect.GetIM())
 
                 # union of this and last refresh_rect
                 if last_refresh_rect is not None:
