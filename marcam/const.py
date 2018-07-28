@@ -62,7 +62,8 @@ else:
     ZOOMINBMP_FNAME = os.path.join(ICON_DIR, 'zoomin32.png')
     ZOOMFITBMP_FNAME = os.path.join(ICON_DIR, 'zoomfit32.png')
 
-# what is one step of zoom? (1.2 might be better)
+# what is one step of zoom? (1.05 too slow, 1.1 looks smooth, 1.15 a little jerky, 1.2 may
+#   be too much?)
 MAG_STEP = 1.1
 # how many zoom steps from minimum to maximum zoom, centered on zoom 100%
 TOTAL_MAG_STEPS = 69
