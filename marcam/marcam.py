@@ -436,10 +436,7 @@ class ImageWindow(wx.Frame):
 
         self.init_ui()
         if srcfile is not None:
-            if srcfile.endswith(".mcm"):
-                self.load_mcmfile_from_path(srcfile)
-            else:
-                self.load_image_from_file(srcfile)
+            self.open_image(srcfile)
 
     @debug_fxn
     def init_ui(self):
