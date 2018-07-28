@@ -948,11 +948,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   to try and avoid flicker in systems without double-buffered DC.
         #   (also style=wx.BUFFER_VIRTUAL_AREA ?)
         # TODO: still helpful? on which platforms?
-        #paint_dc = wx.AutoBufferedPaintDC(self)
         # TODO: currently (7/27/2018) using AutoBufferedPaintDC makes
         #   our drag rubberband box fail.
         #   Possibly related to wx.GraphicsContext ??
-        paint_dc = wx.PaintDC(self)
+        #paint_dc = wx.AutoBufferedPaintDC(self)
+
+        # Since AutoBufferedPaintDC isn't working for us, do it manually
+        if const.PLATFORM == 'mac':
+            paint_dc = wx.PaintDC(self)
+        else:
+            paint_dc = wx.BufferedPaintDC(self)
+
         # for scrolled window
         self.DoPrepareDC(paint_dc)
 
@@ -1118,19 +1124,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
 
     @debug_fxn
-    def paint_rect(self, dc, rect):
+    def paint_rect(self, paintdc, rect):
         """Given a rect needing a refresh in window PaintDC, Blit the image
         to fill that rect.
 
         Args:
-            dc (wx.PaintDC): Device Context to Blit into
+            paintdc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
         # if no image, fill area with background color
         if self.has_no_image():
-            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-            dc.SetBrush(dc.GetBackground())
-            dc.DrawRectangle(rect)
+            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            paintdc.SetBrush(paintdc.GetBackground())
+            paintdc.DrawRectangle(rect)
             # DONE
             return
 
@@ -1151,11 +1157,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 dest_pos, dest_size,
                 )
         if rects_to_draw:
-            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
             # debug pen:
-            #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
-            dc.SetBrush(dc.GetBackground())
-            dc.DrawRectangleList(rects_to_draw)
+            #paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+            paintdc.SetBrush(paintdc.GetBackground())
+            paintdc.DrawRectangleList(rects_to_draw)
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -1165,8 +1171,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   employing the clipping mask behavior of PaintDC to make sure we
         #   only display in the area of the window
 
-        # copy region from self.img_dc into dc with possible stretching
-        dc.StretchBlit(
+        # copy region from self.img_dc into paintdc with possible stretching
+        paintdc.StretchBlit(
                 dest_pos.x, dest_pos.y,
                 dest_size.x, dest_size.y,
                 img_dc_src,
@@ -1175,7 +1181,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
 
         if self.is_dragging:
-            self.draw_rubberband_box(dc)
+            self.draw_rubberband_box(paintdc)
 
     @debug_fxn
     def draw_rubberband_box(self, dc):
@@ -1184,6 +1190,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             dc (wx.DC): typically wx.PaintDC, DC on which to draw drag rect
         """
+        # NOTE: GraphicsContext currently (7/27/2018) doesn't seem to work with
+        #   AutoBufferedPaintDC
         graphics_dc = wx.GraphicsContext.Create(dc)
 
         if graphics_dc:
@@ -2225,18 +2233,18 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         self.Update()
 
     @debug_fxn
-    def paint_rect(self, dc, rect):
+    def paint_rect(self, paintdc, rect):
         """Given a rect needing a refresh in window PaintDC, Blit the image
         to fill that rect.
 
         Args:
-            dc (wx.PaintDC): Device Context to Blit into
+            paintdc (wx.PaintDC): Device Context to Blit into
             rect (tuple): coordinates to refresh (window coordinates)
         """
         if self.has_no_image():
-            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-            dc.SetBrush(dc.GetBackground())
-            dc.DrawRectangle(rect)
+            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            paintdc.SetBrush(paintdc.GetBackground())
+            paintdc.DrawRectangle(rect)
             # DONE
             return
 
@@ -2259,11 +2267,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 dest_size,
                 )
         if rects_to_draw:
-            dc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
             # debug pen:
-            #dc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
-            dc.SetBrush(dc.GetBackground())
-            dc.DrawRectangleList(rects_to_draw)
+            #paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+            paintdc.SetBrush(paintdc.GetBackground())
+            paintdc.DrawRectangleList(rects_to_draw)
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -2273,8 +2281,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         #   employing the clipping mask behavior of PaintDC to make sure we
         #   only display in the area of the window
 
-        # copy region from self.img_dc into dc with possible stretching
-        dc.StretchBlit(
+        # copy region from self.img_dc into paintdc with possible stretching
+        paintdc.StretchBlit(
                 dest_pos.x, dest_pos.y,
                 dest_size.x, dest_size.y,
                 img_dc_src,
@@ -2288,13 +2296,13 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         #   portion of mark even if center of mark is not in region
         sq_size = const.CROSS_REFRESH_SQ_SIZE
         self.draw_marks(
-                dc,
+                paintdc,
                 (src_pos_x - sq_size/2)*scale_dc, (src_pos_y - sq_size/2)*scale_dc,
                 (src_size_x + sq_size)*scale_dc, (src_size_y + sq_size)*scale_dc)
 
         # draw rubber-band box AFTER marks, so it is drawn on top of them
         if self.rubberband_draw_rect is not None:
-            self.draw_rubberband_box(dc)
+            self.draw_rubberband_box(paintdc)
 
     @debug_fxn
     def draw_marks(self, dc, src_pos_x, src_pos_y, src_size_x, src_size_y):
