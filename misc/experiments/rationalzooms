@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+
+def print_floats(float_list, floats_per_line=10):
+    for i in range(0,len(float_list),floats_per_line):
+        for j in range(floats_per_line):
+            if i+j >= len(float_list):
+                break
+            print("% 2.3f "%float_list[i+j], end="")
+        print("")
+
+def closest_to(val, ok_list):
+    error = [abs(val-x) for x in ok_list]
+    min_error = min(error)
+    return ok_list[error.index(min_error)]
+
+def compute_rational_zooms(max_numdenom=64, mag_step=1.1, mag_len_half=34,
+        verbose = False):
+
+    # Print Constants
+    if verbose:
+        print("ratios a/b, 0 > a,b > %d"%(max_numdenom+1))
+        print("mag_step = %f"%mag_step)
+        print("mag_len_half = %f"%mag_len_half)
+
+    # ----------------------------------------
+    ratios = []
+
+    for a in range(1,max_numdenom+1):
+        for b in range(1,max_numdenom+1):
+            ratios.append(a/b)
+
+    # get unique values only in list
+    ratios=list(set(ratios))
+    ratios.sort()
+
+    if verbose:
+        print("Rational ratios")
+        print_floats(ratios)
+
+    # ----------------------------------------
+    # replicate ImageSrolledWindow zooms
+    zoom_list = [
+            mag_step**x
+            for x in range(-mag_len_half, mag_len_half+1)
+            ]
+    # set this to 1.0 by hand to make sure no floating-point shenanigans
+    # might make it not exactly 1.0
+    zoom_list[mag_len_half] = 1.0
+
+    if verbose:
+        print("\nMarcam current zoom ratios")
+        print_floats(zoom_list)
+
+    # ----------------------------------------
+    rational_zoom_list = [closest_to(x, ratios) for x in zoom_list]
+    if verbose:
+        print("\nClosest rational zoom ratios")
+        print_floats(rational_zoom_list)
+
+    # ----------------------------------------
+    zoom_errors_sub = [
+            abs(rational_zoom_list[i]-zoom_list[i]) for i in range(len(zoom_list))
+            ]
+    if verbose:
+        print("\nClosest rational zoom ratio subtractive error")
+        print_floats(zoom_errors_sub)
+
+    # ----------------------------------------
+    zoom_errors_perc = [
+            zoom_errors_sub[i]/zoom_list[i]*100 for i in range(len(zoom_list))
+            ]
+    if verbose:
+        print("\nClosest rational zoom ratio percentage error")
+        print_floats(zoom_errors_perc)
+        print("\nMax. zoom ratio perc. error:%.2f%%"%(max(zoom_errors_perc)))
+
+    return max(zoom_errors_perc)
+
+
+# ----------------------------------------
+def best_mag_step(max_numdenom=32, mag_len_half=34):
+    print("")
+    print("max_numdenom = %d"%max_numdenom)
+    print("mag_len_half = %d"%mag_len_half)
+
+    possible_mag_steps = [x/1000 for x in range(1050,1199)]
+    #print(possible_mag_steps)
+    all_zoom_errors = []
+    for mag_step in possible_mag_steps:
+        zoom_error_perc = compute_rational_zooms(
+                max_numdenom=max_numdenom,
+                mag_step=mag_step,
+                mag_len_half=mag_len_half
+                )
+        all_zoom_errors.append(zoom_error_perc)
+
+    print("Best mag_steps:")
+    for i in range(20):
+        min_error = min(all_zoom_errors)
+        min_error_i = all_zoom_errors.index(min_error)
+        mag_step = possible_mag_steps[min_error_i]
+        print("  mag_step = %.3f, error = %.2f%%"%(mag_step, min_error))
+        possible_mag_steps.pop(min_error_i)
+        all_zoom_errors.pop(min_error_i)
+
+for max_numdenom in range(24,65):
+    best_mag_step(
+            max_numdenom=max_numdenom,
+            mag_len_half=34
+            )
