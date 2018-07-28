@@ -40,13 +40,12 @@ import numpy as np
 import biorad1sc_reader
 from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
+import image_proc
 from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
 
 # DEBUG sets global debug message verbosity
-
-# NOTE: wx.DC.GetAsBitmap() to grab a DC as a bitmap
 
 # which modules are we logging
 LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
@@ -1593,26 +1592,40 @@ class ImageWindow(wx.Frame):
         Args:
             imdata_path (str): full path to filename to save to
         """
-        # make temp file - must make actual file for use with zipfile
+        # make temp file for image file
+        #   must make actual file for use with zipfile
         (temp_img_fd, temp_img_name) = tempfile.mkstemp()
         temp_img = os.fdopen(temp_img_fd, mode='wb')
+
         # copy source image into temp file
-        if isinstance(self.img_path, str):
-            # pathname
-            with open(self.img_path, 'rb') as img_fh:
-                temp_img.write(img_fh.read())
-        else:
-            # zipfile mcm file
-            with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
-                temp_img.write(container_fh.open(self.img_path[1]).read())
+        # self.img_path: path to image we originally loaded
+        # self.save_filepath: path to mcm file we've saved
+        # self.img_panel.img_dc: max-res image data MemoryDC
+
+        # TODO: need to know if loading and saving and converting
+        #   to MemoryDC and back is lossless
+        current_img = image_proc.memorydc2image(self.img_panel.img_dc)
+        current_img.SaveFile(temp_img, wx.BITMAP_TYPE_PNG)
         temp_img.close()
 
-        # get archive name for image in zip
-        if isinstance(self.img_path, str):
-            (_, imgfile_ext) = os.path.splitext(self.img_path)
-            img_arcname = "image" + imgfile_ext
-        else:
-            img_arcname = self.img_path[1]
+        #if isinstance(self.img_path, str):
+        #    # pathname for plain image file
+        #    with open(self.img_path, 'rb') as img_fh:
+        #        temp_img.write(img_fh.read())
+        #else:
+        #    # mcm zipfile component image file
+        #    with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
+        #        temp_img.write(container_fh.open(self.img_path[1]).read())
+        #temp_img.close()
+
+        ## get archive name for image in zip
+        #if isinstance(self.img_path, str):
+        #    (_, imgfile_ext) = os.path.splitext(self.img_path)
+        #    img_arcname = "image" + imgfile_ext
+        #else:
+        #    img_arcname = self.img_path[1]
+
+        img_arcname = "image.png"
 
         # write new save file
         try:
