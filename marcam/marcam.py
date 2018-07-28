@@ -45,7 +45,8 @@ from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
 
-# DEBUG sets global debug message verbosity
+# DEBUG defaults to False.  Is set to True if debug switch found
+DEBUG = False
 
 # which modules are we logging
 LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
@@ -65,7 +66,7 @@ class MarcamFormatter(logging.Formatter):
         of a log message
 
         Args:
-            record (str): log message
+            record (Logger.LogRecord): log message
 
         Returns:
             out_string: processed log message
@@ -450,48 +451,48 @@ class ImageWindow(wx.Frame):
         # File
         open_recent_menu = wx.Menu()
         file_menu = wx.Menu()
-        oitem = file_menu.Append(wx.ID_OPEN,
+        file_open_item = file_menu.Append(wx.ID_OPEN,
                 'Open Image...\tCtrl+O',
                 'Open image file'
                 )
-        orecentitem = file_menu.AppendSubMenu(open_recent_menu,
+        file_openrecent_item = file_menu.AppendSubMenu(open_recent_menu,
                 'Open Recent',
                 'Open recent .mcm files'
                 )
         file_menu.Append(wx.ID_SEPARATOR)
-        citem = file_menu.Append(wx.ID_CLOSE,
+        file_close_item = file_menu.Append(wx.ID_CLOSE,
                 'Close\tCtrl+W',
                 'Close image'
                 )
-        sitem = file_menu.Append(wx.ID_SAVE,
+        file_save_item = file_menu.Append(wx.ID_SAVE,
                 'Save Image Data\tCtrl+S',
                 'Save .mcm image and data file'
                 )
-        saitem = file_menu.Append(wx.ID_SAVEAS,
+        file_saveas_item = file_menu.Append(wx.ID_SAVEAS,
                 'Save Image Data As...\tShift+Ctrl+S',
                 'Save .mcm image and data file'
                 )
-        eiitem = file_menu.Append(wx.ID_ANY,
+        file_exportimage_item = file_menu.Append(wx.ID_ANY,
                 'Export Image...\tCtrl+E',
                 'Export image with marks to image file'
                 )
-        quititem = file_menu.Append(wx.ID_EXIT,
+        file_quit_item = file_menu.Append(wx.ID_EXIT,
                 'Quit\tCtrl+Q',
                 'Quit application'
                 )
         menubar.Append(file_menu, '&File')
         # Edit
         edit_menu = wx.Menu()
-        undoitem = edit_menu.Append(wx.ID_UNDO,
+        edit_undo_item = edit_menu.Append(wx.ID_UNDO,
                 'Undo\tCtrl+Z',
                 'Undo last action'
                 )
-        redoitem = edit_menu.Append(wx.ID_REDO,
+        edit_redo_item = edit_menu.Append(wx.ID_REDO,
                 'Redo\tShift+Ctrl+Z',
                 'Redo last undone action'
                 )
         edit_menu.Append(wx.ID_SEPARATOR)
-        copyitem = edit_menu.Append(wx.ID_COPY,
+        edit_copy_item = edit_menu.Append(wx.ID_COPY,
                 'Copy Marks Total\tCtrl+C',
                 'Copy total marks number to Clipboard.'
                 )
@@ -502,15 +503,15 @@ class ImageWindow(wx.Frame):
         menubar.Append(edit_menu, '&Edit')
         # View
         view_menu = wx.Menu()
-        zoomoutitem = view_menu.Append(wx.ID_ZOOM_OUT,
+        zoom_zoomout_item = view_menu.Append(wx.ID_ZOOM_OUT,
                 'Zoom Out\t[',
                 'Decrease image magnification.'
                 )
-        zoominitem = view_menu.Append(wx.ID_ZOOM_IN,
+        zoom_zoomin_item = view_menu.Append(wx.ID_ZOOM_IN,
                 'Zoom In\t]',
                 'Increase image magnification.'
                 )
-        zoomfititem = view_menu.Append(wx.ID_ZOOM_FIT,
+        zoom_zoomfit_item = view_menu.Append(wx.ID_ZOOM_FIT,
                 'Zoom to Fit\tCtrl+0',
                 'Zoom image to fill window.'
                 )
@@ -531,43 +532,50 @@ class ImageWindow(wx.Frame):
         self.select_menu_item.Enable(False)
         self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
         tools_menu.Append(wx.ID_SEPARATOR)
-        imginfoitem = tools_menu.Append(wx.ID_ANY,
+        tools_imginfo_item = tools_menu.Append(wx.ID_ANY,
                 "&Image Info\tShift+Ctrl+I",
                 )
-        imginvertitem = tools_menu.Append(wx.ID_ANY,
+        tools_imginvert_item = tools_menu.Append(wx.ID_ANY,
                 "I&nvert Image\tShift+Ctrl+N",
                 )
-        imgautocontrast0item = tools_menu.Append(wx.ID_ANY,
+        tools_imgautocontrast0_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 0\tShift+Ctrl+J",
                 )
-        imgautocontrast2item = tools_menu.Append(wx.ID_ANY,
+        tools_imgautocontrast2_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 2",
                 )
-        imgautocontrast4item = tools_menu.Append(wx.ID_ANY,
+        tools_imgautocontrast4_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 4",
                 )
-        imgautocontrast6item = tools_menu.Append(wx.ID_ANY,
+        tools_imgautocontrast6_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 6",
                 )
-        imgfalsecolorviridisitem = tools_menu.Append(wx.ID_ANY,
+        tools_imgfcolorviridis_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color (Viridis)\tShift+Ctrl+C",
                 )
-        imgfalsecolorplasmaitem = tools_menu.Append(wx.ID_ANY,
+        tools_imgfcolorplasma_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color (Plasma)",
                 )
-        imgfalsecolormagmaitem = tools_menu.Append(wx.ID_ANY,
+        tools_imgfcolormagma_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color (Magma)",
                 )
-        imgfalsecolorinfernoitem = tools_menu.Append(wx.ID_ANY,
+        tools_imgfcolorinferno_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color (Inferno)",
                 )
         menubar.Append(tools_menu, "&Tools")
+        # Debug (only if debug mode set)
+        if DEBUG:
+            debug_menu = wx.Menu()
+            debug_benchzoom_item = debug_menu.Append(wx.ID_ANY,
+                    "Benchmark Zoom",
+                    )
+            menubar.Append(debug_menu, "&Debug")
         # Help
         help_menu = wx.Menu()
-        aboutitem = help_menu.Append(wx.ID_ABOUT,
+        help_about_item = help_menu.Append(wx.ID_ABOUT,
                 "&About Marcam"
                 )
-        helpitem = help_menu.Append(wx.ID_HELP,
+        help_help_item = help_menu.Append(wx.ID_HELP,
                 "&Marcam Help"
                 )
         menubar.Append(help_menu,
@@ -582,8 +590,8 @@ class ImageWindow(wx.Frame):
 
         # register Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
-        self.win_history.register_undo_menu_item(undoitem)
-        self.win_history.register_redo_menu_item(redoitem)
+        self.win_history.register_undo_menu_item(edit_undo_item)
+        self.win_history.register_redo_menu_item(edit_redo_item)
 
         # For marks display, find text width of "9999", to leave enough
         #   padding to have space to contain "999"
@@ -723,41 +731,43 @@ class ImageWindow(wx.Frame):
 
         # setup event handlers for menus
         # File menu items
-        self.Bind(wx.EVT_MENU, self.on_open, oitem)
-        self.Bind(wx.EVT_MENU, self.on_close, citem)
-        self.Bind(wx.EVT_MENU, self.on_save, sitem)
-        self.Bind(wx.EVT_MENU, self.on_saveas, saitem)
-        self.Bind(wx.EVT_MENU, self.on_export_image, eiitem)
-        self.Bind(wx.EVT_MENU, self.on_quit, quititem)
+        self.Bind(wx.EVT_MENU, self.on_open, file_open_item)
+        self.Bind(wx.EVT_MENU, self.on_close, file_close_item)
+        self.Bind(wx.EVT_MENU, self.on_save, file_save_item)
+        self.Bind(wx.EVT_MENU, self.on_saveas, file_saveas_item)
+        self.Bind(wx.EVT_MENU, self.on_export_image, file_exportimage_item)
+        self.Bind(wx.EVT_MENU, self.on_quit, file_quit_item)
         # open recent handler
         self.Bind(wx.EVT_MENU_RANGE, self.on_open_recent,
                 id=wx.ID_FILE1, id2=wx.ID_FILE9
                 )
         # Edit menu items
-        self.Bind(wx.EVT_MENU, self.on_undo, undoitem)
-        self.Bind(wx.EVT_MENU, self.on_redo, redoitem)
-        self.Bind(wx.EVT_MENU, self.on_toclip, copyitem)
+        self.Bind(wx.EVT_MENU, self.on_undo, edit_undo_item)
+        self.Bind(wx.EVT_MENU, self.on_redo, edit_redo_item)
+        self.Bind(wx.EVT_MENU, self.on_toclip, edit_copy_item)
         self.Bind(wx.EVT_MENU, self.on_select_all, self.selallitem)
         # View menu items
-        self.Bind(wx.EVT_MENU, self.on_zoomout, zoomoutitem)
-        self.Bind(wx.EVT_MENU, self.on_zoomin, zoominitem)
-        self.Bind(wx.EVT_MENU, self.on_zoomfit, zoomfititem)
+        self.Bind(wx.EVT_MENU, self.on_zoomout, zoom_zoomout_item)
+        self.Bind(wx.EVT_MENU, self.on_zoomin, zoom_zoomin_item)
+        self.Bind(wx.EVT_MENU, self.on_zoomfit, zoom_zoomfit_item)
         # Tools menu items
         self.Bind(wx.EVT_MENU, self.on_selectmode, self.select_menu_item)
         self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
-        self.Bind(wx.EVT_MENU, self.on_imginfo, imginfoitem)
-        self.Bind(wx.EVT_MENU, self.on_imginvert, imginvertitem)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast0, imgautocontrast0item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast2, imgautocontrast2item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast4, imgautocontrast4item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast6, imgautocontrast6item)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorviridis, imgfalsecolorviridisitem)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorplasma, imgfalsecolorplasmaitem)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolormagma, imgfalsecolormagmaitem)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorinferno, imgfalsecolorinfernoitem)
+        self.Bind(wx.EVT_MENU, self.on_imginfo, tools_imginfo_item)
+        self.Bind(wx.EVT_MENU, self.on_imginvert, tools_imginvert_item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast0, tools_imgautocontrast0_item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast2, tools_imgautocontrast2_item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast4, tools_imgautocontrast4_item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrast6, tools_imgautocontrast6_item)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorviridis, tools_imgfcolorviridis_item)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorplasma, tools_imgfcolorplasma_item)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolormagma, tools_imgfcolormagma_item)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorinferno, tools_imgfcolorinferno_item)
+        # Debug menu items
+        self.Bind(wx.EVT_MENU, self.on_debug_benchzoom, debug_benchzoom_item)
         # Help menu items
-        self.Bind(wx.EVT_MENU, self.on_about, aboutitem)
-        self.Bind(wx.EVT_MENU, self.on_help, helpitem)
+        self.Bind(wx.EVT_MENU, self.on_about, help_about_item)
+        self.Bind(wx.EVT_MENU, self.on_help, help_help_item)
 
         self.SetTitle('Marcam')
 
@@ -1666,6 +1676,35 @@ class ImageWindow(wx.Frame):
         self.html = HelpFrame(self, id=wx.ID_ANY)
         self.html.Show(True)
 
+    @debug_fxn
+    def on_debug_benchzoom(self, evt):
+
+        # get zoom to max zoom
+        self.on_zoomfit(None)
+        for i in range(69):
+            self.on_zoomin(None)
+
+        LOGGER.debug("Start Debug Benchmark Zoom")
+        # start timing
+        start_bench = time.time()
+
+        for i in range(68):
+            #self.on_zoomout(None)
+            zoom = self.img_panel.zoom(-1)
+            print(zoom)
+        for i in range(68):
+            #self.on_zoomin(None)
+            zoom = self.img_panel.zoom(1)
+            print(zoom)
+
+        # finish timing
+        bench_eltime = time.time() - start_bench
+
+        LOGGER.debug("Finish Debug Benchmark Zoom")
+        print("Zoom benchmark total time: %.3fs"%bench_eltime)
+
+        self.on_zoomfit(None)
+
 
 class HelpFrame(wx.Frame):
     """Separate window to contain HTML help viewer
@@ -1972,7 +2011,7 @@ def process_command_line(argv):
 
     return args
 
-def debug_main():
+def log_debug_main():
     """Log basic system information
     """
     # log situation before doing anything else
@@ -2004,6 +2043,8 @@ def main(argv=None):
 
     # if -d or --debug turn on full debug
     if args.debug:
+        global DEBUG
+        DEBUG = True
         log_level = logging.DEBUG
     else:
         # default loglevel
@@ -2016,7 +2057,7 @@ def main(argv=None):
     config_data = load_config()
 
     # get basic debug info
-    debug_main()
+    log_debug_main()
 
     # see what argv and args are
     LOGGER.info(repr(args))
