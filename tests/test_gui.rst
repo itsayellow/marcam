@@ -20,4 +20,6 @@ Drag a rubberband box.
 2. Does the box flicker as you drag it larger or smaller?
 3. Does the background matter have visual artifacts where the box
    was dragged?
-   
+
+   * test with single_pixel_lines.mcm to see if pixel aliasing under
+     rubberband box is a problem
