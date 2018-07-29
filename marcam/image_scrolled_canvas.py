@@ -982,13 +982,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     panel_size.x, panel_size.y,
                     )
             if self.paint_times is not None:
-                self.paint_times.append(
-                        {
-                            'onpaint_eltime':onpaint_eltime,
-                            'zoom':self.zoom_val,
-                            'panel_size':(panel_size.x, panel_size.y)
-                            }
-                        )
+                zoom_str = "%.3f"%self.zoom_val
+                self.paint_times.setdefault(zoom_str,[]).append(onpaint_eltime)
 
 
     @debug_fxn

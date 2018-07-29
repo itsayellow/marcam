@@ -20,6 +20,7 @@
 #   wx.TopLevelWindow.OSXSetModified()
 
 import argparse
+from datetime import datetime
 import json
 import logging
 import os
@@ -1684,44 +1685,84 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.CommandEvent): TODO
         """
+        desired_panel_size = wx.Size(1024, 768)
+
+        # get current size of window
+        self.benchzoom_origwinsize = self.GetSize()
+
+        # set windows size so panel size is desired panel size
+        panel_size = self.img_panel.GetSize()
+        self.SetSize(
+                self.benchzoom_origwinsize + (desired_panel_size - panel_size)
+                )
 
         # get zoom to max zoom
         self.on_zoomfit(None)
         for i in range(69):
-            self.on_zoomin(None)
+            zoom = self.img_panel.zoom(1)
 
         LOGGER.debug("Start Debug Benchmark Zoom")
-        # set paint_times to list so on_paint records paint times
-        self.img_panel.paint_times = []
+        # set paint_times to dict so on_paint records paint times
+        self.img_panel.paint_times = {}
 
         self.benchzoom_iteration = 0
+        self.benchzoom_zoom_num = 0
         # initiate CallLater loop calling self.debugzoom_helper
         #   (which then repeatedly calls itself until done)
-        wx.CallLater(30,self.debugzoom_helper)
+        wx.CallLater(35,self.debugzoom_helper)
 
     @debug_fxn
     def debugzoom_helper(self):
         # on mac, we need to wait to zoom again after each zoom (CallLater), or
         #   else macOS (or wxOSX?) will skip paint events.
-        # 10ms is too small.  30ms for safety
+        # 10ms is too small.  35ms for safety (< 30Hz)
         # Maybe caused by beam synchronization?  Does that mean we just need to
-        #   update slower than 60Hz (> 16ms)?
+        #   update slower than 60Hz (> 16ms) for most monitors?
         # https://arstechnica.com/gadgets/2007/04/beam-synchronization-friend-or-foe/
 
-        self.benchzoom_iteration += 1
+        zoom = 0.0
+        total_iterations = 10
+        wait_ms = 35
 
-        if self.benchzoom_iteration < 69:
+        if self.benchzoom_zoom_num < 68:
+            # zoom out
             zoom = self.img_panel.zoom(-1)
-            wx.CallLater(30,self.debugzoom_helper)
-        elif self.benchzoom_iteration < 137:
+            self.benchzoom_zoom_num += 1
+            wx.CallLater(wait_ms, self.debugzoom_helper)
+        elif self.benchzoom_zoom_num < 136:
+            # zoom back in
             zoom = self.img_panel.zoom(1)
-            wx.CallLater(30,self.debugzoom_helper)
+            self.benchzoom_zoom_num += 1
+            wx.CallLater(wait_ms, self.debugzoom_helper)
+        elif self.benchzoom_iteration < total_iterations-1:
+            # start new iteration of zooms
+            self.benchzoom_iteration += 1
+            self.benchzoom_zoom_num = 0
+            # zoom out
+            zoom = self.img_panel.zoom(-1)
+            self.benchzoom_zoom_num += 1
+            wx.CallLater(wait_ms, self.debugzoom_helper)
         else:
-            # finish timing
-            LOGGER.debug("paint_times = " + repr(self.img_panel.paint_times))
+            # finish timing, save data
+            benchzoom_data = {}
+            benchzoom_data['paint_times'] = self.img_panel.paint_times
+            benchzoom_data['panel_size'] = self.img_panel.GetSize().Get()
+            benchzoom_data['image_size'] = (
+                    self.img_panel.img_size_x,
+                    self.img_panel.img_size_y
+                    )
+            data_filename = os.path.join(
+                    const.USER_LOG_DIR,
+                    "data_benchzoom_" + datetime.now().strftime('%Y%m%d_%H%M%S')+ ".json"
+                    )
+            with open(data_filename, 'w') as data_fh:
+                json.dump(benchzoom_data, data_fh, separators=(',', ':'))
+            LOGGER.debug("Wrote benchzoom data to file: %s"%data_filename)
             LOGGER.debug("Finish Debug Benchmark Zoom")
             # reset paint_times to None so on_paint doesn't record
             self.img_panel.paint_times = None
+            # set size of window to original size before benchmark
+            self.SetSize(self.benchzoom_origwinsize)
             # zoom back to normal
             self.on_zoomfit(None)
 
