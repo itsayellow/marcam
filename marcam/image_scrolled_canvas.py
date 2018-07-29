@@ -110,6 +110,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.zoom_val = None
         self.zoom_idx = None
         self.zoom_list = None
+        self.paint_times = None
 
         # prevent erasing of background before paint events
         #   we will be responsible for painting entire window, which we
@@ -980,6 +981,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     self.zoom_val,
                     panel_size.x, panel_size.y,
                     )
+            if self.paint_times is not None:
+                self.paint_times.append(
+                        {
+                            'onpaint_eltime':onpaint_eltime,
+                            'zoom':self.zoom_val,
+                            'panel_size':(panel_size.x, panel_size.y)
+                            }
+                        )
+
 
     @debug_fxn
     def _get_margin_rects(self, rect_pos_log, rect_size, dest_pos, dest_size):

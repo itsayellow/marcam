@@ -563,13 +563,16 @@ class ImageWindow(wx.Frame):
                 "Image False Color (Inferno)",
                 )
         menubar.Append(tools_menu, "&Tools")
-        # Debug (only if debug mode set)
         if DEBUG:
+            # Debug menu (only if debug mode set)
             debug_menu = wx.Menu()
             debug_benchzoom_item = debug_menu.Append(wx.ID_ANY,
                     "Benchmark Zoom",
                     )
             menubar.Append(debug_menu, "&Debug")
+
+            # Debug menu items function bindings
+            self.Bind(wx.EVT_MENU, self.on_debug_benchzoom, debug_benchzoom_item)
         # Help
         help_menu = wx.Menu()
         help_about_item = help_menu.Append(wx.ID_ABOUT,
@@ -763,8 +766,6 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_imgfalsecolorplasma, tools_imgfcolorplasma_item)
         self.Bind(wx.EVT_MENU, self.on_imgfalsecolormagma, tools_imgfcolormagma_item)
         self.Bind(wx.EVT_MENU, self.on_imgfalsecolorinferno, tools_imgfcolorinferno_item)
-        # Debug menu items
-        self.Bind(wx.EVT_MENU, self.on_debug_benchzoom, debug_benchzoom_item)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, help_about_item)
         self.Bind(wx.EVT_MENU, self.on_help, help_help_item)
@@ -1656,7 +1657,7 @@ class ImageWindow(wx.Frame):
         """Help->About Menuitem: Open the About window
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         info = wx.adv.AboutDialogInfo()
         info.SetName("Marcam")
@@ -1671,13 +1672,18 @@ class ImageWindow(wx.Frame):
         """Help->Help Menuitem: Open a brief help window (html)
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): TODO
         """
         self.html = HelpFrame(self, id=wx.ID_ANY)
         self.html.Show(True)
 
     @debug_fxn
     def on_debug_benchzoom(self, evt):
+        """Zoom through the range and log all on_paint elapsed times
+
+        Args:
+            evt (wx.CommandEvent): TODO
+        """
 
         # get zoom to max zoom
         self.on_zoomfit(None)
@@ -1685,25 +1691,39 @@ class ImageWindow(wx.Frame):
             self.on_zoomin(None)
 
         LOGGER.debug("Start Debug Benchmark Zoom")
-        # start timing
-        start_bench = time.time()
+        # set paint_times to list so on_paint records paint times
+        self.img_panel.paint_times = []
 
-        for i in range(68):
-            #self.on_zoomout(None)
+        self.benchzoom_iteration = 0
+        # initiate CallLater loop calling self.debugzoom_helper
+        #   (which then repeatedly calls itself until done)
+        wx.CallLater(30,self.debugzoom_helper)
+
+    @debug_fxn
+    def debugzoom_helper(self):
+        # on mac, we need to wait to zoom again after each zoom (CallLater), or
+        #   else macOS (or wxOSX?) will skip paint events.
+        # 10ms is too small.  30ms for safety
+        # Maybe caused by beam synchronization?  Does that mean we just need to
+        #   update slower than 60Hz (> 16ms)?
+        # https://arstechnica.com/gadgets/2007/04/beam-synchronization-friend-or-foe/
+
+        self.benchzoom_iteration += 1
+
+        if self.benchzoom_iteration < 69:
             zoom = self.img_panel.zoom(-1)
-            print(zoom)
-        for i in range(68):
-            #self.on_zoomin(None)
+            wx.CallLater(30,self.debugzoom_helper)
+        elif self.benchzoom_iteration < 137:
             zoom = self.img_panel.zoom(1)
-            print(zoom)
-
-        # finish timing
-        bench_eltime = time.time() - start_bench
-
-        LOGGER.debug("Finish Debug Benchmark Zoom")
-        print("Zoom benchmark total time: %.3fs"%bench_eltime)
-
-        self.on_zoomfit(None)
+            wx.CallLater(30,self.debugzoom_helper)
+        else:
+            # finish timing
+            LOGGER.debug("paint_times = " + repr(self.img_panel.paint_times))
+            LOGGER.debug("Finish Debug Benchmark Zoom")
+            # reset paint_times to None so on_paint doesn't record
+            self.img_panel.paint_times = None
+            # zoom back to normal
+            self.on_zoomfit(None)
 
 
 class HelpFrame(wx.Frame):
