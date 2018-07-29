@@ -1751,6 +1751,9 @@ class ImageWindow(wx.Frame):
                     self.img_panel.img_size_x,
                     self.img_panel.img_size_y
                     )
+            benchzoom_data['platform_uname'] = platform.uname()
+            benchzoom_data['python_ver'] = sys.version.replace('\n', '')
+            benchzoom_data['wx_ver'] = wx.__version__
             data_filename = os.path.join(
                     const.USER_LOG_DIR,
                     "data_benchzoom_" + datetime.now().strftime('%Y%m%d_%H%M%S')+ ".json"
