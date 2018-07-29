@@ -1745,6 +1745,7 @@ class ImageWindow(wx.Frame):
         else:
             # finish timing, save data
             benchzoom_data = {}
+            benchzoom_data['dataset_name'] = 'benchzoom'
             benchzoom_data['paint_times'] = self.img_panel.paint_times
             benchzoom_data['panel_size'] = self.img_panel.GetSize().Get()
             benchzoom_data['image_size'] = (
@@ -1754,6 +1755,7 @@ class ImageWindow(wx.Frame):
             benchzoom_data['platform_uname'] = platform.uname()
             benchzoom_data['python_ver'] = sys.version.replace('\n', '')
             benchzoom_data['wx_ver'] = wx.__version__
+            benchzoom_data['datetime'] = datetime.now().strftime('%Y%m%d_%H:%M:%S')
             data_filename = os.path.join(
                     const.USER_LOG_DIR,
                     "data_benchzoom_" + datetime.now().strftime('%Y%m%d_%H%M%S')+ ".json"
