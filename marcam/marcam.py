@@ -2075,6 +2075,7 @@ def main(argv=None):
 
     # fetch configuration from file
     config_data = load_config()
+    # TODO: also allow config_data.debug to set DEBUG and log_level to DEBUG?
 
     # get basic debug info
     log_debug_main()
