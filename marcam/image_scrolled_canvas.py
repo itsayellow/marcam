@@ -84,8 +84,8 @@ def find_nearest_rational(input_num, possible_nums, possible_denoms):
     for denom in possible_denoms:
         test_nums = np.array(possible_nums)/denom
         errors = np.abs(test_nums - np.array([input_num]*len(possible_nums)))
-        i = np.argmin(errors)
-        nums_denoms.append((i+1,denom))
+        num = possible_nums[np.argmin(errors)]
+        nums_denoms.append((num,denom))
 
     test_nums = np.array([x[0]/x[1] for x in nums_denoms])
     errors = np.abs(test_nums - np.array([input_num]*len(possible_denoms)))
@@ -93,6 +93,29 @@ def find_nearest_rational(input_num, possible_nums, possible_denoms):
     (num, denom) = nums_denoms[i]
     zoom = test_nums[i]
     error = errors[i]
+
+    return (zoom, num, denom, error)
+
+@debug_fxn
+def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
+    """Find rational number close to input_num with lowest (num, denom) within
+    error tolerance.
+    """
+    nums_denoms = []
+    for denom in possible_denoms:
+        test_nums = np.array(possible_nums)/denom
+        errors = np.abs(test_nums - np.array([input_num]*len(possible_nums)))
+        error_ratios = errors/input_num
+        ok_nums = possible_nums[np.where(errors_ratios < error_tol)]
+        nums_denoms.extend([(x,denom) for x in ok_nums])
+
+    # nums_denoms should all be fractions close in value
+    # We pick the one with the lowest numerator (which consequently should
+    #   also have the lowest or close to the lowest denominator)
+    nums_denoms.sort(key=lambda x: x[0])
+    (num, denom) = nums_denoms[0]
+    zoom = num/denom
+    error = np.abs(zoom - input_num)
 
     return (zoom, num, denom, error)
 
@@ -225,8 +248,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.zoom_frac_list.append((num,denom))
 
         perc_errors = np.array(errors)/np.array(self.zoom_list)*100
-        print(zoom_list_ideal)
-        print(perc_errors)
+        #print(zoom_list_ideal)
+        #print(perc_errors)
         print("max_num_denom = %d"%max_num_denom)
         print("max perc error: %.2f%%"%np.max(perc_errors))
 
