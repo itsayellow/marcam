@@ -1234,6 +1234,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # compute dest size
         dest_size = wx.Size(dest_lr.x - dest_pos.x, dest_lr.y - dest_pos.y)
 
+        # TODO: Most of these are passed directly to StretchBlit and no other.
+        #   We should bundle all of the StretchBlit arguments into one tuple
+        #   so that it can be just passed with an asterisk * expansion
+        #   directly to StretchBlit?
         return (
                 rect_pos_log,
                 rect_size,
