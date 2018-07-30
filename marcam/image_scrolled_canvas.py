@@ -77,18 +77,18 @@ def clip(num, num_min=None, num_max=None):
         return num
 
 @debug_fxn
-def find_nearest_rational(input_num, max_num_denom):
+def find_nearest_rational(input_num, possible_nums, possible_denoms):
     """Find nearest rational number to input_num
     """
     nums_denoms = []
-    for denom in range(1,max_num_denom + 1):
-        test_nums = np.arange(1, max_num_denom + 1)/denom
-        errors = np.abs(test_nums - np.array([input_num]*max_num_denom))
+    for denom in possible_denoms:
+        test_nums = np.array(possible_nums)/denom
+        errors = np.abs(test_nums - np.array([input_num]*len(possible_nums)))
         i = np.argmin(errors)
         nums_denoms.append((i+1,denom))
 
     test_nums = np.array([x[0]/x[1] for x in nums_denoms])
-    errors = np.abs(test_nums - np.array([input_num]*max_num_denom))
+    errors = np.abs(test_nums - np.array([input_num]*len(possible_denoms)))
     i = np.argmin(errors)
     (num, denom) = nums_denoms[i]
     zoom = test_nums[i]
@@ -187,6 +187,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.zoom_idx
             self.zoom_val
         """
+        # num: pixels in dest (window)
+        # denom: pixels in src (image)
+        # if 0.25 < zoom_ideal < 0.5:
+        #   denom must be divisible by 2
+        # if        zoom_ideal < 0.25:
+        #   denom must be divisible by 4
         mag_len_half = int(total_mag_steps/2)
 
         # possible magnification list
@@ -198,19 +204,31 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   might make it not exactly 1.0
         zoom_list_ideal[mag_len_half] = 1.0
 
-        #errors = []
+        errors = []
         self.zoom_list = []
         self.zoom_frac_list = []
+        possible_nums = range(1, max_num_denom, 1)
         for zoom_ideal in zoom_list_ideal:
+            if zoom_ideal > 0.5:
+                possible_denoms = range(1, max_num_denom + 1, 1)
+            elif zoom_ideal > 0.25:
+                possible_denoms = range(2, 2*max_num_denom + 1, 2)
+            else:
+                possible_denoms = range(4, 4*max_num_denom + 1, 4)
             (zoom, num, denom, error) = find_nearest_rational(
                     zoom_ideal,
-                    const.ZOOM_MAX_NUM_DENOM
+                    possible_nums,
+                    possible_denoms
                     )
-            #errors.append(error)
+            errors.append(error)
             self.zoom_list.append(zoom)
             self.zoom_frac_list.append((num,denom))
 
-        #perc_errors = np.array(errors)/np.array(self.zoom_list)*100
+        perc_errors = np.array(errors)/np.array(self.zoom_list)*100
+        print(zoom_list_ideal)
+        print(perc_errors)
+        print("max_num_denom = %d"%max_num_denom)
+        print("max perc error: %.2f%%"%np.max(perc_errors))
 
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = mag_len_half
