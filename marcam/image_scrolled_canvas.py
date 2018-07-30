@@ -1292,19 +1292,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 scale_dc, img_dc_src
                 ) = self._get_rect_coords(rect)
 
-        # paint margins bg color if image is smaller than window
-        # TODO: use something other than dest_size (recompute from img size)
-        rects_to_draw = self._get_margin_rects(
-                rect_pos_log, rect_size,
-                dest_pos, dest_size,
-                )
-        if rects_to_draw:
-            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-            # debug pen:
-            #paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
-            paintdc.SetBrush(paintdc.GetBackground())
-            paintdc.DrawRectangleList(rects_to_draw)
-
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
         #   This means to center and zoom accurately (sub-src-pixel) we need to
@@ -1314,6 +1301,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   only display in the area of the window
 
         # copy region from self.img_dc into paintdc with possible stretching
+        # TODO: clipping max to only blit to image area?
         paintdc.StretchBlit(
                 dest_pos.x, dest_pos.y,
                 dest_size.x, dest_size.y,
@@ -1321,6 +1309,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 src_pos_x, src_pos_y,
                 src_size_x, src_size_y,
                 )
+
+        # paint margins bg color if image is smaller than window
+        # TODO: use something other than dest_size (recompute from img size)
+        dest_img_size = wx.Size()
+        dest_img_size.SetHeight(min(dest_size.GetHeight(),self.img_size_y*self.zoom_frac[0]/self.zoom_frac[1]))
+        rects_to_draw = self._get_margin_rects(
+                rect_pos_log, rect_size,
+                dest_pos, dest_img_size,
+                )
+        if rects_to_draw:
+            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            # debug pen:
+            #paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+            paintdc.SetBrush(paintdc.GetBackground())
+            paintdc.DrawRectangleList(rects_to_draw)
 
         if self.is_dragging:
             self.draw_rubberband_box(paintdc)
@@ -2409,11 +2412,13 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 ) = self._get_rect_coords(rect)
 
         # paint margins bg color if image is smaller than window
+        dest_img_size = wx.Size()
+        dest_img_size.SetHeight(min(dest_size.GetHeight(),self.img_size_y*self.zoom_frac[0]/self.zoom_frac[1]))
         rects_to_draw = self._get_margin_rects(
                 rect_pos_log,
                 rect_size,
                 dest_pos,
-                dest_size,
+                dest_img_size,
                 )
         if rects_to_draw:
             paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
