@@ -109,7 +109,6 @@ def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
 
     test_nums = np.tile(possible_nums, len(possible_denoms))
     test_denoms = np.tile(possible_denoms, (len(possible_nums),1)).flatten('F')
-
     error_ratios = np.abs(test_nums/test_denoms - input_num)/input_num
 
     # first ok index is lowest numerator, denominator
@@ -126,11 +125,13 @@ def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
 def create_rational_zooms(mag_step, total_mag_steps, error_tol):
     """Create list of zoom ratios representable by rational numbers
 
+    In the future once we settle on coefficients we like, this can
+    be hard-coded instead of a function.
+
     Args:
         mag_step (float): Ratio of adjacent zoom ratios
         total_mag_steps (int): Total magnification steps from min to max
             (centered on 1.0).  Should be an odd number.
-        max_num_denom (int):
         error_tol (float): maximum multiplicative error that rational zoom
             can be off from ideal_zoom
 
@@ -162,17 +163,20 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
     #   might make it not exactly 1.0
     zoom_list_ideal[mag_len_half] = 1.0
 
-    errors = []
+    #errors = []
     zoom_list = []
     zoom_frac_list = []
     possible_nums = range(1, max_num_denom, 1)
     for zoom_ideal in zoom_list_ideal:
         # constraints due to scale_dc
         if zoom_ideal > 0.5:
+            # normal denominators
             possible_denoms = range(1, max_num_denom + 1, 1)
         elif zoom_ideal > 0.25:
+            # denominators must be divis. by 2 because img_dc_div2
             possible_denoms = range(2, 2*max_num_denom + 1, 2)
         else:
+            # denominators must be divis. by 4 because img_dc_div4
             possible_denoms = range(4, 4*max_num_denom + 1, 4)
 
         (zoom, num, denom, error) = find_low_rational(
@@ -181,13 +185,13 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
                 possible_denoms,
                 error_tol
                 )
-        errors.append(error)
+        #errors.append(error)
         zoom_list.append(zoom)
         zoom_frac_list.append((num,denom))
 
-    perc_errors = np.array(errors)*100
-    print(zoom_frac_list)
-    print("zoom max. perc error: %.2f%%"%np.max(perc_errors))
+    #perc_errors = np.array(errors)*100
+    #print(zoom_frac_list)
+    #print("zoom max. perc error: %.2f%%"%np.max(perc_errors))
 
     return (zoom_list, zoom_frac_list)
 
