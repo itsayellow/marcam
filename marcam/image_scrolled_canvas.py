@@ -101,27 +101,23 @@ def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
     """Find rational number close to input_num with lowest (num, denom) within
     error tolerance.
     """
-    possible_nums = np.array(possible_nums)
-    nums_denoms = []
-    for denom in possible_denoms:
-        test_nums = possible_nums/denom
-        errors = np.abs(test_nums - np.array([input_num]*len(possible_nums)))
-        error_ratios = errors/input_num
-        ok_nums = possible_nums[np.where(error_ratios < error_tol)]
-        nums_denoms.extend([(x,denom) for x in ok_nums])
+    # make sure numerators and denominators are in ascending order
+    possible_nums = np.array(possible_nums, dtype='uint16')
+    possible_denoms = np.array(possible_denoms, dtype='uint16')
+    possible_nums.sort()
+    possible_denoms.sort()
 
-    # did we find any rational numbers?  If not, error
-    if not nums_denoms:
-        raise Exception("Internal error in find_low_rational: can't meet " \
-                "error tolerance.")
+    test_nums = np.tile(possible_nums, len(possible_denoms))
+    test_denoms = np.tile(possible_denoms, (len(possible_nums),1)).flatten('F')
 
-    # nums_denoms should all be fractions close in value
-    # We pick the one with the lowest numerator (which consequently should
-    #   also have the lowest or close to the lowest denominator)
-    nums_denoms.sort(key=lambda x: x[0])
-    (num, denom) = nums_denoms[0]
+    error_ratios = np.abs(test_nums/test_denoms - input_num)/input_num
+
+    # first ok index is lowest numerator, denominator
+    ok_index = np.min(np.where(error_ratios < error_tol))
+    num = test_nums[ok_index]
+    denom = test_denoms[ok_index]
     zoom = num/denom
-    error = np.abs(zoom - input_num)
+    error = error_ratios[ok_index]
 
     return (zoom, num, denom, error)
 
@@ -189,8 +185,8 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
         zoom_list.append(zoom)
         zoom_frac_list.append((num,denom))
 
-    perc_errors = np.array(errors)/np.array(zoom_list_ideal)*100
-    #print(zoom_frac_list)
+    perc_errors = np.array(errors)*100
+    print(zoom_frac_list)
     print("zoom max. perc error: %.2f%%"%np.max(perc_errors))
 
     return (zoom_list, zoom_frac_list)
