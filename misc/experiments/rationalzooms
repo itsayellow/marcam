@@ -115,7 +115,7 @@ def best_mag_step(max_numdenom=32, mag_len_half=34):
 print("")
 print("mag_step=1.1")
 print("mag_len_half=34")
-for max_numdenom in range(24,65):
+for max_numdenom in range(24,129):
     max_perc_err = compute_rational_zooms(
             max_numdenom=max_numdenom,
             mag_step=1.1,
