@@ -63,19 +63,20 @@ else:
     ZOOMFITBMP_FNAME = os.path.join(ICON_DIR, 'zoomfit32.png')
 
 # for mag_step=1.1, total_mag_steps=69:
-#   max_num_denom = 25, max_perc_err = 6.45%
-#   max_num_denom = 26, max_perc_err = 3.01%
-#   max_num_denom = 30, max_perc_err = 2.64%
-#   max_num_denom = 36, max_perc_err = 1.74%
-#   max_num_denom = 52, max_perc_err = 1.02%
-#   max_num_denom = 59, max_perc_err = 0.98%
-#   max_num_denom = 71, max_perc_err = 0.72%
-#   max_num_denom = 80, max_perc_err = 0.68%
-#   max_num_denom = 84, max_perc_err = 0.54%
-#   max_num_denom = 107, max_perc_err = 0.51%
-#   max_num_denom = 108, max_perc_err = 0.42%
-#   max_num_denom = 117, max_perc_err = 0.41%
-#   max_num_denom = 128, max_perc_err = 0.29%
+#   error_tol      max numerator
+#   ----------------------------
+#   0.001          209
+#   0.002          148
+#   0.003--0.004   127
+#   0.005          107
+#   0.006           83
+#   0.007           79
+#   0.008--0.009    70
+#   0.010           58
+#   0.011--0.017    51
+#   0.018--0.025    35
+#   0.026--0.029    29
+#   0.030--inf      25
 # what is one step of zoom? (1.05 too slow, 1.1 looks smooth, 1.15 a little jerky, 1.2 may
 #   be too much?)
 MAG_STEP = 1.1
