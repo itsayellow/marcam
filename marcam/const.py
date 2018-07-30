@@ -81,10 +81,14 @@ else:
 MAG_STEP = 1.1
 # how many zoom steps from minimum to maximum zoom, centered on zoom 100%
 TOTAL_MAG_STEPS = 69
-# how big numerator or denominator can be to create a rational number for
-#   each zoom value (determines minimum pixel size of unit refresh square)
-# Get number < 2%, probably around 1% is best
-ZOOM_MAX_NUM_DENOM = 52 # 35 also seems ok
+# The multiplicative error tolerance, when constructing a zoom from a rational
+#   number compared to the "ideal" zoom from magstep
+# Hard upper limit: 0.1 for mag_step=1.1, so that zoom stays monotonic!
+# Soft upper limit: 0.03 for mag_step=1.1, zoom is just barely jerky
+# 0.05 yields jerky zoom
+# Lower value: closer to "ideal" zoom ratios, bigger on_paint patch size
+# Higher value: smaller on_paint patch size, farther from "ideal" zoom
+ZOOM_MAX_ERROR_TOL = 0.011
 
 # how much to scroll for an EVT_SROLLWIN_* 
 SCROLL_WHEEL_SPEED = 2

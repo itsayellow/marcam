@@ -101,13 +101,19 @@ def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
     """Find rational number close to input_num with lowest (num, denom) within
     error tolerance.
     """
+    possible_nums = np.array(possible_nums)
     nums_denoms = []
     for denom in possible_denoms:
-        test_nums = np.array(possible_nums)/denom
+        test_nums = possible_nums/denom
         errors = np.abs(test_nums - np.array([input_num]*len(possible_nums)))
         error_ratios = errors/input_num
-        ok_nums = possible_nums[np.where(errors_ratios < error_tol)]
+        ok_nums = possible_nums[np.where(error_ratios < error_tol)]
         nums_denoms.extend([(x,denom) for x in ok_nums])
+
+    # did we find any rational numbers?  If not, error
+    if not nums_denoms:
+        raise Exception("Internal error in find_low_rational: can't meet " \
+                "error tolerance.")
 
     # nums_denoms should all be fractions close in value
     # We pick the one with the lowest numerator (which consequently should
@@ -118,6 +124,76 @@ def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
     error = np.abs(zoom - input_num)
 
     return (zoom, num, denom, error)
+
+
+@debug_fxn
+def create_rational_zooms(mag_step, total_mag_steps, error_tol):
+    """Create list of zoom ratios representable by rational numbers
+
+    Args:
+        mag_step (float): Ratio of adjacent zoom ratios
+        total_mag_steps (int): Total magnification steps from min to max
+            (centered on 1.0).  Should be an odd number.
+        max_num_denom (int):
+        error_tol (float): maximum multiplicative error that rational zoom
+            can be off from ideal_zoom
+
+    Returns:
+        tuple: (zoom_list (list of floats), zoom_frac_list (list of tuples))
+    """
+    # mag_step puts a hard limit on error_tol, to ensure monotonicity of zoom
+    if (mag_step - 1) < error_tol:
+        raise Exception("Internal Error in create_rational_zooms: Please " \
+                "make sure that eror_tol < (mag_step - 1)")
+
+    # hard code this, rely on error_tol for tweaking
+    max_num_denom = 64
+
+    # num: pixels in dest (window)
+    # denom: pixels in src (image)
+    # if 0.25 < zoom_ideal < 0.5:
+    #   denom must be divisible by 2
+    # if        zoom_ideal < 0.25:
+    #   denom must be divisible by 4
+    mag_len_half = int(total_mag_steps/2)
+
+    # possible magnification list
+    zoom_list_ideal = [
+            mag_step**x
+            for x in range(-mag_len_half, mag_len_half+1)
+            ]
+    # set this to 1.0 by hand to make sure no floating-point shenanigans
+    #   might make it not exactly 1.0
+    zoom_list_ideal[mag_len_half] = 1.0
+
+    errors = []
+    zoom_list = []
+    zoom_frac_list = []
+    possible_nums = range(1, max_num_denom, 1)
+    for zoom_ideal in zoom_list_ideal:
+        # constraints due to scale_dc
+        if zoom_ideal > 0.5:
+            possible_denoms = range(1, max_num_denom + 1, 1)
+        elif zoom_ideal > 0.25:
+            possible_denoms = range(2, 2*max_num_denom + 1, 2)
+        else:
+            possible_denoms = range(4, 4*max_num_denom + 1, 4)
+
+        (zoom, num, denom, error) = find_low_rational(
+                zoom_ideal,
+                possible_nums,
+                possible_denoms,
+                error_tol
+                )
+        errors.append(error)
+        zoom_list.append(zoom)
+        zoom_frac_list.append((num,denom))
+
+    perc_errors = np.array(errors)/np.array(zoom_list_ideal)*100
+    #print(zoom_frac_list)
+    print("zoom max. perc error: %.2f%%"%np.max(perc_errors))
+
+    return (zoom_list, zoom_frac_list)
 
 
 # really a Scrolled Window
@@ -173,12 +249,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.SetScrollRate(1, 1)
 
         # create zoom ratios of rational numbers (fractions)
-        #   and set zoom to 1.00
-        self.create_rational_zooms(
+        (self.zoom_list, self.zoom_frac_list) = create_rational_zooms(
                 const.MAG_STEP,
                 const.TOTAL_MAG_STEPS,
-                const.ZOOM_MAX_NUM_DENOM
+                const.ZOOM_MAX_ERROR_TOL 
                 )
+        # set zoom_idx to 1.00 scaling
+        self.zoom_idx = int(const.TOTAL_MAG_STEPS/2)
+        self.zoom_val = self.zoom_list[self.zoom_idx]
+        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # setup handlers
         self.Bind(wx.EVT_PAINT, self.on_paint)
@@ -195,68 +274,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # Update immediately repaints invalidated areas
         #   without this, repainting will happen next iteration of event loop
         self.Update()
-
-    @debug_fxn
-    def create_rational_zooms(self, mag_step, total_mag_steps, max_num_denom):
-        """Create list of zoom ratios representable by rational numbers
-
-        Args:
-            mag_step (float): Ratio of adjacent zoom ratios
-            total_mag_steps (int): Total magnification steps from min to max
-                (centered on 1.0).  Should be an odd number.
-
-        Affects:
-            self.zoom_list
-            self.zoom_idx
-            self.zoom_val
-        """
-        # num: pixels in dest (window)
-        # denom: pixels in src (image)
-        # if 0.25 < zoom_ideal < 0.5:
-        #   denom must be divisible by 2
-        # if        zoom_ideal < 0.25:
-        #   denom must be divisible by 4
-        mag_len_half = int(total_mag_steps/2)
-
-        # possible magnification list
-        zoom_list_ideal = [
-                mag_step**x
-                for x in range(-mag_len_half, mag_len_half+1)
-                ]
-        # set this to 1.0 by hand to make sure no floating-point shenanigans
-        #   might make it not exactly 1.0
-        zoom_list_ideal[mag_len_half] = 1.0
-
-        errors = []
-        self.zoom_list = []
-        self.zoom_frac_list = []
-        possible_nums = range(1, max_num_denom, 1)
-        for zoom_ideal in zoom_list_ideal:
-            if zoom_ideal > 0.5:
-                possible_denoms = range(1, max_num_denom + 1, 1)
-            elif zoom_ideal > 0.25:
-                possible_denoms = range(2, 2*max_num_denom + 1, 2)
-            else:
-                possible_denoms = range(4, 4*max_num_denom + 1, 4)
-            (zoom, num, denom, error) = find_nearest_rational(
-                    zoom_ideal,
-                    possible_nums,
-                    possible_denoms
-                    )
-            errors.append(error)
-            self.zoom_list.append(zoom)
-            self.zoom_frac_list.append((num,denom))
-
-        perc_errors = np.array(errors)/np.array(self.zoom_list)*100
-        #print(zoom_list_ideal)
-        #print(perc_errors)
-        print("max_num_denom = %d"%max_num_denom)
-        print("max perc error: %.2f%%"%np.max(perc_errors))
-
-        # set zoom_idx to 1.00 scaling
-        self.zoom_idx = mag_len_half
-        self.zoom_val = self.zoom_list[self.zoom_idx]
-        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
     @debug_fxn
     def SetVirtualSizeNoSizeEvt(self, *args, **kwargs):
