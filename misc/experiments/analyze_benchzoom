@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+import sys
+import argparse
+import json
+import numpy as np
+
+def process_command_line(argv):
+    """Process command line invocation arguments and switches.
+
+    Args:
+        argv: list of arguments, or `None` from ``sys.argv[1:]``.
+
+    Returns:
+        args: Namespace with named attributes of arguments and switches
+    """
+    #script_name = argv[0]
+    argv = argv[1:]
+
+    # initialize the parser object:
+    parser = argparse.ArgumentParser(
+            description="Analyze debug data from Marcam Debug->Benchmark Zoom")
+
+    # specifying nargs= puts outputs of parser in list (even if nargs=1)
+
+    # required arguments
+    parser.add_argument('json_file',
+            help="JSON data file from Benchmark Zoom"
+            )
+
+    # switches/options:
+    #parser.add_argument(
+    #    '-s', '--max_size', action='store',
+    #    help='String specifying maximum size of images.  ' \
+    #            'Larger images will be resized. (e.g. "1024x768")')
+    #parser.add_argument(
+    #    '-o', '--omit_hidden', action='store_true',
+    #    help='Do not copy picasa hidden images to destination directory.')
+
+    args = parser.parse_args(argv)
+
+    return args
+
+def print_paint_times(paint_times):
+    paint_times = {k:np.array(v) for (k,v) in paint_times.items()}
+    for zoom in sorted(paint_times.keys(), key=float):
+        print("Paint Times for Zoom = %s"%zoom)
+        print("    Median:  %.1fms"%(1000*np.median(paint_times[zoom])))
+        print("    Min,Max: %.1fms,%.1fms"%(1000*np.min(paint_times[zoom]),1000*np.max(paint_times[zoom])))
+
+def print_paint_times_md_chart(paint_times):
+    paint_times = {k:np.array(v) for (k,v) in paint_times.items()}
+    print(" Zoom | paint_time (median) ")
+    print("------|---------------------")
+    for zoom in sorted(paint_times.keys(), key=float):
+        print(" %s | %.1fms "%(zoom, 1000*np.median(paint_times[zoom])))
+
+def main(argv=None):
+    args = process_command_line(argv)
+    with open(args.json_file, 'r') as json_fh:
+        benchzoom_data = json.load(json_fh)
+
+    paint_times = benchzoom_data['paint_times']
+
+    # print in report format
+    print_paint_times(paint_times)
+
+    # print in markdown chart format
+    print_paint_times_md_chart(paint_times)
+
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        status = main(sys.argv)
+    except KeyboardInterrupt:
+        print("Stopped by Keyboard Interrupt", file=sys.stderr)
+        # exit error code for Ctrl-C
+        status = 130
+
+    sys.exit(status)
