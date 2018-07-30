@@ -9,7 +9,9 @@ import numpy as np
 print(os.path.abspath('../../marcam'))
 sys.path.append(os.path.abspath('../../marcam'))
 
-from image_scrolled_canvas import find_nearest_rational
+from image_scrolled_canvas import (
+        find_nearest_rational, find_low_rational, create_rational_zooms
+        )
 
 
 def print_floats(float_list, floats_per_line=10):
@@ -175,18 +177,44 @@ def best_mag_step(max_numdenom=32, mag_len_half=34):
         possible_mag_steps.pop(min_error_i)
         all_zoom_errors.pop(min_error_i)
 
-#   for max_numdenom in range(24,65):
-#       best_mag_step(
-#               max_numdenom=max_numdenom,
-#               mag_len_half=34
-#               )
+def create_ideal_zooms(mag_step, total_mag_steps):
+    mag_len_half = int(total_mag_steps/2)
+
+    # possible magnification list
+    zoom_list_ideal = [
+            mag_step**x
+            for x in range(-mag_len_half, mag_len_half+1)
+            ]
+    # set this to 1.0 by hand to make sure no floating-point shenanigans
+    #   might make it not exactly 1.0
+    zoom_list_ideal[mag_len_half] = 1.0
+
+    return(zoom_list_ideal)
+
 
 # --------------------------------------------------------------------------
 
-for max_num_denom in range(24,129):
-    max_perc_err = compute_rational_zooms2(
-            mag_step=1.1,
-            total_mag_steps=69,
-            max_num_denom=max_num_denom,
-            )
-    print("max_num_denom = %d, max_perc_err = %.2f%%"%(max_num_denom, max_perc_err))
+# NOTE: to get very low error_tol to work, you must go inside of
+#   create_rational_zooms and make max_num_denom bigger
+
+mag_step=1.1
+total_mag_steps=69
+
+zoom_list_ideal = np.array(create_ideal_zooms(mag_step, total_mag_steps))
+
+for error_tol in np.arange(0.001, 0.05, 0.001):
+    try:
+        (zoom_list, zoom_frac_list) = create_rational_zooms(
+                mag_step, total_mag_steps, error_tol
+                )
+    except ValueError:
+        print("error_tol = %f is too low."%error_tol)
+        continue
+
+    numerators = [x[0] for x in zoom_frac_list]
+    perc_error = 100*np.abs(zoom_list_ideal-np.array(zoom_list))/zoom_list_ideal
+
+    print("error_tol = %f, max numerator = %d, max_perc_error = %.2f%%"%(
+        error_tol, max(numerators), np.max(perc_error)
+        )
+        )
