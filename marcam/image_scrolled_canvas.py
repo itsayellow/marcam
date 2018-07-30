@@ -1188,6 +1188,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_dc_src = self.img_dc_div4
             scale_dc = 4
 
+        # zoom = window_size/image_size
+        # zoom = dest_size/src_size
+        numerator = self.zoom_frac[0]
+        denominator = self.zoom_frac[1]
+        print("fraction: %d/%d"%(numerator, denominator))
+
         # rect_pos_{x,y} is upper left corner
         # rect_lr_{x,y} is lower right corner
         rect_lr = rect_pos + rect_size
@@ -1195,14 +1201,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         rect_pos_log = self.CalcUnscrolledPosition(rect_pos)
         rect_lr_log = self.CalcUnscrolledPosition(rect_lr)
 
+        # quantize destination positions
+        (x,y)=rect_pos_log.GetIM()
+        rect_pos_log = wx.Point(int(x/numerator)*numerator,int(y/numerator)*numerator)
+        (x,y)=rect_lr_log.GetIM()
+        rect_lr_log = wx.Point(ceil(x/numerator)*numerator,ceil(y/numerator)*numerator)
+
         # img coordinates of upper left corner
         (src_pos_x, src_pos_y) = self.logical2img_coord(
                 rect_pos_log,
                 scale_dc=scale_dc
                 )
         # make int and enforce min. val of 0
-        src_pos_x = clip(int(src_pos_x), 0, None)
-        src_pos_y = clip(int(src_pos_y), 0, None)
+        src_pos_x = clip(round(src_pos_x), 0, None)
+        src_pos_y = clip(round(src_pos_y), 0, None)
 
         # img coordinates of lower right corner
         (src_lr_x, src_lr_y) = self.logical2img_coord(
@@ -1212,15 +1224,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # make int (via ceil) and enforce max. val of img_dc_src size
         dc_size = img_dc_src.GetSize()
-        src_lr_x = clip(ceil(src_lr_x), None, dc_size.x)
-        src_lr_y = clip(ceil(src_lr_y), None, dc_size.y)
+        src_lr_x = clip(round(src_lr_x), None, ceil(dc_size.x/denominator)*denominator)
+        src_lr_y = clip(round(src_lr_y), None, ceil(dc_size.y/denominator)*denominator)
 
+        #dest_pos = rect_pos_log
+        #dest_lr = rect_lr_log
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # dest coordinates are all logical
         dest_pos = self.img2logical_coord(
                 src_pos_x, src_pos_y, scale_dc=scale_dc
                )
+        print("src_pos: (%d,%d)  "%(src_pos_x, src_pos_y), end="")
+        print("dest_pos: (%d,%d)"%(dest_pos.x, dest_pos.y))
 
         # multiply size back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
@@ -1277,6 +1293,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 ) = self._get_rect_coords(rect)
 
         # paint margins bg color if image is smaller than window
+        # TODO: use something other than dest_size (recompute from img size)
         rects_to_draw = self._get_margin_rects(
                 rect_pos_log, rect_size,
                 dest_pos, dest_size,
@@ -1393,6 +1410,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
 
+        # TODO: use self.zoom_frac instead of self.zoom_val
         img_x = (logical_coord.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
         img_y = (logical_coord.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
 
