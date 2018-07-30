@@ -54,7 +54,6 @@ def ceil(num):
     else:
         return int(num)
 
-
 def clip(num, num_min=None, num_max=None):
     """Clip to max and/or min values.  To not use limit, give argument None
 
@@ -76,6 +75,26 @@ def clip(num, num_min=None, num_max=None):
         return min(num, num_max)
     else:
         return num
+
+@debug_fxn
+def find_nearest_rational(input_num, max_num_denom):
+    """Find nearest rational number to input_num
+    """
+    nums_denoms = []
+    for denom in range(1,max_num_denom + 1):
+        test_nums = np.arange(1, max_num_denom + 1)/denom
+        errors = np.abs(test_nums - np.array([input_num]*max_num_denom))
+        i = np.argmin(errors)
+        nums_denoms.append((i+1,denom))
+
+    test_nums = np.array([x[0]/x[1] for x in nums_denoms])
+    errors = np.abs(test_nums - np.array([input_num]*max_num_denom))
+    i = np.argmin(errors)
+    (num, denom) = nums_denoms[i]
+    zoom = test_nums[i]
+    error = errors[i]
+
+    return (zoom, num, denom, error)
 
 
 # really a Scrolled Window
@@ -107,9 +126,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.overlay = wx.Overlay() # for making rubber-band box during drag
         self.rubberband_draw_rect = None
         self.rubberband_refresh_rect = None
-        self.zoom_val = None
+        self.zoom_frac = None
+        self.zoom_frac_list = None
         self.zoom_idx = None
         self.zoom_list = None
+        self.zoom_val = None
         self.paint_times = None
 
         # prevent erasing of background before paint events
@@ -128,20 +149,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # By default, pixels per unit scroll is (1,1)
         self.SetScrollRate(1, 1)
 
-        # setup possible magnification list
-        mag_step = const.MAG_STEP
-        mag_len_half = int(const.TOTAL_MAG_STEPS/2)
-        # possible magnification list
-        self.zoom_list = [
-                mag_step**x
-                for x in range(-mag_len_half, mag_len_half+1)
-                ]
-        # set this to 1.0 by hand to make sure no floating-point shenanigans
-        #   might make it not exactly 1.0
-        self.zoom_list[mag_len_half] = 1.0
-        # set zoom_idx to 1.00 scaling
-        self.zoom_idx = mag_len_half
-        self.zoom_val = self.zoom_list[self.zoom_idx]
+        # create zoom ratios of rational numbers (fractions)
+        #   and set zoom to 1.00
+        self.create_rational_zooms(
+                const.MAG_STEP,
+                const.TOTAL_MAG_STEPS,
+                const.ZOOM_MAX_NUM_DENOM
+                )
 
         # setup handlers
         self.Bind(wx.EVT_PAINT, self.on_paint)
@@ -159,6 +173,49 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   without this, repainting will happen next iteration of event loop
         self.Update()
 
+    @debug_fxn
+    def create_rational_zooms(self, mag_step, total_mag_steps, max_num_denom):
+        """Create list of zoom ratios representable by rational numbers
+
+        Args:
+            mag_step (float): Ratio of adjacent zoom ratios
+            total_mag_steps (int): Total magnification steps from min to max
+                (centered on 1.0).  Should be an odd number.
+
+        Affects:
+            self.zoom_list
+            self.zoom_idx
+            self.zoom_val
+        """
+        mag_len_half = int(total_mag_steps/2)
+
+        # possible magnification list
+        zoom_list_ideal = [
+                mag_step**x
+                for x in range(-mag_len_half, mag_len_half+1)
+                ]
+        # set this to 1.0 by hand to make sure no floating-point shenanigans
+        #   might make it not exactly 1.0
+        zoom_list_ideal[mag_len_half] = 1.0
+
+        #errors = []
+        self.zoom_list = []
+        self.zoom_frac_list = []
+        for zoom_ideal in zoom_list_ideal:
+            (zoom, num, denom, error) = find_nearest_rational(
+                    zoom_ideal,
+                    const.ZOOM_MAX_NUM_DENOM
+                    )
+            #errors.append(error)
+            self.zoom_list.append(zoom)
+            self.zoom_frac_list.append((num,denom))
+
+        #perc_errors = np.array(errors)/np.array(self.zoom_list)*100
+
+        # set zoom_idx to 1.00 scaling
+        self.zoom_idx = mag_len_half
+        self.zoom_val = self.zoom_list[self.zoom_idx]
+        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
     @debug_fxn
     def SetVirtualSizeNoSizeEvt(self, *args, **kwargs):
@@ -204,6 +261,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
         self.zoom_val = self.zoom_list[self.zoom_idx]
+        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # make sure canvas is no larger than window
         self.set_virt_size_with_min()
@@ -812,7 +870,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #           as it would be sized without scrollbars.
         # NICE: self.GetRect() always returns maximum size of client area
         #           as it would be sized without scrollbars.
-        #       Seems to always have position at (0,0), but width, height are 
+        #       Seems to always have position at (0,0), but width, height are
         #           good.
         # USELESS: self.GetMaxClientSize() always = (-1,-1)
         # USELESS: self.GetMaxSize() always = (-1,-1)
@@ -1381,6 +1439,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
+        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # expand virtual window size
         self.set_virt_size_with_min()
@@ -1440,6 +1499,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
+        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # set img centerpoint coords so img coords and win coords from mouse
         #   point are still the same
@@ -1493,6 +1553,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
+        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # set new virtual window size and scroll position based on new zoom
         self.set_virt_size_and_pos()
@@ -2411,10 +2472,12 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # save current self.zoom_val and self.img_coord_xlation_{x,y}
         zoom_val_save = self.zoom_val
+        zoom_frac_save = self.zoom_frac
         img_coord_xlation_x_save = self.img_coord_xlation_x
         img_coord_xlation_y_save = self.img_coord_xlation_y
         # set all mark-affecting parameters for output memDC
         self.zoom_val = 1
+        self.zoom_frac = (1,1)
         self.img_coord_xlation_x = 0
         self.img_coord_xlation_y = 0
 
@@ -2424,9 +2487,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 (size.width + sq_size), (size.height + sq_size))
 
         # restore self.zoom_val and self.img_coord_xlation_{x,y}
-        self.zoom_val = zoom_val_save 
-        self.img_coord_xlation_x = img_coord_xlation_x_save 
-        self.img_coord_xlation_y = img_coord_xlation_y_save 
+        self.zoom_val = zoom_val_save
+        self.zoom_frac = zoom_frac_save
+        self.img_coord_xlation_x = img_coord_xlation_x_save
+        self.img_coord_xlation_y = img_coord_xlation_y_save
 
         # Select the Bitmap out of the memory DC by selecting a new
         # uninitialized Bitmap
