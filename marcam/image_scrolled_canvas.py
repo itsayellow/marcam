@@ -1247,6 +1247,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         Returns:
             tuple: contains the following in order:
+                stretch_blit_args (mixed): All args to be sent to wx.StretchBlit
                 rect_pos_log (wx.Point): logical paint rect position
                 rect_size (wx.Size): paint rect size
                 blit_dest_pos (wx.Point): pos of img region in dest window
@@ -1255,6 +1256,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 blit_src_size (wx.Size): size of region in img src
                 scale_dc (int): which scale we are using src img
                 img_dc_src (wx.MemoryDC): which scaled DC we use for src img
+                actual_dest_pos (wx.Point): exact pos of image in logical
+                    coordinates with no quantization
+                actual_dest_size (wx.Size): exact size of image in logical
+                    coordinates with no quantization
         """
         # break out rect details into variables
         rect_pos = rect.GetPosition()
