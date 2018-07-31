@@ -238,8 +238,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history = win_history
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
-        self.img_coord_xlation_x = None
-        self.img_coord_xlation_y = None
+        self.img_coord_xlation = None
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
@@ -334,8 +333,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history.reset()
         self.img_at_wincenter_x = 0
         self.img_at_wincenter_y = 0
-        self.img_coord_xlation_x = None
-        self.img_coord_xlation_y = None
+        self.img_coord_xlation = None
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
@@ -935,8 +933,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             self.zoom_val
 
         Affects instance variables:
-            self.img_coord_xlation_x
-            self.img_coord_xlation_y
+            self.img_coord_xlation
         """
 
         # Paint entire client area red to debug possible repaint problems.
@@ -1038,18 +1035,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # center in window, not client area, so presence/absence of scrollbar
         #   doesn't affect placement
         if win_size.GetWidth() > self.img_size_x * self.zoom_val:
-            self.img_coord_xlation_x = int(
+            img_coord_xlation_x = int(
                     (win_size.GetWidth() - self.img_size_x * self.zoom_val) / 2
                     )
         else:
-            self.img_coord_xlation_x = 0
+            img_coord_xlation_x = 0
 
         if win_size.GetHeight() > self.img_size_y * self.zoom_val:
-            self.img_coord_xlation_y = int(
+            img_coord_xlation_y = int(
                     (win_size.GetHeight() - self.img_size_y * self.zoom_val) / 2
                     )
         else:
-            self.img_coord_xlation_y = 0
+            img_coord_xlation_y = 0
+        self.img_coord_xlation = wx.Point(img_coord_xlation_x, img_coord_xlation_y)
 
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom, divide by div_scale to get to img coordinates
@@ -1183,17 +1181,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def _rect_to_srcdest(self, rect_point_logical, scale_dc, use_floor=True):
         # INPUT: rect_pos_log, scale_dc, self
 
-        #zoom = dest_size/src_size
+        #zoom = dest_win_size/src_img_size
         (z_numer, z_denom) = self.zoom_frac
 
         # quantize destination positions AFTER subtracting self.img_coord_xlation
         #   then add self.img_coord_xlation back
         (x,y)=rect_point_logical.GetIM()
         # get untranslated x,y
-        x = x - self.img_coord_xlation_x
-        y = y - self.img_coord_xlation_y
-        rect_pos_destcoord = wx.Point(x,y)
-        # quantize x,y
+        x = x - self.img_coord_xlation.x
+        y = y - self.img_coord_xlation.y
+        # quantize x,y, rounding down or up
         if use_floor:
             x = floor(x / z_numer) * z_numer
             y = floor(y / z_numer) * z_numer
@@ -1206,8 +1203,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         blit_src_pos_x = rect_pos_quant_destcoord.x * z_denom / z_numer / scale_dc
         blit_src_pos_y = rect_pos_quant_destcoord.y * z_denom / z_numer / scale_dc
 
-        # make int and enforce min. val of 0
-        # TODO: also clip max value quantized!
+        # make int and enforce min. val of 0, max val of (img_size + quant)
         blit_src_pos_x = clip(
                 round(blit_src_pos_x),
                 0, ceil(self.img_size_x / z_denom) * z_denom / scale_dc
@@ -1220,8 +1216,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # dest coordinates are all logical
-        win_unscroll_x = blit_src_pos_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
-        win_unscroll_y = blit_src_pos_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
+        win_unscroll_x = blit_src_pos_x * z_numer * scale_dc / z_denom + self.img_coord_xlation.x
+        win_unscroll_y = blit_src_pos_y * z_numer * scale_dc / z_denom + self.img_coord_xlation.y
         blit_dest_pos = wx.Point(round(win_unscroll_x), round(win_unscroll_y))
         #blit_dest_pos = self.img2logical_coord(
         #        blit_src_pos_x, blit_src_pos_y, scale_dc=scale_dc
@@ -1296,8 +1292,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
         # compute actual dest size
         actual_dest_pos = wx.Point(
-                rect_pos_log.x + self.img_coord_xlation_x,
-                rect_pos_log.y + self.img_coord_xlation_y,
+                rect_pos_log.x + self.img_coord_xlation.x,
+                rect_pos_log.y + self.img_coord_xlation.y,
                 )
         actual_dest_size = wx.Size(
                 self.img_size_x * self.zoom_val,
@@ -1444,8 +1440,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         win_unscroll = self.CalcUnscrolledPosition(win_coord)
 
-        img_x = (win_unscroll.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
-        img_y = (win_unscroll.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
+        img_x = (win_unscroll.x - self.img_coord_xlation.x) / self.zoom_val / scale_dc
+        img_y = (win_unscroll.y - self.img_coord_xlation.y) / self.zoom_val / scale_dc
 
         return (img_x, img_y)
 
@@ -1465,15 +1461,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
         # TODO: remove these someday when we are confident
-        assert(isinstance(self.img_coord_xlation_x, int))
+        assert(isinstance(self.img_coord_xlation.x, int))
+        assert(isinstance(self.img_coord_xlation.y, int))
         assert(isinstance(self.zoom_frac[0], int))
         assert(isinstance(self.zoom_frac[1], int))
         assert(isinstance(scale_dc, int))
-        #img_x = (logical_coord.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
-        #img_y = (logical_coord.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
+        #img_x = (logical_coord.x - self.img_coord_xlation.x) / self.zoom_val / scale_dc
+        #img_y = (logical_coord.y - self.img_coord_xlation.y) / self.zoom_val / scale_dc
         # TODO: use integer division when we are confident answer is always int
-        img_x = (logical_coord.x - self.img_coord_xlation_x) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
-        img_y = (logical_coord.y - self.img_coord_xlation_y) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
+        img_x = (logical_coord.x - self.img_coord_xlation.x) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
+        img_y = (logical_coord.y - self.img_coord_xlation.y) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
         # TODO: remove these someday when we are confident
         assert img_x==int(img_x)
         assert img_y==int(img_y)
@@ -1492,8 +1489,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             wx.Point: position in logical unscrolled canvas coordinates
         """
-        win_unscroll_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
-        win_unscroll_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
+        win_unscroll_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation.x
+        win_unscroll_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation.y
 
         return wx.Point(round(win_unscroll_x), round(win_unscroll_y))
 
@@ -1509,8 +1506,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             tuple: (win_x (float), win_y (float)) position in device
                 window coordinates
         """
-        win_logical_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
-        win_logical_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
+        win_logical_x = img_x * self.zoom_val * scale_dc + self.img_coord_xlation.x
+        win_logical_y = img_y * self.zoom_val * scale_dc + self.img_coord_xlation.y
         (win_x, win_y) = self.CalcScrolledPosition(win_logical_x, win_logical_y)
         return (win_x, win_y)
 
@@ -2609,13 +2606,13 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # save current self.zoom_val and self.img_coord_xlation_{x,y}
         zoom_val_save = self.zoom_val
         zoom_frac_save = self.zoom_frac
-        img_coord_xlation_x_save = self.img_coord_xlation_x
-        img_coord_xlation_y_save = self.img_coord_xlation_y
+        img_coord_xlation_x_save = self.img_coord_xlation.x
+        img_coord_xlation_y_save = self.img_coord_xlation.y
         # set all mark-affecting parameters for output memDC
         self.zoom_val = 1
         self.zoom_frac = (1,1)
-        self.img_coord_xlation_x = 0
-        self.img_coord_xlation_y = 0
+        self.img_coord_xlation.x = 0
+        self.img_coord_xlation.y = 0
 
         self.draw_marks(
                 memDC,
@@ -2625,8 +2622,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # restore self.zoom_val and self.img_coord_xlation_{x,y}
         self.zoom_val = zoom_val_save
         self.zoom_frac = zoom_frac_save
-        self.img_coord_xlation_x = img_coord_xlation_x_save
-        self.img_coord_xlation_y = img_coord_xlation_y_save
+        self.img_coord_xlation.x = img_coord_xlation_x_save
+        self.img_coord_xlation.y = img_coord_xlation_y_save
 
         # Select the Bitmap out of the memory DC by selecting a new
         # uninitialized Bitmap
