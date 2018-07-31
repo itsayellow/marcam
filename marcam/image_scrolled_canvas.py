@@ -941,7 +941,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # Paint entire client area red to debug possible repaint problems.
         #   (Can see red if we're not repainting over something.)
-        if True:
+        if False:
             self._debug_paint_client_area()
 
         # Don't allow the window to update anything while we do a ton of
@@ -1183,14 +1183,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     def _rect_to_srcdest(self, rect_point_logical, scale_dc, use_floor=True):
         # INPUT: rect_pos_log, scale_dc, self
 
+        #zoom = dest_size/src_size
         (z_numer, z_denom) = self.zoom_frac
 
         # quantize destination positions AFTER subtracting self.img_coord_xlation
         #   then add self.img_coord_xlation back
         (x,y)=rect_point_logical.GetIM()
+        print("(x,y) = (%d,%d)"%(x,y))
         # get untranslated x,y
         x = x - self.img_coord_xlation_x
         y = y - self.img_coord_xlation_y
+        print("(x,y) = (%d,%d)"%(x,y))
         rect_pos_destcoord = wx.Point(x,y)
         # quantize x,y
         if use_floor:
@@ -1200,10 +1203,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             x = ceil(x / z_numer) * z_numer
             y = ceil(y / z_numer) * z_numer
         rect_pos_quant_destcoord = wx.Point(x,y)
-        ## translate back to window logical x,y
-        #x = x + self.img_coord_xlation_x
-        #y = y + self.img_coord_xlation_y
-        #rect_pos_log_quant = wx.Point(x,y)
 
 
 
@@ -1213,8 +1212,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # make int and enforce min. val of 0
         # TODO: also clip max value quantized!
-        blit_src_pos_x = clip(round(blit_src_pos_x), 0, None)
-        blit_src_pos_y = clip(round(blit_src_pos_y), 0, None)
+        blit_src_pos_x = clip(
+                round(blit_src_pos_x),
+                0, ceil(self.img_size_x / z_denom) * z_denom / scale_dc
+                )
+        blit_src_pos_y = clip(
+                round(blit_src_pos_y),
+                0, ceil(self.img_size_y / z_denom) * z_denom / scale_dc
+                )
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
@@ -1230,27 +1235,28 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
 
 
-
         # now find actual dest_pos
 
         # src img coordinates
         actual_src_pos_x = rect_pos_destcoord.x * z_denom / z_numer / scale_dc
         actual_src_pos_y = rect_pos_destcoord.y * z_denom / z_numer / scale_dc
+        print("actual_src_pos(x,y) = (%d,%d)"%(actual_src_pos_x,actual_src_pos_y))
 
         # make int and enforce min. val of 0
         # TODO: also clip max value quantized!
-        actual_src_pos_x = clip(round(actual_src_pos_x), 0, self.img_size_x / scale_dc)
-        actual_src_pos_y = clip(round(actual_src_pos_y), 0, self.img_size_y / scale_dc)
+        actual_src_pos_x = clip(actual_src_pos_x, 0, self.img_size_x / scale_dc)
+        actual_src_pos_y = clip(actual_src_pos_y, 0, self.img_size_y / scale_dc)
+        print("actual_src_pos(x,y) = (%d,%d)"%(actual_src_pos_x,actual_src_pos_y))
 
-        # multiply pos back out to get slightly off-window but
+        # multiply pos back out to get actual_dest_pos
         #   on src-pixel-boundary coords for dest
         # dest coordinates are all logical
-        win_unscroll_x = actual_src_pos_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
-        win_unscroll_y = actual_src_pos_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
+        win_unscroll_x = actual_src_pos_x * z_numer / z_denom * scale_dc + self.img_coord_xlation_x
+        win_unscroll_y = actual_src_pos_y * z_numer / z_denom * scale_dc + self.img_coord_xlation_y
         actual_dest_pos = wx.Point(round(win_unscroll_x), round(win_unscroll_y))
-        #blit_dest_pos = self.img2logical_coord(
-        #        blit_src_pos_x, blit_src_pos_y, scale_dc=scale_dc
-        #       )
+
+
+
         return (blit_dest_pos, blit_src_pos, actual_dest_pos)
 
 
@@ -2517,9 +2523,9 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 actual_dest_pos, actual_dest_size,
                 )
         if rects_to_draw:
-            #paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
             # debug pen:
-            paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+            #paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
             paintdc.SetBrush(paintdc.GetBackground())
             paintdc.DrawRectangleList(rects_to_draw)
 
