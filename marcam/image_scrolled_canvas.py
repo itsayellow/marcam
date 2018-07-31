@@ -26,6 +26,7 @@ import PIL.ImageOps
 
 import const
 import common
+from common import floor, ceil, clip
 import image_proc
 
 # logging stuff
@@ -39,66 +40,6 @@ LOGGER.addHandler(logging.NullHandler())
 debug_fxn = common.debug_fxn_factory(LOGGER.info)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
-
-def floor(num):
-    """Simple numerical ceiling function.
-
-    Args:
-        num (float): input number
-
-    Returns:
-        int: next lowest integer if num is non-integer, else: num
-    """
-    if int(num) > num:
-        # num is negative float
-        # e.g. int(-2.5) = -2
-        return int(num) - 1
-    else:
-        # num is integer, or num is positive float
-        # e.g. int(2.0) = 2
-        # e.g. int(2.5) = 2
-        return int(num)
-
-def ceil(num):
-    """Simple numerical ceiling function.
-
-    Args:
-        num (float): input number
-
-    Returns:
-        int: next highest integer if num is non-integer, else: num
-    """
-    if int(num) < num:
-        # num is positive float
-        # e.g. int(2.5) = 2
-        return int(num) + 1
-    else:
-        # num is integer, or num is negative float
-        # e.g. int(2.0) = 2
-        # e.g. int(-2.5) = -2
-        return int(num)
-
-def clip(num, num_min=None, num_max=None):
-    """Clip to max and/or min values.  To not use limit, give argument None
-
-    Args:
-        num (float): input number
-        num_min (float): minimum value, if less than this return this num
-            Use None to designate no minimum value.
-        num_max (float): maximum value, if more than this return this num
-            Use None to designate no maximum value.
-
-    Returns
-        float: clipped version of input number
-    """
-    if num_min is not None and num_max is not None:
-        return min(max(num, num_min), num_max)
-    elif num_min is not None:
-        return max(num, num_min)
-    elif num_max is not None:
-        return min(num, num_max)
-    else:
-        return num
 
 @debug_fxn
 def find_nearest_rational(input_num, possible_nums, possible_denoms):
