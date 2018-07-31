@@ -258,7 +258,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.overlay = wx.Overlay() # for making rubber-band box during drag
         self.rubberband_draw_rect = None
         self.rubberband_refresh_rect = None
-        self.zoom_frac = None
         self.zoom_frac_list = None
         self.zoom_idx = None
         self.zoom_list = None
@@ -290,7 +289,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = int(const.TOTAL_MAG_STEPS/2)
         self.zoom_val = self.zoom_list[self.zoom_idx]
-        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # setup handlers
         self.Bind(wx.EVT_PAINT, self.on_paint)
@@ -350,7 +348,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = self.zoom_list.index(1.0)
         self.zoom_val = self.zoom_list[self.zoom_idx]
-        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # make sure canvas is no larger than window
         self.set_virt_size_with_min()
@@ -1184,7 +1181,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # INPUT: rect_pos_log, scale_dc, self
 
         #zoom = dest_win_size/src_img_size
-        (z_numer, z_denom) = self.zoom_frac
+        (z_numer, z_denom) = self.zoom_frac_list[self.zoom_idx]
 
         # quantize destination positions AFTER subtracting self.img_coord_xlation
         #   then add self.img_coord_xlation back
@@ -1487,6 +1484,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             tuple: (img_x (float), img_y (float)) position in src image
                 coordinates
         """
+        (z_numer, z_denom) = self.zoom_frac_list[self.zoom_idx]
+
         # img_coord_xlation_{x,y} = 0 unless window is bigger than image
         #   in which case this is non-zero translation of left,top padding
         # self.img_coord_xlation_{x,y} is in window coordinates
@@ -1494,14 +1493,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # TODO: remove these someday when we are confident
         assert(isinstance(self.img_coord_xlation.x, int))
         assert(isinstance(self.img_coord_xlation.y, int))
-        assert(isinstance(self.zoom_frac[0], int))
-        assert(isinstance(self.zoom_frac[1], int))
+        assert(isinstance(z_numer, int))
+        assert(isinstance(z_denom, int))
         assert(isinstance(scale_dc, int))
         #img_x = (logical_coord.x - self.img_coord_xlation.x) / self.zoom_val / scale_dc
         #img_y = (logical_coord.y - self.img_coord_xlation.y) / self.zoom_val / scale_dc
         # TODO: use integer division when we are confident answer is always int
-        img_x = (logical_coord.x - self.img_coord_xlation.x) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
-        img_y = (logical_coord.y - self.img_coord_xlation.y) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
+        img_x = (logical_coord.x - self.img_coord_xlation.x) * z_denom / z_numer / scale_dc
+        img_y = (logical_coord.y - self.img_coord_xlation.y) * z_denom / z_numer / scale_dc
         # TODO: remove these someday when we are confident
         assert img_x==int(img_x)
         assert img_y==int(img_y)
@@ -1611,7 +1610,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
-        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # expand virtual window size
         self.set_virt_size_with_min()
@@ -1670,7 +1668,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
-        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # set img centerpoint coords so img coords and win coords from mouse
         #   point are still the same
@@ -1723,7 +1720,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # record floating point zoom
         self.zoom_val = self.zoom_list[self.zoom_idx]
-        self.zoom_frac = self.zoom_frac_list[self.zoom_idx]
 
         # set new virtual window size and scroll position based on new zoom
         self.set_virt_size_and_pos()
@@ -2632,14 +2628,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         #   portion of mark even if center of mark is not in region
         sq_size = const.CROSS_REFRESH_SQ_SIZE
 
-        # save current self.zoom_val and self.img_coord_xlation_{x,y}
-        zoom_val_save = self.zoom_val
-        zoom_frac_save = self.zoom_frac
+        # save current self.img_coord_xlation_{x,y}
         img_coord_xlation_x_save = self.img_coord_xlation.x
         img_coord_xlation_y_save = self.img_coord_xlation.y
         # set all mark-affecting parameters for output memDC
         self.zoom_val = 1
-        self.zoom_frac = (1,1)
         self.img_coord_xlation.x = 0
         self.img_coord_xlation.y = 0
 
@@ -2649,8 +2642,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 (size.width + sq_size), (size.height + sq_size))
 
         # restore self.zoom_val and self.img_coord_xlation_{x,y}
-        self.zoom_val = zoom_val_save
-        self.zoom_frac = zoom_frac_save
+        self.zoom_val = self.zoom_list[self.zoom_idx]
         self.img_coord_xlation.x = img_coord_xlation_x_save
         self.img_coord_xlation.y = img_coord_xlation_y_save
 
