@@ -1231,9 +1231,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #        blit_src_pos_x, blit_src_pos_y, scale_dc=scale_dc
         #       )
 
-
         return (blit_dest_pos, blit_src_pos)
-
 
     @debug_fxn
     def _get_rect_coords(self, rect):
@@ -1348,10 +1346,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return (
                 stretch_blit_args,
                 rect_pos_log, rect_size,
-                #blit_dest_pos, blit_dest_size,
                 blit_src_pos, blit_src_size,
                 scale_dc,
-                #img_dc_src,
                 actual_dest_pos, actual_dest_size
                 )
 
@@ -1375,10 +1371,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # get coords and choose scaled version of img_dc
         (
                 stretch_blit_args,
-                rect_pos_log,
-                rect_size,
-                blit_src_pos,
-                blit_src_size,
+                rect_pos_log, rect_size,
+                blit_src_pos, blit_src_size,
                 scale_dc,
                 actual_dest_pos, actual_dest_size
                 ) = self._get_rect_coords(rect)
@@ -2491,10 +2485,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # get coords and choose scaled version of img_dc
         (
                 stretch_blit_args,
-                rect_pos_log,
-                rect_size,
-                blit_src_pos,
-                blit_src_size,
+                rect_pos_log, rect_size,
+                blit_src_pos, blit_src_size,
                 scale_dc,
                 actual_dest_pos, actual_dest_size
                 ) = self._get_rect_coords(rect)
