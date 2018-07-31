@@ -222,6 +222,15 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
     return (zoom_list, zoom_frac_list)
 
 
+class RealPoint(wx.RealPoint):
+    """A version of wx.RealPoint that allows multiplication by float
+    """
+    def __mul__(self, other):
+        return RealPoint(self.x * other, self.y * other)
+    def __repr__(self):
+        return "RealPoint(" + repr(self.x) + ", " + repr(self.y) + ")"
+
+
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
     """Window (in the wx sense) widget that displays an image, zooms in and
@@ -236,8 +245,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   proper init)
         self.content_saved = True
         self.history = win_history
-        self.img_at_wincenter_x = 0
-        self.img_at_wincenter_y = 0
+        self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
         self.img_dc = None
         self.img_dc_div2 = None
@@ -331,8 +339,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         self.content_saved = True
         self.history.reset()
-        self.img_at_wincenter_x = 0
-        self.img_at_wincenter_y = 0
+        self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
         self.img_dc = None
         self.img_dc_div2 = None
@@ -388,8 +395,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """Set this scroll position as internally-saved scroll location
 
         Affects:
-            self.img_at_wincenter_x
-            self.img_at_wincenter_y
+            self.img_at_wincenter
         """
         # GetClientSize is size of window graphics not including scrollbars
         # GetSize is size of window including scrollbars
@@ -399,13 +405,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (win_size_x, win_size_y) = self.GetSize()
 
         # translate client center to zoomed image center coords
-        (self.img_at_wincenter_x, self.img_at_wincenter_y
+        (img_at_wincenter_x, img_at_wincenter_y
                 ) = self.win2img_coord(wx.Point(win_size_x/2, win_size_y/2))
+        self.img_at_wincenter = RealPoint(img_at_wincenter_x, img_at_wincenter_y)
 
         LOGGER.info(
                 "MSC:self.img_at_wincenter=(%.3f,%.3f)",
-                self.img_at_wincenter_x,
-                self.img_at_wincenter_y
+                self.img_at_wincenter.x,
+                self.img_at_wincenter.y
                 )
 
     @debug_fxn
@@ -416,7 +423,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             list: scroll_zoom_state - (scroll_coords, zoom_index)
         """
         return (
-                (self.img_at_wincenter_x, self.img_at_wincenter_y),
+                self.img_at_wincenter,
                 self.zoom_idx
                 )
 
@@ -427,34 +434,31 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             scroll_zoom_state (tuple): (scroll_coords, zoom_idx)
         """
-        (self.img_at_wincenter_x, self.img_at_wincenter_y) = scroll_zoom_state[0]
+        self.img_at_wincenter = scroll_zoom_state[0]
         # zoom() will scroll to self.img_at_wincenter_{x,y} after zoom
         self.zoom(scroll_zoom_state[1] - self.zoom_idx)
 
     @debug_fxn
     def scroll_to_img_at_wincenter(self):
         """Scroll window so center of window is at intern. saved scroll location
-        (self.img_at_wincenter_x, self.img_at_wincenter_y)
+        self.img_at_wincenter
         """
         # use GetSize not GetClientSize, so presence or absence of scrollbars
         #   doesn't affect image location in window
         (win_size_x, win_size_y) = self.GetSize()
         (scroll_ppu_x, scroll_ppu_y) = self.GetScrollPixelsPerUnit()
 
-        img_zoom_wincenter_x = self.img_at_wincenter_x * self.zoom_val
-        img_zoom_wincenter_y = self.img_at_wincenter_y * self.zoom_val
+        img_zoom_wincenter = self.img_at_wincenter * self.zoom_val
+        origin = img_zoom_wincenter - RealPoint(win_size_x/2, win_size_y/2)
 
-        origin_x = img_zoom_wincenter_x - win_size_x/2
-        origin_y = img_zoom_wincenter_y - win_size_y/2
-
-        scroll_x = round(origin_x/scroll_ppu_x)
-        scroll_y = round(origin_y/scroll_ppu_y)
+        scroll_x = round(origin.x/scroll_ppu_x)
+        scroll_y = round(origin.y/scroll_ppu_y)
         self.Scroll(scroll_x, scroll_y)
         LOGGER.debug(
                 "MSC:img_zoom_wincenter = (%.3f,%.3f)\nMSC:origin = " + \
                         "(%.3f,%.3f)\nMSC:Scroll to (%d,%d)",
-                img_zoom_wincenter_x, img_zoom_wincenter_y,
-                origin_x, origin_y,
+                img_zoom_wincenter.x, img_zoom_wincenter.y,
+                origin.x, origin.y,
                 scroll_x, scroll_y
                 )
 
@@ -673,8 +677,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 img_x, img_y
                 )
 
-        #self.img_at_wincenter_x = img_x
-        #self.img_at_wincenter_y = img_y
+        #self.img_at_wincenter = RealPoint(img_x, img_y)
         #self.scroll_to_img_at_wincenter()
         self.panimate(img_x, img_y, 1250)
 
@@ -699,8 +702,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         img_x_end = clip(img_x_end, xmin, xmax)
         img_y_end = clip(img_y_end, ymin, ymax)
 
-        img_x_start = self.img_at_wincenter_x
-        img_y_start = self.img_at_wincenter_y
+        img_x_start = self.img_at_wincenter.x
+        img_y_start = self.img_at_wincenter.y
 
         # if we're not moving then just return
         if img_x_end == img_x_start and img_y_end == img_y_start:
@@ -772,8 +775,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # 1 <= pop_num <= len(x_vals)
         pop_num = clip(pop_num, 1, len(x_vals))
         for _ in range(pop_num):
-            self.img_at_wincenter_x = x_vals.pop(0)
-            self.img_at_wincenter_y = y_vals.pop(0)
+            self.img_at_wincenter = RealPoint(x_vals.pop(0), y_vals.pop(0))
         self.scroll_to_img_at_wincenter()
         if x_vals:
             wx.CallLater(
@@ -1594,8 +1596,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.set_virt_size_with_min()
 
         # set image center at window center
-        self.img_at_wincenter_x = self.img_size_x/2
-        self.img_at_wincenter_y = self.img_size_y/2
+        self.img_at_wincenter = RealPoint(self.img_size_x/2, self.img_size_y/2)
 
         if do_refresh:
             # force a paint event with Refresh and Update
@@ -1634,8 +1635,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #point_unscroll = self.CalcUnscrolledPosition(point.x, point.y)
         (img_x, img_y) = self.win2img_coord(win_coords)
         zoom_orig = self.zoom_val
-        delta_x_orig = img_x - self.img_at_wincenter_x
-        delta_y_orig = img_y - self.img_at_wincenter_y
+        delta_x_orig = img_x - self.img_at_wincenter.x
+        delta_y_orig = img_y - self.img_at_wincenter.y
 
         self.zoom_idx += zoom_amt
 
@@ -1654,8 +1655,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   point are still the same
         delta_x_new = delta_x_orig * zoom_orig / self.zoom_val
         delta_y_new = delta_y_orig * zoom_orig / self.zoom_val
-        self.img_at_wincenter_x = img_x - delta_x_new
-        self.img_at_wincenter_y = img_y - delta_y_new
+        self.img_at_wincenter = RealPoint(img_x - delta_x_new, img_y - delta_y_new)
 
         # set new virtual window size and scroll position based on new zoom and
         #   new position
