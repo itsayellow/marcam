@@ -1202,8 +1202,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             y = ceil(y / z_numer) * z_numer
         rect_pos_quant_destcoord = wx.Point(x,y)
 
-
-
         # img coordinates of upper left corner
         blit_src_pos_x = rect_pos_quant_destcoord.x * z_denom / z_numer / scale_dc
         blit_src_pos_y = rect_pos_quant_destcoord.y * z_denom / z_numer / scale_dc
@@ -1231,29 +1229,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         blit_src_pos = wx.Point(blit_src_pos_x, blit_src_pos_y)
 
-
-
-        # now find actual dest_pos
-
-        # src img coordinates
-        actual_src_pos_x = rect_pos_destcoord.x * z_denom / z_numer / scale_dc
-        actual_src_pos_y = rect_pos_destcoord.y * z_denom / z_numer / scale_dc
-
-        # make int and enforce min. val of 0
-        # TODO: also clip max value quantized!
-        actual_src_pos_x = clip(actual_src_pos_x, 0, self.img_size_x / scale_dc)
-        actual_src_pos_y = clip(actual_src_pos_y, 0, self.img_size_y / scale_dc)
-
-        # multiply pos back out to get actual_dest_pos
-        #   on src-pixel-boundary coords for dest
-        # dest coordinates are all logical
-        win_unscroll_x = actual_src_pos_x * z_numer / z_denom * scale_dc + self.img_coord_xlation_x
-        win_unscroll_y = actual_src_pos_y * z_numer / z_denom * scale_dc + self.img_coord_xlation_y
-        actual_dest_pos = wx.Point(round(win_unscroll_x), round(win_unscroll_y))
-
-
-
-        return (blit_dest_pos, blit_src_pos, actual_dest_pos)
+        return (blit_dest_pos, blit_src_pos)
 
 
     @debug_fxn
@@ -1289,11 +1265,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             img_dc_src = self.img_dc_div4
             scale_dc = 4
 
-        # zoom = window_size/image_size
-        # zoom = blit_dest_size/src_size
-        numerator = self.zoom_frac[0]
-        denominator = self.zoom_frac[1]
-
         # rect_pos_{x,y} is upper left corner
         # rect_lr_{x,y} is lower right corner
         rect_lr = rect_pos + rect_size
@@ -1303,30 +1274,34 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # from logical upper-left rect point, compute upper-left
         #   in both src and dest blit coordinates
-        (blit_dest_pos, blit_src_pos, actual_dest_pos) = self._rect_to_srcdest(
+        (blit_dest_pos, blit_src_pos) = self._rect_to_srcdest(
                 rect_pos_log, scale_dc, use_floor=True
                 )
         
         # from logical lower-right rect point, compute upper-left
         #   in both src and dest blit coordinates
-        (dest_lr_pos, src_lr_pos, actual_lr_pos) = self._rect_to_srcdest(
+        (dest_lr_pos, src_lr_pos) = self._rect_to_srcdest(
                 rect_lr_log, scale_dc, use_floor=False
                 )
 
-        # compute src size (quantized)
+        # compute blit src size (zoom patch quantized)
         blit_src_size = wx.Size(
                 src_lr_pos.x - blit_src_pos.x,
                 src_lr_pos.y - blit_src_pos.y
                 )
-        # compute dest size (quantized)
+        # compute blit dest size (zoom patch quantized)
         blit_dest_size = wx.Size(
                 dest_lr_pos.x - blit_dest_pos.x,
                 dest_lr_pos.y - blit_dest_pos.y
                 )
         # compute actual dest size
+        actual_dest_pos = wx.Point(
+                rect_pos_log.x + self.img_coord_xlation_x,
+                rect_pos_log.y + self.img_coord_xlation_y,
+                )
         actual_dest_size = wx.Size(
-                actual_lr_pos.x - actual_dest_pos.x,
-                actual_lr_pos.y - actual_dest_pos.y
+                self.img_size_x * self.zoom_val,
+                self.img_size_y * self.zoom_val
                 )
 
         # TODO: Most of these are passed directly to StretchBlit and no other.
