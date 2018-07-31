@@ -1841,7 +1841,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
-        self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
+        self.history.new(
+                ['IMAGE_XFORM', wx_image_orig, wx_image_new],
+                description = "Image Invert"
+                )
         self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
@@ -1858,7 +1861,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
-        self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
+        self.history.new(
+                ['IMAGE_XFORM', wx_image_orig, wx_image_new],
+                description = "Image False Color"
+                )
         self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
@@ -1875,7 +1881,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
-        self.history.new(['IMAGE_XFORM', wx_image_orig, wx_image_new])
+        self.history.new(
+                ['IMAGE_XFORM', wx_image_orig, wx_image_new],
+                description = "Image Auto-Contrast"
+                )
         self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
@@ -1979,8 +1988,12 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 img_pt = (int(img_x), int(img_y))
                 mark_added = self.mark_point(img_pt)
                 if mark_added:
-                    self.history.new(['MARK', img_pt])
+                    self.history.new(
+                            ['MARK', img_pt],
+                            description = "Add Mark"
+                            )
                 else:
+                    # TODO: IS THIS WRONG?  Should we delete this?
                     self.history.new(['NOP'])
         else:
             # we allow click outside of image in case we drag onto image
@@ -2204,7 +2217,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                         self.mark_dragging_is_sel
                         )
                 # MOVE_MARK from_coord to_coord
-                self.history.new(['MOVE_MARK', self.mouse_left_down['mark_pt'], mark_new_loc])
+                self.history.new(
+                        ['MOVE_MARK', self.mouse_left_down['mark_pt'], mark_new_loc],
+                        description = "Move Mark"
+                        )
 
         else:
             # finish click by selecting at point with args from on_left_down

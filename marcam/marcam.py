@@ -248,17 +248,26 @@ class EditHistory():
         self._update_menu_items()
 
     @debug_fxn
-    def new(self, item):
+    def new(self, item, description=""):
         """Make a new Edit History item
 
         Args:
             item (list): list with first item being action string, and
                 following items information concerning that action
+            description (str): Short text description of the action,
+                for putting after "Undo" or "Redo" in menu items.
+                e.g. "Undo Add Marks", "Undo Image Invert"
         """
         # truncate list so current item is last item (makes empty list
         #   if self.history_ptr == -1)
         self.history = self.history[:self.history_ptr + 1]
-        self.history.append({'edit_action':item, 'save_flag':False})
+        self.history.append(
+                {
+                    'edit_action':item,
+                    'description':description,
+                    'save_flag':False
+                    }
+                )
         self.history_ptr = len(self.history) - 1
         self._update_menu_items()
 
@@ -351,8 +360,31 @@ class EditHistory():
         """
         if self.undo_menu_item is not None:
             self.undo_menu_item.Enable(self._can_undo())
+            if self._can_undo():
+                key_accel = self.undo_menu_item.GetItemLabel().split('\t')[1]
+                undo_descrip = self.history[self.history_ptr]['description']
+                self.undo_menu_item.SetItemLabel(
+                        "Undo " + undo_descrip + "\t" + key_accel
+                        )
+            else:
+                key_accel = self.undo_menu_item.GetItemLabel().split('\t')[1]
+                self.undo_menu_item.SetItemLabel(
+                        "Undo\t" + key_accel
+                        )
+
         if self.redo_menu_item is not None:
             self.redo_menu_item.Enable(self._can_redo())
+            if self._can_redo():
+                key_accel = self.redo_menu_item.GetItemLabel().split('\t')[1]
+                undo_descrip = self.history[self.history_ptr + 1]['description']
+                self.redo_menu_item.SetItemLabel(
+                        "Redo " + undo_descrip + "\t" + key_accel
+                        )
+            else:
+                key_accel = self.redo_menu_item.GetItemLabel().split('\t')[1]
+                self.redo_menu_item.SetItemLabel(
+                        "Redo\t" + key_accel
+                        )
 
     @debug_fxn
     def register_undo_menu_item(self, undo_menu_item):
@@ -913,7 +945,10 @@ class ImageWindow(wx.Frame):
         if key_code == 127 or key_code == 8:
             # Delete (127) or Backspace (8)
             deleted_marks = self.img_panel.delete_selected_marks()
-            self.win_history.new(['DELETE_MARK_LIST', deleted_marks])
+            self.win_history.new(
+                    ['DELETE_MARK_LIST', deleted_marks],
+                    description="Delete Marks"
+                    )
 
         #if key_code == 307:
             # option key - initiate temporary zoom
@@ -1091,10 +1126,11 @@ class ImageWindow(wx.Frame):
         self.open_image(img_path)
 
     def open_image(self, img_path):
-        """Open new image, in this frame if it has no file, otherwise in new frame
+        """Open new image, in this frame if it has no file, otherwise
+        in new frame.
         """
         if self.img_panel.has_no_image():
-            self.open_image_this_frame(img_path)
+            img_ok = self.open_image_this_frame(img_path)
             if const.PLATFORM == 'mac':
                 # on Mac we hide the last frame we close.  So when opening
                 #   we need to show it again
