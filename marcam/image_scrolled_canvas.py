@@ -1300,20 +1300,36 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 dest_lr_pos.x - blit_dest_pos.x,
                 dest_lr_pos.y - blit_dest_pos.y
                 )
-        # compute actual dest size
+        # compute actual dest size by taking upper-left and lower-right
+        #   positions of refresh rect and clipping them to img dest position
         actual_dest_pos = wx.Point(
-                rect_pos_log.x + self.img_coord_xlation.x,
-                rect_pos_log.y + self.img_coord_xlation.y,
+                clip(
+                    rect_pos_log.x,
+                    self.img_coord_xlation.x,
+                    self.img_coord_xlation.x + self.img_size_x * self.zoom_val
+                    ),
+                clip(
+                    rect_pos_log.y,
+                    self.img_coord_xlation.y,
+                    self.img_coord_xlation.y + self.img_size_y * self.zoom_val
+                    )
                 )
-        actual_dest_size = wx.Size(
-                self.img_size_x * self.zoom_val,
-                self.img_size_y * self.zoom_val
+        actual_dest_lr = wx.Point(
+                clip(
+                    rect_lr_log.x,
+                    self.img_coord_xlation.x,
+                    self.img_coord_xlation.x + self.img_size_x * self.zoom_val
+                    ),
+                clip(
+                    rect_lr_log.y,
+                    self.img_coord_xlation.y,
+                    self.img_coord_xlation.y + self.img_size_y * self.zoom_val
+                    )
                 )
+        actual_dest_size = actual_dest_lr - actual_dest_pos
 
-        # TODO: Most of these are passed directly to StretchBlit and no other.
-        #   We should bundle all of the StretchBlit arguments into one tuple
-        #   so that it can be just passed with an asterisk * expansion
-        #   directly to StretchBlit?
+        # Bundle all of the StretchBlit arguments into one tuple so that it can
+        #   be just passed with an asterisk * expansion directly to StretchBlit
         stretch_blit_args = (
                 blit_dest_pos.x, blit_dest_pos.y,
                 blit_dest_size.x, blit_dest_size.y,
