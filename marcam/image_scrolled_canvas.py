@@ -1197,11 +1197,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         else:
             x = ceil(x / z_numer) * z_numer
             y = ceil(y / z_numer) * z_numer
+        assert int(x) == x
+        assert int(y) == y
         rect_pos_quant_destcoord = wx.Point(x,y)
 
         # img coordinates of upper left corner
         blit_src_pos_x = rect_pos_quant_destcoord.x * z_denom / z_numer / scale_dc
         blit_src_pos_y = rect_pos_quant_destcoord.y * z_denom / z_numer / scale_dc
+        assert int(blit_src_pos_x) == blit_src_pos_x
+        assert int(blit_src_pos_y) == blit_src_pos_y
 
         # make int and enforce min. val of 0, max val of (img_size + quant)
         blit_src_pos_x = clip(
@@ -1212,18 +1216,22 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 round(blit_src_pos_y),
                 0, ceil(self.img_size_y / z_denom) * z_denom / scale_dc
                 )
+        assert int(blit_src_pos_x) == blit_src_pos_x
+        assert int(blit_src_pos_y) == blit_src_pos_y
+        blit_src_pos = wx.Point(blit_src_pos_x, blit_src_pos_y)
 
         # multiply pos back out to get slightly off-window but
         #   on src-pixel-boundary coords for dest
         # dest coordinates are all logical
-        win_unscroll_x = blit_src_pos_x * z_numer * scale_dc / z_denom + self.img_coord_xlation.x
-        win_unscroll_y = blit_src_pos_y * z_numer * scale_dc / z_denom + self.img_coord_xlation.y
-        blit_dest_pos = wx.Point(round(win_unscroll_x), round(win_unscroll_y))
+        blit_dest_pos_x = blit_src_pos_x * z_numer * scale_dc / z_denom + self.img_coord_xlation.x
+        blit_dest_pos_y = blit_src_pos_y * z_numer * scale_dc / z_denom + self.img_coord_xlation.y
+        assert int(blit_dest_pos_x) == blit_dest_pos_x
+        assert int(blit_dest_pos_y) == blit_dest_pos_y
+        blit_dest_pos = wx.Point(round(blit_dest_pos_x), round(blit_dest_pos_y))
         #blit_dest_pos = self.img2logical_coord(
         #        blit_src_pos_x, blit_src_pos_y, scale_dc=scale_dc
         #       )
 
-        blit_src_pos = wx.Point(blit_src_pos_x, blit_src_pos_y)
 
         return (blit_dest_pos, blit_src_pos)
 
