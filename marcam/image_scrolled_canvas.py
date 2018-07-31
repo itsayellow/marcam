@@ -40,6 +40,25 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 
+def floor(num):
+    """Simple numerical ceiling function.
+
+    Args:
+        num (float): input number
+
+    Returns:
+        int: next lowest integer if num is non-integer, else: num
+    """
+    if int(num) > num:
+        # num is negative float
+        # e.g. int(-2.5) = -2
+        return int(num) - 1
+    else:
+        # num is integer, or num is positive float
+        # e.g. int(2.0) = 2
+        # e.g. int(2.5) = 2
+        return int(num)
+
 def ceil(num):
     """Simple numerical ceiling function.
 
@@ -47,11 +66,16 @@ def ceil(num):
         num (float): input number
 
     Returns:
-        int: if num is non-integer: (int(num) + 1), else: num
+        int: next highest integer if num is non-integer, else: num
     """
     if int(num) < num:
+        # num is positive float
+        # e.g. int(2.5) = 2
         return int(num) + 1
     else:
+        # num is integer, or num is negative float
+        # e.g. int(2.0) = 2
+        # e.g. int(-2.5) = -2
         return int(num)
 
 def clip(num, num_min=None, num_max=None):
@@ -94,7 +118,8 @@ def find_nearest_rational(input_num, possible_nums, possible_denoms):
     zoom = test_nums[i]
     error = errors[i]
 
-    return (zoom, num, denom, error)
+    # cast numpy.uint16 to plain ints
+    return (zoom, int(num), int(denom), error)
 
 @debug_fxn
 def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
@@ -118,7 +143,8 @@ def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
     zoom = num/denom
     error = error_ratios[ok_index]
 
-    return (zoom, num, denom, error)
+    # cast numpy.uint16 to plain ints
+    return (zoom, int(num), int(denom), error)
 
 
 @debug_fxn
@@ -1154,6 +1180,79 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return rects_to_draw
 
     @debug_fxn
+    def _rect_to_srcdest(self, rect_point_logical, scale_dc):
+        # INPUT: rect_pos_log, scale_dc, self
+
+        (z_numer, z_denom) = self.zoom_frac
+
+        # quantize destination positions AFTER subtracting self.img_coord_xlation
+        #   then add self.img_coord_xlation back
+        (x,y)=rect_point_logical.GetIM()
+        # get untranslated x,y
+        x = x - self.img_coord_xlation_x
+        y = y - self.img_coord_xlation_y
+        rect_pos_destcoord = wx.Point(x,y)
+        # quantize x,y
+        x = int(x / z_numer) * z_numer
+        y = int(y / z_numer) * z_numer
+        rect_pos_quant_destcoord = wx.Point(x,y)
+        ## translate back to window logical x,y
+        #x = x + self.img_coord_xlation_x
+        #y = y + self.img_coord_xlation_y
+        #rect_pos_log_quant = wx.Point(x,y)
+
+
+
+        # img coordinates of upper left corner
+        blit_src_pos_x = rect_pos_quant_destcoord.x * z_denom / z_numer / scale_dc
+        blit_src_pos_y = rect_pos_quant_destcoord.y * z_denom / z_numer / scale_dc
+
+        # make int and enforce min. val of 0
+        # TODO: also clip max value quantized!
+        blit_src_pos_x = clip(round(blit_src_pos_x), 0, None)
+        blit_src_pos_y = clip(round(blit_src_pos_y), 0, None)
+
+        # multiply pos back out to get slightly off-window but
+        #   on src-pixel-boundary coords for dest
+        # dest coordinates are all logical
+        win_unscroll_x = blit_src_pos_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
+        win_unscroll_y = blit_src_pos_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
+        blit_dest_pos = wx.Point(round(win_unscroll_x), round(win_unscroll_y))
+        #blit_dest_pos = self.img2logical_coord(
+        #        blit_src_pos_x, blit_src_pos_y, scale_dc=scale_dc
+        #       )
+
+        # OUTPUT: blit_dest_pos, blit_src_pos_{x,y}
+
+        blit_src_pos = wx.Point(blit_src_pos_x, blit_src_pos_y)
+
+
+
+
+        # now find actual dest_pos
+
+        # src img coordinates
+        actual_src_pos_x = rect_pos_destcoord.x * z_denom / z_numer / scale_dc
+        actual_src_pos_y = rect_pos_destcoord.y * z_denom / z_numer / scale_dc
+
+        # make int and enforce min. val of 0
+        # TODO: also clip max value quantized!
+        actual_src_pos_x = clip(round(actual_src_pos_x), 0, self.img_size_x)
+        actual_src_pos_y = clip(round(actual_src_pos_y), 0, self.img_size_x)
+
+        # multiply pos back out to get slightly off-window but
+        #   on src-pixel-boundary coords for dest
+        # dest coordinates are all logical
+        win_unscroll_x = actual_src_pos_x * self.zoom_val * scale_dc + self.img_coord_xlation_x
+        win_unscroll_y = actual_src_pos_y * self.zoom_val * scale_dc + self.img_coord_xlation_y
+        actual_dest_pos = wx.Point(round(win_unscroll_x), round(win_unscroll_y))
+        #blit_dest_pos = self.img2logical_coord(
+        #        blit_src_pos_x, blit_src_pos_y, scale_dc=scale_dc
+        #       )
+        return (blit_dest_pos, blit_src_pos, actual_dest_pos)
+
+
+    @debug_fxn
     def _get_rect_coords(self, rect):
         """Get all useful coordinates for a paint event given EVT_PAINT rect
 
@@ -1162,14 +1261,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         Returns:
             tuple: contains the following in order:
-                rect_pos_log (wx.Point): paint rect position
+                rect_pos_log (wx.Point): logical paint rect position
                 rect_size (wx.Size): paint rect size
-                dest_pos (wx.Point): pos of region in dest window
-                dest_size (wx.Size): size of region in dest window
-                src_pos_x (float): x pos of region in img src
-                src_pos_y (float): y pos of region in img src
-                src_size_x (float): x size of region in img src
-                src_size_y (float): y size of region in src
+                blit_dest_pos (wx.Point): pos of img region in dest window
+                blit_dest_size (wx.Size): size of region in dest window
+                blit_src_pos (wx.Point): pos of region in img src
+                blit_src_size (wx.Size): size of region in img src
                 scale_dc (int): which scale we are using src img
                 img_dc_src (wx.MemoryDC): which scaled DC we use for src img
         """
@@ -1189,10 +1286,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             scale_dc = 4
 
         # zoom = window_size/image_size
-        # zoom = dest_size/src_size
+        # zoom = blit_dest_size/src_size
         numerator = self.zoom_frac[0]
         denominator = self.zoom_frac[1]
-        print("fraction: %d/%d"%(numerator, denominator))
 
         # rect_pos_{x,y} is upper left corner
         # rect_lr_{x,y} is lower right corner
@@ -1201,67 +1297,52 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         rect_pos_log = self.CalcUnscrolledPosition(rect_pos)
         rect_lr_log = self.CalcUnscrolledPosition(rect_lr)
 
-        # quantize destination positions
-        (x,y)=rect_pos_log.GetIM()
-        rect_pos_log = wx.Point(int(x/numerator)*numerator,int(y/numerator)*numerator)
-        (x,y)=rect_lr_log.GetIM()
-        rect_lr_log = wx.Point(ceil(x/numerator)*numerator,ceil(y/numerator)*numerator)
-
-        # img coordinates of upper left corner
-        (src_pos_x, src_pos_y) = self.logical2img_coord(
-                rect_pos_log,
-                scale_dc=scale_dc
+        # from logical upper-left rect point, compute upper-left
+        #   in both src and dest blit coordinates
+        (blit_dest_pos, blit_src_pos, actual_dest_pos) = self._rect_to_srcdest(
+                rect_pos_log, scale_dc
                 )
-        # make int and enforce min. val of 0
-        src_pos_x = clip(round(src_pos_x), 0, None)
-        src_pos_y = clip(round(src_pos_y), 0, None)
-
-        # img coordinates of lower right corner
-        (src_lr_x, src_lr_y) = self.logical2img_coord(
-                rect_lr_log,
-                scale_dc=scale_dc
+        
+        # from logical lower-right rect point, compute upper-left
+        #   in both src and dest blit coordinates
+        (dest_lr_pos, src_lr_pos, actual_lr_pos) = self._rect_to_srcdest(
+                rect_lr_log, scale_dc
                 )
 
-        # make int (via ceil) and enforce max. val of img_dc_src size
-        dc_size = img_dc_src.GetSize()
-        src_lr_x = clip(round(src_lr_x), None, ceil(dc_size.x/denominator)*denominator)
-        src_lr_y = clip(round(src_lr_y), None, ceil(dc_size.y/denominator)*denominator)
-
-        #dest_pos = rect_pos_log
-        #dest_lr = rect_lr_log
-        # multiply pos back out to get slightly off-window but
-        #   on src-pixel-boundary coords for dest
-        # dest coordinates are all logical
-        dest_pos = self.img2logical_coord(
-                src_pos_x, src_pos_y, scale_dc=scale_dc
-               )
-        print("src_pos: (%d,%d)  "%(src_pos_x, src_pos_y), end="")
-        print("dest_pos: (%d,%d)"%(dest_pos.x, dest_pos.y))
-
-        # multiply size back out to get slightly off-window but
-        #   on src-pixel-boundary coords for dest
-        dest_lr = self.img2logical_coord(
-                src_lr_x, src_lr_y, scale_dc=scale_dc
+        # compute src size (quantized)
+        blit_src_size = wx.Size(
+                src_lr_pos.x - blit_src_pos.x,
+                src_lr_pos.y - blit_src_pos.y
                 )
-
-        # compute src size
-        src_size_x = src_lr_x - src_pos_x
-        src_size_y = src_lr_y - src_pos_y
-        # compute dest size
-        dest_size = wx.Size(dest_lr.x - dest_pos.x, dest_lr.y - dest_pos.y)
+        # compute dest size (quantized)
+        blit_dest_size = wx.Size(
+                dest_lr_pos.x - blit_dest_pos.x,
+                dest_lr_pos.y - blit_dest_pos.y
+                )
+        # compute actual dest size
+        actual_dest_size = wx.Size(
+                actual_lr_pos.x - actual_dest_pos.x,
+                actual_lr_pos.y - actual_dest_pos.y
+                )
 
         # TODO: Most of these are passed directly to StretchBlit and no other.
         #   We should bundle all of the StretchBlit arguments into one tuple
         #   so that it can be just passed with an asterisk * expansion
         #   directly to StretchBlit?
+        stretch_blit_args = (
+                blit_dest_pos.x, blit_dest_pos.y,
+                blit_dest_size.x, blit_dest_size.y,
+                img_dc_src,
+                blit_src_pos.x, blit_src_pos.y,
+                blit_src_size.x, blit_src_size.y,
+                )
         return (
-                rect_pos_log,
-                rect_size,
-                dest_pos,
-                dest_size,
-                src_pos_x, src_pos_y,
-                src_size_x, src_size_y,
-                scale_dc, img_dc_src
+                stretch_blit_args,
+                rect_pos_log, rect_size,
+                blit_dest_pos, blit_dest_size,
+                blit_src_pos, blit_src_size,
+                scale_dc, img_dc_src,
+                actual_dest_pos, actual_dest_size
                 )
 
     @debug_fxn
@@ -1283,13 +1364,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # get coords and choose scaled version of img_dc
         (
+                stretch_blit_args,
                 rect_pos_log,
                 rect_size,
-                dest_pos,
-                dest_size,
-                src_pos_x, src_pos_y,
-                src_size_x, src_size_y,
-                scale_dc, img_dc_src
+                blit_dest_pos,
+                blit_dest_size,
+                blit_src_pos,
+                blit_src_size,
+                scale_dc, img_dc_src,
+                actual_dest_pos, actual_dest_size
                 ) = self._get_rect_coords(rect)
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
@@ -1299,24 +1382,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   dest region.  This way we can zoom and position accurately, while
         #   employing the clipping mask behavior of PaintDC to make sure we
         #   only display in the area of the window
-
         # copy region from self.img_dc into paintdc with possible stretching
         # TODO: clipping max to only blit to image area?
-        paintdc.StretchBlit(
-                dest_pos.x, dest_pos.y,
-                dest_size.x, dest_size.y,
-                img_dc_src,
-                src_pos_x, src_pos_y,
-                src_size_x, src_size_y,
-                )
+        paintdc.StretchBlit(*blit_args)
 
         # paint margins bg color if image is smaller than window
-        # TODO: use something other than dest_size (recompute from img size)
-        dest_img_size = wx.Size()
-        dest_img_size.SetHeight(min(dest_size.GetHeight(),self.img_size_y*self.zoom_frac[0]/self.zoom_frac[1]))
+        # TODO: use something other than blit_dest_size (recompute from img size)
+        #dest_img_size = wx.Size(
+        #        min(blit_dest_size.GetWidth(), self.img_size_x*self.zoom_frac[0]/self.zoom_frac[1]),
+        #        min(blit_dest_size.GetHeight(), self.img_size_y*self.zoom_frac[0]/self.zoom_frac[1]),
+        #)
         rects_to_draw = self._get_margin_rects(
                 rect_pos_log, rect_size,
-                dest_pos, dest_img_size,
+                actual_dest_pos, actual_dest_size,
                 )
         if rects_to_draw:
             paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
@@ -1412,12 +1490,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   in which case this is non-zero translation of left,top padding
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
+        # TODO: remove these someday when we are confident
+        assert(isinstance(self.img_coord_xlation_x, int))
+        assert(isinstance(self.zoom_frac[0], int))
+        assert(isinstance(self.zoom_frac[1], int))
+        assert(isinstance(scale_dc, int))
+        #img_x = (logical_coord.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
+        #img_y = (logical_coord.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
+        # TODO: use integer division when we are confident answer is always int
+        img_x = (logical_coord.x - self.img_coord_xlation_x) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
+        img_y = (logical_coord.y - self.img_coord_xlation_y) * self.zoom_frac[1] / self.zoom_frac[0] / scale_dc
+        # TODO: remove these someday when we are confident
+        assert img_x==int(img_x)
+        assert img_y==int(img_y)
 
-        # TODO: use self.zoom_frac instead of self.zoom_val
-        img_x = (logical_coord.x - self.img_coord_xlation_x) / self.zoom_val / scale_dc
-        img_y = (logical_coord.y - self.img_coord_xlation_y) / self.zoom_val / scale_dc
-
-        return (img_x, img_y)
+        return (int(img_x), int(img_y))
 
     # this happens too many times, don't print to logs normally
     #@debug_fxn
@@ -2402,30 +2489,16 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # get coords and choose scaled version of img_dc
         (
+                stretch_blit_args,
                 rect_pos_log,
                 rect_size,
-                dest_pos,
-                dest_size,
-                src_pos_x, src_pos_y,
-                src_size_x, src_size_y,
-                scale_dc, img_dc_src
+                blit_dest_pos,
+                blit_dest_size,
+                blit_src_pos,
+                blit_src_size,
+                scale_dc, img_dc_src,
+                actual_dest_pos, actual_dest_size
                 ) = self._get_rect_coords(rect)
-
-        # paint margins bg color if image is smaller than window
-        dest_img_size = wx.Size()
-        dest_img_size.SetHeight(min(dest_size.GetHeight(),self.img_size_y*self.zoom_frac[0]/self.zoom_frac[1]))
-        rects_to_draw = self._get_margin_rects(
-                rect_pos_log,
-                rect_size,
-                dest_pos,
-                dest_img_size,
-                )
-        if rects_to_draw:
-            paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
-            # debug pen:
-            #paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
-            paintdc.SetBrush(paintdc.GetBackground())
-            paintdc.DrawRectangleList(rects_to_draw)
 
         # NOTE: Blit shows no performance advantage over StretchBlit (Mac)
         # NOTE: StretchBlit uses ints for both src and dest pixel dimensions.
@@ -2434,15 +2507,28 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         #   dest region.  This way we can zoom and position accurately, while
         #   employing the clipping mask behavior of PaintDC to make sure we
         #   only display in the area of the window
-
         # copy region from self.img_dc into paintdc with possible stretching
-        paintdc.StretchBlit(
-                dest_pos.x, dest_pos.y,
-                dest_size.x, dest_size.y,
-                img_dc_src,
-                src_pos_x, src_pos_y,
-                src_size_x, src_size_y,
+        paintdc.StretchBlit(*stretch_blit_args)
+
+        # paint margins bg color if image is smaller than window
+        dest_img_size = wx.Size(
+                min(blit_dest_size.GetWidth(), self.img_size_x*self.zoom_frac[0]/self.zoom_frac[1]),
+                min(blit_dest_size.GetHeight(), self.img_size_y*self.zoom_frac[0]/self.zoom_frac[1]),
+        )
+        print("rect_pos_log = " + repr(rect_pos_log))
+        print("rect_size = " + repr(rect_size))
+        print("actual_dest_pos = " + repr(actual_dest_pos))
+        print("actual_dest_size = " + repr(actual_dest_size))
+        rects_to_draw = self._get_margin_rects(
+                rect_pos_log, rect_size,
+                actual_dest_pos, actual_dest_size,
                 )
+        if rects_to_draw:
+            #paintdc.SetPen(wx.Pen(wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT))
+            # debug pen:
+            paintdc.SetPen(wx.Pen(wx.Colour(255, 0, 0), width=1, style=wx.SOLID))
+            paintdc.SetBrush(paintdc.GetBackground())
+            paintdc.DrawRectangleList(rects_to_draw)
 
         # draw marks visible in this region
         # need to multiply by scale_dc to get back to div1 image coordinates
@@ -2451,8 +2537,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         sq_size = const.CROSS_REFRESH_SQ_SIZE
         self.draw_marks(
                 paintdc,
-                (src_pos_x - sq_size/2)*scale_dc, (src_pos_y - sq_size/2)*scale_dc,
-                (src_size_x + sq_size)*scale_dc, (src_size_y + sq_size)*scale_dc)
+                (blit_src_pos.x - sq_size/2)*scale_dc, (blit_src_pos.y - sq_size/2)*scale_dc,
+                (blit_src_size.x + sq_size)*scale_dc, (blit_src_size.y + sq_size)*scale_dc)
 
         # draw rubber-band box AFTER marks, so it is drawn on top of them
         if self.rubberband_draw_rect is not None:
