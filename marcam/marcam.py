@@ -398,7 +398,7 @@ class FileDropTarget(wx.FileDropTarget):
         # Close any existing image
         self.window_target.parent.close_image(keep_win_open=True)
         # Open Drag-and-Dropped image file
-        self.window_target.parent.open_image(filename)
+        self.window_target.parent.open_image_this_frame(filename)
 
         # TODO: which one of these??
         #return wx.DragCopy
@@ -437,7 +437,7 @@ class ImageWindow(wx.Frame):
 
         self.init_ui()
         if srcfile is not None:
-            self.open_image(srcfile)
+            self.open_image_this_frame(srcfile)
 
     @debug_fxn
     def init_ui(self):
@@ -1088,9 +1088,13 @@ class ImageWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
+        self.open_image(img_path)
 
+    def open_image(self, img_path):
+        """Open new image, in this frame if it has no file, otherwise in new frame
+        """
         if self.img_panel.has_no_image():
-            self.open_image(img_path)
+            self.open_image_this_frame(img_path)
             if const.PLATFORM == 'mac':
                 # on Mac we hide the last frame we close.  So when opening
                 #   we need to show it again
@@ -1098,11 +1102,14 @@ class ImageWindow(wx.Frame):
         else:
             self.parent.new_frame_open_file(img_path)
 
+    # TODO: Can we add to History if the File is already in FileHistory?
+    #   does that make a duplicate entry or not?
+    # TODO: If we cannot succesfully open a file, make error dialog
     @debug_fxn
-    def open_image(self, img_path):
+    def open_image_this_frame(self, img_path):
         (_, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".mcm":
-            self.load_mcmfile_from_path(img_path)
+            img_ok = self.load_mcmfile_from_path(img_path)
             self.save_filepath = img_path
             # add successful file open to file history
             self.file_history.AddFileToHistory(img_path)
@@ -1110,8 +1117,12 @@ class ImageWindow(wx.Frame):
             self.save_notify()
         else:
             # image or *.1sc file
-            self.load_image_from_file(img_path)
+            img_ok = self.load_image_from_file(img_path)
             # TODO: make it think it needs save immediately
+            #   (Is this already accomplished by not calling self.save_notify()?)
+
+        # if we successfully loaded the file return True, else False
+        return img_ok
 
     @debug_fxn
     def on_open_recent(self, evt):
@@ -1120,16 +1131,19 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        # TODO: open new window if this window is not blank
+        # TODO: Should we also prune this once every application start?
+        #   Can loop around GetHistoryFile(i)
 
         # get path from file_history
         img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
-        self.load_mcmfile_from_path(img_path)
-        self.save_filepath = img_path
-        # we just loaded, so have nothing to save
-        self.save_notify()
-        # add successful file open to file history
-        self.file_history.AddFileToHistory(img_path)
+        if os.path.exists(img_path):
+            self.open_image(img_path)
+        else:
+            # TODO: Error Dialog "Can't find file <img_path>"
+            self.statusbar.SetStatusText(
+                        "Image " + img_path + " not found."
+                        )
+            self.file_history.RemoveFileFromHistory(evt.GetId() - wx.ID_FILE1)
 
     @debug_fxn
     def load_mcmfile_from_path(self, imdata_path):
@@ -1201,6 +1215,9 @@ class ImageWindow(wx.Frame):
                     exc_info=True
                     )
 
+        # img_ok will only be True if we successfully loaded file
+        return img_ok
+
     @debug_fxn
     def load_image_from_file(self, img_file):
         """Given full (non *.mcm) img_file, load image into app
@@ -1210,6 +1227,8 @@ class ImageWindow(wx.Frame):
         Args:
             img_file (str): full path to image file (JPG, TIFF, etc.)
         """
+        img_ok = False
+
         # check for 1sc files and get image data to send to Image
         (_, imgfile_ext) = os.path.splitext(img_file)
         if imgfile_ext == ".1sc":
@@ -1243,6 +1262,9 @@ class ImageWindow(wx.Frame):
             self.statusbar.SetStatusText(
                     "Image " + img_file + " loading ERROR."
                     )
+
+        # img_ok will only be True if we successfully loaded file
+        return img_ok
 
     @debug_fxn
     def close_image(self, keep_win_open=False):
@@ -2033,7 +2055,7 @@ class MarcamApp(wx.App):
             if not self.file_windows or self.file_windows[0].has_image():
                 self.new_frame_open_file(open_file)
             else:
-                self.file_windows[0].open_image(open_file)
+                self.file_windows[0].open_image_this_frame(open_file)
 
     def OnExit(self):
         # save config_data right before app is about to exit
