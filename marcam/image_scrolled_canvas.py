@@ -1189,11 +1189,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # quantize destination positions AFTER subtracting self.img_coord_xlation
         #   then add self.img_coord_xlation back
         (x,y)=rect_point_logical.GetIM()
-        print("(x,y) = (%d,%d)"%(x,y))
         # get untranslated x,y
         x = x - self.img_coord_xlation_x
         y = y - self.img_coord_xlation_y
-        print("(x,y) = (%d,%d)"%(x,y))
         rect_pos_destcoord = wx.Point(x,y)
         # quantize x,y
         if use_floor:
@@ -1240,13 +1238,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # src img coordinates
         actual_src_pos_x = rect_pos_destcoord.x * z_denom / z_numer / scale_dc
         actual_src_pos_y = rect_pos_destcoord.y * z_denom / z_numer / scale_dc
-        print("actual_src_pos(x,y) = (%d,%d)"%(actual_src_pos_x,actual_src_pos_y))
 
         # make int and enforce min. val of 0
         # TODO: also clip max value quantized!
         actual_src_pos_x = clip(actual_src_pos_x, 0, self.img_size_x / scale_dc)
         actual_src_pos_y = clip(actual_src_pos_y, 0, self.img_size_y / scale_dc)
-        print("actual_src_pos(x,y) = (%d,%d)"%(actual_src_pos_x,actual_src_pos_y))
 
         # multiply pos back out to get actual_dest_pos
         #   on src-pixel-boundary coords for dest
@@ -1370,7 +1366,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             # DONE
             return
 
-        print("rect.GetSize() = " + repr(rect.GetSize()))
         # get coords and choose scaled version of img_dc
         (
                 stretch_blit_args,
@@ -2514,10 +2509,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # copy region from self.img_dc into paintdc with possible stretching
         paintdc.StretchBlit(*stretch_blit_args)
 
-        print("rect_pos_log = " + repr(rect_pos_log))
-        print("rect_size = " + repr(rect_size))
-        print("actual_dest_pos = " + repr(actual_dest_pos))
-        print("actual_dest_size = " + repr(actual_dest_size))
         rects_to_draw = self._get_margin_rects(
                 rect_pos_log, rect_size,
                 actual_dest_pos, actual_dest_size,
