@@ -1165,10 +1165,9 @@ class ImageWindow(wx.Frame):
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
         img_ok = self.open_image(img_path)
-        # TODO: what to do if this frame is hidden?
         if not img_ok:
             # wx.ICON_ERROR has no effect on Mac
-            wx.MessageDialog(self,
+            wx.MessageDialog(None,
                     message="Unable to open file: %s"%img_path,
                     caption="File Read Error",
                     #style=wx.OK
@@ -1197,19 +1196,28 @@ class ImageWindow(wx.Frame):
                     #style=wx.OK | wx.ICON_EXCLAMATION
                     ).ShowModal()
 
+    @debug_fxn
     def open_image(self, img_path):
         """Open new image, in this frame if it has no file, otherwise
         in new frame.
         """
         if self.img_panel.has_no_image():
             img_ok = self.open_image_this_frame(img_path)
-            if const.PLATFORM == 'mac':
+            if img_ok and const.PLATFORM == 'mac':
                 # on Mac we hide the last frame we close.  So when opening
                 #   we need to show it again
                 self.Show()
         else:
             # attempt to verify ok image before opening new frame
+
+            # wx.Image.CanRead has its own error log, which is setup to cause
+            #   error dialog.  Disable it if because want to use our own
+            no_log = wx.LogNull()
             img_ok = wx.Image.CanRead(img_path)
+            # re-enable logging
+            del no_log
+
+            print("img_ok = wx.Image.CanRead(img_path) = " + repr(img_ok))
             if img_ok:
                 self.parent.new_frame_open_file(img_path)
 
