@@ -390,7 +390,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         scroll_y = round(origin.y/scroll_ppu_y)
         self.Scroll(scroll_x, scroll_y)
         LOGGER.debug(
-                "MSC:img_zoom_wincenter = (%.3f,%.3f)\nMSC:origin = " + \
+                "MSC:img_zoom_wincenter = (%.3f,%.3f)\nMSC:origin = " \
                         "(%.3f,%.3f)\nMSC:Scroll to (%d,%d)",
                 img_zoom_wincenter.x, img_zoom_wincenter.y,
                 origin.x, origin.y,
@@ -875,8 +875,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # Paint entire client area red to debug possible repaint problems.
         #   (Can see red if we're not repainting over something.)
+        #pylint: disable=using-constant-test
         if False:
             self._debug_paint_client_area()
+        #pylint: enable=using-constant-test
 
         # Don't allow the window to update anything while we do a ton of
         #   playing around with the Virtual Size and scrolling to move to
@@ -915,7 +917,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #       (need to compare not to win_size, but win_size - scroll width)
         x_scrolled = self.img_size_x * self.zoom_val > win_size.GetWidth()
         y_scrolled = self.img_size_y * self.zoom_val > win_size.GetHeight()
-        only_one_scrolled = x_scrolled != y_scrolled
+        #only_one_scrolled = x_scrolled != y_scrolled
         both_or_none_scrolled = x_scrolled == y_scrolled
 
         if both_or_none_scrolled:
@@ -994,11 +996,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         LOGGER.debug("Thaw()")
 
     @debug_fxn
-    def on_size(self, evt):
+    def on_size(self, _evt):
         """EVT_SIZE handler: resizing window
 
         Args:
-            evt (wx.ScrollWinEvent): obj returned from scrolled window event
+            _evt (wx.ScrollWinEvent): obj returned from scrolled window event
         """
         # set new virtual window size and scroll position based on new window
         #   size
@@ -1013,11 +1015,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     # GetClientSize is size of window graphics not including scrollbars
     # GetSize is size of window including scrollbars
     @debug_fxn
-    def on_paint(self, evt):
+    def on_paint(self, _evt):
         """EVT_PAINT handler: update window area
 
         Args:
-            evt (wx.PaintEvent): no useful information
+            _evt (wx.PaintEvent): no useful information
         """
         if LOGGER.isEnabledFor(logging.DEBUG):
             start_onpaint = time.time()
@@ -1310,8 +1312,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (
                 stretch_blit_args,
                 rect_pos_log, rect_size,
-                blit_src_pos, blit_src_size,
-                scale_dc,
+                _, _,
+                _,
                 actual_dest_pos, actual_dest_size
                 ) = self._get_rect_coords(rect)
 
