@@ -1164,36 +1164,17 @@ class ImageWindow(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
-        self.open_image(img_path)
-
-    def open_image(self, img_path):
-        """Open new image, in this frame if it has no file, otherwise
-        in new frame.
-        """
-        if self.img_panel.has_no_image():
-            img_ok = self.open_image_this_frame(img_path)
-            if const.PLATFORM == 'mac':
-                # on Mac we hide the last frame we close.  So when opening
-                #   we need to show it again
-                self.Show()
-            self.menu_items_enable_disable()
-        else:
-            # TODO: try to verify ok image before opening new frame
-            self.parent.new_frame_open_file(img_path)
-
-    # TODO: If we cannot succesfully open a file, make error dialog
-    @debug_fxn
-    def open_image_this_frame(self, img_path):
-        (_, imgfile_ext) = os.path.splitext(img_path)
-        if imgfile_ext == ".mcm":
-            img_ok = self.load_mcmfile_from_path(img_path)
-        else:
-            # image or *.1sc file
-            img_ok = self.load_image_from_file(img_path)
-            # By not calling self.save_notify(), we indicate needs save
-
-        # if we successfully loaded the file return True, else False
-        return img_ok
+        img_ok = self.open_image(img_path)
+        # TODO: what to do if this frame is hidden?
+        if not img_ok:
+            # wx.ICON_ERROR has no effect on Mac
+            wx.MessageDialog(self,
+                    message="Unable to open file: %s"%img_path,
+                    caption="File Read Error",
+                    #style=wx.OK
+                    #style=wx.OK | wx.ICON_ERROR
+                    style=wx.OK | wx.ICON_EXCLAMATION
+                    ).ShowModal()
 
     @debug_fxn
     def on_open_recent(self, evt):
@@ -1212,6 +1193,48 @@ class ImageWindow(wx.Frame):
                         "Image " + img_path + " not found."
                         )
             self.file_history.RemoveFileFromHistory(evt.GetId() - wx.ID_FILE1)
+            wx.MessageDialog(self,
+                    message="Unable to find file: %s"%img_path,
+                    caption="File Not Found",
+                    style=wx.OK
+                    #style=wx.OK | wx.ICON_ERROR
+                    #style=wx.OK | wx.ICON_EXCLAMATION
+                    ).ShowModal()
+
+    def open_image(self, img_path):
+        """Open new image, in this frame if it has no file, otherwise
+        in new frame.
+        """
+        if self.img_panel.has_no_image():
+            img_ok = self.open_image_this_frame(img_path)
+            if const.PLATFORM == 'mac':
+                # on Mac we hide the last frame we close.  So when opening
+                #   we need to show it again
+                self.Show()
+        else:
+            # attempt to verify ok image before opening new frame
+            img_ok = wx.Image.CanRead(img_path)
+            if img_ok:
+                self.parent.new_frame_open_file(img_path)
+
+        return img_ok
+
+    # TODO: If we cannot succesfully open a file, make error dialog
+    @debug_fxn
+    def open_image_this_frame(self, img_path):
+        (_, imgfile_ext) = os.path.splitext(img_path)
+        if imgfile_ext == ".mcm":
+            img_ok = self.load_mcmfile_from_path(img_path)
+        else:
+            # image or *.1sc file
+            img_ok = self.load_image_from_file(img_path)
+            # By not calling self.save_notify(), we indicate needs save
+
+        if img_ok:
+            self.menu_items_enable_disable()
+
+        # if we successfully loaded the file return True, else False
+        return img_ok
 
     @debug_fxn
     def load_mcmfile_from_path(self, imdata_path):
