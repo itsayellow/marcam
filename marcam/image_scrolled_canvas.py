@@ -1784,7 +1784,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #       where only unique images saved.
         self.history.new(
                 ['IMAGE_XFORM', wx_image_orig, wx_image_new],
-                description = "Image Invert"
+                description="Invert Image"
                 )
         self.init_image(wx_image_new, do_zoom_fit=False)
 
@@ -1804,7 +1804,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #       where only unique images saved.
         self.history.new(
                 ['IMAGE_XFORM', wx_image_orig, wx_image_new],
-                description = "Image False Color"
+                description="Image False Color"
                 )
         self.init_image(wx_image_new, do_zoom_fit=False)
 
@@ -1824,7 +1824,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #       where only unique images saved.
         self.history.new(
                 ['IMAGE_XFORM', wx_image_orig, wx_image_new],
-                description = "Image Auto-Contrast"
+                description="Image Auto-Contrast"
                 )
         self.init_image(wx_image_new, do_zoom_fit=False)
 
@@ -1931,7 +1931,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 if mark_added:
                     self.history.new(
                             ['MARK', img_pt],
-                            description = "Add Mark"
+                            description="Add Mark"
                             )
                 else:
                     # TODO: IS THIS WRONG?  Should we delete this?
@@ -2160,7 +2160,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 # MOVE_MARK from_coord to_coord
                 self.history.new(
                         ['MOVE_MARK', self.mouse_left_down['mark_pt'], mark_new_loc],
-                        description = "Move Mark"
+                        description="Move Mark"
                         )
 
         else:

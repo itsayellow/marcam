@@ -255,7 +255,7 @@ class EditHistory():
                 following items information concerning that action
             description (str): Short text description of the action,
                 for putting after "Undo" or "Redo" in menu items.
-                e.g. "Undo Add Marks", "Undo Image Invert"
+                e.g. "Undo Add Marks", "Undo Invert Image"
         """
         # truncate list so current item is last item (makes empty list
         #   if self.history_ptr == -1)
@@ -953,7 +953,7 @@ class ImageWindow(wx.Frame):
             deleted_marks = self.img_panel.delete_selected_marks()
             self.win_history.new(
                     ['DELETE_MARK_LIST', deleted_marks],
-                    description="Delete Marks"
+                    description="Delete Mark" + ("s" if len(deleted_marks) > 1 else "")
                     )
 
         #if key_code == 307:
