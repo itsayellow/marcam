@@ -894,6 +894,10 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.CloseEvt):
         """
+        # can also use this to determine if last closed window shuts down app:
+        #   def wx.PyApp.SetExitOnFrameDelete(self, flag)
+        # https://wxpython.org/Phoenix/docs/html/wx.PyApp.html#wx.PyApp.SetExitOnFrameDelete
+        # but this may delete menus
         veto_close = self.parent.shutdown_frame(
                 self.GetId(),
                 force_close=not evt.CanVeto(),
@@ -2126,19 +2130,19 @@ class MarcamApp(wx.App):
         self.trying_to_quit = False
 
     @debug_fxn
-    def MacOpenFiles(self, fileNames):
+    def MacOpenFiles(self, file_names):
         """wx.PyApp standard function, over-ridden to accept Cocoa
         "openFiles" events
 
         Args:
-            fileNames: list of file names to open
+            file_names: list of file names to open
         """
         # NOTE: works great in bundled app,
-        #   but cmd-line invocation causes fileNames to be last argument
+        #   but cmd-line invocation causes file_names to be last argument
         #       of cmd-line, even if that's the script name
         # TODO: figure out how to ignore bad openFiles from command-line
-        LOGGER.debug(fileNames)
-        for open_file in fileNames:
+        LOGGER.debug(file_names)
+        for open_file in file_names:
             # open in blank window, or
             #   add to file_windows list of file windows
             if not self.file_windows or self.file_windows[0].has_image():
@@ -2152,8 +2156,6 @@ class MarcamApp(wx.App):
         save_config(self.config_data)
         return super().OnExit()
 
-    # TODO: can use this to determine if last closed window shuts down app
-    #def SetExitOnFrameDelete(self, flag)
 
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
