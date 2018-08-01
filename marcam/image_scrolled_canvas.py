@@ -50,7 +50,7 @@ def find_nearest_rational(input_num, possible_nums, possible_denoms):
         test_nums = np.array(possible_nums)/denom
         errors = np.abs(test_nums - np.array([input_num]*len(possible_nums)))
         num = possible_nums[np.argmin(errors)]
-        nums_denoms.append((num,denom))
+        nums_denoms.append((num, denom))
 
     test_nums = np.array([x[0]/x[1] for x in nums_denoms])
     errors = np.abs(test_nums - np.array([input_num]*len(possible_denoms)))
@@ -74,7 +74,7 @@ def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
     possible_denoms.sort()
 
     test_nums = np.tile(possible_nums, len(possible_denoms))
-    test_denoms = np.tile(possible_denoms, (len(possible_nums),1)).flatten('F')
+    test_denoms = np.tile(possible_denoms, (len(possible_nums), 1)).flatten('F')
     error_ratios = np.abs(test_nums/test_denoms - input_num)/input_num
 
     # first ok index is lowest numerator, denominator
@@ -154,7 +154,7 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
                 )
         #errors.append(error)
         zoom_list.append(zoom)
-        zoom_frac_list.append((num,denom))
+        zoom_frac_list.append((num, denom))
 
     #perc_errors = np.array(errors)*100
     #print(zoom_frac_list)
@@ -225,7 +225,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (self.zoom_list, self.zoom_frac_list) = create_rational_zooms(
                 const.MAG_STEP,
                 const.TOTAL_MAG_STEPS,
-                const.ZOOM_MAX_ERROR_TOL 
+                const.ZOOM_MAX_ERROR_TOL
                 )
         # set zoom_idx to 1.00 scaling
         self.zoom_idx = int(const.TOTAL_MAG_STEPS/2)
@@ -795,11 +795,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.SetVirtualSizeNoSizeEvt(size_x, size_y)
         client_dc = wx.ClientDC(self)
         client_dc.SetPen(
-                wx.Pen(colour=wx.Colour(0,0,0),width=1, style=wx.TRANSPARENT)
+                wx.Pen(colour=wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT)
                 )
         client_dc.SetBrush(
                 wx.Brush(
-                    colour=wx.Colour(0,255,0),
+                    colour=wx.Colour(0, 255, 0),
                     style=wx.BRUSHSTYLE_SOLID
                     )
                 )
@@ -828,7 +828,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         client_dc = wx.ClientDC(self)
         # invisible pen
         client_dc.SetPen(
-                wx.Pen(colour=wx.Colour(0,0,0),width=1, style=wx.TRANSPARENT)
+                wx.Pen(colour=wx.Colour(0, 0, 0), width=1, style=wx.TRANSPARENT)
                 )
         # background-colored brush for area
         client_dc.SetBrush(
@@ -1063,7 +1063,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     )
             if self.paint_times is not None:
                 zoom_str = "%.3f"%self.zoom_val
-                self.paint_times.setdefault(zoom_str,[]).append(onpaint_eltime)
+                self.paint_times.setdefault(zoom_str, []).append(onpaint_eltime)
 
 
     @debug_fxn
@@ -1126,7 +1126,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # quantize destination positions AFTER subtracting self.img_coord_xlation
         #   then add self.img_coord_xlation back
-        (x,y)=rect_point_logical.GetIM()
+        (x, y) = rect_point_logical.GetIM()
         # get untranslated x,y
         x = x - self.img_coord_xlation.x
         y = y - self.img_coord_xlation.y
@@ -1139,7 +1139,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             y = ceil(y / z_numer) * z_numer
         assert int(x) == x
         assert int(y) == y
-        rect_pos_quant_destcoord = wx.Point(x,y)
+        rect_pos_quant_destcoord = wx.Point(x, y)
 
         # img coordinates of upper left corner
         blit_src_pos_x = rect_pos_quant_destcoord.x * z_denom / z_numer / scale_dc
@@ -1230,7 +1230,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (blit_dest_pos, blit_src_pos) = self._rect_to_srcdest(
                 rect_pos_log, scale_dc, use_floor=True
                 )
-        
+
         # from logical lower-right rect point, compute upper-left
         #   in both src and dest blit coordinates
         (dest_lr_pos, src_lr_pos) = self._rect_to_srcdest(
@@ -1431,19 +1431,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # self.img_coord_xlation_{x,y} is in window coordinates
         #   divide by zoom to get to img coordinates
         # TODO: remove these someday when we are confident
-        assert(isinstance(self.img_coord_xlation.x, int))
-        assert(isinstance(self.img_coord_xlation.y, int))
-        assert(isinstance(z_numer, int))
-        assert(isinstance(z_denom, int))
-        assert(isinstance(scale_dc, int))
+        assert isinstance(self.img_coord_xlation.x, int)
+        assert isinstance(self.img_coord_xlation.y, int)
+        assert isinstance(z_numer, int)
+        assert isinstance(z_denom, int)
+        assert isinstance(scale_dc, int)
         #img_x = (logical_coord.x - self.img_coord_xlation.x) / self.zoom_val / scale_dc
         #img_y = (logical_coord.y - self.img_coord_xlation.y) / self.zoom_val / scale_dc
         # TODO: use integer division when we are confident answer is always int
         img_x = (logical_coord.x - self.img_coord_xlation.x) * z_denom / z_numer / scale_dc
         img_y = (logical_coord.y - self.img_coord_xlation.y) * z_denom / z_numer / scale_dc
         # TODO: remove these someday when we are confident
-        assert img_x==int(img_x)
-        assert img_y==int(img_y)
+        assert img_x == int(img_x)
+        assert img_y == int(img_y)
 
         return (int(img_x), int(img_y))
 
@@ -1751,13 +1751,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # Blit (in this case copy) the actual screen on the memory DC
         # and thus the Bitmap
-        memDC.Blit( 0, # Copy to this X coordinate
-            0, # Copy to this Y coordinate
-            size.width, # Copy this width
-            size.height, # Copy this height
-            dc_source, # From where do we copy?
-            0, # What's the X offset in the original DC?
-            0  # What's the Y offset in the original DC?
+        memDC.Blit(0, 0,    # dest position
+            size.width, size.height, # src, dest size
+            dc_source,      # From where do we copy?
+            0, 0            # src position
             )
 
         # Select the Bitmap out of the memory DC by selecting a new
@@ -2565,13 +2562,10 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # Blit (in this case copy) the actual screen on the memory DC
         # and thus the Bitmap
-        memDC.Blit( 0, # Copy to this X coordinate
-            0, # Copy to this Y coordinate
-            size.width, # Copy this width
-            size.height, # Copy this height
-            dc_source, # From where do we copy?
-            0, # What's the X offset in the original DC?
-            0  # What's the Y offset in the original DC?
+        memDC.Blit(0, 0,    # dest position
+            size.width, size.height, # src, dest size
+            dc_source,      # From where do we copy?
+            0, 0            # src position
             )
 
         # draw marks visible in this region
@@ -2605,4 +2599,3 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         img = bmp.ConvertToImage()
         #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
         return img
-
