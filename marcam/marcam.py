@@ -1313,7 +1313,7 @@ class ImageWindow(wx.Frame):
                         with container_fh.open(name, 'r') as json_fh:
                             marks = json.load(json_fh)
                         marks = [tuple(x) for x in marks]
-                        self.img_panel.mark_point_list(marks)
+            # need: img, img_name, marks
         except OSError:
             # TODO: need real error dialog
             img_ok = False
@@ -1323,6 +1323,7 @@ class ImageWindow(wx.Frame):
                     )
 
         if img_ok:
+            self.img_panel.mark_point_list(marks)
             self.img_panel.init_image(img)
             # set save_filepath to path of mcm file we loaded
             # self.img_path if from zip is list, zipfile, member_name
