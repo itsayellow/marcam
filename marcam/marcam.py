@@ -165,12 +165,11 @@ def load_config():
             const.USER_CONFIG_DIR,
             "config.json"
             )
-    # if no config.json file, create
     try:
         with open(config_filepath, 'r') as config_fh:
             config_data.update(json.load(config_fh))
     except:
-        # TODO specific exception
+        # if no config.json file, create
         create_config_file(config_filepath)
 
     return config_data
@@ -295,7 +294,7 @@ class EditHistory():
             bool: True if this point in history is saved
         """
         if self.history_ptr == -1:
-            # no edit history, so no save needed (TODO?)
+            # no edit history, so no save needed
             return True
         else:
             return self.history[self.history_ptr]['save_flag']
@@ -427,10 +426,17 @@ class FileDropTarget(wx.FileDropTarget):
         """
         filename = filenames[0]
         LOGGER.info("MSC:Drag and Drop filename:\n    %s", repr(filename))
-        # Close any existing image
-        self.window_target.parent.close_image(keep_win_open=True)
-        # Open Drag-and-Dropped image file
-        self.window_target.parent.open_image_this_frame(filename)
+
+        # ---------
+        # OPTION 1: Open new frame or put image in existing blank frame
+        self.window_target.parent.open_image(filename)
+        # ---------
+        ## OPTION 2: Replace existing image in same frame
+        ## Close any existing image
+        #self.window_target.parent.close_image(keep_win_open=True)
+        ## Open Drag-and-Dropped image file
+        #self.window_target.parent.open_image_this_frame(filename)
+        # ---------
 
         # TODO: which one of these??
         #return wx.DragCopy
