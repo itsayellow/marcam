@@ -447,7 +447,7 @@ class FileDropTarget(wx.FileDropTarget):
 
         # ---------
         # OPTION 1: Open new frame or put image in existing blank frame
-        self.window_target.parent.open_image(filename)
+        img_ok = self.window_target.parent.open_image(filename)
         # ---------
         ## OPTION 2: Replace existing image in same frame
         ## Close any existing image
@@ -457,7 +457,7 @@ class FileDropTarget(wx.FileDropTarget):
         # ---------
 
         # True to accept data, False to veto
-        return True
+        return img_ok
 
 
 class ImageWindow(wx.Frame):
@@ -1207,7 +1207,16 @@ class ImageWindow(wx.Frame):
         # get path from file_history
         img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
         if os.path.exists(img_path):
-            self.open_image(img_path)
+            img_ok = self.open_image(img_path)
+            if not img_ok:
+                # wx.ICON_ERROR has no effect on Mac
+                wx.MessageDialog(None,
+                        message="Unable to open file: %s"%img_path,
+                        caption="File Read Error",
+                        #style=wx.OK
+                        #style=wx.OK | wx.ICON_ERROR
+                        style=wx.OK | wx.ICON_EXCLAMATION
+                        ).ShowModal()
         else:
             self.file_history.RemoveFileFromHistory(evt.GetId() - wx.ID_FILE1)
             wx.MessageDialog(self,
@@ -1222,6 +1231,16 @@ class ImageWindow(wx.Frame):
     def open_image(self, img_path):
         """Open new image, in this frame if it has no file, otherwise
         in new frame.
+
+        Currently every function that calls this implements and error
+        dialog if img_ok is returned False
+
+        Args:
+            img_path (str): full path to image to open
+
+        Returns:
+            (bool) img_ok - whether image was successfully loaded into current
+                or new frame
         """
         if self.img_panel.has_no_image():
             img_ok = self.open_image_this_frame(img_path)
@@ -1295,35 +1314,37 @@ class ImageWindow(wx.Frame):
                             marks = json.load(json_fh)
                         marks = [tuple(x) for x in marks]
                         self.img_panel.mark_point_list(marks)
-            if img_ok:
-                self.img_panel.init_image(img)
-                # set save_filepath to path of mcm file we loaded
-                # self.img_path if from zip is list, zipfile, member_name
-                self.img_path = [imdata_path, img_name]
-                self.save_filepath = imdata_path
-                self.statusbar.SetStatusText(
-                        "Image Data " + imdata_path + " loaded OK."
-                        )
-                # Set window title to filename
-                self.SetTitle(os.path.basename(imdata_path))
-                # on Mac sets file icon in titlebar with right-click showing
-                #   dir hierarchy
-                self.SetRepresentedFilename(imdata_path)
-                # add successful file open to file history
-                self.file_history.AddFileToHistory(imdata_path)
-                # we just loaded .mcm file, so have nothing to save
-                self.save_notify()
-            else:
-                self.statusbar.SetStatusText(
-                        "Image " + imdata_path+ " loading ERROR."
-                        )
-
-        except IOError:
+        except OSError:
             # TODO: need real error dialog
+            img_ok = False
             LOGGER.warning(
                     "Cannot open data in file '%s'.", imdata_path,
                     exc_info=True
                     )
+
+        if img_ok:
+            self.img_panel.init_image(img)
+            # set save_filepath to path of mcm file we loaded
+            # self.img_path if from zip is list, zipfile, member_name
+            self.img_path = [imdata_path, img_name]
+            self.save_filepath = imdata_path
+            self.statusbar.SetStatusText(
+                    "Image Data " + imdata_path + " loaded OK."
+                    )
+            # Set window title to filename
+            self.SetTitle(os.path.basename(imdata_path))
+            # on Mac sets file icon in titlebar with right-click showing
+            #   dir hierarchy
+            self.SetRepresentedFilename(imdata_path)
+            # add successful file open to file history
+            self.file_history.AddFileToHistory(imdata_path)
+            # we just loaded .mcm file, so have nothing to save
+            self.save_notify()
+        else:
+            self.statusbar.SetStatusText(
+                    "Image " + imdata_path+ " loading ERROR."
+                    )
+
 
         # img_ok will only be True if we successfully loaded file
         return img_ok
