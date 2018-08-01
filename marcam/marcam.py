@@ -1534,6 +1534,8 @@ class ImageWindow(wx.Frame):
             _evt (wx.CommandEvent):
         """
         image_info_text = self.img_panel.get_image_info()
+        if image_info_text is None:
+            image_info_text = "Error retrieving image data."
         image_dialog = wx.lib.dialogs.ScrolledMessageDialog(
                 parent=self,
                 msg=image_info_text,
@@ -1558,7 +1560,7 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        self.img_panel.image_remap_colormap(map='viridis')
+        self.img_panel.image_remap_colormap(cmap='viridis')
 
     @debug_fxn
     def on_imgfalsecolorplasma(self, _evt):
@@ -1567,7 +1569,7 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        self.img_panel.image_remap_colormap(map='plasma')
+        self.img_panel.image_remap_colormap(cmap='plasma')
 
     @debug_fxn
     def on_imgfalsecolormagma(self, _evt):
@@ -1576,7 +1578,7 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        self.img_panel.image_remap_colormap(map='magma')
+        self.img_panel.image_remap_colormap(cmap='magma')
 
     @debug_fxn
     def on_imgfalsecolorinferno(self, _evt):
@@ -1585,7 +1587,7 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        self.img_panel.image_remap_colormap(map='inferno')
+        self.img_panel.image_remap_colormap(cmap='inferno')
 
     @debug_fxn
     def on_imgautocontrast0(self, _evt):

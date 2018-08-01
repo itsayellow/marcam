@@ -20,9 +20,6 @@ import time
 
 import wx
 import numpy as np
-import PIL.Image
-import PIL.ImageStat
-import PIL.ImageOps
 
 import const
 import common
@@ -1327,7 +1324,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   only display in the area of the window
         # copy region from self.img_dc into paintdc with possible stretching
         # TODO: clipping max to only blit to image area?
-        paintdc.StretchBlit(*blit_args)
+        paintdc.StretchBlit(*stretch_blit_args)
 
         # paint margins bg color if image is smaller than window
         rects_to_draw = self._get_margin_rects(
@@ -1767,11 +1764,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_invert(self):
-        # TODO: save modified image
-
         # return early if no image
         if self.has_no_image():
-            return None
+            return
 
         wx_image_orig = image_proc.memorydc2image(self.img_dc)
         wx_image_new = image_proc.image_invert(wx_image_orig)
@@ -1786,15 +1781,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.init_image(wx_image_new, do_zoom_fit=False)
 
     @debug_fxn
-    def image_remap_colormap(self, map='viridis'):
-        # TODO: save modified image
-
+    def image_remap_colormap(self, cmap='viridis'):
         # return early if no image
         if self.has_no_image():
-            return None
+            return
 
         wx_image_orig = image_proc.memorydc2image(self.img_dc)
-        wx_image_new = image_proc.image_remap_colormap(wx_image_orig, map=map)
+        wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
         # TODO: specifying orig,new for every image xform is redundant
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
@@ -1807,11 +1800,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
-        # TODO: save modified image
-
         # return early if no image
         if self.has_no_image():
-            return None
+            return
 
         wx_image_orig = image_proc.memorydc2image(self.img_dc)
         wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=cutoff)
@@ -2122,8 +2113,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 if not is_appending:
                     marks_unselected = [
                             x for x in self.marks_selected if x not in marks_in_box]
-                    marks_new_selected = [
-                            x for x in marks_in_box if x not in self.marks_selected]
+                    #marks_new_selected = [
+                    #        x for x in marks_in_box if x not in self.marks_selected]
                     self.marks_selected = marks_in_box
                     # marks_new_selected already in refresh_rect box, so
                     #   no need to refresh them individually.
