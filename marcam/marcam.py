@@ -435,7 +435,7 @@ class FileDropTarget(wx.FileDropTarget):
         ## Close any existing image
         #self.window_target.parent.close_image(keep_win_open=True)
         ## Open Drag-and-Dropped image file
-        #self.window_target.parent.open_image_this_frame(filename)
+        #img_ok = self.window_target.parent.open_image_this_frame(filename)
         # ---------
 
         # True to accept data, False to veto
@@ -1208,18 +1208,7 @@ class ImageWindow(wx.Frame):
                 #   we need to show it again
                 self.Show()
         else:
-            # attempt to verify ok image before opening new frame
-
-            # wx.Image.CanRead has its own error log, which is setup to cause
-            #   error dialog.  Disable it if because want to use our own
-            no_log = wx.LogNull()
-            img_ok = wx.Image.CanRead(img_path)
-            # re-enable logging
-            del no_log
-
-            print("img_ok = wx.Image.CanRead(img_path) = " + repr(img_ok))
-            if img_ok:
-                self.parent.new_frame_open_file(img_path)
+            img_ok = self.parent.new_frame_open_file(img_path)
 
         return img_ok
 
@@ -1490,7 +1479,7 @@ class ImageWindow(wx.Frame):
 
         # create new filename based on old one but ending with _export.png
         (default_dir, default_filename) = os.path.split(img_path)
-        (filename_root, filename_ext) = os.path.splitext(default_filename)
+        (filename_root, _) = os.path.splitext(default_filename)
         default_filename = filename_root + "_export.png"
 
         with wx.FileDialog(
@@ -1945,32 +1934,8 @@ class MarcamApp(wx.App):
             open_files = [None,]
 
         for open_file in open_files:
-            # add to file_windows list of file windows
-            new_size = wx.Size(self.config_data['winsize'])
-            if self.last_frame_pos == wx.DefaultPosition:
-                new_pos = self.last_frame_pos
-            else:
-                new_pos = wx.Point(
-                        self.last_frame_pos.x + const.NEW_FRAME_OFFSET,
-                        self.last_frame_pos.y + const.NEW_FRAME_OFFSET
-                        )
-                x_too_big = new_pos.x + new_size.x > self.display_size.x
-                y_too_big = new_pos.y + new_size.y > self.display_size.y
-                if x_too_big and y_too_big:
-                    new_pos = wx.DefaultPosition
-                elif x_too_big:
-                    new_pos.y = 0
-                elif y_too_big:
-                    new_pos.x = 0
-            self.file_windows.append(
-                    ImageWindow(
-                        self,
-                        open_file,
-                        size=new_size,
-                        pos=new_pos
-                        )
-                    )
-            self.last_frame_pos = self.file_windows[-1].GetPosition()
+            # TODO: what to do with files that can't open because error
+            img_ok = self.new_frame_open_file(open_file)
 
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
@@ -2106,33 +2071,42 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def new_frame_open_file(self, open_file):
-        new_size = wx.Size(self.config_data['winsize'])
-        if self.last_frame_pos == wx.DefaultPosition:
-            new_pos = self.last_frame_pos
-        else:
-            new_pos = wx.Point(
-                    self.last_frame_pos.x + const.NEW_FRAME_OFFSET,
-                    self.last_frame_pos.y + const.NEW_FRAME_OFFSET
+        # verify ok image before opening new frame
+        # wx.Image.CanRead has its own error log, which is setup to cause
+        #   error dialog.  Disable it if because want to use our own
+        no_log = wx.LogNull()
+        img_ok = wx.Image.CanRead(open_file)
+        # re-enable logging
+        del no_log
+
+        if img_ok:
+            new_size = wx.Size(self.config_data['winsize'])
+            if self.last_frame_pos == wx.DefaultPosition:
+                new_pos = self.last_frame_pos
+            else:
+                new_pos = wx.Point(
+                        self.last_frame_pos.x + const.NEW_FRAME_OFFSET,
+                        self.last_frame_pos.y + const.NEW_FRAME_OFFSET
+                        )
+                x_too_big = new_pos.x + new_size.x > self.display_size.x
+                y_too_big = new_pos.y + new_size.y > self.display_size.y
+                if x_too_big and y_too_big:
+                    new_pos = wx.DefaultPosition
+                elif x_too_big:
+                    new_pos.x = 0
+                elif y_too_big:
+                    new_pos.y = 0
+            self.file_windows.append(
+                    ImageWindow(
+                        self,
+                        open_file,
+                        size=new_size,
+                        pos=new_pos
+                        )
                     )
-            x_too_big = new_pos.x + new_size.x > self.display_size.x
-            y_too_big = new_pos.y + new_size.y > self.display_size.y
-            if x_too_big and y_too_big:
-                new_pos = wx.DefaultPosition
-            elif x_too_big:
-                new_pos.x = 0
-            elif y_too_big:
-                new_pos.y = 0
-        self.file_windows.append(
-                ImageWindow(
-                    self,
-                    open_file,
-                    size=new_size,
-                    pos=new_pos
-                    )
-                )
-        self.last_frame_pos = self.file_windows[-1].GetPosition()
-        # TODO: return img_ok = True or False
-        # return img_ok
+            self.last_frame_pos = self.file_windows[-1].GetPosition()
+
+        return img_ok
 
     @debug_fxn
     def quit_app(self):
@@ -2162,9 +2136,10 @@ class MarcamApp(wx.App):
             # open in blank window, or
             #   add to file_windows list of file windows
             if not self.file_windows or self.file_windows[0].has_image():
-                self.new_frame_open_file(open_file)
+                # TODO: what to do with files that can't open because error
+                img_ok = self.new_frame_open_file(open_file)
             else:
-                self.file_windows[0].open_image_this_frame(open_file)
+                img_ok = self.file_windows[0].open_image_this_frame(open_file)
 
     def OnExit(self):
         # save config_data right before app is about to exit

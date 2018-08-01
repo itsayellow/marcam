@@ -114,6 +114,11 @@ CROSS_REFRESH_SQ_SIZE = 12
 TEMP_ZOOM = 10
 
 # BITMAPS
+# Luminance (after undoing gamma):
+#   Y = 0.2126 R + 0.7152 G + 0.0722 B
+
+# Red has more contrast on white background than black background
+# Red could also be on cyan background
 
 # useful for bitmaps below
 pix_clear = b'\x00\x00\x00\x00'
