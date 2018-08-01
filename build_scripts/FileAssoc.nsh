@@ -57,6 +57,11 @@
 
   ;WriteRegStr HKCR ".${EXT}" "${FILECLASS}_backup" "$R0"
 
+  DetailPrint "Current HKCR\.${EXT}: $R0"
+  ; if $R0 is "${FILECLASS}" don't back it up, it's a previous version of our
+  ; own program's same key
+  StrCmp $R0 "${FILECLASS}" no_reg_backup 0
+  ; if $R0 does not exist, don't back it up
   StrCmp $R0 "" no_reg_backup 0
   DetailPrint "Backing up HKCR\.${EXT}"
   ; if HKCR\.${EXT} registry key exists, save backup of to file in $INSTDIR
