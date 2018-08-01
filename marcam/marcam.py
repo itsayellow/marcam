@@ -829,11 +829,6 @@ class ImageWindow(wx.Frame):
                 )
 
     @debug_fxn
-    def register_key_bind(self, key_bind_fxn):
-        # TODO: what is this for??
-        self.key_bind_fxn = key_bind_fxn
-
-    @debug_fxn
     def marks_num_update(self, mark_total):
         """Update the Total Marks display with argument.  Registered with
         img_panel so it can update this automatically
