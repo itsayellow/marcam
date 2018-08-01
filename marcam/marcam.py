@@ -1931,6 +1931,7 @@ class MarcamApp(wx.App):
         self.display_size = wx.Display().GetClientArea().GetSize()
 
         if not self.file_windows and not open_files:
+            # designate on empty frame to open
             open_files = [None,]
 
         for open_file in open_files:
@@ -2071,13 +2072,18 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def new_frame_open_file(self, open_file):
-        # verify ok image before opening new frame
-        # wx.Image.CanRead has its own error log, which is setup to cause
-        #   error dialog.  Disable it if because want to use our own
-        no_log = wx.LogNull()
-        img_ok = wx.Image.CanRead(open_file)
-        # re-enable logging
-        del no_log
+        if open_file is not None:
+            # verify ok image before opening new frame
+            # wx.Image.CanRead has its own error log, which is setup to cause
+            #   error dialog.  Disable it if because want to use our own
+            no_log = wx.LogNull()
+            img_ok = wx.Image.CanRead(open_file)
+            # re-enable logging
+            del no_log
+        else:
+            # force img_ok to True if open_file is None
+            # we are trying to force a new empty window open (application init)
+            img_ok = True
 
         if img_ok:
             new_size = wx.Size(self.config_data['winsize'])
@@ -2136,10 +2142,10 @@ class MarcamApp(wx.App):
             # open in blank window, or
             #   add to file_windows list of file windows
             if not self.file_windows or self.file_windows[0].has_image():
-                # TODO: what to do with files that can't open because error
                 img_ok = self.new_frame_open_file(open_file)
             else:
                 img_ok = self.file_windows[0].open_image_this_frame(open_file)
+            # TODO: what to do with files that can't open because error
 
     def OnExit(self):
         # save config_data right before app is about to exit
