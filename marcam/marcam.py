@@ -464,6 +464,7 @@ class ImageWindow(wx.Frame):
         self.select_menu_item = None
         self.toolbar = None
         self.started_temp_zoom = False
+        self.menu_items_disable_no_image = None
 
         # App configuration
         self.config = wx.Config("Marcam", "itsayellow.com")
@@ -476,6 +477,8 @@ class ImageWindow(wx.Frame):
         if srcfile is not None:
             img_ok = self.open_image_this_frame(srcfile)
         # TODO: handle what happens if bad image, if img_ok==False
+
+        self.menu_items_enable_disable()
 
     @debug_fxn
     def init_ui(self):
@@ -625,6 +628,32 @@ class ImageWindow(wx.Frame):
                 )
 
         self.SetMenuBar(menubar)
+        self.menu_items_disable_no_image = [
+                file_close_item,
+                file_save_item,
+                file_saveas_item,
+                file_exportimage_item,
+                # Edit
+                edit_undo_item,
+                edit_redo_item,
+                edit_copy_item,
+                self.selallitem,
+                # View
+                zoom_zoomout_item,
+                zoom_zoomin_item,
+                zoom_zoomfit_item,
+                # Tools
+                tools_imginfo_item,
+                tools_imginvert_item,
+                tools_imgautocontrast0_item,
+                tools_imgautocontrast2_item,
+                tools_imgautocontrast4_item,
+                tools_imgautocontrast6_item,
+                tools_imgfcolorviridis_item,
+                tools_imgfcolorplasma_item,
+                tools_imgfcolormagma_item,
+                tools_imgfcolorinferno_item,
+                ]
 
         # register Open Recent menu, put under control of FileHistory obj
         self.file_history.UseMenu(open_recent_menu)
@@ -825,6 +854,20 @@ class ImageWindow(wx.Frame):
                 "MSC:self.img_panel size: %s",
                 repr(self.img_panel.GetClientSize())
                 )
+
+    @debug_fxn
+    def menu_items_enable_disable(self):
+        """Enable or disable list of menu items if image frame has image
+
+        Notices:
+            self.menu_items_disable_no_image
+
+        Affects:
+            Enable state of menu items in self.menu_items_disable_no_image
+        """
+        enable_items = not self.img_panel.has_no_image()
+        for item in self.menu_items_disable_no_image:
+            item.Enable(enable_items)
 
     @debug_fxn
     def marks_num_update(self, mark_total):
@@ -1133,6 +1176,7 @@ class ImageWindow(wx.Frame):
                 # on Mac we hide the last frame we close.  So when opening
                 #   we need to show it again
                 self.Show()
+            self.menu_items_enable_disable()
         else:
             # TODO: try to verify ok image before opening new frame
             self.parent.new_frame_open_file(img_path)
@@ -1329,6 +1373,8 @@ class ImageWindow(wx.Frame):
             self.statusbar.SetStatusText('Ready.')
             # Set window title to generic app name
             self.SetTitle('Marcam')
+
+        self.menu_items_enable_disable()
 
         return True
 
