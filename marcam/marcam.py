@@ -45,7 +45,7 @@ import image_proc
 from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
-#TODO: need separate module for mcmfile
+import mcmfile
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
@@ -232,18 +232,8 @@ def can_read_image(image_path):
 
     Detects any readable plain image file, or .mcm file.
     """
-    if zipfile.is_zipfile(image_path):
-        # for .mcm files
-        # verify internals of zipfile
-        try:
-            with zipfile.Zipfile(image_path) as mcm_file:
-                with mcm_file.open('image.png') as png_file:
-                    no_log = wx.LogNull()
-                    img_ok = wx.Image.CanRead(png_file)
-                    # re-enable logging
-                    del no_log
-        except zipfile.BadZipFile:
-            img_ok = False
+    if mcmfile.is_valid(image_path):
+        img_ok = True
     else:
         # for all other image files
         # wx.Image.CanRead has its own error log, which is setup to cause
