@@ -151,7 +151,7 @@ def create_config_file(config_filepath):
                     )
     except:
         # TODO specific exception
-        LOGGER.warn("Can't create config file: %s", config_filepath)
+        LOGGER.warning("Can't create config file: %s", config_filepath)
 
 @debug_fxn
 def load_config():
@@ -186,20 +186,20 @@ def save_config(config_data):
     # if no config.json file, create
     try:
         with open(config_filepath, 'w') as config_fh:
-            config_data = json.dump(
+            json.dump(
                     config_data,
                     config_fh
                     )
         status = True
     except:
         # TODO specific exception
-        LOGGER.warn("Can't save config file: %s", config_filepath)
+        LOGGER.warning("Can't save config file: %s", config_filepath)
         status = False
 
     return status
 
 @debug_fxn
-def file1sc_to_Image(file1sc_file):
+def file1sc_to_image(file1sc_file):
     """Read in file1sc file and convert to wx.Image
 
     Args:
@@ -296,8 +296,8 @@ class EditHistory():
         if self.history_ptr == -1:
             # no edit history, so no save needed
             return True
-        else:
-            return self.history[self.history_ptr]['save_flag']
+
+        return self.history[self.history_ptr]['save_flag']
 
     @debug_fxn
     def undo(self):
@@ -659,27 +659,27 @@ class ImageWindow(wx.Frame):
         try:
             selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
         except:
-            LOGGER.error("MSC:Icon doesn't exist: " + const.SELECTBMP_FNAME)
+            LOGGER.error("MSC:Icon doesn't exist: %s", const.SELECTBMP_FNAME)
         try:
             markbmp = wx.Bitmap(const.MARKBMP_FNAME)
         except:
-            LOGGER.error("MSC:Icon doesn't exist: " + const.MARKBMP_FNAME)
+            LOGGER.error("MSC:Icon doesn't exist: %s", const.MARKBMP_FNAME)
         try:
             toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
         except:
-            LOGGER.error("MSC:Icon doesn't exist: " + const.TOCLIPBMP_FNAME)
+            LOGGER.error("MSC:Icon doesn't exist: %s", const.TOCLIPBMP_FNAME)
         try:
             zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
         except:
-            LOGGER.error("MSC:Icon doesn't exist: " + const.ZOOMOUTBMP_FNAME)
+            LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMOUTBMP_FNAME)
         try:
             zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
         except:
-            LOGGER.error("MSC:Icon doesn't exist: " + const.ZOOMFITBMP_FNAME)
+            LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMFITBMP_FNAME)
         try:
             zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
         except:
-            LOGGER.error("MSC:Icon doesn't exist: " + const.ZOOMINBMP_FNAME)
+            LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMINBMP_FNAME)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
 
         self.toolbar = self.CreateToolBar()
@@ -856,13 +856,13 @@ class ImageWindow(wx.Frame):
             wx.Window.Close()
 
         Args:
-            evt (wx.CloseEvt): 
+            evt (wx.CloseEvt):
         """
         veto_close = self.parent.shutdown_frame(
                 self.GetId(),
                 force_close=not evt.CanVeto(),
-                from_close_menu=self.close_source=='close_menu',
-                from_quit_menu=self.close_source=='quit_menu'
+                from_close_menu=self.close_source == 'close_menu',
+                from_quit_menu=self.close_source == 'quit_menu'
                 )
         if veto_close:
             # don't close window
@@ -948,7 +948,7 @@ class ImageWindow(wx.Frame):
             # down key
             self.img_panel.pan_down(const.SCROLL_KEY_SPEED)
 
-        if key_code == 127 or key_code == 8:
+        if key_code in (127, 8):
             # Delete (127) or Backspace (8)
             deleted_marks = self.img_panel.delete_selected_marks()
             self.win_history.new(
@@ -1207,7 +1207,7 @@ class ImageWindow(wx.Frame):
                         container_fh.extract(name, tmp_dir)
 
                         if name.endswith(".1sc"):
-                            img = file1sc_to_Image(os.path.join(tmp_dir, name))
+                            img = file1sc_to_image(os.path.join(tmp_dir, name))
                         else:
                             # disable logging, we don't care if there is e.g. TIFF image
                             #   with unknown fields
@@ -1274,7 +1274,7 @@ class ImageWindow(wx.Frame):
         # check for 1sc files and get image data to send to Image
         (_, imgfile_ext) = os.path.splitext(img_file)
         if imgfile_ext == ".1sc":
-            img = file1sc_to_Image(img_file)
+            img = file1sc_to_image(img_file)
         else:
             # disable logging, we don't care if there is e.g. TIFF image
             #   with unknown fields
@@ -1550,7 +1550,7 @@ class ImageWindow(wx.Frame):
                 parent=self,
                 msg=image_info_text,
                 caption="Image Info",
-                size=(800,600),
+                size=(800, 600),
                 )
         image_dialog.ShowModal()
 
@@ -1773,7 +1773,7 @@ class ImageWindow(wx.Frame):
         self.benchzoom_zoom_num = 0
         # initiate CallLater loop calling self.debugzoom_helper
         #   (which then repeatedly calls itself until done)
-        wx.CallLater(35,self.debugzoom_helper)
+        wx.CallLater(35, self.debugzoom_helper)
 
     @debug_fxn
     def debugzoom_helper(self):
@@ -1977,6 +1977,7 @@ class MarcamApp(wx.App):
         for frame in self.file_windows:
             if frame.GetId() == frame_to_close_id:
                 # we've found frame to close in 'frame'
+                frame_to_close = frame
                 break
 
         # keep_win_open tells close_image() if it should reset the frame's
@@ -1987,7 +1988,7 @@ class MarcamApp(wx.App):
         #   except that it might possibly take more time.
         keep_win_open = not (
                 force_close or
-                (len(self.file_windows) > 1 ) or
+                (len(self.file_windows) > 1) or
                 (len(self.file_windows) == 1 and from_quit_menu) or
                 (
                     len(self.file_windows) == 1 and
@@ -1999,7 +2000,7 @@ class MarcamApp(wx.App):
 
         # image_closed is False if user clicked "Cancel" when asked to save
         #   otherwise it is True
-        image_closed = frame.close_image(keep_win_open=keep_win_open)
+        image_closed = frame_to_close.close_image(keep_win_open=keep_win_open)
 
         # this tells whether we should continue in the process of closing window
         #   after the return of this function
@@ -2029,11 +2030,11 @@ class MarcamApp(wx.App):
         assert (hide_window and not close_window) or not hide_window
 
         if close_window:
-            self.file_windows.remove(frame)
+            self.file_windows.remove(frame_to_close)
 
         if hide_window:
             # on Mac we hide the last frame we close.
-            frame.Hide()
+            frame_to_close.Hide()
 
         veto_close = not close_window
 
@@ -2197,19 +2198,19 @@ def main(argv=None):
     myapp = MarcamApp(args.srcfiles, config_data)
     myapp.MainLoop()
 
-    # return 0 to indicate "status OK"
+    # return 0 to indicate "STATUS OK"
     return 0
 
 
 if __name__ == "__main__":
     try:
-        status = main(sys.argv)
+        STATUS = main(sys.argv)
     except KeyboardInterrupt:
         print("Stopped by Keyboard Interrupt", file=sys.stderr)
         # exit error code for Ctrl-C
-        status = 130
+        STATUS = 130
     except:
         LOGGER.error("UNCAUGHT FATAL ERROR", exc_info=True)
-        status = 1
+        STATUS = 1
 
-    sys.exit(status)
+    sys.exit(STATUS)
