@@ -1143,15 +1143,10 @@ class ImageWindow(wx.Frame):
         (_, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".mcm":
             img_ok = self.load_mcmfile_from_path(img_path)
-            self.save_filepath = img_path
-            # add successful file open to file history
-            self.file_history.AddFileToHistory(img_path)
-            # we just loaded .mcm file, so have nothing to save
-            self.save_notify()
         else:
             # image or *.1sc file
             img_ok = self.load_image_from_file(img_path)
-            # Indicate needs save immediately by not calling self.save_notify()
+            # By not calling self.save_notify(), we indicate needs save
 
         # if we successfully loaded the file return True, else False
         return img_ok
@@ -1232,6 +1227,10 @@ class ImageWindow(wx.Frame):
                 # on Mac sets file icon in titlebar with right-click showing
                 #   dir hierarchy
                 self.SetRepresentedFilename(imdata_path)
+                # add successful file open to file history
+                self.file_history.AddFileToHistory(imdata_path)
+                # we just loaded .mcm file, so have nothing to save
+                self.save_notify()
             else:
                 self.statusbar.SetStatusText(
                         "Image " + imdata_path+ " loading ERROR."
@@ -1345,9 +1344,12 @@ class ImageWindow(wx.Frame):
             self.on_saveas(evt)
         else:
             # use current filename/path to save
-            self.save_img_data(self.save_filepath)
-            # signify we have saved content
-            self.save_notify()
+            if self.save_img_data(self.save_filepath) is not None:
+                # signify we have saved content
+                self.save_notify()
+            else:
+                # TODO: error in saving dialog
+                print("Error in saving")
 
     @debug_fxn
     def on_saveas(self, _evt):
@@ -1381,18 +1383,23 @@ class ImageWindow(wx.Frame):
 
             # save the current contents in the file
             pathname = file_dialog.GetPath()
-            self.save_img_data(pathname)
-            # TODO check if save_img_data worked before saving save name
-            self.save_filepath = pathname
-            # signify we have saved content
-            self.save_notify()
-            # add successful file save as to file history
-            self.file_history.AddFileToHistory(pathname)
-            # Set window title to newly-saved filename
-            self.SetTitle(os.path.basename(pathname))
-            # on Mac sets file icon in titlebar with right-click showing
-            #   dir hierarchy
-            self.SetRepresentedFilename(pathname)
+            arc_names = self.save_img_data(pathname)
+            if arc_names is not None:
+                self.save_filepath = pathname
+                # set img_path
+                self.img_path = [pathname, arc_names[0]]
+                # signify we have saved content
+                self.save_notify()
+                # add successful file save as to file history
+                self.file_history.AddFileToHistory(pathname)
+                # Set window title to newly-saved filename
+                self.SetTitle(os.path.basename(pathname))
+                # on Mac sets file icon in titlebar with right-click showing
+                #   dir hierarchy
+                self.SetRepresentedFilename(pathname)
+            else:
+                # TODO: error in saving dialog
+                print("Error in saving")
 
     @debug_fxn
     def on_export_image(self, _evt):
@@ -1401,25 +1408,25 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        if self.save_filepath:
-            (default_dir, default_filename) = os.path.split(self.save_filepath)
+        if self.save_filepath is not None:
+            img_path = self.save_filepath
         else:
-            if isinstance(self.img_path, list):
-                img_path = self.img_path[0]
-            else:
-                img_path = self.img_path
-            (img_path_root, _) = os.path.splitext(
-                    os.path.basename(img_path)
-                    )
-            default_save_path = img_path_root + ".png"
-            (default_dir, default_filename) = os.path.split(default_save_path)
+            # if we have no save_filepath, we have not loaded .mcm image
+            #   thus self.img_path cannot be list, but must be string
+            img_path = self.img_path
+
+        # create new filename based on old one but ending with _export.png
+        (default_dir, default_filename) = os.path.split(img_path)
+        (filename_root, filename_ext) = os.path.splitext(default_filename)
+        default_filename = filename_root + "_export.png"
+
         with wx.FileDialog(
                 self,
                 "Export Image and Marks as Image",
                 wildcard=wx.Image.GetImageExtWildcard(),
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 defaultDir=default_dir,
-                #defaultFile=default_filename,
+                defaultFile=default_filename,
                 ) as file_dialog:
 
             if file_dialog.ShowModal() == wx.ID_CANCEL:
@@ -1427,6 +1434,7 @@ class ImageWindow(wx.Frame):
 
             # save the current contents in the file
             pathname = file_dialog.GetPath()
+            # TODO: need to actually save this from memorydc
             export_image = self.img_panel.export_to_image()
             export_image.SaveFile(pathname)
 
@@ -1680,20 +1688,26 @@ class ImageWindow(wx.Frame):
         #    img_arcname = self.img_path[1]
 
         img_arcname = "image.png"
+        markdata_name = "marks.txt"
 
         # write new save file
         try:
             with zipfile.ZipFile(imdata_path, 'w') as container_fh:
                 container_fh.write(temp_img_name, arcname=img_arcname)
                 container_fh.writestr(
-                        "marks.txt",
+                        markdata_name,
                         json.dumps(self.img_panel.marks, separators=(',', ':'))
                         )
         except IOError:
             # TODO: need real error dialog
             LOGGER.warning("Cannot save current data in file '%s'.", imdata_path)
+            returnval = None
+        else:
+            returnval = (img_arcname, markdata_name)
         finally:
             os.unlink(temp_img_name)
+
+        return returnval
 
     @debug_fxn
     def on_about(self, _evt):
