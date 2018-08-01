@@ -227,6 +227,23 @@ def file1sc_to_image(file1sc_file):
     img = wx.Image(img_x, img_y, bytes(img_data_rgb))
     return img
 
+@debug_fxn
+def can_read_image(image_path):
+    if zipfile.is_zipfile(image_path):
+        # for .mcm files
+        # TODO: verify internals of zipfile
+        img_ok = True
+    else:
+        # for all other image files
+        # wx.Image.CanRead has its own error log, which is setup to cause
+        #   error dialog.  Disable it if because want to use our own
+        no_log = wx.LogNull()
+        img_ok = wx.Image.CanRead(image_path)
+        # re-enable logging
+        del no_log
+
+    return img_ok
+
 
 class EditHistory():
     """Keeps track of Edit History, undo, redo
@@ -1379,7 +1396,7 @@ class ImageWindow(wx.Frame):
             elif save_query_response == wx.ID_CANCEL:
                 return False
 
-        # if image is closed, do we still keep this frame open?
+        # image is closed--if we still keep this frame open then reset state
         if keep_win_open:
             # reset edit history
             self.win_history.reset()
@@ -1414,8 +1431,15 @@ class ImageWindow(wx.Frame):
                 # signify we have saved content
                 self.save_notify()
             else:
-                # TODO: error in saving dialog
-                print("Error in saving")
+                # error in saving dialog
+                # wx.ICON_ERROR has no effect on Mac
+                wx.MessageDialog(None,
+                        message="Unable to save file: %s"%self.save_filepath,
+                        caption="File Write Error",
+                        #style=wx.OK
+                        #style=wx.OK | wx.ICON_ERROR
+                        style=wx.OK | wx.ICON_EXCLAMATION
+                        ).ShowModal()
 
     @debug_fxn
     def on_saveas(self, _evt):
@@ -1464,8 +1488,15 @@ class ImageWindow(wx.Frame):
                 #   dir hierarchy
                 self.SetRepresentedFilename(pathname)
             else:
-                # TODO: error in saving dialog
-                print("Error in saving")
+                # error in saving dialog
+                # wx.ICON_ERROR has no effect on Mac
+                wx.MessageDialog(None,
+                        message="Unable to save file: %s"%pathname,
+                        caption="File Write Error",
+                        #style=wx.OK
+                        #style=wx.OK | wx.ICON_ERROR
+                        style=wx.OK | wx.ICON_EXCLAMATION
+                        ).ShowModal()
 
     @debug_fxn
     def on_export_image(self, _evt):
@@ -2078,12 +2109,7 @@ class MarcamApp(wx.App):
     def new_frame_open_file(self, open_file):
         if open_file is not None:
             # verify ok image before opening new frame
-            # wx.Image.CanRead has its own error log, which is setup to cause
-            #   error dialog.  Disable it if because want to use our own
-            no_log = wx.LogNull()
-            img_ok = wx.Image.CanRead(open_file)
-            # re-enable logging
-            del no_log
+            img_ok = can_read_image(open_file)
         else:
             # force img_ok to True if open_file is None
             # we are trying to force a new empty window open (application init)
@@ -2131,8 +2157,8 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def MacOpenFiles(self, file_names):
-        """wx.PyApp standard function, over-ridden to accept Cocoa
-        "openFiles" events
+        """wx.PyApp standard function to accept Cocoa "openFiles" events.
+        Over-ridden to process files.
 
         Args:
             file_names: list of file names to open
