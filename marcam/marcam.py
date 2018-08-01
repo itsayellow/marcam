@@ -879,7 +879,6 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        self.menu_close_file = True
         # send EVT_CLOSE event, next is on_evt_close()
         self.close_source = 'close_menu'
         self.Close()
