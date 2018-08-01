@@ -1188,10 +1188,6 @@ class ImageWindow(wx.Frame):
         if os.path.exists(img_path):
             self.open_image(img_path)
         else:
-            # TODO: Error Dialog "Can't find file <img_path>"
-            self.statusbar.SetStatusText(
-                        "Image " + img_path + " not found."
-                        )
             self.file_history.RemoveFileFromHistory(evt.GetId() - wx.ID_FILE1)
             wx.MessageDialog(self,
                     message="Unable to find file: %s"%img_path,
