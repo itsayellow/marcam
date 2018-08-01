@@ -45,6 +45,7 @@ import image_proc
 from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
+#TODO: need separate module for mcmfile
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
@@ -149,9 +150,8 @@ def create_config_file(config_filepath):
                     config_data,
                     config_fh,
                     )
-    except:
-        # TODO specific exception
-        LOGGER.warning("Can't create config file: %s", config_filepath)
+    except OSError as err:
+        LOGGER.warning("Can't create config file '%s': %s", config_filepath, err)
 
 @debug_fxn
 def load_config():
@@ -191,9 +191,8 @@ def save_config(config_data):
                     config_fh
                     )
         status = True
-    except:
-        # TODO specific exception
-        LOGGER.warning("Can't save config file: %s", config_filepath)
+    except OSError as err:
+        LOGGER.warning("Can't save config file '%s': %s", config_filepath, err)
         status = False
 
     return status
@@ -229,10 +228,22 @@ def file1sc_to_image(file1sc_file):
 
 @debug_fxn
 def can_read_image(image_path):
+    """Detect if this image is readable by this program.
+
+    Detects any readable plain image file, or .mcm file.
+    """
     if zipfile.is_zipfile(image_path):
         # for .mcm files
-        # TODO: verify internals of zipfile
-        img_ok = True
+        # verify internals of zipfile
+        try:
+            with zipfile.Zipfile(image_path) as mcm_file:
+                with mcm_file.open('image.png') as png_file:
+                    no_log = wx.LogNull()
+                    img_ok = wx.Image.CanRead(png_file)
+                    # re-enable logging
+                    del no_log
+        except zipfile.BadZipFile:
+            img_ok = False
     else:
         # for all other image files
         # wx.Image.CanRead has its own error log, which is setup to cause
