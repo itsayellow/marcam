@@ -416,12 +416,12 @@ class FileDropTarget(wx.FileDropTarget):
         self.window_target = window_target
 
     @debug_fxn
-    def OnDropFiles(self, x, y, filenames):
+    def OnDropFiles(self, _x, _y, filenames):
         """Dropped File Handler
 
         Args:
-            x (int): x coordinate of mouse
-            y (int): y coordinate of mouse
+            _x (int): x coordinate of mouse
+            _y (int): y coordinate of mouse
             filenames (list): A list of filepaths
         """
         filename = filenames[0]
@@ -438,8 +438,7 @@ class FileDropTarget(wx.FileDropTarget):
         #self.window_target.parent.open_image_this_frame(filename)
         # ---------
 
-        # TODO: which one of these??
-        #return wx.DragCopy
+        # True to accept data, False to veto
         return True
 
 
@@ -475,7 +474,8 @@ class ImageWindow(wx.Frame):
 
         self.init_ui()
         if srcfile is not None:
-            self.open_image_this_frame(srcfile)
+            img_ok = self.open_image_this_frame(srcfile)
+        # TODO: handle what happens if bad image, if img_ok==False
 
     @debug_fxn
     def init_ui(self):
@@ -494,7 +494,7 @@ class ImageWindow(wx.Frame):
                 'Open Image...\tCtrl+O',
                 'Open image file'
                 )
-        file_openrecent_item = file_menu.AppendSubMenu(open_recent_menu,
+        file_menu.AppendSubMenu(open_recent_menu,
                 'Open Recent',
                 'Open recent .mcm files'
                 )
@@ -714,8 +714,6 @@ class ImageWindow(wx.Frame):
         #   update number on its init
         # using TextCtrl to allow copy to clipboard
         self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
-        # TODO: think about putting border (invisible somehow?) back in
-        #   so that count is justified with "Marks" label
         self.marks_num_display = wx.TextCtrl(
                 self.toolbar, wx.ID_ANY, size=wx.Size(text_width_px, -1),
                 #style=wx.TE_READONLY | wx.BORDER_NONE
@@ -875,11 +873,11 @@ class ImageWindow(wx.Frame):
 
 
     @debug_fxn
-    def on_close(self, evt):
+    def on_close(self, _evt):
         """File->Close menu handler
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         self.menu_close_file = True
         # send EVT_CLOSE event, next is on_evt_close()
@@ -887,11 +885,11 @@ class ImageWindow(wx.Frame):
         self.Close()
 
     @debug_fxn
-    def on_quit(self, evt):
+    def on_quit(self, _evt):
         """File->Quit menu handler
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         self.parent.quit_app()
 
@@ -1033,12 +1031,12 @@ class ImageWindow(wx.Frame):
         evt.Skip()
 
     @debug_fxn
-    def on_selectmode(self, evt):
+    def on_selectmode(self, _evt):
         """Tools->Select Mode Menuitem, or Arrow tool button handler
         Go into Select Mode.
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         # SELECT MODE
         self.img_panel.mark_mode = False
@@ -1052,12 +1050,12 @@ class ImageWindow(wx.Frame):
         self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_ARROW))
 
     @debug_fxn
-    def on_markmode(self, evt):
+    def on_markmode(self, _evt):
         """Tools->Mark Mode Menuitem, or Mark tool button handler
         Go into Mark Mode.
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         # MARK MODE
         self.img_panel.mark_mode = True
@@ -1072,13 +1070,13 @@ class ImageWindow(wx.Frame):
         self.img_panel.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
 
     @debug_fxn
-    def on_toclip(self, evt):
+    def on_toclip(self, _evt):
         """Edit->Copy Marks Total menu/toolbar button handler
 
         Copy the total number of marks to the Clipboard.
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         marks_total_text = self.marks_num_display.GetLineText(0)
         if wx.TheClipboard.Open():
@@ -1090,11 +1088,11 @@ class ImageWindow(wx.Frame):
             wx.TheClipboard.Close()
 
     @debug_fxn
-    def on_open(self, evt):
+    def on_open(self, _evt):
         """File->Open Image Data... menu handler for Main Window
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         # create wildcard for:
         #   native *.mcm files
@@ -1137,10 +1135,9 @@ class ImageWindow(wx.Frame):
                 #   we need to show it again
                 self.Show()
         else:
+            # TODO: try to verify ok image before opening new frame
             self.parent.new_frame_open_file(img_path)
 
-    # TODO: Can we add to History if the File is already in FileHistory?
-    #   does that make a duplicate entry or not?
     # TODO: If we cannot succesfully open a file, make error dialog
     @debug_fxn
     def open_image_this_frame(self, img_path):
@@ -1155,8 +1152,7 @@ class ImageWindow(wx.Frame):
         else:
             # image or *.1sc file
             img_ok = self.load_image_from_file(img_path)
-            # TODO: make it think it needs save immediately
-            #   (Is this already accomplished by not calling self.save_notify()?)
+            # Indicate needs save immediately by not calling self.save_notify()
 
         # if we successfully loaded the file return True, else False
         return img_ok
@@ -1168,9 +1164,6 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.): TODO
         """
-        # TODO: Should we also prune this once every application start?
-        #   Can loop around GetHistoryFile(i)
-
         # get path from file_history
         img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
         if os.path.exists(img_path):
@@ -1346,7 +1339,7 @@ class ImageWindow(wx.Frame):
         """File->Save menu handler for Main Window
 
         Args:
-            evt (wx.CommandEvent): TODO
+            evt (wx.CommandEvent):
         """
         if self.save_filepath is None:
             # we've never "Save As..." so do that instead
@@ -1358,11 +1351,11 @@ class ImageWindow(wx.Frame):
             self.save_notify()
 
     @debug_fxn
-    def on_saveas(self, evt):
+    def on_saveas(self, _evt):
         """File->Save As... menu handler for Main Window
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         if self.save_filepath:
             (default_dir, default_filename) = os.path.split(self.save_filepath)
@@ -1403,11 +1396,11 @@ class ImageWindow(wx.Frame):
             self.SetRepresentedFilename(pathname)
 
     @debug_fxn
-    def on_export_image(self, evt):
+    def on_export_image(self, _evt):
         """File->Export Image... menu handler for Main Window
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         if self.save_filepath:
             (default_dir, default_filename) = os.path.split(self.save_filepath)
@@ -1439,7 +1432,7 @@ class ImageWindow(wx.Frame):
             export_image.SaveFile(pathname)
 
     @debug_fxn
-    def on_undo(self, evt):
+    def on_undo(self, _evt):
         """Edit->Undo handler
 
         Possible actions:
@@ -1448,7 +1441,7 @@ class ImageWindow(wx.Frame):
             ['MOVE_MARK', <src mark coordinate>, <dest mark coordinate>]
             ['IMAGE_XFORM', <orig image>, <modified image>]
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         action = self.win_history.undo()
         LOGGER.info("MSC:undo: %s", repr(action))
@@ -1468,11 +1461,11 @@ class ImageWindow(wx.Frame):
             self.img_panel.save_notify()
 
     @debug_fxn
-    def on_redo(self, evt):
+    def on_redo(self, _evt):
         """Edit->Redo handler
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         action = self.win_history.redo()
         LOGGER.info("MSC:redo: %s", repr(action))
@@ -1492,53 +1485,53 @@ class ImageWindow(wx.Frame):
             self.img_panel.save_notify()
 
     @debug_fxn
-    def on_select_all(self, evt):
+    def on_select_all(self, _evt):
         """Edit->Select All handler
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         self.img_panel.select_all_marks()
 
     @debug_fxn
-    def on_zoomout(self, evt):
+    def on_zoomout(self, _evt):
         """View->Zoom Out menu/toolbar button handler
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         zoom = self.img_panel.zoom(-1)
         if zoom:
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
-    def on_zoomin(self, evt):
+    def on_zoomin(self, _evt):
         """View->Zoom In menu/toolbar button handler
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         zoom = self.img_panel.zoom(1)
         if zoom:
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
-    def on_zoomfit(self, evt):
+    def on_zoomfit(self, _evt):
         """View->Zoom to Fit menu/toolbar button handler
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         zoom = self.img_panel.zoom_fit()
         if zoom:
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
 
     @debug_fxn
-    def on_imginfo(self, evt):
+    def on_imginfo(self, _evt):
         """Tools->Image Info menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         image_info_text = self.img_panel.get_image_info()
         image_dialog = wx.lib.dialogs.ScrolledMessageDialog(
@@ -1550,93 +1543,84 @@ class ImageWindow(wx.Frame):
         image_dialog.ShowModal()
 
     @debug_fxn
-    def on_imginvert(self, evt):
+    def on_imginvert(self, _evt):
         """Tools->Invert Image menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_invert()
 
     @debug_fxn
-    def on_imgfalsecolorviridis(self, evt):
+    def on_imgfalsecolorviridis(self, _evt):
         """Tools->False Color menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_remap_colormap(map='viridis')
 
     @debug_fxn
-    def on_imgfalsecolorplasma(self, evt):
+    def on_imgfalsecolorplasma(self, _evt):
         """Tools->False Color menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_remap_colormap(map='plasma')
 
     @debug_fxn
-    def on_imgfalsecolormagma(self, evt):
+    def on_imgfalsecolormagma(self, _evt):
         """Tools->False Color menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_remap_colormap(map='magma')
 
     @debug_fxn
-    def on_imgfalsecolorinferno(self, evt):
+    def on_imgfalsecolorinferno(self, _evt):
         """Tools->False Color menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_remap_colormap(map='inferno')
 
     @debug_fxn
-    def on_imgautocontrast0(self, evt):
+    def on_imgautocontrast0(self, _evt):
         """Tools->Image Auto-Contrast 0 menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=0)
 
     @debug_fxn
-    def on_imgautocontrast2(self, evt):
+    def on_imgautocontrast2(self, _evt):
         """Tools->Image Auto-Contrast 2 menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=2)
 
     @debug_fxn
-    def on_imgautocontrast4(self, evt):
+    def on_imgautocontrast4(self, _evt):
         """Tools->Image Auto-Contrast 4 menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=4)
 
     @debug_fxn
-    def on_imgautocontrast6(self, evt):
+    def on_imgautocontrast6(self, _evt):
         """Tools->Image Auto-Contrast 6 menu item
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
-        # TODO: allow save of image mods
         self.img_panel.image_autocontrast(cutoff=6)
 
     @debug_fxn
@@ -1673,8 +1657,6 @@ class ImageWindow(wx.Frame):
         # self.save_filepath: path to mcm file we've saved
         # self.img_panel.img_dc: max-res image data MemoryDC
 
-        # TODO: need to know if loading and saving and converting
-        #   to MemoryDC and back is lossless
         current_img = image_proc.memorydc2image(self.img_panel.img_dc)
         current_img.SaveFile(temp_img, wx.BITMAP_TYPE_PNG)
         temp_img.close()
@@ -1713,11 +1695,11 @@ class ImageWindow(wx.Frame):
             os.unlink(temp_img_name)
 
     @debug_fxn
-    def on_about(self, evt):
+    def on_about(self, _evt):
         """Help->About Menuitem: Open the About window
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         info = wx.adv.AboutDialogInfo()
         info.SetName("Marcam")
@@ -1728,21 +1710,21 @@ class ImageWindow(wx.Frame):
         wx.adv.AboutBox(info)
 
     @debug_fxn
-    def on_help(self, evt):
+    def on_help(self, _evt):
         """Help->Help Menuitem: Open a brief help window (html)
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         self.html = HelpFrame(self, id=wx.ID_ANY)
         self.html.Show(True)
 
     @debug_fxn
-    def on_debug_benchzoom(self, evt):
+    def on_debug_benchzoom(self, _evt):
         """Zoom through the range and log all on_paint elapsed times
 
         Args:
-            evt (wx.CommandEvent): TODO
+            _evt (wx.CommandEvent):
         """
         desired_panel_size = wx.Size(1024, 768)
 
@@ -1757,8 +1739,8 @@ class ImageWindow(wx.Frame):
 
         # get zoom to max zoom
         self.on_zoomfit(None)
-        for i in range(69):
-            zoom = self.img_panel.zoom(1)
+        for _ in range(69):
+            self.img_panel.zoom(1)
 
         LOGGER.debug("Start Debug Benchmark Zoom")
         # set paint_times to dict so on_paint records paint times
@@ -1779,18 +1761,17 @@ class ImageWindow(wx.Frame):
         #   update slower than 60Hz (> 16ms) for most monitors?
         # https://arstechnica.com/gadgets/2007/04/beam-synchronization-friend-or-foe/
 
-        zoom = 0.0
         total_iterations = 10
         wait_ms = 35
 
         if self.benchzoom_zoom_num < 68:
             # zoom out
-            zoom = self.img_panel.zoom(-1)
+            self.img_panel.zoom(-1)
             self.benchzoom_zoom_num += 1
             wx.CallLater(wait_ms, self.debugzoom_helper)
         elif self.benchzoom_zoom_num < 136:
             # zoom back in
-            zoom = self.img_panel.zoom(1)
+            self.img_panel.zoom(1)
             self.benchzoom_zoom_num += 1
             wx.CallLater(wait_ms, self.debugzoom_helper)
         elif self.benchzoom_iteration < total_iterations-1:
@@ -1798,7 +1779,7 @@ class ImageWindow(wx.Frame):
             self.benchzoom_iteration += 1
             self.benchzoom_zoom_num = 0
             # zoom out
-            zoom = self.img_panel.zoom(-1)
+            self.img_panel.zoom(-1)
             self.benchzoom_zoom_num += 1
             wx.CallLater(wait_ms, self.debugzoom_helper)
         else:
@@ -1821,7 +1802,7 @@ class ImageWindow(wx.Frame):
                     )
             with open(data_filename, 'w') as data_fh:
                 json.dump(benchzoom_data, data_fh, separators=(',', ':'))
-            LOGGER.debug("Wrote benchzoom data to file: %s"%data_filename)
+            LOGGER.debug("Wrote benchzoom data to file: %s", data_filename)
             LOGGER.debug("Finish Debug Benchmark Zoom")
             # reset paint_times to None so on_paint doesn't record
             self.img_panel.paint_times = None
@@ -2062,6 +2043,8 @@ class MarcamApp(wx.App):
                     )
                 )
         self.last_frame_pos = self.file_windows[-1].GetPosition()
+        # TODO: return img_ok = True or False
+        # return img_ok
 
     @debug_fxn
     def quit_app(self):
