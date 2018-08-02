@@ -892,7 +892,7 @@ class ImageWindow(wx.Frame):
         # See if we can shutdown this frame.
         # If it is kept open for any reason, we need to veto this close event
         # shutdown_frame has the logic for what to do on attempting to close
-        #   a window.
+        #   a window, including asking user about saving unsaved changes.
         veto_close = self.parent.shutdown_frame(
                 self.GetId(),
                 force_close=not evt.CanVeto(),
@@ -909,6 +909,7 @@ class ImageWindow(wx.Frame):
             # normally close window
             winsize = self.GetSize()
             self.parent.config_data['winsize'] = list(winsize)
+            # TODO: do we only need to save file_history on quit?
             self.file_history.Save(self.config)
             # continue with normal event handling
             evt.Skip()
