@@ -58,12 +58,11 @@ def is_valid(mcm_path):
         # for .mcm files
         # verify internals of zipfile
         try:
+            tmp_dir = tempfile.mkdtemp()
             with zipfile.ZipFile(mcm_path) as mcm_file:
                 image_name = [
                         x for x in container_fh.namelist() if x.startswith(MCM_IMAGE_NAME)
                         ][0]
-                # TODO: we need to remove tempdir
-                tmp_dir = tempfile.mkdtemp()
                 mcm_file.extract(image_name, tmp_dir)
                 no_log = wx.LogNull()
                 img_ok = wx.Image.CanRead(os.path.join(tmp_dir, image_name))
@@ -71,13 +70,13 @@ def is_valid(mcm_path):
                 del no_log
         except zipfile.BadZipFile:
             img_ok = False
+        finally:
+            # remove temp dir
+            os.remove(os.path.join(tmp_dir, name))
+            os.rmdir(tmp_dir)
     else:
         img_ok = False
 
-    # remove temp dir
-    os.remove(os.path.join(tmp_dir, name))
-    os.rmdir(tmp_dir)
-    
     return img_ok
 
 @debug_fxn
