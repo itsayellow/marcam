@@ -19,6 +19,7 @@ import json
 import logging
 import os
 import os.path
+import shutil
 import tempfile
 import zipfile
 
@@ -40,6 +41,7 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 
+# for new files
 MCM_VERSION = '1.0.0'
 MCM_IMAGE_NAME = 'image.png'
 MCM_INFO_NAME = 'info.json'
@@ -65,12 +67,20 @@ def read_image(image_path):
     #   with unknown fields
     # TODO: could also just raise loglevel to Error and above
     no_log = wx.LogNull()
-
     img = wx.Image(image_path)
-
     # re-enable logging
     del no_log
+
     return img
+
+@debug_fxn
+def is_legacy_mcm_file(mcm_path):
+    try:
+        with zipfile.ZipFile(mcm_path) as mcm_container:
+            legacy_mcm = MCM_INFO_NAME not in mcm_container.namelist()
+    except (zipfile.BadZipFile, OSError) as err:
+        raise McmFileError
+    return legacy_mcm
 
 @debug_fxn
 def is_valid(mcm_path):
@@ -88,17 +98,16 @@ def is_valid(mcm_path):
                         x for x in mcm_container.namelist() if x.startswith(MCM_IMAGE_NAME)
                         ][0]
                 mcm_container.extract(image_name, tmp_dir)
-                img_ok = image_readable(os.path.join(tmp_dir, image_name))
+                mcm_ok = image_readable(os.path.join(tmp_dir, image_name))
         except zipfile.BadZipFile:
-            img_ok = False
+            mcm_ok = False
         finally:
             # remove temp dir
-            os.remove(os.path.join(tmp_dir, image_name))
-            os.rmdir(tmp_dir)
+            shutil.rmtree(tmp_dir)
     else:
-        img_ok = False
+        mcm_ok = False
 
-    return img_ok
+    return mcm_ok
 
 @debug_fxn
 def load(imdata_path):
@@ -107,54 +116,45 @@ def load(imdata_path):
     Args:
         imdata_path (str): path to .mcm file to open
     """
-    # legacy marks file name
-    marks_file_name = 'marks.txt'
+    raise_McmFileError = False
     # init img_ok to False in case we don't load image
     img_ok = False
 
+    # if legacy file use legacy file function
+    if is_legacy_mcm_file(imdata_path):
+        return legacy_load(imdata_path)
+
+    # Modern MCM (version > 1.0)
     # first load image from zip
     try:
         tmp_dir = tempfile.mkdtemp()
         with zipfile.ZipFile(imdata_path, 'r') as container_fh:
             with container_fh.open(MCM_INFO_NAME, 'r') as info_fh:
                 info = json.load(info_fh)
+            marks = info['marks']
 
-            namelist = container_fh.namelist()
-            for name in namelist:
-                if name.startswith("image."):
-                    # TODO: we need to remove tempdir
-                    container_fh.extract(name, tmp_dir)
+            image_name = info['mcm_image_name']
+            container_fh.extract(image_name, tmp_dir)
 
-                    if name.endswith(".1sc"):
-                        img = image_proc.file1sc_to_image(
-                                os.path.join(tmp_dir, name)
-                                )
-                    else:
-                        img = read_image(os.path.join(tmp_dir, name))
-                    # check if img loaded ok
-                    img_ok = img.IsOk()
-                    img_name = name
+            img = read_image(os.path.join(tmp_dir, image_name))
+            # check if img loaded ok
+            img_ok = img.IsOk()
 
-                if name == "marks.txt":
-                    with container_fh.open(name, 'r') as json_fh:
-                        marks = json.load(json_fh)
-                    marks = [tuple(x) for x in marks]
     except (zipfile.BadZipFile, OSError) as err:
         LOGGER.warning(
                 "Cannot open data in file '%s': %s", imdata_path, err,
                 exc_info=True
                 )
-        raise McmFileError
+        raise_McmFileError = True
     finally:
         # remove temp dir
-        os.remove(os.path.join(tmp_dir, name))
-        os.rmdir(tmp_dir)
-
-
-    # need: img, img_name, marks
+        shutil.rmtree(tmp_dir)
+    if raise_McmFileError == True:
+        # Do this here so this raise allows the finally above to execute
+        raise McmFileError
 
     if img_ok:
-        return (img, marks, img_name)
+        return (img, marks, image_name)
     else:
         return (None, None, None)
 
@@ -195,8 +195,7 @@ def save(imdata_path, img, marks):
                     MCM_INFO_NAME,
                     json.dumps(mcm_info)
                     )
-    except IOError:
-        # TODO: need real error dialog
+    except OSError:
         LOGGER.warning("Cannot save current data in file '%s'.", imdata_path)
         returnval = None
     else:
@@ -207,3 +206,58 @@ def save(imdata_path, img, marks):
         os.unlink(temp_img_name)
 
     return returnval
+
+
+@debug_fxn
+def legacy_load(imdata_path):
+    """For old mcm files only (before they contained 'info.json')
+ 
+    Load legacy app .mcm file
+
+    Args:
+        imdata_path (str): path to .mcm file to open
+    """
+    # init img_ok to False in case we don't load image
+    img_ok = False
+
+    # first load image from zip
+    try:
+        with zipfile.ZipFile(imdata_path, 'r') as container_fh:
+            namelist = container_fh.namelist()
+            for name in namelist:
+                if name.startswith("image."):
+                    tmp_dir = tempfile.mkdtemp()
+                    container_fh.extract(name, tmp_dir)
+
+                    if name.endswith(".1sc"):
+                        img = image_proc.file1sc_to_image(os.path.join(tmp_dir, name))
+                    else:
+                        # disable logging, we don't care if there is e.g. TIFF image
+                        #   with unknown fields
+                        # TODO: could also just raise loglevel to Error and above
+                        no_log = wx.LogNull()
+
+                        img = wx.Image(os.path.join(tmp_dir, name))
+
+                        # re-enable logging
+                        del no_log
+                    # check if img loaded ok
+                    img_ok = img.IsOk()
+                    img_name = name
+
+                    # remove temp dir
+                    os.remove(os.path.join(tmp_dir, name))
+                    os.rmdir(tmp_dir)
+
+                if name == "marks.txt":
+                    with container_fh.open(name, 'r') as json_fh:
+                        marks = json.load(json_fh)
+                    marks = [tuple(x) for x in marks]
+    except OSError:
+        # TODO: need real error dialog
+        img_ok = False
+        LOGGER.warning(
+                "Cannot open data in file '%s'.", imdata_path,
+                exc_info=True
+                )
+    return (img, marks, img_name)

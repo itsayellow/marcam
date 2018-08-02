@@ -51,7 +51,9 @@ import mcmfile
 DEBUG = False
 
 # which modules are we logging
-LOGGED_MODULES = [__name__, 'image_scrolled_canvas']
+LOGGED_MODULES = [
+        __name__, 'image_scrolled_canvas', 'image_proc', 'mcmfile', 'common'
+        ]
 
 # global logger obj for this file
 LOGGER = logging.getLogger(__name__)
