@@ -33,7 +33,7 @@ def debug_fxn_factory(logger_fxn):
         debug_fxn.depth = 0
         def func_wrapper(*args, **kwargs):
             debug_fxn.depth += 1
-            log_string = "FXN%d:"%debug_fxn.depth + func.__qualname__ + "(\n"
+            log_string = "FXN%d: %s.%s(\n"%(debug_fxn.depth, func.__module__, func.__qualname__)
             for arg in args[1:]:
                 log_string += "    " + repr(arg) + ",\n"
             for key in kwargs:
