@@ -88,8 +88,8 @@ Application preferences stored in the file:
 Documentation References
 ------------------------
 
-* `Creating and Hosting a Personal Site on GitHub <http://jmcglone.com/guides/github-pages/>`_
-* `Get Started With GitHub Pages (Plus Bonus Jekyll) <https://24ways.org/2013/get-started-with-github-pages/>`_
+* `Creating and Hosting a Personal Site on GitHub <http://jmcglone.com/guides/github-pages/>`_ - Jonathan McGlone
+* `Get Started With GitHub Pages (Plus Bonus Jekyll) <https://24ways.org/2013/get-started-with-github-pages/>`_ - Anna Debenham
 * `Jekyll Docs <https://jekyllrb.com/docs/home/>`_
 * `reStructuredText Main Page <http://docutils.sourceforge.net/rst.html>`_
 * `reStructuredText Markup Spec <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_
