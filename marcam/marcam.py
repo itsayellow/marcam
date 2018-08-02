@@ -1489,7 +1489,7 @@ class ImageWindow(wx.Frame):
 
             # save the current contents in the file
             pathname = file_dialog.GetPath()
-            # TODO: need to actually save this from memorydc
+            # saves from memorydc
             export_image = self.img_panel.export_to_image()
             export_image.SaveFile(pathname)
 
