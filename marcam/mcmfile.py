@@ -66,7 +66,7 @@ def read_image(image_path):
     # TODO: could also just raise loglevel to Error and above
     no_log = wx.LogNull()
 
-    img = wx.Image(os.path.join(tmp_dir, name))
+    img = wx.Image(image_path)
 
     # re-enable logging
     del no_log
@@ -93,7 +93,7 @@ def is_valid(mcm_path):
             img_ok = False
         finally:
             # remove temp dir
-            os.remove(os.path.join(tmp_dir, name))
+            os.remove(os.path.join(tmp_dir, image_name))
             os.rmdir(tmp_dir)
     else:
         img_ok = False
@@ -117,7 +117,7 @@ def load(imdata_path):
         tmp_dir = tempfile.mkdtemp()
         with zipfile.ZipFile(imdata_path, 'r') as container_fh:
             with container_fh.open(MCM_INFO_NAME, 'r') as info_fh:
-                info = json.load(info.fh)
+                info = json.load(info_fh)
 
             namelist = container_fh.namelist()
             for name in namelist:
