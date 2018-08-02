@@ -181,7 +181,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # init all properties to None (cause error if accessed before
         #   proper init)
-        self.content_saved = True
         self.history = win_history
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
@@ -273,7 +272,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             refresh_update (bool): default True.  Whether to Refresh() and
                 Update() window area
         """
-        self.content_saved = True
         self.history.reset()
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
@@ -303,27 +301,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn_debug
     def has_no_image(self):
         return self.img_dc is None
-
-    @debug_fxn
-    def needs_save(self):
-        """poll self and children to determine if we need to save document
-
-        Uses:
-            self.content_saved
-
-        Returns:
-            bool: whether content needs saving
-        """
-        return not self.content_saved
-
-    @debug_fxn
-    def save_notify(self):
-        """tell self and children data was saved now
-
-        Affects:
-            self.content_saved
-        """
-        self.content_saved = True
 
     @debug_fxn
     def get_img_wincenter(self):
@@ -2233,8 +2210,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             return False
 
         self.marks.append(img_point)
-        # signal to parent that a new unsaved state has happened
-        self.content_saved = False
 
         self.refresh_mark_area(img_point)
 
@@ -2294,8 +2269,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         except ValueError:
             pass
         self.refresh_mark_area(mark_pt)
-        # signal to parent that a new unsaved state has happened
-        self.content_saved = False
         if not internal:
             # tell parent UI new total marks number
             self._update_mark_total()

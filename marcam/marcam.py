@@ -219,7 +219,7 @@ def save_config(config_data):
 
 
 class EditHistory():
-    """Keeps track of Edit History, undo, redo
+    """Keeps track of Edit History, undo, redo, whether save is needed
     """
     def __init__(self):
         self.undo_menu_item = None
@@ -439,7 +439,6 @@ class ImageWindow(wx.Frame):
 
         # internal state
         self.win_history = EditHistory()
-        self.content_saved = True
         self.img_path = None
         self.save_filepath = None
         self.temp_scroll_zoom_state = None
@@ -1240,7 +1239,7 @@ class ImageWindow(wx.Frame):
         else:
             # image or *.1sc file
             img_ok = self.load_image_from_file(img_path)
-            # By not calling self.save_notify(), we indicate needs save
+            # By not calling self.win_history.save_notify(), indicate needs save
 
         if img_ok:
             self.menu_items_enable_disable()
@@ -1290,7 +1289,7 @@ class ImageWindow(wx.Frame):
             # add successful file open to file history
             self.file_history.AddFileToHistory(imdata_path)
             # we just loaded .mcm file, so have nothing to save
-            self.save_notify()
+            self.win_history.save_notify()
 
         # img_ok will only be True if we successfully loaded file
         return img_ok
@@ -1346,7 +1345,7 @@ class ImageWindow(wx.Frame):
         Returns:
             bool: Whether the image was closed.
         """
-        if self.needs_save():
+        if not self.win_history.is_saved():
             save_query = wx.MessageDialog(
                     self,
                     "",
@@ -1362,12 +1361,10 @@ class ImageWindow(wx.Frame):
 
         # image is closed--if we still keep this frame open then reset state
         if keep_win_open:
-            # reset edit history
+            # reset edit/save history
             self.win_history.reset()
             # reset filepath for mcm file to nothing on close
             self.save_filepath = None
-            # reset content_saved in case user didn't save
-            self.content_saved = True
             # make scrolled window show no image
             self.img_panel.set_no_image()
             # update statusbar text
@@ -1393,7 +1390,7 @@ class ImageWindow(wx.Frame):
             # use current filename/path to save
             if self.save_img_data(self.save_filepath) is not None:
                 # signify we have saved content
-                self.save_notify()
+                self.win_history.save_notify()
             else:
                 # error in saving dialog
                 # wx.ICON_ERROR has no effect on Mac
@@ -1443,7 +1440,7 @@ class ImageWindow(wx.Frame):
                 # set img_path
                 self.img_path = [pathname, arc_names[0]]
                 # signify we have saved content
-                self.save_notify()
+                self.win_history.save_notify()
                 # add successful file save as to file history
                 self.file_history.AddFileToHistory(pathname)
                 # Set window title to newly-saved filename
@@ -1522,12 +1519,6 @@ class ImageWindow(wx.Frame):
         if action[0] == 'IMAGE_XFORM':
             self.img_panel.init_image(action[1], do_zoom_fit=False)
 
-        # if we now are in a point in history that was saved, notify self
-        #   and img_panel
-        if self.win_history.is_saved():
-            self.content_saved = True
-            self.img_panel.save_notify()
-
     @debug_fxn
     def on_redo(self, _evt):
         """Edit->Redo handler
@@ -1545,12 +1536,6 @@ class ImageWindow(wx.Frame):
             self.img_panel.move_mark(action[1], action[2], is_selected=False)
         if action[0] == 'IMAGE_XFORM':
             self.img_panel.init_image(action[2], do_zoom_fit=False)
-
-        # if we now are in a point in history that was saved, notify self
-        #   and img_panel
-        if self.win_history.is_saved():
-            self.content_saved = True
-            self.img_panel.save_notify()
 
     @debug_fxn
     def on_select_all(self, _evt):
@@ -1692,23 +1677,6 @@ class ImageWindow(wx.Frame):
             _evt (wx.CommandEvent):
         """
         self.img_panel.image_autocontrast(cutoff=6)
-
-    @debug_fxn
-    def save_notify(self):
-        # tell self and children data was saved now
-        self.content_saved = True
-        self.img_panel.save_notify()
-        self.win_history.save_notify()
-
-    @debug_fxn
-    def needs_save(self):
-        """Function to determine if file has changed since last save or open
-
-        Returns:
-            bool: True if file has changed since save or open
-        """
-        # poll self and children to determine if we need to save document
-        return not self.content_saved or self.img_panel.needs_save()
 
     @debug_fxn
     def save_img_data(self, imdata_path):
