@@ -50,7 +50,7 @@ class McmFileError(Exception):
 
 
 @debug_fxn
-def img_readable(image_path):
+def image_readable(image_path):
     """Check if wx.Image can read this file without making error dialog
     """
     no_log = wx.LogNull()
@@ -59,6 +59,18 @@ def img_readable(image_path):
     del no_log
     return img_ok
 
+@debug_fxn
+def read_image(image_path):
+    # disable logging, we don't care if there is e.g. TIFF image
+    #   with unknown fields
+    # TODO: could also just raise loglevel to Error and above
+    no_log = wx.LogNull()
+
+    img = wx.Image(os.path.join(tmp_dir, name))
+
+    # re-enable logging
+    del no_log
+    return img
 
 @debug_fxn
 def is_valid(mcm_path):
@@ -76,7 +88,7 @@ def is_valid(mcm_path):
                         x for x in mcm_container.namelist() if x.startswith(MCM_IMAGE_NAME)
                         ][0]
                 mcm_container.extract(image_name, tmp_dir)
-                img_ok = img_readable(os.path.join(tmp_dir, image_name))
+                img_ok = image_readable(os.path.join(tmp_dir, image_name))
         except zipfile.BadZipFile:
             img_ok = False
         finally:
@@ -114,17 +126,11 @@ def load(imdata_path):
                     container_fh.extract(name, tmp_dir)
 
                     if name.endswith(".1sc"):
-                        img = image_proc.file1sc_to_image(os.path.join(tmp_dir, name))
+                        img = image_proc.file1sc_to_image(
+                                os.path.join(tmp_dir, name)
+                                )
                     else:
-                        # disable logging, we don't care if there is e.g. TIFF image
-                        #   with unknown fields
-                        # TODO: could also just raise loglevel to Error and above
-                        no_log = wx.LogNull()
-
-                        img = wx.Image(os.path.join(tmp_dir, name))
-
-                        # re-enable logging
-                        del no_log
+                        img = read_image(os.path.join(tmp_dir, name))
                     # check if img loaded ok
                     img_ok = img.IsOk()
                     img_name = name
