@@ -23,6 +23,8 @@ import numpy as np
 import PIL.Image
 import PIL.ImageStat
 import PIL.ImageOps
+import biorad1sc_reader
+from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
 import common
 import colormaps
@@ -39,6 +41,7 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 # TODO: may want to use threads for some time-consuming operations
+
 
 #-----------------------
 # Image data conversions

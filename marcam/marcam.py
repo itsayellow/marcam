@@ -30,16 +30,12 @@ import re
 import sys
 import tempfile
 import time
-import zipfile
 
 import wx
 import wx.adv
 import wx.html2
 import wx.lib.dialogs
 import numpy as np
-
-import biorad1sc_reader
-from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
 import image_proc
 from image_scrolled_canvas import ImageScrolledCanvasMarks
@@ -80,6 +76,28 @@ class MarcamFormatter(logging.Formatter):
         out_string = out_string.replace("\n", "\n    ")
         return out_string
 
+
+@debug_fxn
+def can_read_image(image_path):
+    """Detect if this image is readable by this program.
+
+    Detects any readable plain image file, or .mcm file.
+    """
+    (_, image_path_ext) = os.path.splitext(image_path)
+    if mcmfile.is_valid(image_path):
+        img_ok = True
+    elif image_path_ext == ".1sc":
+        img_ok = not not image_proc.file1sc_to_image(image_path)
+    else:
+        # for all other image files
+        # wx.Image.CanRead has its own error log, which is setup to cause
+        #   error dialog.  Disable it if because want to use our own
+        no_log = wx.LogNull()
+        img_ok = wx.Image.CanRead(image_path)
+        # re-enable logging
+        del no_log
+
+    return img_ok
 
 @debug_fxn
 def logging_setup(log_level=logging.DEBUG):
@@ -198,25 +216,6 @@ def save_config(config_data):
         status = False
 
     return status
-
-@debug_fxn
-def can_read_image(image_path):
-    """Detect if this image is readable by this program.
-
-    Detects any readable plain image file, or .mcm file.
-    """
-    if mcmfile.is_valid(image_path):
-        img_ok = True
-    else:
-        # for all other image files
-        # wx.Image.CanRead has its own error log, which is setup to cause
-        #   error dialog.  Disable it if because want to use our own
-        no_log = wx.LogNull()
-        img_ok = wx.Image.CanRead(image_path)
-        # re-enable logging
-        del no_log
-
-    return img_ok
 
 
 class EditHistory():
@@ -1317,7 +1316,7 @@ class ImageWindow(wx.Frame):
             del no_log
 
         # check if img loaded ok
-        img_ok = img.IsOk()
+        img_ok = img and img.IsOk()
 
         if img_ok:
             self.img_panel.init_image(img)
@@ -1707,7 +1706,7 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def save_img_data(self, imdata_path):
-        """Save image and mark locations to .mcm zipfile
+        """Save image and mark locations to .mcm file
 
         Args:
             imdata_path (str): full path to filename to save to
