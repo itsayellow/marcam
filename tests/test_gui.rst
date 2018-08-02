@@ -7,21 +7,35 @@ Test in macOS.
 
 Every time we notice something broken, add it here to test.
 
+MCM File Format - Save
+----------------------
+
+#. Save a \*.mcm file
+#. Load it back
+
+File Formats - Load
+-------------------
+
+#. Load \*.1sc file
+#. Load \*.mcm file (new)
+#. Load \*.mcm file (old, legacy)
+#. Load \*.png file
+
 Zoom
 ----
 
 Zoom in all the way, then zoom out all the way.
 
-1. Does the image show odd artifacts at any zoom level?
-2. Does the image appear to jitter in position?
-3. Does the image appear to shimmer in its composition?
-4. Do the boundary rectangles draw properly when the image is smaller than the
+#. Does the image show odd artifacts at any zoom level?
+#. Does the image appear to jitter in position?
+#. Does the image appear to shimmer in its composition?
+#. Do the boundary rectangles draw properly when the image is smaller than the
    window?
 
 Enable `_debug_paint_client_area` to see red outlines on boundary fill
 rectangles.
 
-1. Do the boundary rectangles look like two rectangles spanning the top
+#. Do the boundary rectangles look like two rectangles spanning the top
    and bottom, with two other rectangles on the sides (the same height
    as the image)?
 
