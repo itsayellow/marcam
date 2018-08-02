@@ -39,31 +39,45 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 
+MCM_VERSION = '1.0.0'
+MCM_IMAGE_NAME = 'image.png'
+MCM_INFO_NAME = 'info.json'
+
+
 class McmFileError(Exception):
     pass
 
 
 @debug_fxn
-def is_valid(image_path):
+def is_valid(mcm_path):
     """Detect if this image is readable by this program.
 
     Detects any readable .mcm file.
     """
-    if zipfile.is_zipfile(image_path):
+    if zipfile.is_zipfile(mcm_path):
         # for .mcm files
         # verify internals of zipfile
         try:
-            with zipfile.ZipFile(image_path) as mcm_file:
-                with mcm_file.open('image.png') as png_file:
-                    no_log = wx.LogNull()
-                    img_ok = wx.Image.CanRead(png_file)
-                    # re-enable logging
-                    del no_log
+            with zipfile.ZipFile(mcm_path) as mcm_file:
+                image_name = [
+                        x for x in container_fh.namelist() if x.startswith(MCM_IMAGE_NAME)
+                        ][0]
+                # TODO: we need to remove tempdir
+                tmp_dir = tempfile.mkdtemp()
+                mcm_file.extract(image_name, tmp_dir)
+                no_log = wx.LogNull()
+                img_ok = wx.Image.CanRead(os.path.join(tmp_dir, image_name))
+                # re-enable logging
+                del no_log
         except zipfile.BadZipFile:
             img_ok = False
     else:
         img_ok = False
 
+    # remove temp dir
+    os.remove(os.path.join(tmp_dir, name))
+    os.rmdir(tmp_dir)
+    
     return img_ok
 
 @debug_fxn
@@ -73,15 +87,21 @@ def load(imdata_path):
     Args:
         imdata_path (str): path to .mcm file to open
     """
+    # legacy marks file name
+    marks_file_name = 'marks.txt'
     # init img_ok to False in case we don't load image
     img_ok = False
 
     # first load image from zip
     try:
         with zipfile.ZipFile(imdata_path, 'r') as container_fh:
+            with container_fh.open(MCM_INFO_NAME, 'r') as info_fh:
+                info = json.load(info.fh)
+
             namelist = container_fh.namelist()
             for name in namelist:
                 if name.startswith("image."):
+                    # TODO: we need to remove tempdir
                     tmp_dir = tempfile.mkdtemp()
                     container_fh.extract(name, tmp_dir)
 
@@ -141,45 +161,34 @@ def save(imdata_path, img, marks):
     # self.save_filepath: path to mcm file we've saved
     # self.img_panel.img_dc: max-res image data MemoryDC
 
-    current_img = image_proc.memorydc2image(self.img_panel.img_dc)
-    current_img.SaveFile(temp_img, wx.BITMAP_TYPE_PNG)
+    img.SaveFile(temp_img, wx.BITMAP_TYPE_PNG)
     temp_img.close()
 
-    #if isinstance(self.img_path, str):
-    #    # pathname for plain image file
-    #    with open(self.img_path, 'rb') as img_fh:
-    #        temp_img.write(img_fh.read())
-    #else:
-    #    # mcm zipfile component image file
-    #    with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
-    #        temp_img.write(container_fh.open(self.img_path[1]).read())
-    #temp_img.close()
-
-    ## get archive name for image in zip
-    #if isinstance(self.img_path, str):
-    #    (_, imgfile_ext) = os.path.splitext(self.img_path)
-    #    img_arcname = "image" + imgfile_ext
-    #else:
-    #    img_arcname = self.img_path[1]
-
-    img_arcname = "image.png"
-    markdata_name = "marks.txt"
-
+    mcm_info = {
+            'mcm_version':MCM_VERSION,
+            'mcm_image_name':MCM_IMAGE_NAME,
+            'mcm_info_name':MCM_INFO_NAME,
+            'marks':marks
+            }
     # write new save file
     try:
         with zipfile.ZipFile(imdata_path, 'w') as container_fh:
-            container_fh.write(temp_img_name, arcname=img_arcname)
+            # write image file to archive
+            container_fh.write(temp_img_name, arcname=MCM_IMAGE_NAME)
+            # write json text file to archive
             container_fh.writestr(
-                    markdata_name,
-                    json.dumps(self.img_panel.marks, separators=(',', ':'))
+                    MCM_INFO_NAME,
+                    json.dumps(mcm_info)
                     )
     except IOError:
         # TODO: need real error dialog
         LOGGER.warning("Cannot save current data in file '%s'.", imdata_path)
         returnval = None
     else:
-        returnval = (img_arcname, markdata_name)
+        # TODO: do we really want these return values?
+        returnval = (MCM_IMAGE_NAME, MCM_INFO_NAME)
     finally:
+        # remove temp file
         os.unlink(temp_img_name)
 
     return returnval

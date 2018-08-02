@@ -1297,7 +1297,8 @@ class ImageWindow(wx.Frame):
             self.img_panel.mark_point_list(marks)
             self.img_panel.init_image(img)
             # set save_filepath to path of mcm file we loaded
-            # self.img_path if from zip is list, zipfile, member_name
+            # self.img_path if from mcm is list: [<mcmfilepath>, <member_name>]
+            # TODO: do we even care about this list, or img_name?
             self.img_path = [imdata_path, img_name]
             self.save_filepath = imdata_path
             self.statusbar.SetStatusText(
@@ -1738,58 +1739,8 @@ class ImageWindow(wx.Frame):
         Args:
             imdata_path (str): full path to filename to save to
         """
-        # make temp file for image file
-        #   must make actual file for use with zipfile
-        (temp_img_fd, temp_img_name) = tempfile.mkstemp()
-        temp_img = os.fdopen(temp_img_fd, mode='wb')
-
-        # copy source image into temp file
-        # self.img_path: path to image we originally loaded
-        # self.save_filepath: path to mcm file we've saved
-        # self.img_panel.img_dc: max-res image data MemoryDC
-
         current_img = image_proc.memorydc2image(self.img_panel.img_dc)
-        current_img.SaveFile(temp_img, wx.BITMAP_TYPE_PNG)
-        temp_img.close()
-
-        #if isinstance(self.img_path, str):
-        #    # pathname for plain image file
-        #    with open(self.img_path, 'rb') as img_fh:
-        #        temp_img.write(img_fh.read())
-        #else:
-        #    # mcm zipfile component image file
-        #    with zipfile.ZipFile(self.img_path[0], 'r') as container_fh:
-        #        temp_img.write(container_fh.open(self.img_path[1]).read())
-        #temp_img.close()
-
-        ## get archive name for image in zip
-        #if isinstance(self.img_path, str):
-        #    (_, imgfile_ext) = os.path.splitext(self.img_path)
-        #    img_arcname = "image" + imgfile_ext
-        #else:
-        #    img_arcname = self.img_path[1]
-
-        img_arcname = "image.png"
-        markdata_name = "marks.txt"
-
-        # write new save file
-        try:
-            with zipfile.ZipFile(imdata_path, 'w') as container_fh:
-                container_fh.write(temp_img_name, arcname=img_arcname)
-                container_fh.writestr(
-                        markdata_name,
-                        json.dumps(self.img_panel.marks, separators=(',', ':'))
-                        )
-        except IOError:
-            # TODO: need real error dialog
-            LOGGER.warning("Cannot save current data in file '%s'.", imdata_path)
-            returnval = None
-        else:
-            returnval = (img_arcname, markdata_name)
-        finally:
-            os.unlink(temp_img_name)
-
-        return returnval
+        return mcmfile.save(imdata_path, current_img, self.img_panel.marks)
 
     @debug_fxn
     def on_about(self, _evt):
