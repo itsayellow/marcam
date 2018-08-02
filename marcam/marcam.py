@@ -623,8 +623,8 @@ class ImageWindow(wx.Frame):
                 file_saveas_item,
                 file_exportimage_item,
                 # Edit
-                edit_undo_item,
-                edit_redo_item,
+                #edit_undo_item, # under EditHistory control
+                #edit_redo_item, # under EditHistory control
                 edit_copy_item,
                 self.selallitem,
                 # View
