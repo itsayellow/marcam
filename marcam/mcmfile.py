@@ -46,6 +46,7 @@ MCM_VERSION = '1.0.0'
 MCM_IMAGE_NAME = 'image.png'
 MCM_INFO_NAME = 'info.json'
 
+MCM_LEGACY_IMAGE_PREFIX = 'image.'
 
 class McmFileError(Exception):
     pass
@@ -95,7 +96,7 @@ def is_valid(mcm_path):
             tmp_dir = tempfile.mkdtemp()
             with zipfile.ZipFile(mcm_path) as mcm_container:
                 image_name = [
-                        x for x in mcm_container.namelist() if x.startswith(MCM_IMAGE_NAME)
+                        x for x in mcm_container.namelist() if x.startswith(MCM_LEGACY_IMAGE_PREFIX)
                         ][0]
                 mcm_container.extract(image_name, tmp_dir)
                 mcm_ok = image_readable(os.path.join(tmp_dir, image_name))
@@ -226,7 +227,7 @@ def legacy_load(imdata_path):
         with zipfile.ZipFile(imdata_path, 'r') as container_fh:
             namelist = container_fh.namelist()
             for name in namelist:
-                if name.startswith("image."):
+                if name.startswith(MCM_LEGACY_IMAGE_PREFIX):
                     tmp_dir = tempfile.mkdtemp()
                     container_fh.extract(name, tmp_dir)
 
