@@ -89,6 +89,7 @@ Documentation References
 ------------------------
 
 * `Creating and Hosting a Personal Site on GitHub <http://jmcglone.com/guides/github-pages/>`_
+* `Get Started With GitHub Pages (Plus Bonus Jekyll) <https://24ways.org/2013/get-started-with-github-pages/>`_
 * `reStructuredText Main Page <http://docutils.sourceforge.net/rst.html>`_
 * `reStructuredText Markup Spec <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_
 * `reStructuredText Directives <http://docutils.sourceforge.net/docs/ref/rst/directives.html>`_
