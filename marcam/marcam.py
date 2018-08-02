@@ -1282,45 +1282,16 @@ class ImageWindow(wx.Frame):
 
         # first load image from zip
         try:
-            with zipfile.ZipFile(imdata_path, 'r') as container_fh:
-                namelist = container_fh.namelist()
-                for name in namelist:
-                    if name.startswith("image."):
-                        tmp_dir = tempfile.mkdtemp()
-                        container_fh.extract(name, tmp_dir)
-
-                        if name.endswith(".1sc"):
-                            img = file1sc_to_image(os.path.join(tmp_dir, name))
-                        else:
-                            # disable logging, we don't care if there is e.g. TIFF image
-                            #   with unknown fields
-                            # TODO: could also just raise loglevel to Error and above
-                            no_log = wx.LogNull()
-
-                            img = wx.Image(os.path.join(tmp_dir, name))
-
-                            # re-enable logging
-                            del no_log
-                        # check if img loaded ok
-                        img_ok = img.IsOk()
-                        img_name = name
-
-                        # remove temp dir
-                        os.remove(os.path.join(tmp_dir, name))
-                        os.rmdir(tmp_dir)
-
-                    if name == "marks.txt":
-                        with container_fh.open(name, 'r') as json_fh:
-                            marks = json.load(json_fh)
-                        marks = [tuple(x) for x in marks]
+            (img, marks, img_name) = mcmfile.load(imdata_path)
             # need: img, img_name, marks
-        except OSError:
-            # TODO: need real error dialog
-            img_ok = False
+        except mcmfile.McmFileError:
+            img = None
             LOGGER.warning(
                     "Cannot open data in file '%s'.", imdata_path,
                     exc_info=True
                     )
+
+        img_ok = img is not None
 
         if img_ok:
             self.img_panel.mark_point_list(marks)
@@ -1341,11 +1312,6 @@ class ImageWindow(wx.Frame):
             self.file_history.AddFileToHistory(imdata_path)
             # we just loaded .mcm file, so have nothing to save
             self.save_notify()
-        else:
-            self.statusbar.SetStatusText(
-                    "Image " + imdata_path+ " loading ERROR."
-                    )
-
 
         # img_ok will only be True if we successfully loaded file
         return img_ok
@@ -1390,10 +1356,6 @@ class ImageWindow(wx.Frame):
             # on Mac sets file icon in titlebar with right-click showing
             #   dir hierarchy
             self.SetRepresentedFilename(img_file)
-        else:
-            self.statusbar.SetStatusText(
-                    "Image " + img_file + " loading ERROR."
-                    )
 
         # img_ok will only be True if we successfully loaded file
         return img_ok
@@ -2189,7 +2151,6 @@ class MarcamApp(wx.App):
         # NOTE: works great in bundled app,
         #   but cmd-line invocation causes file_names to be last argument
         #       of cmd-line, even if that's the script name
-        # TODO: figure out how to ignore bad openFiles from command-line
         LOGGER.debug(file_names)
         for open_file in file_names:
             # open in blank window, or
@@ -2198,7 +2159,8 @@ class MarcamApp(wx.App):
                 img_ok = self.new_frame_open_file(open_file)
             else:
                 img_ok = self.file_windows[0].open_image_this_frame(open_file)
-            # TODO: what to do with files that can't open because error
+            # TODO: figure out how to ignore bad openFiles from command-line
+            #   what to do with files that can't open because error
 
     def OnExit(self):
         # save config_data right before app is about to exit

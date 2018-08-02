@@ -15,11 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import logging
 import os
 import os.path
 import tempfile
 import zipfile
+
+import wx
 
 import common
 
@@ -36,6 +39,10 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 
+class McmFileError(Exception):
+    pass
+
+
 @debug_fxn
 def is_valid(image_path):
     """Detect if this image is readable by this program.
@@ -46,7 +53,7 @@ def is_valid(image_path):
         # for .mcm files
         # verify internals of zipfile
         try:
-            with zipfile.Zipfile(image_path) as mcm_file:
+            with zipfile.ZipFile(image_path) as mcm_file:
                 with mcm_file.open('image.png') as png_file:
                     no_log = wx.LogNull()
                     img_ok = wx.Image.CanRead(png_file)
@@ -102,18 +109,20 @@ def load(imdata_path):
                     with container_fh.open(name, 'r') as json_fh:
                         marks = json.load(json_fh)
                     marks = [tuple(x) for x in marks]
-    except IOError:
-        # TODO: need real error dialog
+    except (zipfile.BadZipFile, OSError) as err:
         LOGGER.warning(
-                "Cannot open data in file '%s'.", imdata_path,
+                "Cannot open data in file '%s': %s", imdata_path, err,
                 exc_info=True
                 )
+        raise McmFileError
 
-    # img_ok will only be True if we successfully loaded file
+    # need: img, img_name, marks
+
     if img_ok:
         return (img, marks, img_name)
     else:
-        return None
+        return (None, None, None)
+
 
 @debug_fxn
 def save(imdata_path, img, marks):
