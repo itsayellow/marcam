@@ -888,12 +888,20 @@ class ImageWindow(wx.Frame):
         #   def wx.PyApp.SetExitOnFrameDelete(self, flag)
         # https://wxpython.org/Phoenix/docs/html/wx.PyApp.html#wx.PyApp.SetExitOnFrameDelete
         # but this may delete menus
+
+        # See if we can shutdown this frame.
+        # If it is kept open for any reason, we need to veto this close event
+        # shutdown_frame has the logic for what to do on attempting to close
+        #   a window.
         veto_close = self.parent.shutdown_frame(
                 self.GetId(),
                 force_close=not evt.CanVeto(),
                 from_close_menu=self.close_source == 'close_menu',
                 from_quit_menu=self.close_source == 'quit_menu'
                 )
+        # reset self.close_source
+        self.close_source = None
+
         if veto_close:
             # don't close window
             evt.Veto()
@@ -904,9 +912,6 @@ class ImageWindow(wx.Frame):
             self.file_history.Save(self.config)
             # continue with normal event handling
             evt.Skip()
-
-        # reset self.close_source
-        self.close_source = None
 
 
     @debug_fxn
@@ -1947,11 +1952,10 @@ class MarcamApp(wx.App):
         #                   self.file_windows.remove(frame)
         #                   close_window = True
 
-        for frame in self.file_windows:
-            if frame.GetId() == frame_to_close_id:
-                # we've found frame to close in 'frame'
-                frame_to_close = frame
-                break
+        frame_to_close = [
+                frame
+                for frame in self.file_windows if frame.GetId() == frame_to_close_id
+                ][0]
 
         # keep_win_open tells close_image() if it should reset the frame's
         #   settings if it successfully closes the image (in anticipation of
@@ -1971,6 +1975,8 @@ class MarcamApp(wx.App):
                     )
                 )
 
+        # close_image checks to see if there are unsaved changes, and if there
+        #   is, asks the user if the user wants to save, or cancel window close
         # image_closed is False if user clicked "Cancel" when asked to save
         #   otherwise it is True
         image_closed = frame_to_close.close_image(keep_win_open=keep_win_open)
