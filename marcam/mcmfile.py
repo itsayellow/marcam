@@ -116,7 +116,7 @@ def load(imdata_path):
     Args:
         imdata_path (str): path to .mcm file to open
     """
-    raise_McmFileError = False
+    raise_mcm_file_error = False
     # init img_ok to False in case we don't load image
     img_ok = False
 
@@ -145,18 +145,19 @@ def load(imdata_path):
                 "Cannot open data in file '%s': %s", imdata_path, err,
                 exc_info=True
                 )
-        raise_McmFileError = True
+        raise_mcm_file_error = True
     finally:
         # remove temp dir
         shutil.rmtree(tmp_dir)
-    if raise_McmFileError == True:
+    if raise_mcm_file_error:
         # Do this here so this raise allows the finally above to execute
         raise McmFileError
 
-    if img_ok:
-        return (img, marks, image_name)
-    else:
+    # error return
+    if not img_ok:
         return (None, None, None)
+
+    return (img, marks, image_name)
 
 
 @debug_fxn
@@ -211,7 +212,7 @@ def save(imdata_path, img, marks):
 @debug_fxn
 def legacy_load(imdata_path):
     """For old mcm files only (before they contained 'info.json')
- 
+
     Load legacy app .mcm file
 
     Args:
@@ -260,4 +261,8 @@ def legacy_load(imdata_path):
                 "Cannot open data in file '%s'.", imdata_path,
                 exc_info=True
                 )
+    # error return
+    if not img_ok:
+        return (None, None, None)
+
     return (img, marks, img_name)
