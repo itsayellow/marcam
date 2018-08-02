@@ -42,6 +42,34 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 #-----------------------
 # Image data conversions
+@debug_fxn
+def file1sc_to_image(file1sc_file):
+    """Read in file1sc file and convert to wx.Image
+
+    Args:
+        file1sc_file (str): path to .1sc file
+
+    Returns:
+        wx.Image: image object
+    """
+    try:
+        read1sc = biorad1sc_reader.Reader(file1sc_file)
+    except (BioRadInvalidFileError, BioRadParsingError):
+        # img_ok is false if 1sc is not valid 1sc file
+        return False
+
+    (img_x, img_y, img_data) = read1sc.get_img_data()
+
+    # TODO: wx.Image is probably only 8-bits each color channel
+    #   yet we have 16-bit images
+    # wx.Image wants img_x * img_y * 3
+    # TODO: shadow data with full 16-bit info
+    img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
+    img_data_rgb[0::3] = img_data//256
+    img_data_rgb[1::3] = img_data//256
+    img_data_rgb[2::3] = img_data//256
+    img = wx.Image(img_x, img_y, bytes(img_data_rgb))
+    return img
 
 @debug_fxn
 def image2memorydc(in_image, white_bg=False):

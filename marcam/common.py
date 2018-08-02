@@ -106,4 +106,3 @@ def clip(num, num_min=None, num_max=None):
         return min(num, num_max)
     else:
         return num
-

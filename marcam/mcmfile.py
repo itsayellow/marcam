@@ -25,6 +25,7 @@ import zipfile
 import wx
 
 import common
+import image_proc
 
 
 # logging stuff
@@ -49,6 +50,17 @@ class McmFileError(Exception):
 
 
 @debug_fxn
+def img_readable(image_path):
+    """Check if wx.Image can read this file without making error dialog
+    """
+    no_log = wx.LogNull()
+    img_ok = wx.Image.CanRead(image_path)
+    # re-enable logging
+    del no_log
+    return img_ok
+
+
+@debug_fxn
 def is_valid(mcm_path):
     """Detect if this image is readable by this program.
 
@@ -59,15 +71,12 @@ def is_valid(mcm_path):
         # verify internals of zipfile
         try:
             tmp_dir = tempfile.mkdtemp()
-            with zipfile.ZipFile(mcm_path) as mcm_file:
+            with zipfile.ZipFile(mcm_path) as mcm_container:
                 image_name = [
-                        x for x in container_fh.namelist() if x.startswith(MCM_IMAGE_NAME)
+                        x for x in mcm_container.namelist() if x.startswith(MCM_IMAGE_NAME)
                         ][0]
-                mcm_file.extract(image_name, tmp_dir)
-                no_log = wx.LogNull()
-                img_ok = wx.Image.CanRead(os.path.join(tmp_dir, image_name))
-                # re-enable logging
-                del no_log
+                mcm_container.extract(image_name, tmp_dir)
+                img_ok = img_readable(os.path.join(tmp_dir, image_name))
         except zipfile.BadZipFile:
             img_ok = False
         finally:
@@ -93,6 +102,7 @@ def load(imdata_path):
 
     # first load image from zip
     try:
+        tmp_dir = tempfile.mkdtemp()
         with zipfile.ZipFile(imdata_path, 'r') as container_fh:
             with container_fh.open(MCM_INFO_NAME, 'r') as info_fh:
                 info = json.load(info.fh)
@@ -101,11 +111,10 @@ def load(imdata_path):
             for name in namelist:
                 if name.startswith("image."):
                     # TODO: we need to remove tempdir
-                    tmp_dir = tempfile.mkdtemp()
                     container_fh.extract(name, tmp_dir)
 
                     if name.endswith(".1sc"):
-                        img = file1sc_to_image(os.path.join(tmp_dir, name))
+                        img = image_proc.file1sc_to_image(os.path.join(tmp_dir, name))
                     else:
                         # disable logging, we don't care if there is e.g. TIFF image
                         #   with unknown fields
@@ -120,10 +129,6 @@ def load(imdata_path):
                     img_ok = img.IsOk()
                     img_name = name
 
-                    # remove temp dir
-                    os.remove(os.path.join(tmp_dir, name))
-                    os.rmdir(tmp_dir)
-
                 if name == "marks.txt":
                     with container_fh.open(name, 'r') as json_fh:
                         marks = json.load(json_fh)
@@ -134,6 +139,11 @@ def load(imdata_path):
                 exc_info=True
                 )
         raise McmFileError
+    finally:
+        # remove temp dir
+        os.remove(os.path.join(tmp_dir, name))
+        os.rmdir(tmp_dir)
+
 
     # need: img, img_name, marks
 
