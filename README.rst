@@ -85,9 +85,10 @@ Application Log files stored in the directory:
 Application preferences stored in the file:
 "C:\\Users\\<username>\\AppData\\Local\\Marcam\\config.json"
 
-reStructuredText References
----------------------------
+Documentation References
+------------------------
 
+* `Creating and Hosting a Personal Site on GitHub <http://jmcglone.com/guides/github-pages/>`_
 * `reStructuredText Main Page <http://docutils.sourceforge.net/rst.html>`_
 * `reStructuredText Markup Spec <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_
 * `reStructuredText Directives <http://docutils.sourceforge.net/docs/ref/rst/directives.html>`_
