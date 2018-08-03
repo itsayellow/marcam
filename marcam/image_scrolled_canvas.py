@@ -1987,8 +1987,13 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 self.refresh_mark_area(self.mark_dragging)
             else:
                 try:
+                    # in case we have scrolled while dragging, recalculate
+                    #   window position from original unscrolled position
+                    point_devcoord = self.CalcScrolledPosition(
+                            self.mouse_left_down['point_unscroll']
+                            )
                     refresh_rect = wx.Rect(
-                            topLeft=self.mouse_left_down['point'],
+                            topLeft=point_devcoord,
                             bottomRight=evt_pos
                             )
                     draw_rect = wx.Rect(
