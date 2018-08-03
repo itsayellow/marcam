@@ -1,6 +1,5 @@
 """Constants that setup parameters and behavior of application
 """
-
 # Copyright 2017-2018 Matthew A. Clapp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,7 @@
 # limitations under the License.
 
 import sys
-import wx 
+import wx
 import appdirs
 import os.path
 
@@ -91,7 +90,7 @@ TOTAL_MAG_STEPS = 69
 # Higher value: smaller on_paint patch size, farther from "ideal" zoom
 ZOOM_MAX_ERROR_TOL = 0.011
 
-# how much to scroll for an EVT_SROLLWIN_* 
+# how much to scroll for an EVT_SROLLWIN_*
 SCROLL_WHEEL_SPEED = 2
 # how much to scroll for an keypress
 SCROLL_KEY_SPEED = 20
@@ -107,9 +106,6 @@ PROXIMITY_PX = 6
 #   larger -> doesn't break with slow computers
 PANIMATE_STEP_MS = 30
 
-# appropriate for 11px x 11px cross
-CROSS_REFRESH_SQ_SIZE = 12
-
 # how many zoom_idx to zoom in on press of Option key
 TEMP_ZOOM = 10
 
@@ -121,36 +117,14 @@ TEMP_ZOOM = 10
 # Red could also be on cyan background
 
 # useful for bitmaps below
-pix_clear = b'\x00\x00\x00\x00'
+pix_clr = b'\x00\x00\x00\x00'
 pix_red = b'\xff\x00\x00\xff'
-pix_yellow = b'\xff\xff\x00\xff'
-
-# red cross, 5px x 5px
-centerline_5 = pix_clear*2 + pix_red + pix_clear*2
-crossline_5 = pix_red*5
-CROSS_5x5_RED_BMP = wx.Bitmap.FromBufferRGBA(
-        5, 5,
-        centerline_5*2 + crossline_5 + centerline_5*2
-        )
-
-# red cross, 7px x 7px
-centerline_7 = pix_clear*3 + pix_red + pix_clear*3
-crossline_7 = pix_red*7
-CROSS_7x7_RED_BMP = wx.Bitmap.FromBufferRGBA(
-        7, 7,
-        centerline_7*3 + crossline_7 + centerline_7*3
-        )
-
-# red cross, 9px x 9px
-centerline_9 = pix_clear*4 + pix_red + pix_clear*4
-crossline_9 = pix_red*9
-CROSS_9x9_RED_BMP = wx.Bitmap.FromBufferRGBA(
-        9, 9,
-        centerline_9*4 + crossline_9 + centerline_9*4
-        )
+pix_ylw = b'\xff\xff\x00\xff'
+pix_grn = b'\x00\xff\x00\xff'
+pix_blu = b'\x00\x00\xff\xff'
 
 # red cross, 11px x 11px
-centerline_11 = pix_clear*5 + pix_red + pix_clear*5
+centerline_11 = pix_clr*5 + pix_red + pix_clr*5
 crossline_11 = pix_red*11
 CROSS_11x11_RED_BMP = wx.Bitmap.FromBufferRGBA(
         11, 11,
@@ -158,11 +132,42 @@ CROSS_11x11_RED_BMP = wx.Bitmap.FromBufferRGBA(
         )
 
 # yellow cross, 11px x 11px
-centerline_11 = pix_clear*5 + pix_yellow + pix_clear*5
-crossline_11 = pix_yellow*11
+centerline_11 = pix_clr*5 + pix_ylw + pix_clr*5
+crossline_11 = pix_ylw*11
 CROSS_11x11_YELLOW_BMP = wx.Bitmap.FromBufferRGBA(
         11, 11,
         centerline_11*5 + crossline_11 + centerline_11*5
+        )
+
+# appropriate for 11px x 11px cross
+CROSS_REFRESH_SQ_SIZE = 12
+CROSS_UNSEL_BMP = CROSS_11x11_RED_BMP
+CROSS_SEL_BMP = CROSS_11x11_YELLOW_BMP
+
+# ARCHIVE BELOW ---------------------------------------------------------
+
+# red cross, 5px x 5px
+centerline_5 = pix_clr*2 + pix_red + pix_clr*2
+crossline_5 = pix_red*5
+CROSS_5x5_RED_BMP = wx.Bitmap.FromBufferRGBA(
+        5, 5,
+        centerline_5*2 + crossline_5 + centerline_5*2
+        )
+
+# red cross, 7px x 7px
+centerline_7 = pix_clr*3 + pix_red + pix_clr*3
+crossline_7 = pix_red*7
+CROSS_7x7_RED_BMP = wx.Bitmap.FromBufferRGBA(
+        7, 7,
+        centerline_7*3 + crossline_7 + centerline_7*3
+        )
+
+# red cross, 9px x 9px
+centerline_9 = pix_clr*4 + pix_red + pix_clr*4
+crossline_9 = pix_red*9
+CROSS_9x9_RED_BMP = wx.Bitmap.FromBufferRGBA(
+        9, 9,
+        centerline_9*4 + crossline_9 + centerline_9*4
         )
 
 
@@ -175,7 +180,7 @@ pix_transluc25_white = b'\xff\xff\xff\x40'
 pix_transluc25_cyan = b'\x00\xff\xff\x40'
 
 # red cross with background shadow, 11px x 11px
-centerline_11 = pix_clear*5 + pix_red + pix_transluc25_black + pix_clear*4
+centerline_11 = pix_clr*5 + pix_red + pix_transluc25_black + pix_clr*4
 crossline_11 = pix_red*11
 crossline_below_11 = pix_transluc25_black*5 + pix_red + pix_transluc25_black*5
 CROSS_11x11_RED_SHADOW_BMP = wx.Bitmap.FromBufferRGBA(
@@ -184,7 +189,7 @@ CROSS_11x11_RED_SHADOW_BMP = wx.Bitmap.FromBufferRGBA(
         )
 
 # red cross with background glow, 11px x 11px
-centerline_11 = pix_clear*4 + pix_transluc25_cyan + pix_red + pix_transluc25_cyan + pix_clear*4
+centerline_11 = pix_clr*4 + pix_transluc25_cyan + pix_red + pix_transluc25_cyan + pix_clr*4
 crossline_above_11 = pix_transluc25_cyan*5 + pix_red + pix_transluc25_cyan*5
 crossline_11 = pix_red*11
 crossline_below_11 = pix_transluc25_cyan*5 + pix_red + pix_transluc25_cyan*5

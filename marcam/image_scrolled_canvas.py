@@ -2476,7 +2476,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(
-                            const.CROSS_11x11_RED_BMP,
+                            const.CROSS_UNSEL_BMP,
                             cross_win - (6, 6)
                             )
 
@@ -2493,7 +2493,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     # NOTE: if you change the size of this bmp, also change
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(
-                            const.CROSS_11x11_YELLOW_BMP,
+                            const.CROSS_SEL_BMP,
                             cross_win - (6, 6)
                             )
 
@@ -2504,12 +2504,12 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
                 if self.mark_dragging_is_sel:
                     dc.DrawBitmap(
-                            const.CROSS_11x11_YELLOW_BMP,
+                            const.CROSS_SEL_BMP,
                             cross_win - (6, 6)
                             )
                 else:
                     dc.DrawBitmap(
-                            const.CROSS_11x11_RED_BMP,
+                            const.CROSS_UNSEL_BMP,
                             cross_win - (6, 6)
                             )
 
