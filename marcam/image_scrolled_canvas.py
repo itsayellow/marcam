@@ -107,6 +107,27 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
         raise Exception("Internal Error in create_rational_zooms: Please " \
                 "make sure that eror_tol < (mag_step - 1)")
 
+    if mag_step == 1.1 and total_mag_steps == 69 and error_tol == 0.011:
+        # as long as coefficients are typical, use precomputed values
+        zoom_frac_list = [
+                (3, 76), (4, 92), (3, 64), (4, 76), (3, 52), (1, 16), (5, 72),
+                (4, 52), (1, 12), (7, 76), (9, 88), (4, 36), (18, 148), (6, 44),
+                (3, 20), (11, 68), (5, 28), (4, 20), (7, 32), (18, 76), (9, 34),
+                (7, 24), (7, 22), (7, 20), (7, 18), (6, 14), (12, 26), (14, 27),
+                (9, 16), (5, 8), (11, 16), (3, 4), (5, 6), (9, 10), (1, 1),
+                (10, 9), (6, 5), (4, 3), (16, 11), (8, 5), (16, 9), (27, 14),
+                (13, 6), (7, 3), (13, 5), (17, 6), (19, 6), (24, 7), (19, 5),
+                (21, 5), (23, 5), (5, 1), (11, 2), (37, 6), (20, 3), (22, 3),
+                (41, 5), (9, 1), (39, 4), (43, 4), (12, 1), (13, 1), (29, 2),
+                (16, 1), (35, 2), (19, 1), (21, 1), (23, 1), (51, 2)
+                ]
+        zoom_list = [x[0]/x[1] for x in zoom_frac_list]
+        return (zoom_list, zoom_frac_list)
+    else:
+        # let us know we are not as fast as we could be
+        print("WARNING: NOT USING PRECOMPUTED ZOOM RATIOS.")
+        LOGGER.warning("NOT USING PRECOMPUTED ZOOM RATIOS.")
+
     # hard code this, rely on error_tol for tweaking
     max_num_denom = 64
 
@@ -156,6 +177,18 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
     #perc_errors = np.array(errors)*100
     #print(zoom_frac_list)
     #print("zoom max. perc error: %.2f%%"%np.max(perc_errors))
+
+    # DEBUG DELETEME
+    print("mag_step = ")
+    print(mag_step)
+    print("total_mag_steps = ")
+    print(total_mag_steps)
+    print("error_tol = ")
+    print(error_tol)
+    print("zoom_list = ")
+    print(zoom_list)
+    print("zoom_frac_list = ")
+    print(zoom_frac_list)
 
     return (zoom_list, zoom_frac_list)
 

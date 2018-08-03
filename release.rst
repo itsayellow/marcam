@@ -21,4 +21,7 @@ Summary
    i. In separate tab, look over all commits since last release to write up
       notable changes.
 
+#. Build Installers
 
+   i. In Windows, upload installer as "Marcam <version_num> Windows Installer.exe" to Github release.
+   #. On Mac, upload dmg file as "Marcam <version_num> Mac.dmg" to Github release.

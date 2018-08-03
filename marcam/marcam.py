@@ -462,7 +462,13 @@ class ImageWindow(wx.Frame):
         self.file_history = wx.FileHistory()
         self.file_history.Load(self.config)
 
+        if DEBUG:
+            start_time = time.time()
         self.init_ui()
+        if DEBUG:
+            eltime = time.time() - start_time
+            LOGGER.debug("init_ui elapsed time: %.3fms"%(eltime*1000))
+
         if srcfile is not None:
             img_ok = self.open_image_this_frame(srcfile)
         # TODO: handle what happens if bad image, if img_ok==False
