@@ -2477,7 +2477,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(
                             const.CROSS_UNSEL_BMP,
-                            cross_win - (6, 6)
+                            cross_win - const.CROSS_CENTER_COORDS
                             )
 
         pts_in_box = []
@@ -2494,7 +2494,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                     #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
                     dc.DrawBitmap(
                             const.CROSS_SEL_BMP,
-                            cross_win - (6, 6)
+                            cross_win - const.CROSS_CENTER_COORDS
                             )
 
         if self.mark_dragging is not None:
@@ -2505,12 +2505,12 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 if self.mark_dragging_is_sel:
                     dc.DrawBitmap(
                             const.CROSS_SEL_BMP,
-                            cross_win - (6, 6)
+                            cross_win - const.CROSS_CENTER_COORDS
                             )
                 else:
                     dc.DrawBitmap(
                             const.CROSS_UNSEL_BMP,
-                            cross_win - (6, 6)
+                            cross_win - const.CROSS_CENTER_COORDS
                             )
 
     @debug_fxn

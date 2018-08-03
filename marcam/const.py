@@ -122,6 +122,7 @@ pix_red = b'\xff\x00\x00\xff'
 pix_ylw = b'\xff\xff\x00\xff'
 pix_grn = b'\x00\xff\x00\xff'
 pix_blu = b'\x00\x00\xff\xff'
+pix_wht = b'\xff\xff\xff\xff'
 
 # red cross, 11px x 11px
 centerline_11 = pix_clr*5 + pix_red + pix_clr*5
@@ -139,10 +140,20 @@ CROSS_11x11_YELLOW_BMP = wx.Bitmap.FromBufferRGBA(
         centerline_11*5 + crossline_11 + centerline_11*5
         )
 
+# blue cross white bg, 11px x 11px - a good cross
+centerline_11 = pix_clr*4 + pix_wht + pix_blu + pix_wht + pix_clr*4
+off_crossline_11 = pix_wht*5 + pix_blu + pix_wht*5
+crossline_11 = pix_blu*11
+CROSS_11x11_BLUE_WHT_BMP = wx.Bitmap.FromBufferRGBA(
+        11, 11,
+        centerline_11*4 + off_crossline_11 + crossline_11 + off_crossline_11 + centerline_11*4
+        )
+
 # appropriate for 11px x 11px cross
 CROSS_REFRESH_SQ_SIZE = 12
 CROSS_UNSEL_BMP = CROSS_11x11_RED_BMP
 CROSS_SEL_BMP = CROSS_11x11_YELLOW_BMP
+CROSS_CENTER_COORDS = (6, 6)
 
 # ARCHIVE BELOW ---------------------------------------------------------
 
