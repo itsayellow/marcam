@@ -20,7 +20,7 @@ import appdirs
 import os.path
 
 APP_NAME = 'Marcam'
-VERSION_STR = "0.6.0"
+VERSION_STR = "0.7.0"
 
 # OS-dependent
 # Use appauthor=False (only applicable to Windows) to indicate only one
