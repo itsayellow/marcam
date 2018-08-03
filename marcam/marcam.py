@@ -1288,10 +1288,6 @@ class ImageWindow(wx.Frame):
             self.SetRepresentedFilename(imdata_path)
             # add successful file open to file history
             self.file_history.AddFileToHistory(imdata_path)
-
-            # DEBUG DELETEME
-            print(self.win_history.history)
-
             # we just loaded .mcm file, so have nothing to save
             self.win_history.save_notify()
 
