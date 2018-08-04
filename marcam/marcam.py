@@ -438,7 +438,7 @@ class ImageWindow(wx.Frame):
         super().__init__(None, **kwargs)
 
         # internal state
-        self.win_history = EditHistory()
+        self.frame_history = EditHistory()
         self.img_path = None
         self.save_filepath = None
         self.temp_scroll_zoom_state = None
@@ -656,8 +656,8 @@ class ImageWindow(wx.Frame):
 
         # register Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
-        self.win_history.register_undo_menu_item(edit_undo_item)
-        self.win_history.register_redo_menu_item(edit_redo_item)
+        self.frame_history.register_undo_menu_item(edit_undo_item)
+        self.frame_history.register_redo_menu_item(edit_redo_item)
 
         # For marks display, find text width of "9999", to leave enough
         #   padding to have space to contain "999"
@@ -763,7 +763,7 @@ class ImageWindow(wx.Frame):
         #   what we need
         self.img_panel = ImageScrolledCanvasMarks(
                 self,
-                self.win_history,
+                self.frame_history,
                 self.marks_num_update,
                 # the following always makes scrollbars,
                 #   Mac: they appear tiny and all the way to 0 (not
@@ -991,7 +991,7 @@ class ImageWindow(wx.Frame):
         if key_code in (127, 8):
             # Delete (127) or Backspace (8)
             deleted_marks = self.img_panel.delete_selected_marks()
-            self.win_history.new(
+            self.frame_history.new(
                     ['DELETE_MARK_LIST', deleted_marks],
                     description="Delete Mark" + ("s" if len(deleted_marks) > 1 else "")
                     )
@@ -1245,7 +1245,7 @@ class ImageWindow(wx.Frame):
         else:
             # image or *.1sc file
             img_ok = self.load_image_from_file(img_path)
-            # By not calling self.win_history.save_notify(), indicate needs save
+            # By not calling self.frame_history.save_notify(), indicate needs save
 
         if img_ok:
             self.menu_items_enable_disable()
@@ -1295,7 +1295,7 @@ class ImageWindow(wx.Frame):
             # add successful file open to file history
             self.file_history.AddFileToHistory(imdata_path)
             # we just loaded .mcm file, so have nothing to save
-            self.win_history.save_notify()
+            self.frame_history.save_notify()
 
         # img_ok will only be True if we successfully loaded file
         return img_ok
@@ -1351,7 +1351,7 @@ class ImageWindow(wx.Frame):
         Returns:
             bool: Whether the image was closed.
         """
-        if not self.win_history.is_saved():
+        if not self.frame_history.is_saved():
             save_query = wx.MessageDialog(
                     self,
                     "",
@@ -1368,7 +1368,7 @@ class ImageWindow(wx.Frame):
         # image is closed--if we still keep this frame open then reset state
         if keep_win_open:
             # reset edit/save history
-            self.win_history.reset()
+            self.frame_history.reset()
             # reset filepath for mcm file to nothing on close
             self.save_filepath = None
             # make scrolled window show no image
@@ -1396,7 +1396,7 @@ class ImageWindow(wx.Frame):
             # use current filename/path to save
             if self.save_img_data(self.save_filepath) is not None:
                 # signify we have saved content
-                self.win_history.save_notify()
+                self.frame_history.save_notify()
             else:
                 # error in saving dialog
                 # wx.ICON_ERROR has no effect on Mac
@@ -1446,7 +1446,7 @@ class ImageWindow(wx.Frame):
                 # set img_path
                 self.img_path = [pathname, arc_names[0]]
                 # signify we have saved content
-                self.win_history.save_notify()
+                self.frame_history.save_notify()
                 # add successful file save as to file history
                 self.file_history.AddFileToHistory(pathname)
                 # Set window title to newly-saved filename
@@ -1514,7 +1514,7 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        action = self.win_history.undo()
+        action = self.frame_history.undo()
         LOGGER.info("MSC:undo: %s", repr(action))
         if action[0] == 'MARK':
             self.img_panel.delete_mark(action[1], internal=False)
@@ -1532,7 +1532,7 @@ class ImageWindow(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        action = self.win_history.redo()
+        action = self.frame_history.redo()
         LOGGER.info("MSC:redo: %s", repr(action))
         if action[0] == 'MARK':
             self.img_panel.mark_point(action[1])
