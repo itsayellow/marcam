@@ -20,6 +20,10 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=[0]):
     Args:
         logger_fxn (logging.Logger.{info,debug,warning,error): Logger function
             send info msgs to.  Typically logging.Logger.info
+        debug_fxn_state (list of one integer): typically [0] at initialization,
+            this is a depth state that can be shared by all modules by
+            using the same variable from the same module as argument to all.
+            (typically common.DEBUG_FXN_STATE)
     """
 
     # debug decorator that announces function call/entry and lists args
