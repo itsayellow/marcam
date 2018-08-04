@@ -1835,10 +1835,11 @@ class HelpFrame(wx.Frame):
 
 
 class FrameList():
-    @debug_Fxn
+    @debug_fxn
     def __init__(self):
         self.frame_list = []
 
+    @debug_fxn
     def active_frame(self):
         for frame in self.frame_list:
             if frame.IsActive():
@@ -1846,28 +1847,35 @@ class FrameList():
                 break
         return return_frame
 
+    @debug_fxn
     def has_zero(self):
         return not self.frame_list
 
+    @debug_fxn
     def has_one(self):
         return len(self.frame_list) == 1
 
+    @debug_fxn
     def has_multiple(self):
         return len(self.frame_list) > 1
 
+    @debug_fxn
     def frame_with_id(self, search_id):
         for frame in self.frame_list:
-            if frame.GetId() == search_id
+            if frame.GetId() == search_id:
                 return_frame = frame
                 break
         return return_frame
 
+    @debug_fxn
     def append(self, frame_to_append):
         self.frame_list.append(frame_to_remove)
 
+    @debug_fxn
     def remove(self, frame_to_remove):
         self.frame_list.remove(frame_to_remove)
 
+    @debug_fxn
     def get_list_copy():
         return self.frame_list.copy()
 
