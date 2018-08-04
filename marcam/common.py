@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-def debug_fxn_factory(logger_fxn):
+def debug_fxn_factory(logger_fxn, debug_fxn_state=[0]):
     """Factory to produce debug_fxn that logs to specified logger object
 
     Args:
@@ -24,16 +24,12 @@ def debug_fxn_factory(logger_fxn):
 
     # debug decorator that announces function call/entry and lists args
     def debug_fxn(func):
-        """Function decorator that prints the function name and the arguments used
-        in the function call before executing the function
+        """Function decorator that prints the function name and the arguments
+        used in the function call before executing the function
         """
-        # store initial depth attribute
-        # TODO: consider using logger_fxn.marcam_depth instead of debug_fxn.depth?
-        #       If this is allowed, depth can be global across all modules.
-        debug_fxn.depth = 0
         def func_wrapper(*args, **kwargs):
-            debug_fxn.depth += 1
-            log_string = "FXN%d: %s.%s(\n"%(debug_fxn.depth, func.__module__, func.__qualname__)
+            debug_fxn_state[0] += 1
+            log_string = "FXN%d: %s.%s(\n"%(debug_fxn_state[0], func.__module__, func.__qualname__)
             for arg in args[1:]:
                 log_string += "    " + repr(arg) + ",\n"
             for key in kwargs:
@@ -41,11 +37,15 @@ def debug_fxn_factory(logger_fxn):
             log_string += "    )"
             logger_fxn(log_string)
             return_vals = func(*args, **kwargs)
-            debug_fxn.depth -= 1
+            debug_fxn_state[0] -= 1
             return return_vals
         return func_wrapper
 
     return debug_fxn
+
+# Stores global depth for debug_fxn's in all modules
+#   (e.g. debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE))
+DEBUG_FXN_STATE = [0]
 
 def floor(num):
     """Simple numerical ceiling function.

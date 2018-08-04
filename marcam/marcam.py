@@ -57,7 +57,7 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.info("MSC:ICON_DIR=%s", const.ICON_DIR)
 
 # create debug function using this file's logger
-debug_fxn = common.debug_fxn_factory(LOGGER.info)
+debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 
 
 class MarcamFormatter(logging.Formatter):
