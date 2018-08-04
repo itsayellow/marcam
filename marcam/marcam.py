@@ -2102,7 +2102,7 @@ class MarcamApp(wx.App):
         """
         # NOTE: works great in bundled app,
         #   but cmd-line invocation causes file_names to be last argument
-        #       of cmd-line, even if that's the script name
+        #       of cmd-line, even if that's the script name (???)
         LOGGER.debug(file_names)
         for open_file in file_names:
             # open in blank window, or
@@ -2113,6 +2113,10 @@ class MarcamApp(wx.App):
                 img_ok = self.file_windows[0].open_image_this_frame(open_file)
             # TODO: figure out how to ignore bad openFiles from command-line
             #   what to do with files that can't open because error
+            if img_ok:
+                print("MacOpenFiles: img_ok: %s"%open_file)
+            else:
+                print("MacOpenFiles: not img_ok: %s"%open_file)
 
     def OnExit(self):
         # save config_data right before app is about to exit
