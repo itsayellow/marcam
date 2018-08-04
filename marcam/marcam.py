@@ -1834,6 +1834,44 @@ class HelpFrame(wx.Frame):
         self.SetSize((500, 600))
 
 
+class FrameList():
+    @debug_Fxn
+    def __init__(self):
+        self.frame_list = []
+
+    def active_frame(self):
+        for frame in self.frame_list:
+            if frame.IsActive():
+                return_frame = frame
+                break
+        return return_frame
+
+    def has_zero(self):
+        return not self.frame_list
+
+    def has_one(self):
+        return len(self.frame_list) == 1
+
+    def has_multiple(self):
+        return len(self.frame_list) > 1
+
+    def frame_with_id(self, search_id):
+        for frame in self.frame_list:
+            if frame.GetId() == search_id
+                return_frame = frame
+                break
+        return return_frame
+
+    def append(self, frame_to_append):
+        self.frame_list.append(frame_to_remove)
+
+    def remove(self, frame_to_remove):
+        self.frame_list.remove(frame_to_remove)
+
+    def get_list_copy():
+        return self.frame_list.copy()
+
+
 # NOTE: closing window saves size, opening new window uses saved size
 class MarcamApp(wx.App):
     @debug_fxn
@@ -2036,6 +2074,8 @@ class MarcamApp(wx.App):
     @debug_fxn
     def quit_app(self):
         self.trying_to_quit = True
+        # we need to copy this because frame.Close() will end up modifying
+        #   self.file_windows, which will corrupt the loop in progress
         open_windows = self.file_windows.copy()
         for frame in open_windows:
             frame.close_source = 'quit_menu'
