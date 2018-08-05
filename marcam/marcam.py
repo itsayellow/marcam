@@ -2249,6 +2249,9 @@ def log_debug_main():
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
     """
+    # allow setting of global from main
+    global DEBUG
+
     # process command line if started from there
     # Also, py2app sends file(s) to open via argv if file is dragged on top
     #   of the application icon to start the icon
@@ -2256,19 +2259,22 @@ def main(argv=None):
 
     # if -d or --debug turn on full debug
     if args.debug:
-        global DEBUG
         DEBUG = True
         log_level = logging.DEBUG
     else:
         # default loglevel
         log_level = logging.INFO
 
-    # setup logging
-    logging_setup(log_level)
-
     # fetch configuration from file
     config_data = load_config()
-    # TODO: also allow config_data.debug to set DEBUG and log_level to DEBUG?
+
+    # allow debug mode to turn on also from config_data
+    if config_data['debug'] == True:
+        DEBUG = True
+        log_level = logging.DEBUG
+
+    # setup logging
+    logging_setup(log_level)
 
     # get basic debug info
     log_debug_main()
