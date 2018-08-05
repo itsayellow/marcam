@@ -1837,13 +1837,14 @@ class HelpFrame(wx.Frame):
 class FrameList():
     @debug_fxn
     def __init__(self):
-        self.frame_list = []
+        # index dict by ID, as we use this most often
+        self.frame_list = {}
 
     @debug_fxn
     def active_frame(self):
-        for frame in self.frame_list:
-            if frame.IsActive():
-                return_frame = frame
+        for frame_id in self.frame_list:
+            if self.frame_list[frame_id].IsActive():
+                return_frame = self.frame_list[frame_id]
                 break
         return return_frame
 
@@ -1856,28 +1857,40 @@ class FrameList():
         return len(self.frame_list) == 1
 
     @debug_fxn
+    def all_have_image(self):
+        # We assume the only possibility of a frame not having an image is if
+        #   it is the only one.  Thus it is "safe" to just check [0].
+        return len(self.frame_list) > 0 and self.frame_list.values()[0].has_image()
+
+    @debug_fxn
     def has_multiple(self):
         return len(self.frame_list) > 1
 
     @debug_fxn
-    def frame_with_id(self, search_id):
-        for frame in self.frame_list:
-            if frame.GetId() == search_id:
-                return_frame = frame
-                break
-        return return_frame
+    def frame_from_id(self, frame_id):
+        return self.frame_list[frame_id]
+
+    @debug_fxn
+    def only_frame(self):
+        assert len(self.frame_list) == 1
+        return self.frame_list.values()[0]
 
     @debug_fxn
     def append(self, frame_to_append):
-        self.frame_list.append(frame_to_remove)
+        self.frame_list[frame_to_append.GetId()]=frame_to_append
+
+    #@debug_fxn
+    #def remove(self, frame_to_remove):
+    #    self.frame_list.pop(frame_to_remove.GetId())
 
     @debug_fxn
-    def remove(self, frame_to_remove):
-        self.frame_list.remove(frame_to_remove)
+    def remove_id(self, frame_id_to_remove):
+        self.frame_list.pop(frame_id_to_remove)
 
     @debug_fxn
-    def get_list_copy():
-        return self.frame_list.copy()
+    def get_list_copy(self):
+        # TODO: hopefully we won't need this forever, stopgap
+        return [self.frame_list[id] for id in self.frame_list]
 
 
 # NOTE: closing window saves size, opening new window uses saved size
@@ -1886,7 +1899,7 @@ class MarcamApp(wx.App):
     def __init__(self, open_files, config_data, *args, **kwargs):
         # reset this before calling super().__init__(), which calls
         #   MacOpenFiles()
-        self.file_windows = []
+        self.file_windows = FrameList()
         self.config_data = config_data
         self.last_frame_pos = wx.DefaultPosition
         self.trying_to_quit = False
@@ -1899,7 +1912,7 @@ class MarcamApp(wx.App):
         # gives just window-placeable screen area
         self.display_size = wx.Display().GetClientArea().GetSize()
 
-        if not self.file_windows and not open_files:
+        if self.file_windows.has_zero() and not open_files:
             # designate on empty frame to open
             open_files = [None,]
 
@@ -1922,14 +1935,10 @@ class MarcamApp(wx.App):
         self.Bind(wx.EVT_KEY_UP, self.on_key_up)
 
     def on_key_down(self, evt):
-        for file_window in self.file_windows:
-            if file_window.IsActive():
-                file_window.on_key_down(evt)
+        self.file_windows.active_frame().on_key_down(evt)
 
     def on_key_up(self, evt):
-        for file_window in self.file_windows:
-            if file_window.IsActive():
-                file_window.on_key_up(evt)
+        self.file_windows.active_frame().on_key_up(evt)
 
     @debug_fxn
     def shutdown_frame(self, frame_to_close_id, force_close=False,
@@ -1973,10 +1982,7 @@ class MarcamApp(wx.App):
         #                   self.file_windows.remove(frame)
         #                   close_window = True
 
-        frame_to_close = [
-                frame
-                for frame in self.file_windows if frame.GetId() == frame_to_close_id
-                ][0]
+        frame_to_close = self.file_windows.frame_from_id(frame_to_close_id)
 
         # keep_win_open tells close_image() if it should reset the frame's
         #   settings if it successfully closes the image (in anticipation of
@@ -1986,10 +1992,10 @@ class MarcamApp(wx.App):
         #   except that it might possibly take more time.
         keep_win_open = not (
                 force_close or
-                (len(self.file_windows) > 1) or
-                (len(self.file_windows) == 1 and from_quit_menu) or
+                self.file_windows.has_multiple() or
+                (self.file_windows.has_one() and from_quit_menu) or
                 (
-                    len(self.file_windows) == 1 and
+                    self.file_windows.has_one() and
                     not from_quit_menu and
                     not from_close_menu and
                     const.PLATFORM != 'mac'
@@ -2006,10 +2012,10 @@ class MarcamApp(wx.App):
         #   after the return of this function
         close_window = (
                 force_close or
-                (len(self.file_windows) > 1 and image_closed) or
-                (len(self.file_windows) == 1 and image_closed and from_quit_menu) or
+                (self.file_windows.has_multiple() and image_closed) or
+                (self.file_windows.has_one() and image_closed and from_quit_menu) or
                 (
-                    len(self.file_windows) == 1 and
+                    self.file_windows.has_one() and
                     image_closed and
                     not from_quit_menu and
                     not from_close_menu and
@@ -2020,7 +2026,7 @@ class MarcamApp(wx.App):
         # on Mac, which conditions cause the last window to stay open and hid
         hide_window = (
             not force_close and
-            (len(self.file_windows) == 1) and
+            self.file_windows.has_one() and
             image_closed and
             not from_quit_menu and
             (const.PLATFORM == 'mac')
@@ -2030,7 +2036,7 @@ class MarcamApp(wx.App):
         assert (hide_window and not close_window) or not hide_window
 
         if close_window:
-            self.file_windows.remove(frame_to_close)
+            self.file_windows.remove_id(frame_to_close_id)
 
         if hide_window:
             # on Mac we hide the last frame we close.
@@ -2075,7 +2081,7 @@ class MarcamApp(wx.App):
                         pos=new_pos
                         )
                     )
-            self.last_frame_pos = self.file_windows[-1].GetPosition()
+            self.last_frame_pos = new_pos
 
         return img_ok
 
@@ -2084,8 +2090,7 @@ class MarcamApp(wx.App):
         self.trying_to_quit = True
         # we need to copy this because frame.Close() will end up modifying
         #   self.file_windows, which will corrupt the loop in progress
-        open_windows = self.file_windows.copy()
-        for frame in open_windows:
+        for frame in self.file_windows.get_list_copy():
             frame.close_source = 'quit_menu'
             frame_closed = frame.Close()
             if not frame_closed:
@@ -2107,10 +2112,11 @@ class MarcamApp(wx.App):
         for open_file in file_names:
             # open in blank window, or
             #   add to file_windows list of file windows
-            if not self.file_windows or self.file_windows[0].has_image():
+            if self.file_windows.has_zero() or self.file_windows.all_have_image():
                 img_ok = self.new_frame_open_file(open_file)
             else:
-                img_ok = self.file_windows[0].open_image_this_frame(open_file)
+                # only one frame, and it has no image
+                img_ok = self.file_windows.only_frame().open_image_this_frame(open_file)
             # TODO: figure out how to ignore bad openFiles from command-line
             #   what to do with files that can't open because error
             if img_ok:
