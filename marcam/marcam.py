@@ -1842,6 +1842,8 @@ class FrameList():
 
     @debug_fxn
     def active_frame(self):
+        """Return the frame in FrameList that is currently active.
+        """
         for frame_id in self.frame_list:
             if self.frame_list[frame_id].IsActive():
                 return_frame = self.frame_list[frame_id]
@@ -1850,33 +1852,47 @@ class FrameList():
 
     @debug_fxn
     def has_zero(self):
+        """FrameList contains zero frames (empty).
+        """
         return not self.frame_list
 
     @debug_fxn
     def has_one(self):
+        """FrameList contains only one frame.
+        """
         return len(self.frame_list) == 1
 
     @debug_fxn
     def all_have_image(self):
+        """All FrameList frames contain images (has_image()==True)
+        """
         # We assume the only possibility of a frame not having an image is if
         #   it is the only one.  Thus it is "safe" to just check [0].
         return len(self.frame_list) > 0 and self.frame_list.values()[0].has_image()
 
     @debug_fxn
     def has_multiple(self):
+        """FrameList has multiple frames.
+        """
         return len(self.frame_list) > 1
 
     @debug_fxn
     def frame_from_id(self, frame_id):
+        """Return the frame specified by frame ID.
+        """
         return self.frame_list[frame_id]
 
     @debug_fxn
     def only_frame(self):
+        """Return the only frame in the list
+        """
         assert len(self.frame_list) == 1
         return self.frame_list.values()[0]
 
     @debug_fxn
     def append(self, frame_to_append):
+        """Add the specified frame to the FrameList
+        """
         self.frame_list[frame_to_append.GetId()]=frame_to_append
 
     #@debug_fxn
@@ -1885,6 +1901,8 @@ class FrameList():
 
     @debug_fxn
     def remove_id(self, frame_id_to_remove):
+        """Remove the frame specified by frame ID from the FrameList
+        """
         self.frame_list.pop(frame_id_to_remove)
 
     @debug_fxn
