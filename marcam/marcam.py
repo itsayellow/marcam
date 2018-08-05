@@ -1960,13 +1960,16 @@ class MarcamApp(wx.App):
         # gives just window-placeable screen area
         self.display_size = wx.Display().GetClientArea().GetSize()
 
-        if self.file_windows.has_zero() and not open_files:
-            # designate on empty frame to open
-            open_files = [None,]
-
         for open_file in open_files:
             # TODO: what to do with files that can't open because error
             img_ok = self.new_frame_open_file(open_file)
+
+        # if after giving chances to open files from command-line, OS events,
+        #   etc., we still don't have any open frames, open an empty one
+        #   on startup
+        if self.file_windows.has_zero():
+            # open an empty frame
+            img_ok = self.new_frame_open_file(None)
 
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
