@@ -1811,11 +1811,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img.append(wx_image_new)
         # update img pointer
         self.img_idx += 1
-
-        # TODO: specifying orig,new for every image xform is redundant
-        #   (find a way to not duplicate image data in EditHistory)
-        #   Can possibly reference images in another holding area,
-        #       where only unique images saved.
+        # save previous image idx, and new image idx
         self.history.new(
                 ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
                 description="Invert Image"
@@ -1838,11 +1834,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img.append(wx_image_new)
         # update img pointer
         self.img_idx += 1
-
-        # TODO: specifying orig,new for every image xform is redundant
-        #   (find a way to not duplicate image data in EditHistory)
-        #   Can possibly reference images in another holding area,
-        #       where only unique images saved.
+        # save previous image idx, and new image idx
         self.history.new(
                 ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
                 description="Image False Color"
@@ -1865,11 +1857,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img.append(wx_image_new)
         # update img pointer
         self.img_idx += 1
-
-        # TODO: specifying orig,new for every image xform is redundant
-        #   (find a way to not duplicate image data in EditHistory)
-        #   Can possibly reference images in another holding area,
-        #       where only unique images saved.
+        # save previous image idx, and new image idx
         self.history.new(
                 ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
                 description="Image Auto-Contrast"
