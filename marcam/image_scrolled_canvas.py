@@ -217,6 +217,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history = win_history
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
+        self.img = None
+        self.img_idx = None
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
@@ -308,6 +310,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history.reset()
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
+        self.img = None
+        self.img_idx = None
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
@@ -1491,7 +1495,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return (win_x, win_y)
 
     @debug_fxn
-    def init_image(self, img, do_zoom_fit=True):
+    def get_current_img(self):
+        return self.img[self.img_idx]
+
+    @debug_fxn
+    def new_img(self, img):
+        self.img = [img]
+        self.img_idx = 0
+
+    @debug_fxn
+    def set_img_idx(self, idx_set):
+        self.img_idx = idx_set
+
+    @debug_fxn
+    def init_image(self, do_zoom_fit=True):
         """Load and initialize image
 
         Args:
@@ -1499,6 +1516,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         if LOGGER.isEnabledFor(logging.DEBUG):
             staticdc_start = time.time()
+
+        # before calling init_image, must call new_img, or set_img_idx
+        #   so this is correct
+        img = self.img[self.img_idx]
 
         self.img_size_y = img.GetHeight()
         self.img_size_x = img.GetWidth()
@@ -1780,17 +1801,26 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.has_no_image():
             return
 
-        wx_image_orig = image_proc.memorydc2image(self.img_dc)
+        # get current image
+        wx_image_orig = self.img[self.img_idx]
+        # create new image
         wx_image_new = image_proc.image_invert(wx_image_orig)
+        # delete all items after current one in list
+        self.img = self.img[:self.img_idx+1]
+        # add new img to end of list
+        self.img.append(wx_image_new)
+        # update img pointer
+        self.img_idx += 1
+
         # TODO: specifying orig,new for every image xform is redundant
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
         self.history.new(
-                ['IMAGE_XFORM', wx_image_orig, wx_image_new],
+                ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
                 description="Invert Image"
                 )
-        self.init_image(wx_image_new, do_zoom_fit=False)
+        self.init_image(do_zoom_fit=False)
 
     @debug_fxn
     def image_remap_colormap(self, cmap='viridis'):
@@ -1798,17 +1828,26 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.has_no_image():
             return
 
-        wx_image_orig = image_proc.memorydc2image(self.img_dc)
+        # get current image
+        wx_image_orig = self.img[self.img_idx]
+        # create new image
         wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
+        # delete all items after current one in list
+        self.img = self.img[:self.img_idx+1]
+        # add new img to end of list
+        self.img.append(wx_image_new)
+        # update img pointer
+        self.img_idx += 1
+
         # TODO: specifying orig,new for every image xform is redundant
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
         self.history.new(
-                ['IMAGE_XFORM', wx_image_orig, wx_image_new],
+                ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
                 description="Image False Color"
                 )
-        self.init_image(wx_image_new, do_zoom_fit=False)
+        self.init_image(do_zoom_fit=False)
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
@@ -1816,17 +1855,26 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.has_no_image():
             return
 
-        wx_image_orig = image_proc.memorydc2image(self.img_dc)
+        # get current image
+        wx_image_orig = self.img[self.img_idx]
+        # create new image
         wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=cutoff)
+        # delete all items after current one in list
+        self.img = self.img[:self.img_idx+1]
+        # add new img to end of list
+        self.img.append(wx_image_new)
+        # update img pointer
+        self.img_idx += 1
+
         # TODO: specifying orig,new for every image xform is redundant
         #   (find a way to not duplicate image data in EditHistory)
         #   Can possibly reference images in another holding area,
         #       where only unique images saved.
         self.history.new(
-                ['IMAGE_XFORM', wx_image_orig, wx_image_new],
+                ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
                 description="Image Auto-Contrast"
                 )
-        self.init_image(wx_image_new, do_zoom_fit=False)
+        self.init_image(do_zoom_fit=False)
 
     @debug_fxn
     def get_image_info(self):

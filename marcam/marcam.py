@@ -1278,12 +1278,16 @@ class ImageWindow(wx.Frame):
 
         if img_ok:
             self.img_panel.mark_point_list(marks)
-            self.img_panel.init_image(img)
+            # reset img history in window to only new image, reset idx
+            self.img_panel.new_img(img)
+            # init image in window
+            self.img_panel.init_image()
             # set save_filepath to path of mcm file we loaded
             # self.img_path if from mcm is list: [<mcmfilepath>, <member_name>]
             # TODO: do we even care about this list, or img_name?
             self.img_path = [imdata_path, img_name]
             self.save_filepath = imdata_path
+            # TODO: is this superfluous?
             self.statusbar.SetStatusText(
                     "Image Data " + imdata_path + " loaded OK."
                     )
@@ -1330,7 +1334,11 @@ class ImageWindow(wx.Frame):
         img_ok = img and img.IsOk()
 
         if img_ok:
-            self.img_panel.init_image(img)
+            # reset img history in window to only new image, reset idx
+            self.img_panel.new_img(img)
+            # init image in window
+            self.img_panel.init_image()
+            # TODO: is this superfluous?
             self.statusbar.SetStatusText("Image " + img_file + " loaded OK.")
             # reset filepath for mcm file to nothing if we load new image
             self.img_path = img_file
@@ -1523,7 +1531,8 @@ class ImageWindow(wx.Frame):
         if action[0] == 'MOVE_MARK':
             self.img_panel.move_mark(action[2], action[1], is_selected=False)
         if action[0] == 'IMAGE_XFORM':
-            self.img_panel.init_image(action[1], do_zoom_fit=False)
+            self.img_panel.set_img_idx(action[1])
+            self.img_panel.init_image(do_zoom_fit=False)
 
     @debug_fxn
     def on_redo(self, _evt):
@@ -1541,7 +1550,8 @@ class ImageWindow(wx.Frame):
         if action[0] == 'MOVE_MARK':
             self.img_panel.move_mark(action[1], action[2], is_selected=False)
         if action[0] == 'IMAGE_XFORM':
-            self.img_panel.init_image(action[2], do_zoom_fit=False)
+            self.img_panel.set_img_idx(action[2])
+            self.img_panel.init_image(do_zoom_fit=False)
 
     @debug_fxn
     def on_select_all(self, _evt):
@@ -1691,8 +1701,11 @@ class ImageWindow(wx.Frame):
         Args:
             imdata_path (str): full path to filename to save to
         """
-        current_img = image_proc.memorydc2image(self.img_panel.img_dc)
-        return mcmfile.save(imdata_path, current_img, self.img_panel.marks)
+        return mcmfile.save(
+                imdata_path,
+                self.img_panel.get_current_img(),
+                self.img_panel.marks
+                )
 
     @debug_fxn
     def on_about(self, _evt):
