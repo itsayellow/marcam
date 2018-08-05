@@ -1851,6 +1851,23 @@ class FrameList():
         return return_frame
 
     @debug_fxn
+    def frame_with_file(self, img_file):
+        """Return the frame in FrameList that has img_file inside it.
+        """
+        return_frame = None
+        for frame_id in self.frame_list:
+            if (
+                    self.frame_list[frame_id].img_path == img_file or
+                    (
+                        isinstance(self.frame_list[frame_id].img_path, list) and
+                        self.frame_list[frame_id].img_path[0] == img_file
+                        )
+                    ):
+                return_frame = self.frame_list[frame_id]
+                break
+        return return_frame
+
+    @debug_fxn
     def has_zero(self):
         """FrameList contains zero frames (empty).
         """
@@ -2067,8 +2084,19 @@ class MarcamApp(wx.App):
     @debug_fxn
     def new_frame_open_file(self, open_file):
         if open_file is not None:
-            # verify ok image before opening new frame
-            img_ok = can_read_image(open_file)
+            already_open_frame = self.file_windows.frame_with_file(open_file)
+            if already_open_frame:
+                # Already have a frame with that file open, don't open a dup
+                #   just move it to front
+                # TODO: better/different way to do this besides Raise, SetFocus?
+                already_open_frame.Raise()
+                already_open_frame.SetFocus()
+                # because our image is already open in a frame, we
+                #   return img_ok = True
+                return True
+            else:
+                # verify ok image before opening new frame
+                img_ok = can_read_image(open_file)
         else:
             # force img_ok to True if open_file is None
             # we are trying to force a new empty window open (application init)
