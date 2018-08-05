@@ -2119,15 +2119,16 @@ class MarcamApp(wx.App):
                     new_pos.x = 0
                 elif y_too_big:
                     new_pos.y = 0
-            self.file_windows.append(
-                    ImageWindow(
-                        self,
-                        open_file,
-                        size=new_size,
-                        pos=new_pos
-                        )
+            new_frame = ImageWindow(
+                    self,
+                    open_file,
+                    size=new_size,
+                    pos=new_pos
                     )
-            self.last_frame_pos = new_pos
+            self.file_windows.append(new_frame)
+            # need to actually GetPosition to get real position, in case both
+            #   self.last_frame_pos = (-1, -1) and new_pos = (-1, -1)
+            self.last_frame_pos = new_frame.GetPosition()
 
         return img_ok
 
