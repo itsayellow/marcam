@@ -1,0 +1,6 @@
+Layer fx->Drop Shadow...
+    Opacity: 25%
+    Angle: 90degrees, Use Global Light
+    Distance: 24px  ?
+    Spread: 42%     ?
+    Size: 62px      ?
