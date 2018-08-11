@@ -53,6 +53,38 @@ td, th {
                     Enable Mark Mode
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <img src="assets/img/zoomout32.png">
+                </td>
+                <td>
+                    Zoom Out
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="assets/img/zoomin32.png">
+                </td>
+                <td>
+                    Zoom In
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="assets/img/zoomfit32.png">
+                </td>
+                <td>
+                    Zoom to Fit in Window
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="assets/img/toclip32.png">
+                </td>
+                <td>
+                    Copy Total Number of Marks to Clipboard
+                </td>
+            </tr>
         </table>
 
         <h2>Mouse Actions</h2>
