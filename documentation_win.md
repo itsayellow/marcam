@@ -39,7 +39,7 @@ td, th {
         <table border="1" cellpadding="10">
             <tr>
                 <td>
-                    <img src="help_selectmode_off.png">
+                    <img src="assets/img/selectmode32.png">
                 </td>
                 <td>
                     Enable Select Mode
@@ -47,7 +47,7 @@ td, th {
             </tr>
             <tr>
                 <td>
-                    <img src="help_markmode_off.png">
+                    <img src="assets/img/marktool32.png">
                 </td>
                 <td>
                     Enable Mark Mode

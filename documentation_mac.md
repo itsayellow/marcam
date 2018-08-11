@@ -39,7 +39,7 @@ td, th {
         <table border="1" cellpadding="10">
             <tr>
                 <td>
-                    <img src="pointerg_mac_24.png">
+                    <img src="assets/img/selectmode24_mac.png">
                 </td>
                 <td>
                     Enable Select Mode
@@ -47,7 +47,7 @@ td, th {
             </tr>
             <tr>
                 <td>
-                    <img src="pencil6c_mac_24.png">
+                    <img src="assets/img/markmode24_mac.png">
                 </td>
                 <td>
                     Enable Mark Mode
