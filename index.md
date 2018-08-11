@@ -43,7 +43,7 @@ addition, it allows you to make some other key image modifications.
 
 # Documentation
 
-You can also always use: Help&rarr;Marcam Help menu inside of Marcam
+You can also always use: Help&rarr;Marcam Help menu inside of Marcam.
 
 * [Marcam macOS Documentation](documentation_mac)
 * [Marcam Windows Documentation](documentation_win)
