@@ -43,12 +43,10 @@ addition, it allows you to make some other key image modifications.
 
 # Documentation
 
-You can always use: Help&rarr;Marcam Help menu inside of Marcam
+You can also always use: Help&rarr;Marcam Help menu inside of Marcam
 
-Online Help
-
-* [Help for Mac](documentation_mac)
-* [Help for Windows](documentation_win)
+* [Marcam macOS Documentation](documentation_mac)
+* [Marcam Windows Documentation](documentation_win)
 
 # System Requirements
 * Mac OS X 10.10 Yosemite or later.
