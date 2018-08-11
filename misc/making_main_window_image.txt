@@ -1,4 +1,18 @@
+All platforms
+-------------
 open "misc/Ctr dapi A.mcm" in Marcam (1280x800 image with marks)
 Set zoom to 46.2%
 Make window exactly fit image (no scrollbars)
 Take screenshot of window
+
+
+Windows extra (dropshadow)
+--------------------------
+open screenshot in Photoshop
+Set canvas size to 1348x1200
+Layer fx->Drop Shadow...
+    Opacity: 10%
+    Angle: 90degrees, Use Global Light
+    Distance: 24px  ?
+    Spread: 42%     ?
+    Size: 62px      ?
