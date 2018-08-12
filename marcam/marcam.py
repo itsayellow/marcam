@@ -1899,13 +1899,9 @@ class FrameList():
         """
         # We assume the only possibility of a frame not having an image is if
         #   it is the only one.  Thus it is "safe" to just check [0].
-        LOGGER.info("len(self.frame_list) > 0")
-        LOGGER.info(repr(len(self.frame_list) > 0))
-        LOGGER.info("self.frame_list.values()[0]")
-        LOGGER.info(repr(self.frame_list.values()[0]))
-        LOGGER.info("self.frame_list.values()[0].has_image()")
-        LOGGER.info(repr(self.frame_list.values()[0].has_image()))
-        return len(self.frame_list) > 0 and self.frame_list.values()[0].has_image()
+        # self.frame_list.values is a dictionary view object, we must convert
+        #   it to list before indexing
+        return len(self.frame_list) > 0 and list(self.frame_list.values())[0].has_image()
 
     @debug_fxn
     def has_multiple(self):
@@ -1924,7 +1920,9 @@ class FrameList():
         """Return the only frame in the list
         """
         assert len(self.frame_list) == 1
-        return self.frame_list.values()[0]
+        # self.frame_list.values is a dictionary view object, we must convert
+        #   it to list before indexing
+        return list(self.frame_list.values())[0]
 
     @debug_fxn
     def append(self, frame_to_append):
