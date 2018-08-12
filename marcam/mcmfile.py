@@ -94,7 +94,8 @@ def is_valid(mcm_path):
     if is_legacy_mcm_file(mcm_path):
         # Actually try and load file.  This is slow, but hopefully we
         #   won't often need to test legacy files.
-        return legacy_load(imdata_path) != (None, None, None)
+        file_ok = (legacy_load(mcm_path) != (None, None, None))
+        return file_ok
 
     if zipfile.is_zipfile(mcm_path):
         # for .mcm files
