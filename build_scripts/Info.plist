@@ -23,6 +23,8 @@
 			</array>
 		</dict>
 		<dict>
+			<key>CFBundleTypeIconFile</key>
+                        <string>media/marcam_doc.icns</string>
 			<key>CFBundleTypeName</key>
 			<string>Bio-Rad Gel File</string>
 			<key>CFBundleTypeRole</key>
