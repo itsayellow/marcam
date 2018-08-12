@@ -874,6 +874,7 @@ class ImageWindow(wx.Frame):
         """
         self.marks_num_display.SetLabel("%d"%mark_total)
 
+    @debug_fxn
     def has_image(self):
         return not self.img_panel.has_no_image()
 
@@ -1898,6 +1899,12 @@ class FrameList():
         """
         # We assume the only possibility of a frame not having an image is if
         #   it is the only one.  Thus it is "safe" to just check [0].
+        LOGGER.info("len(self.frame_list) > 0")
+        LOGGER.info(repr(len(self.frame_list) > 0))
+        LOGGER.info("self.frame_list.values()[0]")
+        LOGGER.info(repr(self.frame_list.values()[0]))
+        LOGGER.info("self.frame_list.values()[0].has_image()")
+        LOGGER.info(repr(self.frame_list.values()[0].has_image()))
         return len(self.frame_list) > 0 and self.frame_list.values()[0].has_image()
 
     @debug_fxn
