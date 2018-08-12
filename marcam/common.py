@@ -41,6 +41,11 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=[0]):
             log_string += "    )"
             logger_fxn(log_string)
             return_vals = func(*args, **kwargs)
+            logger_fxn(
+                    "<--FXN%d: %s.%s\n   RETURNS: %s",
+                    debug_fxn_state[0], func.__module__, func.__qualname__,
+                    repr(return_vals)
+                    )
             debug_fxn_state[0] -= 1
             return return_vals
         return func_wrapper
