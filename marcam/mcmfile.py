@@ -80,7 +80,8 @@ def is_legacy_mcm_file(mcm_path):
         with zipfile.ZipFile(mcm_path) as mcm_container:
             legacy_mcm = MCM_INFO_NAME not in mcm_container.namelist()
     except (zipfile.BadZipFile, OSError) as err:
-        raise McmFileError
+        #raise McmFileError
+        return False
     return legacy_mcm
 
 @debug_fxn
@@ -89,6 +90,12 @@ def is_valid(mcm_path):
 
     Detects any readable .mcm file.
     """
+    # if legacy file use legacy file function
+    if is_legacy_mcm_file(mcm_path):
+        # Actually try and load file.  This is slow, but hopefully we
+        #   won't often need to test legacy files.
+        return legacy_load(imdata_path) != (None, None, None)
+
     if zipfile.is_zipfile(mcm_path):
         # for .mcm files
         # verify internals of zipfile
