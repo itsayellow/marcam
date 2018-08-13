@@ -2188,9 +2188,9 @@ class MarcamApp(wx.App):
             # TODO: figure out how to ignore bad openFiles from command-line
             #   what to do with files that can't open because error
             if img_ok:
-                print("MacOpenFiles: img_ok: %s"%open_file)
+                LOGGER.info("MacOpenFiles: img_ok: %s"%open_file)
             else:
-                print("MacOpenFiles: not img_ok: %s"%open_file)
+                LOGGER.info("MacOpenFiles: not img_ok: %s"%open_file)
 
     def OnExit(self):
         # save config_data right before app is about to exit
