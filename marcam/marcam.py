@@ -1228,10 +1228,6 @@ class ImageWindow(wx.Frame):
         """
         if self.img_panel.has_no_image():
             img_ok = self.open_image_this_frame(img_path)
-            if img_ok and const.PLATFORM == 'mac':
-                # on Mac we hide the last frame we close.  So when opening
-                #   we need to show it again
-                self.Show()
         else:
             img_ok = self.parent.new_frame_open_file(img_path)
 
@@ -1250,6 +1246,10 @@ class ImageWindow(wx.Frame):
 
         if img_ok:
             self.menu_items_enable_disable()
+            if const.PLATFORM == 'mac':
+                # on Mac we hide the last frame we close.  So when opening
+                #   we need to make sure to show it again
+                self.Show()
 
         # if we successfully loaded the file return True, else False
         return img_ok
