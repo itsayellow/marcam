@@ -2163,8 +2163,7 @@ class MarcamApp(wx.App):
                 # Already have a frame with that file open, don't open a dup
                 #   just move it to front
                 # TODO: better/different way to do this besides Raise, SetFocus?
-                already_open_frame.Raise()
-                already_open_frame.SetFocus()
+                already_open_frame.activate()
                 # because our image is already open in a frame, we
                 #   return img_ok = True
                 return True
