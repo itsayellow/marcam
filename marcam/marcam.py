@@ -349,18 +349,13 @@ class EditHistory():
         item_count = 1
         edits_since_save_new = []
         for i in range(len(edits_since_save)):
-            if i+1 < len(edits_since_save):
-                if edits_since_save[i+1] == edits_since_save[i]:
-                    item_count += 1
-                else:
-                    edits_since_save_new.append(
-                            edits_since_save[i] + (" [x%d]"%item_count if item_count > 1 else "")
-                            )
-                    item_count = 1
+            if i+1 < len(edits_since_save) and edits_since_save[i+1] == edits_since_save[i]:
+                item_count += 1
             else:
                 edits_since_save_new.append(
                         edits_since_save[i] + (" [x%d]"%item_count if item_count > 1 else "")
                         )
+                item_count = 1
 
         return edits_since_save_new
 
@@ -1407,13 +1402,16 @@ class ImageWindow(wx.Frame):
 
             # changes list
             changes_list = self.frame_history.get_actions_since_save()
+            if len(changes_list) > 4:
+                extra_str = "[%d more...]"%(len(changes_list) - 3)
+                changes_list = changes_list[:3] + [extra_str,]
             if changes_list is not None:
                 changes_str = "\n".join(["    - "+x for x in changes_list])
 
             save_query = wx.MessageDialog(
                     self,
                     "\nChanges since last save:\n%s\n"%changes_str,
-                    "Save changes to %s before closing?"%image_to_close,
+                    "Save changes to \"%s\" before closing?"%image_to_close,
                     wx.CANCEL | wx.YES_NO | wx.YES_DEFAULT | wx.ICON_EXCLAMATION,
                     )
             save_query.SetYesNoLabels("&Save", "&Don't Save")
