@@ -381,7 +381,7 @@ class EditHistory():
         Enable and Disable menu item on its own
 
         Args:
-            undo_menu_item (wx.MenuItem): menud item instance for Undo
+            undo_menu_item (wx.MenuItem): menu item instance for Undo
         """
         self.undo_menu_item = undo_menu_item
         self._update_menu_items()
@@ -392,7 +392,7 @@ class EditHistory():
         Enable and Disable menu item on its own
 
         Args:
-            redo_menu_item (wx.MenuItem): menud item instance for Redo
+            redo_menu_item (wx.MenuItem): menu item instance for Redo
         """
         self.redo_menu_item = redo_menu_item
         self._update_menu_items()
