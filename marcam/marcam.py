@@ -326,6 +326,45 @@ class EditHistory():
         return redo_action
 
     @debug_fxn
+    def get_actions_since_save(self):
+        if self.is_saved():
+            # no edit history or no actions since save
+            return None
+
+        try:
+            save_loc = [x['save_flag'] for x in self.history].index(True)
+        except ValueError:
+            # never saved
+            save_loc = -1
+
+        if save_loc < self.history_ptr:
+            edits_since_save = self.history[save_loc+1:self.history_ptr+1]
+            edits_since_save = [x['description'] for x in edits_since_save]
+        else:
+            # save_loc > self.history_ptr:
+            edits_since_save = self.history[self.history_ptr+1:save_loc+1]
+            edits_since_save = ["Undo " + x['description'] for x in edits_since_save]
+            edits_since_save.reverse()
+
+        item_count = 1
+        edits_since_save_new = []
+        for i in range(len(edits_since_save)):
+            if i+1 < len(edits_since_save):
+                if edits_since_save[i+1] == edits_since_save[i]:
+                    item_count += 1
+                else:
+                    edits_since_save_new.append(
+                            edits_since_save[i] + (" [x%d]"%item_count if item_count > 1 else "")
+                            )
+                    item_count = 1
+            else:
+                edits_since_save_new.append(
+                        edits_since_save[i] + (" [x%d]"%item_count if item_count > 1 else "")
+                        )
+
+        return edits_since_save_new
+
+    @debug_fxn
     def _can_undo(self):
         """Is there an action to undo back in history?
 
@@ -1361,10 +1400,20 @@ class ImageWindow(wx.Frame):
             bool: Whether the image was closed.
         """
         if not self.frame_history.is_saved():
+            try:
+                image_to_close = os.path.basename(self.img_path)
+            except TypeError:
+                image_to_close = os.path.basename(self.img_path[0])
+
+            # changes list
+            changes_list = self.frame_history.get_actions_since_save()
+            if changes_list is not None:
+                changes_str = "\n".join(["    - "+x for x in changes_list])
+
             save_query = wx.MessageDialog(
                     self,
-                    "",
-                    "Save changes to Image Data before closing this image?",
+                    "\nChanges since last save:\n%s\n"%changes_str,
+                    "Save changes to %s before closing?"%image_to_close,
                     wx.CANCEL | wx.YES_NO | wx.YES_DEFAULT | wx.ICON_EXCLAMATION,
                     )
             save_query.SetYesNoLabels("&Save", "&Don't Save")
