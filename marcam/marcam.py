@@ -1923,6 +1923,7 @@ class FrameList():
         # index dict by ID, as we use this most often
         self.frame_dict = {}
         self.frame_win_menus = {}
+        self.win_menu = []
 
     @debug_fxn
     def active_frame(self):
@@ -1999,6 +2000,27 @@ class FrameList():
         """Add the specified frame to the FrameList
         """
         self.frame_dict[frame_to_append.GetId()]=frame_to_append
+        new_menu_item = wx.MenuItem(
+                id=wx.ID_ANY,
+                text=frame_to_append.GetTitle(),
+                )
+        self.win_menu.append([new_menu_item.GetId(), new_menu_item])
+        for frame_menu_id in self.frame_win_menus:
+            print(frame_menu_id)
+            print(self.frame_win_menus[frame_menu_id])
+            for (win_menu_item_id, win_menu_item) in self.win_menu:
+                #print(win_menu_item_id)
+                #print(win_menu_item)
+                menu_item = self.frame_win_menus[frame_menu_id].FindItemById(win_menu_item_id)
+                #print(menu_item)
+                if menu_item is not None:
+                    self.frame_win_menus[frame_menu_id].Remove(win_menu_item_id)
+            for (win_menu_item_id, win_menu_item) in self.win_menu:
+                # TODO: it appears that the same menu item cannot be part of
+                #   more than one menu
+                #   The following makes the app crash for 2nd frame_menu_id
+                #self.frame_win_menus[frame_menu_id].Append(win_menu_item)
+                pass
 
     #@debug_fxn
     #def remove(self, frame_to_remove):
