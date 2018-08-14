@@ -601,7 +601,7 @@ class ImageWindow(wx.Frame):
         self.select_menu_item = tools_menu.Append(wx.ID_ANY, "&Select Mode\tCtrl+T")
         # we start in select mode, so disable menu to enable select mode
         self.select_menu_item.Enable(False)
-        self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+M")
+        self.mark_menu_item = tools_menu.Append(wx.ID_ANY, "&Mark Mode\tCtrl+K")
         tools_menu.Append(wx.ID_SEPARATOR)
         tools_imginfo_item = tools_menu.Append(wx.ID_ANY,
                 "&Image Info\tShift+Ctrl+I",
@@ -634,6 +634,22 @@ class ImageWindow(wx.Frame):
                 "Image False Color (Inferno)",
                 )
         menubar.Append(tools_menu, "&Tools")
+        # Window
+        if const.PLATFORM == 'mac':
+            window_menu = wx.Menu()
+            window_minimize_item = window_menu.Append(wx.ID_ANY,
+                    'Minimize\tCtrl+M',
+                    'Minimize window.'
+                    )
+            window_zoom_item = window_menu.Append(wx.ID_ANY,
+                    'Zoom',
+                    'Zoom window to fill screen.'
+                    )
+            window_menu.Append(wx.ID_SEPARATOR)
+            menubar.Append(window_menu, "&Window")
+            # TODO: window list at end of window_menu
+            self.parent.file_windows.register_window_menu(self, window_menu)
+
         if DEBUG:
             # Debug menu (only if debug mode set)
             debug_menu = wx.Menu()
