@@ -885,6 +885,11 @@ class ImageWindow(wx.Frame):
                 )
 
     @debug_fxn
+    def activate(self):
+        self.Raise()
+        self.SetFocus()
+
+    @debug_fxn
     def menu_items_enable_disable(self):
         """Enable or disable list of menu items if image frame has image
 
@@ -1395,6 +1400,7 @@ class ImageWindow(wx.Frame):
             bool: Whether the image was closed.
         """
         if not self.frame_history.is_saved():
+            self.activate()
             try:
                 image_to_close = os.path.basename(self.img_path)
             except TypeError:
