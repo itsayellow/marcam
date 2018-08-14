@@ -2013,8 +2013,6 @@ class FrameList():
 
     @debug_fxn
     def register_window_menu(self, frame_inst, window_menu):
-        print(frame_inst)
-        print(window_menu)
         self.frame_win_menus[frame_inst.GetId()] = window_menu
 
     @debug_fxn
