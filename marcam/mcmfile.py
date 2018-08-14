@@ -166,6 +166,9 @@ def load(imdata_path):
     if not img_ok:
         return (None, None, None)
 
+    # make sure marks coordinates are tuples
+    marks = [tuple(x) for x in marks]
+
     return (img, marks, image_name)
 
 
@@ -273,5 +276,8 @@ def legacy_load(imdata_path):
     # error return
     if not img_ok:
         return (None, None, None)
+
+    # make sure marks coordinates are tuples
+    marks = [tuple(x) for x in marks]
 
     return (img, marks, img_name)
