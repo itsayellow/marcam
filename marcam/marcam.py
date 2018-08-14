@@ -1921,15 +1921,16 @@ class FrameList():
     @debug_fxn
     def __init__(self):
         # index dict by ID, as we use this most often
-        self.frame_list = {}
+        self.frame_dict = {}
+        self.frame_win_menus = {}
 
     @debug_fxn
     def active_frame(self):
         """Return the frame in FrameList that is currently active.
         """
-        for frame_id in self.frame_list:
-            if self.frame_list[frame_id].IsActive():
-                return_frame = self.frame_list[frame_id]
+        for frame_id in self.frame_dict:
+            if self.frame_dict[frame_id].IsActive():
+                return_frame = self.frame_dict[frame_id]
                 break
         return return_frame
 
@@ -1938,15 +1939,15 @@ class FrameList():
         """Return the frame in FrameList that has img_file inside it.
         """
         return_frame = None
-        for frame_id in self.frame_list:
+        for frame_id in self.frame_dict:
             if (
-                    self.frame_list[frame_id].img_path == img_file or
+                    self.frame_dict[frame_id].img_path == img_file or
                     (
-                        isinstance(self.frame_list[frame_id].img_path, list) and
-                        self.frame_list[frame_id].img_path[0] == img_file
+                        isinstance(self.frame_dict[frame_id].img_path, list) and
+                        self.frame_dict[frame_id].img_path[0] == img_file
                         )
                     ):
-                return_frame = self.frame_list[frame_id]
+                return_frame = self.frame_dict[frame_id]
                 break
         return return_frame
 
@@ -1954,13 +1955,13 @@ class FrameList():
     def has_zero(self):
         """FrameList contains zero frames (empty).
         """
-        return not self.frame_list
+        return not self.frame_dict
 
     @debug_fxn
     def has_one(self):
         """FrameList contains only one frame.
         """
-        return len(self.frame_list) == 1
+        return len(self.frame_dict) == 1
 
     @debug_fxn
     def all_have_image(self):
@@ -1968,51 +1969,58 @@ class FrameList():
         """
         # We assume the only possibility of a frame not having an image is if
         #   it is the only one.  Thus it is "safe" to just check [0].
-        # self.frame_list.values is a dictionary view object, we must convert
+        # self.frame_dict.values is a dictionary view object, we must convert
         #   it to list before indexing
-        return len(self.frame_list) > 0 and list(self.frame_list.values())[0].has_image()
+        return len(self.frame_dict) > 0 and list(self.frame_dict.values())[0].has_image()
 
     @debug_fxn
     def has_multiple(self):
         """FrameList has multiple frames.
         """
-        return len(self.frame_list) > 1
+        return len(self.frame_dict) > 1
 
     @debug_fxn
     def frame_from_id(self, frame_id):
         """Return the frame specified by frame ID.
         """
-        return self.frame_list[frame_id]
+        return self.frame_dict[frame_id]
 
     @debug_fxn
     def only_frame(self):
         """Return the only frame in the list
         """
-        assert len(self.frame_list) == 1
-        # self.frame_list.values is a dictionary view object, we must convert
+        assert len(self.frame_dict) == 1
+        # self.frame_dict.values is a dictionary view object, we must convert
         #   it to list before indexing
-        return list(self.frame_list.values())[0]
+        return list(self.frame_dict.values())[0]
 
     @debug_fxn
     def append(self, frame_to_append):
         """Add the specified frame to the FrameList
         """
-        self.frame_list[frame_to_append.GetId()]=frame_to_append
+        self.frame_dict[frame_to_append.GetId()]=frame_to_append
 
     #@debug_fxn
     #def remove(self, frame_to_remove):
-    #    self.frame_list.pop(frame_to_remove.GetId())
+    #    self.frame_dict.pop(frame_to_remove.GetId())
 
     @debug_fxn
     def remove_id(self, frame_id_to_remove):
         """Remove the frame specified by frame ID from the FrameList
         """
-        self.frame_list.pop(frame_id_to_remove)
+        self.frame_dict.pop(frame_id_to_remove)
+        print(self.frame_win_menus.pop(frame_id_to_remove, None))
+
+    @debug_fxn
+    def register_window_menu(self, frame_inst, window_menu):
+        print(frame_inst)
+        print(window_menu)
+        self.frame_win_menus[frame_inst.GetId()] = window_menu
 
     @debug_fxn
     def get_list_copy(self):
         # TODO: hopefully we won't need this forever, stopgap
-        return [self.frame_list[id] for id in self.frame_list]
+        return [self.frame_dict[id] for id in self.frame_dict]
 
 
 # NOTE: closing window saves size, opening new window uses saved size
