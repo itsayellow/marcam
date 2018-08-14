@@ -2009,7 +2009,7 @@ class FrameList():
         """Remove the frame specified by frame ID from the FrameList
         """
         self.frame_dict.pop(frame_id_to_remove)
-        print(self.frame_win_menus.pop(frame_id_to_remove, None))
+        self.frame_win_menus.pop(frame_id_to_remove, None)
 
     @debug_fxn
     def register_window_menu(self, frame_inst, window_menu):
