@@ -949,6 +949,11 @@ class ImageWindow(wx.Frame):
         return not self.img_panel.has_no_image()
 
     @debug_fxn
+    def on_window_menu_activate(self, evt):
+        common.debug_print_evt_info(evt)
+        self.activate()
+
+    @debug_fxn
     def on_minimize(self, evt):
         """Minimize Menu handler: for Window->Minimize
 
@@ -2113,6 +2118,12 @@ class FrameList():
                                 )
                     if frame_title == self.frame_dict[frame_id]['frame'].GetTitle():
                         this_menuitem.Check(True)
+                    self.frame_dict[frame_id]['frame'].Bind(
+                            wx.EVT_MENU,
+                            self.frame_dict[frame_id2]['frame'].on_window_menu_activate,
+                            this_menuitem
+                            )
+
             else:
                 print("No menu:")
                 print("    " + repr(frame_id))
