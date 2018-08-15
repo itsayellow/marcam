@@ -503,10 +503,8 @@ class ImageWindow(wx.Frame):
             eltime = time.time() - start_time
             LOGGER.debug("init_ui elapsed time: %.3fms"%(eltime*1000))
 
-        if srcfile is not None:
-            img_ok = self.open_image_this_frame(srcfile)
-        # TODO: handle what happens if bad image, if img_ok==False
-
+        # On init, we will always have no image, so this just disables
+        #   unneeded menus
         self.menu_items_enable_disable()
 
     @debug_fxn
@@ -1464,6 +1462,8 @@ class ImageWindow(wx.Frame):
             # on Mac sets file icon in titlebar with right-click showing
             #   dir hierarchy
             self.SetRepresentedFilename(img_file)
+            # on Mac update Window menu frame list with new title
+            self.parent.file_windows.update_window_menu()
 
         # img_ok will only be True if we successfully loaded file
         return img_ok
@@ -2097,14 +2097,23 @@ class FrameList():
                         else:
                             print("Menuitem is wrong, removing and putting new one in")
                             win_menu.Remove(win_menu_item)
-                            win_menu.Insert(i + win_menu_origcount, wx.ID_ANY, frame_title)
+                            this_menuitem = win_menu.InsertCheckItem(
+                                    i + win_menu_origcount,
+                                    wx.ID_ANY,
+                                    frame_title
+                                    )
                     else:
                         print("Adding new menuitem")
-                        win_menu.Append(wx.ID_ANY, frame_title)
+                        this_menuitem = win_menu.AppendCheckItem(
+                                wx.ID_ANY,
+                                frame_title
+                                )
+                    #if frame_title == self.frame_dict[frame_id]['frame'].GetTitle():
+                    #    this_menuitem.Check(True)
             else:
                 print("No menu:")
-                print(frame_id)
-                print(self.frame_dict[frame_id]['frame'])
+                print("    " + repr(frame_id))
+                print("    " + repr(self.frame_dict[frame_id]['frame']))
 
     #@debug_fxn
     #def remove(self, frame_to_remove):
@@ -2322,13 +2331,18 @@ class MarcamApp(wx.App):
                     new_pos.x = 0
                 elif y_too_big:
                     new_pos.y = 0
+            # TODO: update_window_menu in here fails because no appended
+            #   frame (in next append statement)
             new_frame = ImageWindow(
                     self,
-                    open_file,
+                    None,
                     size=new_size,
                     pos=new_pos
                     )
             self.file_windows.append(new_frame)
+            if open_file is not None:
+                ## TODO: handle what happens if bad image, if img_ok==False
+                new_frame.open_image_this_frame(open_file)
             # need to actually GetPosition to get real position, in case both
             #   self.last_frame_pos = (-1, -1) and new_pos = (-1, -1)
             self.last_frame_pos = new_frame.GetPosition()
