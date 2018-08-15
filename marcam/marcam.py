@@ -1352,6 +1352,8 @@ class ImageWindow(wx.Frame):
             # on Mac sets file icon in titlebar with right-click showing
             #   dir hierarchy
             self.SetRepresentedFilename(imdata_path)
+            # on Mac update Window menu frame list with new title
+            self.parent.file_windows.update_window_menu()
             # add successful file open to file history
             self.file_history.AddFileToHistory(imdata_path)
             # we just loaded .mcm file, so have nothing to save
@@ -1532,6 +1534,8 @@ class ImageWindow(wx.Frame):
                 # on Mac sets file icon in titlebar with right-click showing
                 #   dir hierarchy
                 self.SetRepresentedFilename(pathname)
+                # on Mac update Window menu frame list with new title
+                self.parent.file_windows.update_window_menu()
             else:
                 # error in saving dialog
                 # wx.ICON_ERROR has no effect on Mac
@@ -1922,16 +1926,15 @@ class FrameList():
     def __init__(self):
         # index dict by ID, as we use this most often
         self.frame_dict = {}
-        self.frame_win_menus = {}
-        self.win_menu = []
+        self.win_menu_list = []
 
     @debug_fxn
     def active_frame(self):
         """Return the frame in FrameList that is currently active.
         """
         for frame_id in self.frame_dict:
-            if self.frame_dict[frame_id].IsActive():
-                return_frame = self.frame_dict[frame_id]
+            if self.frame_dict[frame_id]['frame'].IsActive():
+                return_frame = self.frame_dict[frame_id]['frame']
                 break
         return return_frame
 
@@ -1942,13 +1945,13 @@ class FrameList():
         return_frame = None
         for frame_id in self.frame_dict:
             if (
-                    self.frame_dict[frame_id].img_path == img_file or
+                    self.frame_dict[frame_id]['frame'].img_path == img_file or
                     (
-                        isinstance(self.frame_dict[frame_id].img_path, list) and
-                        self.frame_dict[frame_id].img_path[0] == img_file
+                        isinstance(self.frame_dict[frame_id]['frame'].img_path, list) and
+                        self.frame_dict[frame_id]['frame'].img_path[0] == img_file
                         )
                     ):
-                return_frame = self.frame_dict[frame_id]
+                return_frame = self.frame_dict[frame_id]['frame']
                 break
         return return_frame
 
@@ -1972,7 +1975,7 @@ class FrameList():
         #   it is the only one.  Thus it is "safe" to just check [0].
         # self.frame_dict.values is a dictionary view object, we must convert
         #   it to list before indexing
-        return len(self.frame_dict) > 0 and list(self.frame_dict.values())[0].has_image()
+        return len(self.frame_dict) > 0 and list(self.frame_dict.values())[0]['frame'].has_image()
 
     @debug_fxn
     def has_multiple(self):
@@ -1984,7 +1987,7 @@ class FrameList():
     def frame_from_id(self, frame_id):
         """Return the frame specified by frame ID.
         """
-        return self.frame_dict[frame_id]
+        return self.frame_dict[frame_id]['frame']
 
     @debug_fxn
     def only_frame(self):
@@ -1993,34 +1996,57 @@ class FrameList():
         assert len(self.frame_dict) == 1
         # self.frame_dict.values is a dictionary view object, we must convert
         #   it to list before indexing
-        return list(self.frame_dict.values())[0]
+        return list(self.frame_dict.values())[0]['frame']
 
     @debug_fxn
     def append(self, frame_to_append):
         """Add the specified frame to the FrameList
         """
-        self.frame_dict[frame_to_append.GetId()]=frame_to_append
-        new_menu_item = wx.MenuItem(
-                id=wx.ID_ANY,
-                text=frame_to_append.GetTitle(),
-                )
-        self.win_menu.append([new_menu_item.GetId(), new_menu_item])
-        for frame_menu_id in self.frame_win_menus:
-            print(frame_menu_id)
-            print(self.frame_win_menus[frame_menu_id])
-            for (win_menu_item_id, win_menu_item) in self.win_menu:
-                #print(win_menu_item_id)
-                #print(win_menu_item)
-                menu_item = self.frame_win_menus[frame_menu_id].FindItemById(win_menu_item_id)
-                #print(menu_item)
-                if menu_item is not None:
-                    self.frame_win_menus[frame_menu_id].Remove(win_menu_item_id)
-            for (win_menu_item_id, win_menu_item) in self.win_menu:
-                # TODO: it appears that the same menu item cannot be part of
-                #   more than one menu
-                #   The following makes the app crash for 2nd frame_menu_id
-                #self.frame_win_menus[frame_menu_id].Append(win_menu_item)
-                pass
+        # init to empty dict if not already
+        self.frame_dict.setdefault(frame_to_append.GetId(), {})
+        self.frame_dict[frame_to_append.GetId()]['frame'] = frame_to_append
+        # if wxpython ever automatically manages the Window menu on Mac, the
+        #   following will be unnecessary
+        self.win_menu_list.append(frame_to_append.GetId())
+        self.update_window_menu()
+
+    @debug_fxn
+    def update_window_menu(self):
+        """Update the frame list part of the Window Menu on Mac
+
+        if wxpython ever automatically manages the Window menu on Mac, the
+        following will be unnecessary
+
+        """
+        # Only applies for mac Window menu
+        if const.PLATFORM != 'mac':
+            return
+
+        print("update_window_menu start")
+        for frame_id in self.frame_dict:
+            print(self.frame_dict[frame_id])
+            win_menu = self.frame_dict[frame_id]['menu']
+            win_menu_origcount = self.frame_dict[frame_id]['menu_origcount']
+            if self.frame_dict[frame_id].get('menu', False):
+                print("Has menu:")
+
+                for (i, frame_id2) in enumerate(self.win_menu_list):
+                    frame_title = self.frame_dict[frame_id2]['frame'].GetTitle()
+                    if win_menu_origcount + i < win_menu.GetMenuItemCount():
+                        win_menu_item = win_menu.FindItemByPosition(i + win_menu_origcount)
+                        if win_menu_item.GetItemLabel() == frame_title:
+                            print("Menuitem is as we expect")
+                        else:
+                            print("Menuitem is wrong, removing and putting new one in")
+                            win_menu.Remove(win_menu_item)
+                            win_menu.Insert(i + win_menu_origcount, wx.ID_ANY, frame_title)
+                    else:
+                        print("Adding new menuitem")
+                        win_menu.Append(wx.ID_ANY, frame_title)
+            else:
+                print("No menu:")
+                print(frame_id)
+                print(self.frame_dict[frame_id]['frame'])
 
     #@debug_fxn
     #def remove(self, frame_to_remove):
@@ -2031,16 +2057,18 @@ class FrameList():
         """Remove the frame specified by frame ID from the FrameList
         """
         self.frame_dict.pop(frame_id_to_remove)
-        self.frame_win_menus.pop(frame_id_to_remove, None)
 
     @debug_fxn
     def register_window_menu(self, frame_inst, window_menu):
-        self.frame_win_menus[frame_inst.GetId()] = window_menu
+        # init to empty dict if not already
+        self.frame_dict.setdefault(frame_inst.GetId(), {})
+        self.frame_dict[frame_inst.GetId()]['menu'] = window_menu
+        self.frame_dict[frame_inst.GetId()]['menu_origcount'] = window_menu.GetMenuItemCount()
 
     @debug_fxn
     def get_list_copy(self):
         # TODO: hopefully we won't need this forever, stopgap
-        return [self.frame_dict[id] for id in self.frame_dict]
+        return [self.frame_dict[id]['frame'] for id in self.frame_dict]
 
 
 # NOTE: closing window saves size, opening new window uses saved size
