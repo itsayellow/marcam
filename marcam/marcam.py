@@ -637,7 +637,7 @@ class ImageWindow(wx.Frame):
         # Window
         if const.PLATFORM == 'mac':
             window_menu = wx.Menu()
-            window_minimize_item = window_menu.Append(wx.ID_ANY,
+            self.window_minimize_item = window_menu.Append(wx.ID_ANY,
                     'Minimize\tCtrl+M',
                     'Minimize window.'
                     )
@@ -647,8 +647,11 @@ class ImageWindow(wx.Frame):
                     )
             window_menu.Append(wx.ID_SEPARATOR)
             menubar.Append(window_menu, "&Window")
-            # TODO: window list at end of window_menu
+            # register menu with file_windows FrameList to add window list at
+            #   end of window_menu
             self.parent.file_windows.register_window_menu(self, window_menu)
+            self.Bind(wx.EVT_MENU, self.on_minimize, self.window_minimize_item)
+            self.Bind(wx.EVT_MENU, self.on_window_zoom, window_zoom_item)
 
         if DEBUG:
             # Debug menu (only if debug mode set)
@@ -834,6 +837,20 @@ class ImageWindow(wx.Frame):
 
         # setup event handlers for Frame events
         self.Bind(wx.EVT_CLOSE, self.on_evt_close)
+        self.Bind(wx.EVT_ICONIZE, self.on_evt_iconize)
+
+        # debug event handlers
+        self.Bind(wx.EVT_ACTIVATE, self.on_evt_debug)
+        self.Bind(wx.EVT_ACTIVATE_APP, self.on_evt_debug)
+        self.Bind(wx.EVT_HIBERNATE, self.on_evt_debug)
+        self.Bind(wx.EVT_KILL_FOCUS, self.on_evt_debug)
+        self.Bind(wx.EVT_MAXIMIZE, self.on_evt_debug)
+        self.Bind(wx.EVT_SET_FOCUS, self.on_evt_debug)
+        self.Bind(wx.EVT_SHOW, self.on_evt_debug)
+        self.Bind(wx.EVT_SIZE, self.on_evt_debug)
+        self.Bind(wx.EVT_SIZING, self.on_evt_debug)
+        self.Bind(wx.EVT_WINDOW_CREATE, self.on_evt_debug)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.on_evt_debug)
 
         # setup event handlers for toolbar
         self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
@@ -915,9 +932,9 @@ class ImageWindow(wx.Frame):
         Affects:
             Enable state of menu items in self.menu_items_disable_no_image
         """
-        enable_items = not self.img_panel.has_no_image()
+        enable_state = not self.img_panel.has_no_image()
         for item in self.menu_items_disable_no_image:
-            item.Enable(enable_items)
+            item.Enable(enable_state)
 
     @debug_fxn
     def marks_num_update(self, mark_total):
@@ -932,6 +949,47 @@ class ImageWindow(wx.Frame):
     @debug_fxn
     def has_image(self):
         return not self.img_panel.has_no_image()
+
+    @debug_fxn
+    def on_minimize(self, evt):
+        """Minimize Menu handler: for Window->Minimize
+
+        Args:
+            evt (wx.CommandEvt):
+        """
+        self.Iconize()
+
+    @debug_fxn
+    def on_window_zoom(self, evt):
+        """Zoom Menu handler: for Window->Zoom
+
+        Toggles whether window is enlarged to boundaries of screen.
+        Note this is different than "Full Screen" Mac button.
+
+        Args:
+            evt (wx.CommandEvt):
+        """
+        self.Maximize(not self.IsMaximized())
+
+    @debug_fxn
+    def on_evt_debug(self, evt):
+        common.debug_print_evt_info(evt)
+        evt.Skip()
+
+    @debug_fxn
+    def on_evt_iconize(self, evt):
+        """Event Handler for Iconize (Minimize, Unminimize) Window
+
+        Args:
+            evt (wx.IconizeEvt):
+        """
+        common.debug_print_evt_info(evt)
+        try:
+            self.window_minimize_item.Enable(not self.IsIconized())
+        except NameError:
+            # if no window_minimize_item, silently ignore
+            pass
+        evt.Skip()
 
     @debug_fxn
     def on_evt_close(self, evt):
