@@ -2096,6 +2096,7 @@ class FrameList():
                         win_menu_item = win_menu.FindItemByPosition(i + win_menu_origcount)
                         if win_menu_item.GetItemLabel() == frame_title:
                             print("Menuitem is as we expect")
+                            this_menuitem = win_menu_item
                         else:
                             print("Menuitem is wrong, removing and putting new one in")
                             win_menu.Remove(win_menu_item)
@@ -2110,8 +2111,8 @@ class FrameList():
                                 wx.ID_ANY,
                                 frame_title
                                 )
-                    #if frame_title == self.frame_dict[frame_id]['frame'].GetTitle():
-                    #    this_menuitem.Check(True)
+                    if frame_title == self.frame_dict[frame_id]['frame'].GetTitle():
+                        this_menuitem.Check(True)
             else:
                 print("No menu:")
                 print("    " + repr(frame_id))
