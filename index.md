@@ -9,7 +9,7 @@ title: Marcam
 
 Marcam is an application for macOS and Windows that allows you to mark
 objects in an image, and keep track of how many marks have been made.  In
-addition, it allows you to make some other key image modifications.
+addition, it allows you to make other key image modifications.
 
 ### Features
 
