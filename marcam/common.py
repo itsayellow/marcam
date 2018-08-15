@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import wx
+
+
 def debug_fxn_factory(logger_fxn, debug_fxn_state=[0]):
     """Factory to produce debug_fxn that logs to specified logger object
 
@@ -115,3 +118,35 @@ def clip(num, num_min=None, num_max=None):
         return min(num, num_max)
     else:
         return num
+
+
+# global dicts to decode numbers to constants
+EVT_TYPES = {}
+for item in dir(wx):
+    if item.startswith("wxEVT_"):
+        EVT_TYPES[getattr(wx, item)] = item[2:]
+EVT_CATEGORIES = {}
+for item in dir(wx):
+    if item.startswith("EVT_CATEGORY_"):
+        EVT_CATEGORIES[getattr(wx, item)] = item
+
+
+def debug_print_evt_info(evt):
+    """Print debug info concerning an event
+
+    Args:
+        evt: Any wx Event
+    """
+    print("Event")
+    print("    Type: %s (%d)"%(EVT_TYPES.get(evt.GetEventType(), ""), evt.GetEventType()))
+    print("    Category: %s (%d)"%(EVT_CATEGORIES.get(evt.GetEventCategory(), ""), evt.GetEventCategory()))
+    print("    EventObject: " + repr(evt.GetEventObject()))
+    print("    ID: " + repr(evt.GetId()))
+    print("    RefData: " + repr(evt.GetRefData()))
+    print("    ClassInfo:")
+    print("        BaseClassName1: " + repr(evt.GetClassInfo().GetBaseClassName1()))
+    print("        BaseClassName2: " + repr(evt.GetClassInfo().GetBaseClassName2()))
+    print("        ClassName: " + repr(evt.GetClassInfo().GetClassName()))
+    print("    ClassName: " + repr(evt.GetClassName()))
+    print("    Timestamp: " + repr(evt.GetTimestamp()))
+
