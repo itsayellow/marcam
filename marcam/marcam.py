@@ -838,17 +838,17 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_ICONIZE, self.on_evt_iconize)
 
         # debug event handlers
-        self.Bind(wx.EVT_ACTIVATE, self.on_evt_debug)
-        self.Bind(wx.EVT_ACTIVATE_APP, self.on_evt_debug)
-        self.Bind(wx.EVT_HIBERNATE, self.on_evt_debug)
-        self.Bind(wx.EVT_KILL_FOCUS, self.on_evt_debug)
-        self.Bind(wx.EVT_MAXIMIZE, self.on_evt_debug)
-        self.Bind(wx.EVT_SET_FOCUS, self.on_evt_debug)
-        self.Bind(wx.EVT_SHOW, self.on_evt_debug)
-        self.Bind(wx.EVT_SIZE, self.on_evt_debug)
-        self.Bind(wx.EVT_SIZING, self.on_evt_debug)
-        self.Bind(wx.EVT_WINDOW_CREATE, self.on_evt_debug)
-        self.Bind(wx.EVT_WINDOW_DESTROY, self.on_evt_debug)
+        #self.Bind(wx.EVT_ACTIVATE, self.on_evt_debug)
+        #self.Bind(wx.EVT_ACTIVATE_APP, self.on_evt_debug)
+        #self.Bind(wx.EVT_HIBERNATE, self.on_evt_debug)
+        #self.Bind(wx.EVT_KILL_FOCUS, self.on_evt_debug)
+        #self.Bind(wx.EVT_MAXIMIZE, self.on_evt_debug)
+        #self.Bind(wx.EVT_SET_FOCUS, self.on_evt_debug)
+        #self.Bind(wx.EVT_SHOW, self.on_evt_debug)
+        #self.Bind(wx.EVT_SIZE, self.on_evt_debug)
+        #self.Bind(wx.EVT_SIZING, self.on_evt_debug)
+        #self.Bind(wx.EVT_WINDOW_CREATE, self.on_evt_debug)
+        #self.Bind(wx.EVT_WINDOW_DESTROY, self.on_evt_debug)
 
         # setup event handlers for toolbar
         self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
@@ -2087,6 +2087,8 @@ class FrameList():
             win_menu_origcount = self.frame_dict[frame_id]['menu_origcount']
             if self.frame_dict[frame_id].get('menu', False):
                 print("Has menu:")
+                print("    " + repr(frame_id))
+                print("    " + repr(self.frame_dict[frame_id]['frame']))
 
                 for (i, frame_id2) in enumerate(self.win_menu_list):
                     frame_title = self.frame_dict[frame_id2]['frame'].GetTitle()
@@ -2301,7 +2303,6 @@ class MarcamApp(wx.App):
             if already_open_frame:
                 # Already have a frame with that file open, don't open a dup
                 #   just move it to front
-                # TODO: better/different way to do this besides Raise, SetFocus?
                 already_open_frame.activate()
                 # because our image is already open in a frame, we
                 #   return img_ok = True
