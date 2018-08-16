@@ -75,6 +75,8 @@ Section "Marcam (required)"
 
 ; APP_ASSOCIATE EXT FILECLASS DESCRIPTION ICON COMMANDTEXT COMMAND
   !insertmacro APP_ASSOCIATE "mcm" "Marcam.ImageData" "Marcam Image Data" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
+  !insertmacro APP_OPENWITH "1sc" "Marcam.PlainImage" "Marcam Plain Image" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
+  !insertmacro APP_OPENWITH "png" "Marcam.PlainImage" "Marcam Plain Image" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
 
 SectionEnd
 
@@ -98,6 +100,8 @@ Section "Uninstall"
   DeleteRegKey HKLM SOFTWARE\Marcam
   ;APP_UNASSOCIATE EXT FILECLASS
   !insertmacro APP_UNASSOCIATE "mcm" "Marcam.ImageData"
+  !insertmacro APP_UNOPENWITH "1sc" "Marcam.PlainImage"
+  !insertmacro APP_UNOPENWITH "png" "Marcam.PlainImage"
 
   ; Remove files and uninstaller
   Delete $INSTDIR\*.*
