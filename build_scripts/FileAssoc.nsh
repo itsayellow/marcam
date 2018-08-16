@@ -79,6 +79,22 @@
   WriteRegStr HKCR "${FILECLASS}\shell" "" "open"
   WriteRegStr HKCR "${FILECLASS}\shell\open" "" `${COMMANDTEXT}`
   WriteRegStr HKCR "${FILECLASS}\shell\open\command" "" `${COMMAND}`
+  DetailPrint "Added HKCR\.${EXT}"
+  DetailPrint "Added HKCR\${FILECLASS}"
+!macroend
+
+; the following by Matthew Clapp 2018
+; https://docs.microsoft.com/en-us/windows/desktop/shell/how-to-include-an-application-on-the-open-with-dialog-box
+!macro APP_OPENWITH EXT FILECLASS DESCRIPTION ICON COMMANDTEXT COMMAND
+  WriteRegStr HKCR ".${EXT}\OpenWithProgids" "${FILECLASS}" ""
+
+  WriteRegStr HKCR "${FILECLASS}" "" `${DESCRIPTION}`
+  WriteRegStr HKCR "${FILECLASS}\DefaultIcon" "" `${ICON}`
+  WriteRegStr HKCR "${FILECLASS}\shell" "" "open"
+  WriteRegStr HKCR "${FILECLASS}\shell\open" "" `${COMMANDTEXT}`
+  WriteRegStr HKCR "${FILECLASS}\shell\open\command" "" `${COMMAND}`
+  DetailPrint "Added HKCR\.${EXT}\OpenWithProgids\${FILECLASS}"
+  DetailPrint "Added HKCR\${FILECLASS}"
 !macroend
 
 !macro APP_ASSOCIATE_EX EXT FILECLASS DESCRIPTION ICON VERB DEFAULTVERB SHELLNEW COMMANDTEXT COMMAND
@@ -111,6 +127,7 @@
   ;ReadRegStr $R0 HKCR ".${EXT}" `${FILECLASS}_backup`
 
   DeleteRegKey HKCR ".${EXT}"
+  DetailPrint "Deleted HKCR\.${EXT}"
   ; restore backup of registry from file in $INSTDIR if it exists
   IfFileExists $INSTDIR\reg_${EXT}_backup.txt 0 no_reg_write
   DetailPrint "Restoring backup of HKCR\.${EXT}"
@@ -122,6 +139,18 @@
   no_reg_write:
 
   DeleteRegKey HKCR `${FILECLASS}`
+  DetailPrint "Deleted HKCR\${FILECLASS}"
+!macroend
+
+; the following by Matthew Clapp 2018
+; https://docs.microsoft.com/en-us/windows/desktop/shell/how-to-include-an-application-on-the-open-with-dialog-box
+!macro APP_UNOPENWITH EXT FILECLASS
+  DeleteRegValue HKCR ".${EXT}\OpenWithProgids" "${FILECLASS}"
+  DeleteRegKey /ifempty HKCR ".${EXT}\OpenWithProgids"
+  DeleteRegKey /ifempty HKCR ".${EXT}"
+  DeleteRegKey HKCR "${FILECLASS}"
+  DetailPrint "Deleted HKCR\.${EXT}\OpenWithProgids\${FILECLASS}"
+  DetailPrint "Deleted HKCR\${FILECLASS}"
 !macroend
 
 !macro APP_ASSOCIATE_GETFILECLASS OUTPUT EXT
