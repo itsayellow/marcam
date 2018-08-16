@@ -465,7 +465,7 @@ class FileDropTarget(wx.FileDropTarget):
 
 
 class ImageWindow(wx.Frame):
-    def __init__(self, parent, srcfile, **kwargs):
+    def __init__(self, parent, **kwargs):
         # no parent window, so use None as only *arg
         super().__init__(None, **kwargs)
 
@@ -836,17 +836,17 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_ICONIZE, self.on_evt_iconize)
 
         # debug event handlers
-        #self.Bind(wx.EVT_ACTIVATE, self.on_evt_debug)
-        #self.Bind(wx.EVT_ACTIVATE_APP, self.on_evt_debug)
-        #self.Bind(wx.EVT_HIBERNATE, self.on_evt_debug)
-        #self.Bind(wx.EVT_KILL_FOCUS, self.on_evt_debug)
-        #self.Bind(wx.EVT_MAXIMIZE, self.on_evt_debug)
-        #self.Bind(wx.EVT_SET_FOCUS, self.on_evt_debug)
-        #self.Bind(wx.EVT_SHOW, self.on_evt_debug)
-        #self.Bind(wx.EVT_SIZE, self.on_evt_debug)
-        #self.Bind(wx.EVT_SIZING, self.on_evt_debug)
-        #self.Bind(wx.EVT_WINDOW_CREATE, self.on_evt_debug)
-        #self.Bind(wx.EVT_WINDOW_DESTROY, self.on_evt_debug)
+        #self.Bind(wx.EVT_ACTIVATE, common.on_evt_debug)
+        #self.Bind(wx.EVT_ACTIVATE_APP, common.on_evt_debug)
+        #self.Bind(wx.EVT_HIBERNATE, common.on_evt_debug)
+        #self.Bind(wx.EVT_KILL_FOCUS, common.on_evt_debug)
+        #self.Bind(wx.EVT_MAXIMIZE, common.on_evt_debug)
+        #self.Bind(wx.EVT_SET_FOCUS, common.on_evt_debug)
+        #self.Bind(wx.EVT_SHOW, common.on_evt_debug)
+        #self.Bind(wx.EVT_SIZE, common.on_evt_debug)
+        #self.Bind(wx.EVT_SIZING, common.on_evt_debug)
+        #self.Bind(wx.EVT_WINDOW_CREATE, common.on_evt_debug)
+        #self.Bind(wx.EVT_WINDOW_DESTROY, common.on_evt_debug)
 
         # setup event handlers for toolbar
         self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
@@ -952,11 +952,10 @@ class ImageWindow(wx.Frame):
         menu = evt.GetEventObject()
         menuitem_id = evt.GetId()
         menuitem = menu.FindItemById(menuitem_id)
-        menuitem_label = menu.FindItemById(menuitem_id).GetItemLabel()
         menuitem.Check(False)
 
     @debug_fxn
-    def on_minimize(self, evt):
+    def on_minimize(self, _evt):
         """Minimize Menu handler: for Window->Minimize
 
         Args:
@@ -965,7 +964,7 @@ class ImageWindow(wx.Frame):
         self.Iconize()
 
     @debug_fxn
-    def on_window_zoom(self, evt):
+    def on_window_zoom(self, _evt):
         """Zoom Menu handler: for Window->Zoom
 
         Toggles whether window is enlarged to boundaries of screen.
@@ -975,11 +974,6 @@ class ImageWindow(wx.Frame):
             evt (wx.CommandEvt):
         """
         self.Maximize(not self.IsMaximized())
-
-    @debug_fxn
-    def on_evt_debug(self, evt):
-        common.debug_print_evt_info(evt)
-        evt.Skip()
 
     @debug_fxn
     def on_evt_iconize(self, evt):
@@ -2346,7 +2340,6 @@ class MarcamApp(wx.App):
             #   frame (in next append statement)
             new_frame = ImageWindow(
                     self,
-                    None,
                     size=new_size,
                     pos=new_pos
                     )
@@ -2395,9 +2388,9 @@ class MarcamApp(wx.App):
             # TODO: figure out how to ignore bad openFiles from command-line
             #   what to do with files that can't open because error
             if img_ok:
-                LOGGER.info("MacOpenFiles: img_ok: %s"%open_file)
+                LOGGER.info("MacOpenFiles: img_ok: %s", open_file)
             else:
-                LOGGER.info("MacOpenFiles: not img_ok: %s"%open_file)
+                LOGGER.info("MacOpenFiles: not img_ok: %s", open_file)
 
     def OnExit(self):
         # save config_data right before app is about to exit
