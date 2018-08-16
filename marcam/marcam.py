@@ -729,29 +729,23 @@ class ImageWindow(wx.Frame):
         #       width can be variable (78w seen)
         #   in wx pixels use 24h x >24w
         #   rounded corners
-        try:
-            selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
-        except:
+        selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
+        markbmp = wx.Bitmap(const.MARKBMP_FNAME)
+        toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
+        zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
+        zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
+        zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
+        if not selectbmp.IsOk():
             LOGGER.error("MSC:Icon doesn't exist: %s", const.SELECTBMP_FNAME)
-        try:
-            markbmp = wx.Bitmap(const.MARKBMP_FNAME)
-        except:
+        if not markbmp.IsOk():
             LOGGER.error("MSC:Icon doesn't exist: %s", const.MARKBMP_FNAME)
-        try:
-            toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
-        except:
+        if not toclipbmp.IsOk():
             LOGGER.error("MSC:Icon doesn't exist: %s", const.TOCLIPBMP_FNAME)
-        try:
-            zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
-        except:
+        if not zoomoutbmp.IsOk():
             LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMOUTBMP_FNAME)
-        try:
-            zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
-        except:
+        if not zoomfitbmp.IsOk():
             LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMFITBMP_FNAME)
-        try:
-            zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
-        except:
+        if not zoominbmp.IsOk():
             LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMINBMP_FNAME)
         #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
 
