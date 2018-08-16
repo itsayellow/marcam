@@ -1993,6 +1993,7 @@ class FrameList():
         # index dict by ID, as we use this most often
         self.frame_dict = {}
         self.win_menu_list = []
+        self.is_handling_window_menu = False
 
     @debug_fxn
     def active_frame(self):
@@ -2084,8 +2085,7 @@ class FrameList():
         following will be unnecessary
 
         """
-        # Only applies for mac Window menu
-        if const.PLATFORM != 'mac':
+        if not self.is_handling_window_menu:
             return
 
         for frame_id in self.frame_dict:
@@ -2102,8 +2102,7 @@ class FrameList():
                         # Current menu item is correct, set this_menuitem
                         this_menuitem = win_menu_item
                     else:
-                        # Current menu item is not correct, replace it:w
-
+                        # Current menu item is not correct, replace it
                         win_menu.Remove(win_menu_item)
                         this_menuitem = win_menu.InsertCheckItem(
                                 i + win_menu_origcount,
@@ -2145,6 +2144,7 @@ class FrameList():
         self.frame_dict.setdefault(frame_inst.GetId(), {})
         self.frame_dict[frame_inst.GetId()]['menu'] = window_menu
         self.frame_dict[frame_inst.GetId()]['menu_origcount'] = window_menu.GetMenuItemCount()
+        self.is_handling_window_menu = True
 
     @debug_fxn
     def get_list_copy(self):
