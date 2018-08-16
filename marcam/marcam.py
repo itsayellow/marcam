@@ -950,8 +950,10 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def on_window_menu_activate(self, evt):
-        common.debug_print_evt_info(evt)
         self.activate()
+        common.debug_print_evt_info(evt)
+        for item in dir(evt):
+            print("    " + item + ": " + repr(getattr(evt, item)))
 
     @debug_fxn
     def on_minimize(self, evt):
