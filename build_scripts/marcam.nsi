@@ -23,6 +23,10 @@
 ;--------------------------------
 !include "FileAssoc.nsh"
 
+; TODO: Icon, InstProgressFlags, AddBrandingImage, SetBrandingImage,
+; TODO: maybe: License*, ManifestDPIAware, ManifestSupportedOS, VI*
+; TODO: Modern UI? http://nsis.sourceforge.net/Docs/Chapter2.html#tutmodernui
+
 ; The name of the installer
 Name "Marcam"
 
@@ -77,6 +81,9 @@ Section "Marcam (required)"
   !insertmacro APP_ASSOCIATE "mcm" "Marcam.ImageData" "Marcam Image Data" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
   !insertmacro APP_OPENWITH "1sc" "Marcam.PlainImage" "Marcam Plain Image" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
   !insertmacro APP_OPENWITH "png" "Marcam.PlainImage" "Marcam Plain Image" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
+  !insertmacro APP_OPENWITH "tif" "Marcam.PlainImage" "Marcam Plain Image" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
+  !insertmacro APP_OPENWITH "tiff" "Marcam.PlainImage" "Marcam Plain Image" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
+  !insertmacro APP_OPENWITH "jpg" "Marcam.PlainImage" "Marcam Plain Image" "$INSTDIR\media\marcam_doc.ico" "Open with Marcam" "$INSTDIR\marcam.exe $\"%1$\""
 
 SectionEnd
 
@@ -102,6 +109,9 @@ Section "Uninstall"
   !insertmacro APP_UNASSOCIATE "mcm" "Marcam.ImageData"
   !insertmacro APP_UNOPENWITH "1sc" "Marcam.PlainImage"
   !insertmacro APP_UNOPENWITH "png" "Marcam.PlainImage"
+  !insertmacro APP_UNOPENWITH "tif" "Marcam.PlainImage"
+  !insertmacro APP_UNOPENWITH "tiff" "Marcam.PlainImage"
+  !insertmacro APP_UNOPENWITH "jpg" "Marcam.PlainImage"
 
   ; Remove files and uninstaller
   Delete $INSTDIR\*.*
