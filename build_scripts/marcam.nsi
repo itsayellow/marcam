@@ -23,6 +23,10 @@
 ;--------------------------------
 !include "FileAssoc.nsh"
 
+; TODO: Icon, InstProgressFlags, AddBrandingImage, SetBrandingImage,
+; TODO: maybe: License*, ManifestDPIAware, ManifestSupportedOS, VI*
+; TODO: Modern UI? http://nsis.sourceforge.net/Docs/Chapter2.html#tutmodernui
+
 ; The name of the installer
 Name "Marcam"
 
