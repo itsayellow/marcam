@@ -952,18 +952,10 @@ class ImageWindow(wx.Frame):
     def on_window_menu_activate(self, evt):
         self.activate()
         menu = evt.GetEventObject()
-        print("Menu: " + repr(menu))
         menuitem_id = evt.GetId()
-        print("Menuitem ID: " + repr(menuitem_id))
         menuitem = menu.FindItemById(menuitem_id)
-        print("Menuitem: " + repr(menuitem))
         menuitem_label = menu.FindItemById(menuitem_id).GetItemLabel()
-        print("Menuitem label: " + repr(menuitem_label))
-        print("unchecking...")
         menuitem.Check(False)
-        #common.debug_print_evt_info(evt)
-        #for item in dir(evt):
-        #    print("    " + item + ": " + repr(getattr(evt, item)))
 
     @debug_fxn
     def on_minimize(self, evt):
@@ -2096,25 +2088,17 @@ class FrameList():
         if const.PLATFORM != 'mac':
             return
 
-        print("update_window_menu start")
         for frame_id in self.frame_dict:
-            print(self.frame_dict[frame_id])
             win_menu = self.frame_dict[frame_id]['menu']
             win_menu_origcount = self.frame_dict[frame_id]['menu_origcount']
             if self.frame_dict[frame_id].get('menu', False):
-                print("Has menu:")
-                print("    " + repr(frame_id))
-                print("    " + repr(self.frame_dict[frame_id]['frame']))
-
                 for (i, frame_id2) in enumerate(self.win_menu_list):
                     frame_title = self.frame_dict[frame_id2]['frame'].GetTitle()
                     if win_menu_origcount + i < win_menu.GetMenuItemCount():
                         win_menu_item = win_menu.FindItemByPosition(i + win_menu_origcount)
                         if win_menu_item.GetItemLabel() == frame_title:
-                            print("Menuitem is as we expect")
                             this_menuitem = win_menu_item
                         else:
-                            print("Menuitem is wrong, removing and putting new one in")
                             win_menu.Remove(win_menu_item)
                             this_menuitem = win_menu.InsertCheckItem(
                                     i + win_menu_origcount,
@@ -2122,7 +2106,6 @@ class FrameList():
                                     frame_title
                                     )
                     else:
-                        print("Adding new menuitem")
                         this_menuitem = win_menu.AppendCheckItem(
                                 wx.ID_ANY,
                                 frame_title
@@ -2136,9 +2119,7 @@ class FrameList():
                             )
 
             else:
-                print("No menu:")
-                print("    " + repr(frame_id))
-                print("    " + repr(self.frame_dict[frame_id]['frame']))
+                pass
 
     #@debug_fxn
     #def remove(self, frame_to_remove):
