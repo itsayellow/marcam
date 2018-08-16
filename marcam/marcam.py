@@ -951,9 +951,19 @@ class ImageWindow(wx.Frame):
     @debug_fxn
     def on_window_menu_activate(self, evt):
         self.activate()
-        common.debug_print_evt_info(evt)
-        for item in dir(evt):
-            print("    " + item + ": " + repr(getattr(evt, item)))
+        menu = evt.GetEventObject()
+        print("Menu: " + repr(menu))
+        menuitem_id = evt.GetId()
+        print("Menuitem ID: " + repr(menuitem_id))
+        menuitem = menu.FindItemById(menuitem_id)
+        print("Menuitem: " + repr(menuitem))
+        menuitem_label = menu.FindItemById(menuitem_id).GetItemLabel()
+        print("Menuitem label: " + repr(menuitem_label))
+        print("unchecking...")
+        menuitem.Check(False)
+        #common.debug_print_evt_info(evt)
+        #for item in dir(evt):
+        #    print("    " + item + ": " + repr(getattr(evt, item)))
 
     @debug_fxn
     def on_minimize(self, evt):
