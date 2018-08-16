@@ -2471,6 +2471,18 @@ def main(argv=None):
         # default loglevel
         log_level = logging.INFO
 
+    # Make sure we are only running a single instance per user
+    singleinst_name = "Marcam-%s"%wx.GetUserId()
+    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
+    singleinst_path = const.USER_CONFIG_DIR
+    singleinst_instance = wx.SingleInstanceChecker(
+            singleinst_name,
+            singleinst_path,
+            )
+    if singleinst_instance.IsAnotherRunning():
+        print("Another instance of Marcam is already running.  Exiting.")
+        return 1
+
     # fetch configuration from file
     config_data = load_config()
 
