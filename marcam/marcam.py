@@ -986,7 +986,6 @@ class ImageWindow(wx.Frame):
         Args:
             evt (wx.IconizeEvt):
         """
-        common.debug_print_evt_info(evt)
         try:
             self.window_minimize_item.Enable(not self.IsIconized())
         except NameError:
