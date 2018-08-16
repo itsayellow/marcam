@@ -2336,8 +2336,6 @@ class MarcamApp(wx.App):
                     new_pos.x = 0
                 elif y_too_big:
                     new_pos.y = 0
-            # TODO: update_window_menu in here fails because no appended
-            #   frame (in next append statement)
             new_frame = ImageWindow(
                     self,
                     size=new_size,
