@@ -2452,6 +2452,18 @@ def log_debug_main():
     LOGGER.info(log_string)
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
+def another_instance_running(app_args):
+    # make global to persist until app is closed
+    global singleinst_instance
+    singleinst_name = "Marcam-%s"%wx.GetUserId()
+    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
+    singleinst_path = const.USER_CONFIG_DIR
+    singleinst_instance = wx.SingleInstanceChecker(
+            singleinst_name,
+            singleinst_path,
+            )
+    return singleinst_instance.IsAnotherRunning()
+
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
     """
@@ -2472,14 +2484,8 @@ def main(argv=None):
         log_level = logging.INFO
 
     # Make sure we are only running a single instance per user
-    singleinst_name = "Marcam-%s"%wx.GetUserId()
-    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
-    singleinst_path = const.USER_CONFIG_DIR
-    singleinst_instance = wx.SingleInstanceChecker(
-            singleinst_name,
-            singleinst_path,
-            )
-    if singleinst_instance.IsAnotherRunning():
+    # If not, exit
+    if another_instance_running(args):
         print("Another instance of Marcam is already running.  Exiting.")
         return 1
 
