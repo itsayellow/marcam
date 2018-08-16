@@ -2089,37 +2089,45 @@ class FrameList():
             return
 
         for frame_id in self.frame_dict:
+            # we update each frame's Window menu list of windows
+            this_frame = self.frame_dict[frame_id]['frame']
             win_menu = self.frame_dict[frame_id]['menu']
             win_menu_origcount = self.frame_dict[frame_id]['menu_origcount']
-            if self.frame_dict[frame_id].get('menu', False):
-                for (i, frame_id2) in enumerate(self.win_menu_list):
-                    frame_title = self.frame_dict[frame_id2]['frame'].GetTitle()
-                    if win_menu_origcount + i < win_menu.GetMenuItemCount():
-                        win_menu_item = win_menu.FindItemByPosition(i + win_menu_origcount)
-                        if win_menu_item.GetItemLabel() == frame_title:
-                            this_menuitem = win_menu_item
-                        else:
-                            win_menu.Remove(win_menu_item)
-                            this_menuitem = win_menu.InsertCheckItem(
-                                    i + win_menu_origcount,
-                                    wx.ID_ANY,
-                                    frame_title
-                                    )
+            for (i, menuitem_frame_id) in enumerate(self.win_menu_list):
+                menuitem_frame = self.frame_dict[menuitem_frame_id]['frame']
+                menuitem_frame_title = menuitem_frame.GetTitle()
+                if win_menu_origcount + i < win_menu.GetMenuItemCount():
+                    win_menu_item = win_menu.FindItemByPosition(i + win_menu_origcount)
+                    if win_menu_item.GetItemLabel() == menuitem_frame_title:
+                        # Current menu item is correct, set this_menuitem
+                        this_menuitem = win_menu_item
                     else:
-                        this_menuitem = win_menu.AppendCheckItem(
-                                wx.ID_ANY,
-                                frame_title
-                                )
-                    if frame_title == self.frame_dict[frame_id]['frame'].GetTitle():
-                        this_menuitem.Check(True)
-                    self.frame_dict[frame_id]['frame'].Bind(
-                            wx.EVT_MENU,
-                            self.frame_dict[frame_id2]['frame'].on_window_menu_activate,
-                            this_menuitem
-                            )
+                        # Current menu item is not correct, replace it:w
 
-            else:
-                pass
+                        win_menu.Remove(win_menu_item)
+                        this_menuitem = win_menu.InsertCheckItem(
+                                i + win_menu_origcount,
+                                wx.ID_ANY,
+                                menuitem_frame_title
+                                )
+                else:
+                    # We don't have a menu item yet, so append one
+                    this_menuitem = win_menu.AppendCheckItem(
+                            wx.ID_ANY,
+                            menuitem_frame_title
+                            )
+                if menuitem_frame_title == this_frame.GetTitle():
+                    # For the Window menu item that is for our own window,
+                    #   check it to show that's where we are
+                    this_menuitem.Check(True)
+
+                # Bind this menuitem to the appropriate frame's activation
+                #   function
+                this_frame.Bind(
+                        wx.EVT_MENU,
+                        menuitem_frame.on_window_menu_activate,
+                        this_menuitem
+                        )
 
     #@debug_fxn
     #def remove(self, frame_to_remove):
