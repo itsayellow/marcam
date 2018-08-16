@@ -28,14 +28,12 @@ import os.path # TODO: consider pathlib
 import platform
 import re
 import sys
-import tempfile
 import time
 
 import wx
 import wx.adv
 import wx.html2
 import wx.lib.dialogs
-import numpy as np
 
 import image_proc
 from image_scrolled_canvas import ImageScrolledCanvasMarks
@@ -501,7 +499,7 @@ class ImageWindow(wx.Frame):
         self.init_ui()
         if DEBUG:
             eltime = time.time() - start_time
-            LOGGER.debug("init_ui elapsed time: %.3fms"%(eltime*1000))
+            LOGGER.debug("init_ui elapsed time: %.3fms", eltime*1000)
 
         # On init, we will always have no image, so this just disables
         #   unneeded menus
@@ -2486,7 +2484,7 @@ def main(argv=None):
     config_data = load_config()
 
     # allow debug mode to turn on also from config_data
-    if config_data['debug'] == True:
+    if config_data['debug']:
         DEBUG = True
         log_level = logging.DEBUG
 
