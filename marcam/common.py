@@ -120,9 +120,8 @@ def clip(num, num_min=None, num_max=None):
         return num
 
 
-@debug_fxn
 def on_evt_debug(evt):
-    common.debug_print_evt_info(evt)
+    debug_print_evt_info(evt)
     evt.Skip()
 
 # global dicts to decode numbers to constants
@@ -134,7 +133,6 @@ EVT_CATEGORIES = {}
 for item in dir(wx):
     if item.startswith("EVT_CATEGORY_"):
         EVT_CATEGORIES[getattr(wx, item)] = item
-
 
 def debug_print_evt_info(evt):
     """Print debug info concerning an event
