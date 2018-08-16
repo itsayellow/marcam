@@ -348,12 +348,12 @@ class EditHistory():
 
         item_count = 1
         edits_since_save_new = []
-        for i in range(len(edits_since_save)):
-            if i+1 < len(edits_since_save) and edits_since_save[i+1] == edits_since_save[i]:
+        for (i, this_edit) in enumerate(edits_since_save):
+            if i+1 < len(edits_since_save) and edits_since_save[i+1] == this_edit:
                 item_count += 1
             else:
                 edits_since_save_new.append(
-                        edits_since_save[i] + (" [x%d]"%item_count if item_count > 1 else "")
+                        this_edit + (" [x%d]"%item_count if item_count > 1 else "")
                         )
                 item_count = 1
 
