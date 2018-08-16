@@ -188,7 +188,7 @@ def load_config():
     try:
         with open(config_filepath, 'r') as config_fh:
             config_data.update(json.load(config_fh))
-    except:
+    except FileNotFoundError:
         # if no config.json file, create
         create_config_file(config_filepath)
 
