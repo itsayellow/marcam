@@ -2462,7 +2462,11 @@ def another_instance_running(app_args):
             singleinst_name,
             singleinst_path,
             )
-    return singleinst_instance.IsAnotherRunning()
+    returnval = singleinst_instance.IsAnotherRunning()
+    if returnval and app_args.srcfiles:
+        print("We must shutdown but we have srcfiles")
+
+    return returnval
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
