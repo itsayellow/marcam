@@ -2455,6 +2455,22 @@ def log_debug_main():
     LOGGER.info(log_string)
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
+def another_instance_running(app_args):
+    # make global to persist until app is closed
+    global singleinst_instance
+    singleinst_name = "Marcam-%s"%wx.GetUserId()
+    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
+    singleinst_path = const.USER_CONFIG_DIR
+    singleinst_instance = wx.SingleInstanceChecker(
+            singleinst_name,
+            singleinst_path,
+            )
+    returnval = singleinst_instance.IsAnotherRunning()
+    if returnval and app_args.srcfiles:
+        print("We must shutdown but we have srcfiles")
+
+    return returnval
+
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
     """
@@ -2473,6 +2489,12 @@ def main(argv=None):
     else:
         # default loglevel
         log_level = logging.INFO
+
+    # Make sure we are only running a single instance per user
+    # If not, exit
+    if another_instance_running(args):
+        print("Another instance of Marcam is already running.  Exiting.")
+        return 1
 
     # fetch configuration from file
     config_data = load_config()
