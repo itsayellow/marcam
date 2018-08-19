@@ -2199,6 +2199,18 @@ class MarcamApp(wx.App):
         self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
         self.Bind(wx.EVT_KEY_UP, self.on_key_up)
 
+        # Since we're the master instance, on Windows startup a thread to field
+        #   requests to open files from possible other instances started and ended
+        if const.PLATFORM == 'win':
+            print("Starting new thread...")
+            threading.Thread(
+                    target=win_file_receiver,
+                    args=self,
+                    daemon=True,
+                    )
+            win_file_thread.start()
+
+
     def on_key_down(self, evt):
         self.file_windows.active_frame().on_key_down(evt)
 
@@ -2479,7 +2491,7 @@ def another_instance_running(app_args):
 
     return returnval
 
-def win_file_receiver():
+def win_file_receiver(app_inst):
     i = 0
     while True:
         time.sleep(1)
@@ -2510,16 +2522,6 @@ def main(argv=None):
     if another_instance_running(args):
         print("Another instance of Marcam is already running.  Exiting.")
         return 1
-
-    # Since we're the master instance, on Windows startup a thread to field
-    #   requests to open files from possible other instances started and ended
-    if const.PLATFORM == 'win':
-        print("Starting new thread...")
-        win_file_thread = threading.Thread(
-                target=win_file_receiver,
-                daemon=True,
-                )
-        win_file_thread.start()
 
     # fetch configuration from file
     config_data = load_config()
