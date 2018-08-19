@@ -74,7 +74,7 @@ def pipe_server():
 
         while count < 10:
             print(f"writing message {count}")
-            some_data = str.encode(f"count: {count}")
+            some_data = f"count: {count}".encode(encoding='utf-8')
             win32file.WriteFile(
                     # handle to Named Pipe
                     pipe,
@@ -108,31 +108,35 @@ def pipe_client():
             if res == 0:
                 print(f"SetNamedPipeHandleState return code: {res}")
             while True:
-                resp = win32file.ReadFile(handle, 64*1024)
-                print(f"message: {resp}")
+                (hr, resp_bytes) = win32file.ReadFile(handle, 64*1024)
+                resp_str = resp_bytes.decode(encoding='utf-8')
+                print(f"hr: {hr}    message: {resp_str}")
         except win32file.error as e:
             # https://docs.microsoft.com/en-us/windows/desktop/debug/system-error-codes--0-499-
             winerror = e.args[0]
             funcname = e.args[1]
             strerror = e.args[2]
-            print(winerror)
-            print(funcname)
-            print(strerror)
             if winerror == 2:
                 # ERROR_FILE_NOT_FOUND
                 #   The system cannot find the file specified
                 print("no pipe, trying again in a sec")
+                print("    {0}".format(winerror))
+                print("    {0}".format(funcname))
+                print("    {0}".format(strerror))
                 time.sleep(1)
             elif winerror == 109:
                 # ERROR_BROKEN_PIPE
                 #   The pipe has been ended.
                 print("broken pipe, bye bye")
+                print("    {0}".format(winerror))
+                print("    {0}".format(funcname))
+                print("    {0}".format(strerror))
                 quit = True
             else:
                 print("Unknown Windows error:")
-                print("    " + repr(winerror))
-                print("    " + repr(funcname))
-                print("    " + repr(strerror))
+                print("    {0}".format(winerror))
+                print("    {0}".format(funcname))
+                print("    {0}".format(strerror))
 
 
 if __name__ == '__main__':
