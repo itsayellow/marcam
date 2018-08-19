@@ -2209,7 +2209,10 @@ class MarcamApp(wx.App):
                     daemon=True,
                     )
             win_file_thread.start()
+            self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
+    def on_evt_win_file(self, evt):
+        print("Event received: %s"%evt.my_event_string)
 
     def on_key_down(self, evt):
         self.file_windows.active_frame().on_key_down(evt)
@@ -2497,7 +2500,10 @@ def win_file_receiver(app_inst):
         time.sleep(1)
         i += 1
         print("I'm still awake after %d iterations."%i)
-        #wx.PostEvent("I'm still awake after %d iterations."%i)
+        wx.PostEvent(
+                app_inst,
+                myWinFileEvent(my_event_string="I'm still awake after %d iterations."%i)
+                )
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
