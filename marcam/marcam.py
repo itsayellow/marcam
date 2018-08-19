@@ -2512,10 +2512,12 @@ def main(argv=None):
     # Since we're the master instance, on Windows startup a thread to field
     #   requests to open files from possible other instances started and ended
     if const.PLATFORM == 'win':
-        threading.Thread(
+        print("Starting new thread...")
+        win_file_thread = threading.Thread(
                 target=win_file_receiver,
                 daemon=True,
                 )
+        win_file_thread.start()
 
     # fetch configuration from file
     config_data = load_config()
