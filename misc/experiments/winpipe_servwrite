@@ -113,9 +113,7 @@ def pipe_client():
                 print(f"hr: {hr}    message: {resp_str}")
         except win32file.error as e:
             # https://docs.microsoft.com/en-us/windows/desktop/debug/system-error-codes--0-499-
-            winerror = e.args[0]
-            funcname = e.args[1]
-            strerror = e.args[2]
+            (winerror, funcname, strerror) = e.args
             if winerror == 2:
                 # ERROR_FILE_NOT_FOUND
                 #   The system cannot find the file specified
