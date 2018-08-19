@@ -5,19 +5,68 @@
 
 import time
 import sys
-import win32pipe, win32file, pywintypes
+import win32pipe, win32file
 
+# https://docs.microsoft.com/en-us/windows/desktop/ipc/named-pipes
+# https://docs.microsoft.com/en-us/windows/desktop/ipc/pipe-names
+# https://docs.microsoft.com/en-us/windows/desktop/api/Winbase/nf-winbase-createnamedpipea
+# http://timgolden.me.uk/pywin32-docs/win32pipe.html
+# http://timgolden.me.uk/pywin32-docs/win32file.html
+
+PIPE_NAME = r'\\.\pipe\Marcam-username'
 
 def pipe_server():
     print("pipe server")
     count = 0
     pipe = win32pipe.CreateNamedPipe(
-        r'\\.\pipe\Foo',
-        win32pipe.PIPE_ACCESS_DUPLEX,
-        win32pipe.PIPE_TYPE_MESSAGE | win32pipe.PIPE_READMODE_MESSAGE | win32pipe.PIPE_WAIT,
-        1, 65536, 65536,
-        0,
-        None)
+            # lpName
+            # ----------
+            # Unicode name of pipe.
+            # Use the following form when specifying the name of a pipe in the
+            # CreateFile, WaitNamedPipe, or CallNamedPipe function:
+            #   \\ServerName\pipe\PipeName
+            # where ServerName is either the name of a remote computer or a
+            # period, to specify the local computer.  The pipe name string
+            # specified by PipeName can include any character other than a
+            # backslash, including numbers and special characters. The entire
+            # pipe name string can be up to 256 characters long. Pipe names are
+            # not case-sensitive.
+            # The pipe server cannot create a pipe on another computer, so
+            # CreateNamedPipe must use a period for the server name, as shown
+            # in the following example.
+            #   \\.\pipe\PipeName
+            PIPE_NAME,
+            # dwOpenMode
+            # ----------
+            # can be one of:
+            #   PIPE_ACCESS_DUPLEX, PIPE_ACCESS_INBOUND, PIPE_ACCESS_OUTBOUND
+            win32pipe.PIPE_ACCESS_DUPLEX,
+            # dwPipeMode
+            # ----------
+            # can be one of:
+            #   PIPE_TYPE_MESSAGE, PIPE_TYPE_BYTE,
+            # additionally can have one of:
+            #   PIPE_READMODE_MESSAGE, PIPE_READMODE_BYTE
+            # additionally can have one of:
+            #   PIPE_WAIT, PIPE_NOWAIT
+            win32pipe.PIPE_TYPE_MESSAGE | win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_WAIT,
+            # nMaxInstances
+            # -------------
+            1,
+            # nOutBufferSize
+            # -------------
+            65536,
+            # nInBufferSize
+            # -------------
+            65536,
+            # nDefaultTimeOut
+            # ---------------
+            # in milliseconds. 0 means "50 ms"
+            0,
+            # lpSecurity Attributes
+            # ---------------------
+            None
+            )
     try:
         print("waiting for client")
         win32pipe.ConnectNamedPipe(pipe, None)
@@ -26,7 +75,12 @@ def pipe_server():
         while count < 10:
             print(f"writing message {count}")
             some_data = str.encode(f"count: {count}")
-            win32file.WriteFile(pipe, some_data)
+            win32file.WriteFile(
+                    # handle to Named Pipe
+                    pipe,
+                    # data in bytes format
+                    some_data
+                    )
             time.sleep(1)
             count += 1
 
@@ -42,7 +96,7 @@ def pipe_client():
     while not quit:
         try:
             handle = win32file.CreateFile(
-                r'\\.\pipe\Foo',
+                PIPE_NAME,
                 win32file.GENERIC_READ | win32file.GENERIC_WRITE,
                 0,
                 None,
@@ -56,13 +110,29 @@ def pipe_client():
             while True:
                 resp = win32file.ReadFile(handle, 64*1024)
                 print(f"message: {resp}")
-        except pywintypes.error as e:
-            if e.args[0] == 2:
+        except win32file.error as e:
+            # https://docs.microsoft.com/en-us/windows/desktop/debug/system-error-codes--0-499-
+            winerror = e.args[0]
+            funcname = e.args[1]
+            strerror = e.args[2]
+            print(winerror)
+            print(funcname)
+            print(strerror)
+            if winerror == 2:
+                # ERROR_FILE_NOT_FOUND
+                #   The system cannot find the file specified
                 print("no pipe, trying again in a sec")
                 time.sleep(1)
-            elif e.args[0] == 109:
+            elif winerror == 109:
+                # ERROR_BROKEN_PIPE
+                #   The pipe has been ended.
                 print("broken pipe, bye bye")
                 quit = True
+            else:
+                print("Unknown Windows error:")
+                print("    " + repr(winerror))
+                print("    " + repr(funcname))
+                print("    " + repr(strerror))
 
 
 if __name__ == '__main__':
