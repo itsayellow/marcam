@@ -6,6 +6,7 @@
 import time
 import sys
 import win32pipe, win32file
+import win32security
 
 # https://docs.microsoft.com/en-us/windows/desktop/ipc/named-pipes
 # https://docs.microsoft.com/en-us/windows/desktop/ipc/pipe-names
@@ -65,8 +66,23 @@ def pipe_server():
             0,
             # lpSecurity Attributes
             # ---------------------
+            # can be PySECURITY_ATTRIBUTES, containing PySECURITY_DESCRIPTOR,
+            #   to set pipe security for both client and server
             None
             )
+    #winsecure = win32security.GetSecurityInfo(
+    #        pipe,
+    #        win32security.SE_FILE_OBJECT,
+    #        win32security.OWNER_SECURITY_INFORMATION
+    #        )
+    #print(winsecure)
+    #print(winsecure.GetSecurityDescriptorOwner())
+    #winsecure = win32security.GetSecurityInfo(
+    #        pipe,
+    #        win32security.SE_FILE_OBJECT,
+    #        win32security.DACL_SECURITY_INFORMATION
+    #        )
+    #print(winsecure.GetSecurityDescriptorDACL())
     try:
         print("waiting for client")
         win32pipe.ConnectNamedPipe(pipe, None)
@@ -81,10 +97,16 @@ def pipe_server():
         print("finished now")
     except win32file.error as e:
         (winerror, funcname, strerror) = e.args
-        print("Windows error:")
-        print("    {0}".format(winerror))
-        print("    {0}".format(funcname))
-        print("    {0}".format(strerror))
+        if winerror == 109:
+            print("Client closed access to pipe.")
+            print("    {0}".format(winerror))
+            print("    {0}".format(funcname))
+            print("    {0}".format(strerror))
+        else:
+            print("Windows error:")
+            print("    {0}".format(winerror))
+            print("    {0}".format(funcname))
+            print("    {0}".format(strerror))
 
     finally:
         win32file.CloseHandle(pipe)
