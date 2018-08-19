@@ -2477,7 +2477,7 @@ def another_instance_running(app_args):
 
     return returnval
 
-def win_file_receiver(self, ):
+def win_file_receiver():
     i = 0
     while True:
         time.sleep(1)
@@ -2513,7 +2513,7 @@ def main(argv=None):
     #   requests to open files from possible other instances started and ended
     if const.PLATFORM == 'win':
         threading.Thread(
-                target=self.win_file_receiver,
+                target=win_file_receiver,
                 daemon=True,
                 )
 
