@@ -2200,7 +2200,7 @@ class MarcamApp(wx.App):
         # Since we're the master instance, on Windows startup a thread to field
         #   requests to open files from possible other instances started and ended
         if const.PLATFORM == 'win':
-        print("Starting new thread...")
+            print("Starting new thread...")
             threading.Thread(
                     target=win_file_receiver,
                     args=self,
