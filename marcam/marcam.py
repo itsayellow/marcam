@@ -2496,7 +2496,8 @@ def win_file_receiver(app_inst):
     while True:
         time.sleep(1)
         i += 1
-        wx.PostEvent("I'm still awake after %d iterations."%i)
+        print("I'm still awake after %d iterations."%i)
+        #wx.PostEvent("I'm still awake after %d iterations."%i)
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
