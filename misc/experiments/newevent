@@ -16,7 +16,7 @@ DELAY = 0.7
 
 def evt_thr(win):
     time.sleep(DELAY)
-    wx.PostEvent(win, MooEvent(moo=1))
+    wx.PostEvent(win, MooEvent(moo="Moo!"))
 
 def cmd_thr(win, id):
     time.sleep(DELAY)
