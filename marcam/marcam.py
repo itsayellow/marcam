@@ -28,6 +28,7 @@ import os.path # TODO: consider pathlib
 import platform
 import re
 import sys
+import threading
 import time
 
 import wx
@@ -2476,6 +2477,13 @@ def another_instance_running(app_args):
 
     return returnval
 
+def win_file_receiver(self, ):
+    i = 0
+    while True:
+        time.sleep(1)
+        i += 1
+        print("I'm still awake after %d iterations."%i)
+
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
     """
@@ -2500,6 +2508,14 @@ def main(argv=None):
     if another_instance_running(args):
         print("Another instance of Marcam is already running.  Exiting.")
         return 1
+
+    # Since we're the master instance, on Windows startup a thread to field
+    #   requests to open files from possible other instances started and ended
+    if const.PLATFORM == 'win':
+        threading.Thread(
+                target=self.win_file_receiver,
+                daemon=True,
+                )
 
     # fetch configuration from file
     config_data = load_config()
