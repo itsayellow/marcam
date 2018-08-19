@@ -2203,9 +2203,9 @@ class MarcamApp(wx.App):
         #   requests to open files from possible other instances started and ended
         if const.PLATFORM == 'win':
             print("Starting new thread...")
-            threading.Thread(
+            win_file_thread = threading.Thread(
                     target=win_file_receiver,
-                    args=self,
+                    args=(self,),
                     daemon=True,
                     )
             win_file_thread.start()
