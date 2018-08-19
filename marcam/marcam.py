@@ -1270,8 +1270,9 @@ class ImageWindow(wx.Frame):
         wildcard_img = "Image Files " + image_wildcards + "|"
         wildcard_1sc = "Bio-Rad 1sc Files|*.1sc"
         wildcard = wildcard_all + wildcard_mcm + wildcard_img + wildcard_1sc
+        # native Mac open dialog has no title message
         open_file_dialog = wx.FileDialog(self,
-                "Open Image file",
+                "" if const.PLATFORM == 'mac' else "Open Image file",
                 wildcard=wildcard,
                 style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 
@@ -1568,9 +1569,12 @@ class ImageWindow(wx.Frame):
                     )
             default_save_path = img_path_root + ".mcm"
             (default_dir, default_filename) = os.path.split(default_save_path)
+
+        # native Mac open dialog has no title message
         with wx.FileDialog(
                 self,
-                "Save MCM file", wildcard="MCM files (*.mcm)|*.mcm",
+                "" if const.PLATFORM == 'mac' else "Save MCM file",
+                wildcard="MCM files (*.mcm)|*.mcm",
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 defaultDir=default_dir,
                 defaultFile=default_filename,
@@ -1627,9 +1631,10 @@ class ImageWindow(wx.Frame):
         (filename_root, _) = os.path.splitext(default_filename)
         default_filename = filename_root + "_export.png"
 
+        # native Mac open dialog has no title message
         with wx.FileDialog(
                 self,
-                "Export Image and Marks as Image",
+                "" if const.PLATFORM == 'mac' else "Export Image and Marks as Image",
                 wildcard=wx.Image.GetImageExtWildcard(),
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 defaultDir=default_dir,
