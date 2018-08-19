@@ -135,7 +135,7 @@ def pipe_client():
                     )
             if res == 0:
                 print(f"SetNamedPipeHandleState return code: {res}")
-            for count in range(20):
+            for count in range(5):
                 some_data = f"count: {count}".encode(encoding='utf-8')
                 win32file.WriteFile(
                         # handle to Named Pipe
@@ -144,6 +144,7 @@ def pipe_client():
                         some_data
                         )
                 time.sleep(1)
+            quit = True
         except win32file.error as e:
             (winerror, funcname, strerror) = e.args
             if winerror == 2:
