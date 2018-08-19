@@ -35,6 +35,7 @@ import wx
 import wx.adv
 import wx.html2
 import wx.lib.dialogs
+import wx.lib.newevent
 
 import image_proc
 from image_scrolled_canvas import ImageScrolledCanvasMarks
@@ -58,6 +59,7 @@ LOGGER.info("MSC:ICON_DIR=%s", const.ICON_DIR)
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 
+(myWinFileEvent, EVT_WIN_FILE) = wx.lib.newevent.NewEvent()
 
 class MarcamFormatter(logging.Formatter):
     def format(self, record):
@@ -2482,7 +2484,7 @@ def win_file_receiver():
     while True:
         time.sleep(1)
         i += 1
-        print("I'm still awake after %d iterations."%i)
+        wx.PostEvent("I'm still awake after %d iterations."%i)
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
