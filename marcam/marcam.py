@@ -43,6 +43,7 @@ import const
 import common
 import mcmfile
 import winpipe
+import pywintypes
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
@@ -60,6 +61,8 @@ LOGGER.info("MSC:ICON_DIR=%s", const.ICON_DIR)
 
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
+
+WIN_FILE_PIPE_NAME = r"\\.\pipe\Marcam" + "-%s"%wx.GetUserId()
 
 (myWinFileEvent, EVT_WIN_FILE) = wx.lib.newevent.NewEvent()
 
@@ -2497,18 +2500,51 @@ def another_instance_running(app_args):
     return returnval
 
 def win_file_receiver(app_inst):
-    pipe_name = r"\\.\pipe\Marcam" + "-%s"%wx.GetUserId()
-    openfile_pipe = winpipe.create_named_pipe(pipe_name)
-    print("Created pipe")
-    i = 0
+    filearg_pipe = winpipe.create_named_pipe(WIN_FILE_PIPE_NAME)
+    print("Created pipe.")
     while True:
-        time.sleep(1)
-        i += 1
-        #print("I'm still awake after %d iterations."%i)
-        wx.PostEvent(
-                app_inst,
-                myWinFileEvent(my_event_string="I'm still awake after %d iterations."%i)
-                )
+        # for as long as this thread lives, wait for clients to write to pipe
+        client_done = False
+        print("Waiting for client...")
+        winpipe.connect_and_wait(filearg_pipe)
+        print("Got client.")
+        while not client_done:
+            # keep reading from this client until it closes access to pipe
+            try:
+                resp_str = winpipe.pipe_read(pipe)
+                print(f"message:\n    {resp_str}")
+                wx.PostEvent(
+                        app_inst,
+                        myWinFileEvent(
+                            my_event_string=resp_str
+                            )
+                        )
+            except pywintypes.error as e:
+                (winerror, funcname, strerror) = e.args
+                if winerror == 109:
+                    print("Client closed access to pipe.")
+                    client_done = True
+                else:
+                    LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                            winerror, funcname, strerror
+                            )
+                    # DEBUG DELETEME
+                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
+                    client_done = True
+                    raise
+            finally:
+                if client_done:
+                    pywintypes.CloseHandle(pipe)
+
+    #i = 0
+    #while True:
+    #    time.sleep(1)
+    #    i += 1
+    #    #print("I'm still awake after %d iterations."%i)
+    #    wx.PostEvent(
+    #            app_inst,
+    #            myWinFileEvent(my_event_string="I'm still awake after %d iterations."%i)
+    #            )
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
