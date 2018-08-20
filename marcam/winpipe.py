@@ -165,6 +165,15 @@ def pipe_server(pipe_name):
 
     print("finished now")
 
+def write_to_pipe(handle, data_string):
+    data_bytes = data_string.encode(encoding='utf-8')
+    win32file.WriteFile(
+            # handle to Named Pipe
+            handle,
+            # data in bytes format
+            data_bytes
+            )
+
 @debug_fxn
 def pipe_client(pipe_name):
     print("pipe client")
@@ -180,18 +189,12 @@ def pipe_client(pipe_name):
         else:
             raise
 
-    print("Connected to pipe.")
+    print("Client Connected to pipe.")
 
     while not quit:
         try:
             for count in range(5):
-                some_data = f"count: {count}".encode(encoding='utf-8')
-                win32file.WriteFile(
-                        # handle to Named Pipe
-                        handle,
-                        # data in bytes format
-                        some_data
-                        )
+                write_to_pipe(handle, f"count: {count}")
                 time.sleep(1)
             quit = True
         except win32file.error as e:
