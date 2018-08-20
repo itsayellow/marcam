@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+
+import wx
+import win32api
+import win32gui
+import win32con
+
+class TestFrame(wx.Frame):
+    def __init__(self):
+        wx.Frame.__init__(self, None, title="WndProc Test", size=(200,150))
+        p = wx.Panel(self)
+
+        # Set the WndProc to our function
+        self.oldWndProc = win32gui.SetWindowLong(self.GetHandle(),
+                                                 win32con.GWL_WNDPROC,
+                                                 self.MyWndProc)
+        
+        # Make a dictionary of message names to be used for printing below
+        self.msgdict = {} 
+        for name in dir(win32con): 
+            if name.startswith("WM_"): 
+                value = getattr(win32con, name) 
+                self.msgdict[value] = name 
+
+
+    def MyWndProc(self, hWnd, msg, wParam, lParam):
+        # Display what we've got.
+        print (self.msgdict.get(msg), msg, wParam, lParam)
+        
+        # Restore the old WndProc.  Notice the use of wxin32api
+        # instead of win32gui here.  This is to avoid an error due to
+        # not passing a callable object.
+        if msg == win32con.WM_DESTROY: 
+            win32api.SetWindowLong(self.GetHandle(), 
+                                   win32con.GWL_WNDPROC, 
+                                   self.oldWndProc) 
+
+        # Pass all messages (in this case, yours may be different) on
+        # to the original WndProc
+        return win32gui.CallWindowProc(self.oldWndProc,
+                                       hWnd, msg, wParam, lParam)
+
+app = wx.App()
+f = TestFrame()
+f.Show()
+app.MainLoop()
