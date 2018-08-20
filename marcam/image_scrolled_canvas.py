@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import logging
+import threading
 import time
 
 import wx
@@ -36,6 +37,9 @@ LOGGER.addHandler(logging.NullHandler())
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
+
+
+(myImageProcDoneEvent, EVT_IMG_PROC_DONE) = wx.lib.newevent.NewEvent()
 
 
 @debug_fxn
@@ -1819,19 +1823,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.init_image(do_zoom_fit=False)
 
     @debug_fxn
-    def image_remap_colormap(self, cmap='viridis'):
-        # return early if no image
-        if self.has_no_image():
-            return
+    def thread_image_remap_colormap(self, cmap):
+        # create new image (3.7s for 4276x2676 image)
+        self.wx_image_new = image_proc.image_remap_colormap(self.wx_image_orig, cmap=cmap)
+        wx.PostEvent(self, myImageProcDoneEvent())
 
-        # get current image
-        wx_image_orig = self.img[self.img_idx]
-        # create new image
-        wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
+    @debug_fxn
+    def finish_image_remap_colormap(self, evt):
+        self.image_remap_dialog.Update(100)
+        start_time = time.time()
         # delete all items after current one in list
         self.img = self.img[:self.img_idx+1]
         # add new img to end of list
-        self.img.append(wx_image_new)
+        self.img.append(self.wx_image_new)
         # update img pointer
         self.img_idx += 1
         # save previous image idx, and new image idx
@@ -1839,7 +1843,64 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
                 description="Image False Color"
                 )
+        print("3 before init image: %.1fms"%((time.time()-start_time)*1000))
+        start_time = time.time()
+        # put new image in window (188ms for 4276x2676)
         self.init_image(do_zoom_fit=False)
+        print("4 init image: %.1fms"%((time.time()-start_time)*1000))
+       
+    def pulse_image_remap_dialog(self):
+        if self.image_remap_dialog.GetValue() < 100:
+            self.image_remap_dialog.Pulse()
+            wx.CallLater(100, self.pulse_image_remap_dialog)
+
+    @debug_fxn
+    def image_remap_colormap(self, cmap='viridis'):
+        # return early if no image
+        if self.has_no_image():
+            return
+
+        # DEBUG DELETEME
+        start_time = time.time()
+        # get current image
+        self.wx_image_orig = self.img[self.img_idx]
+        print("1 get current image: %.1fms"%((time.time()-start_time)*1000))
+
+        imageproc_thread = threading.Thread(
+                target=self.thread_image_remap_colormap,
+                args=(cmap,),
+                daemon=True,
+                )
+        imageproc_thread.start()
+        self.Bind(EVT_IMG_PROC_DONE, self.finish_image_remap_colormap)
+        self.image_remap_dialog = wx.ProgressDialog(
+                "Processing Image.",
+                "Applying False Color to image.",
+                parent=self
+                )
+        wx.CallAfter(self.pulse_image_remap_dialog)
+        
+        #start_time = time.time()
+        # create new image (3.7s for 4276x2676 image)
+        #wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
+        #print("2 image_proc.remap: %.1fms"%((time.time()-start_time)*1000))
+        #start_time = time.time()
+        ## delete all items after current one in list
+        #self.img = self.img[:self.img_idx+1]
+        ## add new img to end of list
+        #self.img.append(wx_image_new)
+        ## update img pointer
+        #self.img_idx += 1
+        ## save previous image idx, and new image idx
+        #self.history.new(
+        #        ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
+        #        description="Image False Color"
+        #        )
+        #print("3 before init image: %.1fms"%((time.time()-start_time)*1000))
+        #start_time = time.time()
+        ## put new image in window (188ms for 4276x2676)
+        #self.init_image(do_zoom_fit=False)
+        #print("4 init image: %.1fms"%((time.time()-start_time)*1000))
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
