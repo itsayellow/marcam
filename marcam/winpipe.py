@@ -211,9 +211,13 @@ def pipe_read(pipe):
 
 @debug_fxn
 def pipe_read_server(pipe_name, string_read_fxn):
+    """Create a pipe server that reads only.
+
+    When a message is read, execute string_read_fxn on the received string.
+    """
+    filearg_pipe = create_named_pipe(pipe_name)
+    print("Created pipe.")
     while True:
-        filearg_pipe = create_named_pipe(pipe_name)
-        print("Created pipe.")
         client_done = False
         print("Waiting for client...")
         connect_and_wait(filearg_pipe)
@@ -237,12 +241,10 @@ def pipe_read_server(pipe_name, string_read_fxn):
                     raise
             else:
                 string_read_fxn(resp_str)
-                #print(f"message:\n    {resp_str}")
-                ## post as an Event to App, so it can open filenames we receive
-                #wx.PostEvent(wx_app, myWinFileEvent(open_filename=resp_str))
             finally:
                 if client_done:
-                    win32file.CloseHandle(filearg_pipe)
+                    # Disconnect client from pipe
+                    win32pipe.DisconnectNamedPipe(filearg_pipe)
 
 @debug_fxn
 def pipe_server(pipe_name):
