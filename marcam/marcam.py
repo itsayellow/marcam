@@ -2217,8 +2217,7 @@ class MarcamApp(wx.App):
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
     def on_evt_win_file(self, evt):
-        # DEBUG DELETEME
-        print("Event received: %s"%evt.open_filename)
+        LOGGER.info("Event received: %s"%evt.open_filename)
         img_ok = self.open_file(evt.open_filename)
 
     def on_key_down(self, evt):
