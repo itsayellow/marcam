@@ -210,6 +210,41 @@ def pipe_read(pipe):
     return resp_str
 
 @debug_fxn
+def pipe_read_server(pipe_name, string_read_fxn):
+    while True:
+        filearg_pipe = create_named_pipe(pipe_name)
+        print("Created pipe.")
+        client_done = False
+        print("Waiting for client...")
+        connect_and_wait(filearg_pipe)
+        print("Got client.")
+        while not client_done:
+            # keep reading from this client until it closes access to pipe
+            try:
+                resp_str = pipe_read(filearg_pipe)
+            except pywintypes.error as e:
+                (winerror, funcname, strerror) = e.args
+                if winerror == 109:
+                    print("Client closed access to pipe.")
+                    client_done = True
+                else:
+                    LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                            winerror, funcname, strerror
+                            )
+                    # DEBUG DELETEME
+                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
+                    client_done = True
+                    raise
+            else:
+                string_read_fxn(resp_str)
+                #print(f"message:\n    {resp_str}")
+                ## post as an Event to App, so it can open filenames we receive
+                #wx.PostEvent(wx_app, myWinFileEvent(open_filename=resp_str))
+            finally:
+                if client_done:
+                    win32file.CloseHandle(filearg_pipe)
+
+@debug_fxn
 def pipe_server(pipe_name):
     print("pipe server")
     client_done = False

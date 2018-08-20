@@ -44,9 +44,6 @@ import common
 import mcmfile
 if const.PLATFORM == 'win':
     import winpipe
-if const.PLATFORM == 'win':
-    import pywintypes
-    import win32file
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
@@ -2514,38 +2511,13 @@ def another_instance_running(srcfile_args):
     return another_inst
 
 def win_file_receiver(wx_app):
+    def string_read_fxn(read_str):
+        print(f"message:\n    {read_str}")
+        # post as an Event to App, so it can open filenames we receive
+        wx.PostEvent(wx_app, myWinFileEvent(open_filename=read_str))
+
     # for as long as this thread lives, wait for clients to write to pipe
-    while True:
-        filearg_pipe = winpipe.create_named_pipe(WIN_FILE_PIPE_NAME)
-        print("Created pipe.")
-        client_done = False
-        print("Waiting for client...")
-        winpipe.connect_and_wait(filearg_pipe)
-        print("Got client.")
-        while not client_done:
-            # keep reading from this client until it closes access to pipe
-            try:
-                resp_str = winpipe.pipe_read(filearg_pipe)
-            except pywintypes.error as e:
-                (winerror, funcname, strerror) = e.args
-                if winerror == 109:
-                    print("Client closed access to pipe.")
-                    client_done = True
-                else:
-                    LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
-                            winerror, funcname, strerror
-                            )
-                    # DEBUG DELETEME
-                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
-                    client_done = True
-                    raise
-            else:
-                print(f"message:\n    {resp_str}")
-                # post as an Event to App, so it can open filenames we receive
-                wx.PostEvent(wx_app, myWinFileEvent(open_filename=resp_str))
-            finally:
-                if client_done:
-                    win32file.CloseHandle(filearg_pipe)
+    winpipe.pipe_read_server(WIN_FILE_PIPE_NAME, string_read_fxn)
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
