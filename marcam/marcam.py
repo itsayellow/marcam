@@ -30,8 +30,6 @@ import re
 import sys
 import threading
 import time
-import pywintypes
-import win32file
 
 import wx
 import wx.adv
@@ -44,7 +42,11 @@ from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
 import mcmfile
-import winpipe
+if const.PLATFORM == 'win':
+    import winpipe
+if const.PLATFORM == 'win':
+    import pywintypes
+    import win32file
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
