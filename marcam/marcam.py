@@ -2179,9 +2179,9 @@ class MarcamApp(wx.App):
         # gives just window-placeable screen area
         self.display_size = wx.Display().GetClientArea().GetSize()
 
-        for open_file in open_files:
+        for open_filename in open_files:
             # TODO: what to do with files that can't open because error
-            img_ok = self.new_frame_open_file(open_file)
+            img_ok = self.new_frame_open_file(open_filename)
 
         # if after giving chances to open files from command-line, OS events,
         #   etc., we still don't have any open frames, open an empty one
@@ -2217,7 +2217,9 @@ class MarcamApp(wx.App):
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
     def on_evt_win_file(self, evt):
+        # DEBUG DELETEME
         print("Event received: %s"%evt.open_filename)
+        img_ok = self.open_file(evt.open_filename)
 
     def on_key_down(self, evt):
         self.file_windows.active_frame().on_key_down(evt)
@@ -2332,9 +2334,9 @@ class MarcamApp(wx.App):
         return veto_close
 
     @debug_fxn
-    def new_frame_open_file(self, open_file):
-        if open_file is not None:
-            already_open_frame = self.file_windows.frame_with_file(open_file)
+    def new_frame_open_file(self, open_filename):
+        if open_filename is not None:
+            already_open_frame = self.file_windows.frame_with_file(open_filename)
             if already_open_frame:
                 # Already have a frame with that file open, don't open a dup
                 #   just move it to front
@@ -2344,9 +2346,9 @@ class MarcamApp(wx.App):
                 return True
             else:
                 # verify ok image before opening new frame
-                img_ok = can_read_image(open_file)
+                img_ok = can_read_image(open_filename)
         else:
-            # force img_ok to True if open_file is None
+            # force img_ok to True if open_filename is None
             # we are trying to force a new empty window open (application init)
             img_ok = True
 
@@ -2373,9 +2375,9 @@ class MarcamApp(wx.App):
                     pos=new_pos
                     )
             self.file_windows.append(new_frame)
-            if open_file is not None:
+            if open_filename is not None:
                 ## TODO: handle what happens if bad image, if img_ok==False
-                new_frame.open_image_this_frame(open_file)
+                new_frame.open_image_this_frame(open_filename)
             # need to actually GetPosition to get real position, in case both
             #   self.last_frame_pos = (-1, -1) and new_pos = (-1, -1)
             self.last_frame_pos = new_frame.GetPosition()
@@ -2406,20 +2408,25 @@ class MarcamApp(wx.App):
         #   but cmd-line invocation causes file_names to be last argument
         #       of cmd-line, even if that's the script name (???)
         LOGGER.debug(file_names)
-        for open_file in file_names:
-            # open in blank window, or
-            #   add to file_windows list of file windows
-            if self.file_windows.has_zero() or self.file_windows.all_have_image():
-                img_ok = self.new_frame_open_file(open_file)
-            else:
-                # only one frame, and it has no image
-                img_ok = self.file_windows.only_frame().open_image_this_frame(open_file)
+        for open_filename in file_names:
+            img_ok = self.open_file(open_filename)
             # TODO: figure out how to ignore bad openFiles from command-line
             #   what to do with files that can't open because error
             if img_ok:
-                LOGGER.info("MacOpenFiles: img_ok: %s", open_file)
+                LOGGER.info("MacOpenFiles: img_ok: %s", open_filename)
             else:
-                LOGGER.info("MacOpenFiles: not img_ok: %s", open_file)
+                LOGGER.info("MacOpenFiles: not img_ok: %s", open_filename)
+
+    def open_file(self, open_filename):
+        # open in blank window, or
+        #   add to file_windows list of file windows
+        if self.file_windows.has_zero() or self.file_windows.all_have_image():
+            img_ok = self.new_frame_open_file(open_filename)
+        else:
+            # only one frame, and it has no image
+            img_ok = self.file_windows.only_frame().open_image_this_frame(open_filename)
+
+        return img_ok
 
     def OnExit(self):
         # save config_data right before app is about to exit
