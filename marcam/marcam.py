@@ -2499,7 +2499,7 @@ def win_file_receiver(app_inst):
     while True:
         time.sleep(1)
         i += 1
-        print("I'm still awake after %d iterations."%i)
+        #print("I'm still awake after %d iterations."%i)
         wx.PostEvent(
                 app_inst,
                 myWinFileEvent(my_event_string="I'm still awake after %d iterations."%i)

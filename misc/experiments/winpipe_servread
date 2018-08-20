@@ -14,11 +14,11 @@ import win32security
 # http://timgolden.me.uk/pywin32-docs/win32pipe.html
 # http://timgolden.me.uk/pywin32-docs/win32file.html
 
-PIPE_NAME = r'\\.\pipe\Marcam-username'
+# constant not defined by win32pipe
+PIPE_REJECT_REMOTE_CLIENTS = 8
 
-def pipe_server(pipe_name):
-    print("pipe server")
-    count = 0
+
+def create_pipe(pipe_name):
     pipe = win32pipe.CreateNamedPipe(
             # lpName
             # ----------
@@ -50,7 +50,7 @@ def pipe_server(pipe_name):
             #   PIPE_READMODE_MESSAGE, PIPE_READMODE_BYTE
             # additionally can have one of:
             #   PIPE_WAIT, PIPE_NOWAIT
-            win32pipe.PIPE_TYPE_MESSAGE | win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_WAIT,
+            win32pipe.PIPE_TYPE_MESSAGE | win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
             # nMaxInstances
             # -------------
             1,
@@ -70,6 +70,12 @@ def pipe_server(pipe_name):
             #   to set pipe security for both client and server
             None
             )
+    return pipe
+
+def pipe_server(pipe_name):
+    print("pipe server")
+    count = 0
+    pipe = create_pipe(pipe_name)
     #winsecure = win32security.GetSecurityInfo(
     #        pipe,
     #        win32security.SE_FILE_OBJECT,
@@ -171,11 +177,12 @@ def pipe_client(pipe_name):
 
 
 if __name__ == '__main__':
+    pipe_name = r'\\.\pipe\Marcam-username'
     if len(sys.argv) < 2:
         print("need s or c as argument")
     elif sys.argv[1] == "s":
-        pipe_server(PIPE_NAME)
+        pipe_server(pipe_name)
     elif sys.argv[1] == "c":
-        pipe_client(PIPE_NAME)
+        pipe_client(pipe_name)
     else:
         print(f"no can do: {sys.argv[1]}")
