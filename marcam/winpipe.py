@@ -3,10 +3,13 @@
 # original from:
 # https://stackoverflow.com/questions/48542644/python-and-windows-named-pipes
 
+import logging
 import time
 import sys
 import win32pipe, win32file
 #import win32security
+
+import common
 
 # https://docs.microsoft.com/en-us/windows/desktop/ipc/named-pipes
 # https://docs.microsoft.com/en-us/windows/desktop/ipc/pipe-names
@@ -87,7 +90,7 @@ def create_named_pipe(pipe_name):
     return pipe
 
 @debug_fxn
-def wait_for_client(pipe):
+def connect_and_wait(pipe):
     """Wait for a client connection, do not return until one is found.
 
     Assumes create_named_pipe used PIPE_WAIT mode.
@@ -102,56 +105,85 @@ def wait_for_client(pipe):
         raise
 
 @debug_fxn
+def client_connect_to_pipe(pipe_name):
+    try:
+        handle = win32file.CreateFile(
+            pipe_name,
+            win32file.GENERIC_WRITE,
+            0,
+            None,
+            win32file.OPEN_EXISTING,
+            0,
+            None
+        )
+    except win32file.error as e:
+        (winerror, funcname, strerror) = e.args
+        LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                winerror, funcname, strerror
+                )
+        raise
+
+    return handle
+
+@debug_fxn
+def pipe_read(pipe):
+    (hr, resp_bytes) = win32file.ReadFile(pipe, 64*1024)
+    resp_str = resp_bytes.decode(encoding='utf-8')
+    return resp_str
+
+@debug_fxn
 def pipe_server(pipe_name):
     print("pipe server")
-    count = 0
+    client_done = False
 
     pipe = create_named_pipe(pipe_name)
     print("waiting for client")
-    wait_for_client(pipe):
+    connect_and_wait(pipe)
     print("got client")
 
-    try:
-        while count < 10:
-            (hr, resp_bytes) = win32file.ReadFile(pipe, 64*1024)
-            resp_str = resp_bytes.decode(encoding='utf-8')
-            print(f"hr: {hr}    message: {resp_str}")
-            count += 1
+    while not client_done:
+        try:
+            resp_str = pipe_read(pipe)
+            print(f"message: {resp_str}")
+        except win32file.error as e:
+            (winerror, funcname, strerror) = e.args
+            if winerror == 109:
+                print("Client closed access to pipe.")
+                print("    {0}".format(winerror))
+                print("    {0}".format(funcname))
+                print("    {0}".format(strerror))
+                client_done = True
+            else:
+                LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                        winerror, funcname, strerror
+                        )
+                client_done = True
+                raise
+        finally:
+            if client_done:
+                win32file.CloseHandle(pipe)
 
-        print("finished now")
-    except win32file.error as e:
-        (winerror, funcname, strerror) = e.args
-        if winerror == 109:
-            print("Client closed access to pipe.")
-            print("    {0}".format(winerror))
-            print("    {0}".format(funcname))
-            print("    {0}".format(strerror))
-        else:
-            LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
-                    winerror, funcname, strerror
-                    )
-            raise
-
-    finally:
-        win32file.CloseHandle(pipe)
-
+    print("finished now")
 
 @debug_fxn
 def pipe_client(pipe_name):
     print("pipe client")
     quit = False
 
+    try:
+        handle = client_connect_to_pipe(pipe_name)
+    except win32file.error as e:
+        (winerror, funcname, strerror) = e.args
+        if winerror==2:
+            print("No pipe server.")
+            return
+        else:
+            raise
+
+    print("Connected to pipe.")
+
     while not quit:
         try:
-            handle = win32file.CreateFile(
-                pipe_name,
-                win32file.GENERIC_WRITE,
-                0,
-                None,
-                win32file.OPEN_EXISTING,
-                0,
-                None
-            )
             for count in range(5):
                 some_data = f"count: {count}".encode(encoding='utf-8')
                 win32file.WriteFile(
