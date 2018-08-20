@@ -30,6 +30,8 @@ import re
 import sys
 import threading
 import time
+import pywintypes
+import win32file
 
 import wx
 import wx.adv
@@ -43,7 +45,6 @@ import const
 import common
 import mcmfile
 import winpipe
-import pywintypes
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
@@ -2483,7 +2484,7 @@ def log_debug_main():
     LOGGER.info(log_string)
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
-def another_instance_running(app_args):
+def another_instance_running(srcfile_args):
     # make global to persist until app is closed
     global singleinst_instance
     singleinst_name = "Marcam-%s"%wx.GetUserId()
@@ -2493,25 +2494,79 @@ def another_instance_running(app_args):
             singleinst_name,
             singleinst_path,
             )
-    returnval = singleinst_instance.IsAnotherRunning()
-    if returnval and app_args.srcfiles:
-        print("We must shutdown but we have srcfiles")
+    another_inst = singleinst_instance.IsAnotherRunning()
+    if another_inst and srcfile_args:
+        # send our filename arguments to other instance running via Windows
+        #   named pipe
+        if const.PLATFORM=='win':
+            try:
+                pipe_handle = winpipe.client_connect_to_pipe(WIN_FILE_PIPE_NAME)
+            except pywintypes.error as e:
+                (winerror, funcname, strerror) = e.args
+                if winerror==2:
+                    print("Error: No pipe server.")
+                    return another_inst
+                else:
+                    raise
+            print("Client Connected to pipe.")
+            # send filenames to pipe
+            for filename in srcfile_args:
+                winpipe.write_to_pipe(pipe_handle, filename)
+                print("Wrote: %s"%filename)
 
-    return returnval
+            win32file.CloseHandle(pipe_handle)
+        else:
+            print("Error: We must shutdown with unopened srcfiles.")
+
+    return another_inst
 
 def win_file_receiver(app_inst):
-    filearg_pipe = winpipe.create_named_pipe(WIN_FILE_PIPE_NAME)
-    print("Created pipe.")
+    # for as long as this thread lives, wait for clients to write to pipe
     while True:
-        # for as long as this thread lives, wait for clients to write to pipe
+        no_pipe_instance = True
+        while no_pipe_instance:
+            try:
+                filearg_pipe = winpipe.create_named_pipe(WIN_FILE_PIPE_NAME)
+                no_pipe_instance = False
+            except pywintypes.error as e:
+                (winerror, funcname, strerror) = e.args
+                if winerror == 231:
+                    # pipe is busy (being closed)
+                    print("Pipe is busy, trying again...")
+                else:
+                    LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                            winerror, funcname, strerror
+                            )
+                    # DEBUG DELETEME
+                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
+                    raise
+
+        print("Created pipe.")
         client_done = False
         print("Waiting for client...")
-        winpipe.connect_and_wait(filearg_pipe)
+        no_connection = True
+        while no_connection:
+            try:
+                winpipe.connect_and_wait(filearg_pipe)
+                no_connection = False
+            except pywintypes.error as e:
+                (winerror, funcname, strerror) = e.args
+                if winerror == 232:
+                    # The pipe is being closed, try again
+                    print("The pipe is being closed, trying again")
+                else:
+                    LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                            winerror, funcname, strerror
+                            )
+                    # DEBUG DELETEME
+                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
+                    raise
+
         print("Got client.")
         while not client_done:
             # keep reading from this client until it closes access to pipe
             try:
-                resp_str = winpipe.pipe_read(pipe)
+                resp_str = winpipe.pipe_read(filearg_pipe)
                 print(f"message:\n    {resp_str}")
                 # post as an Event to App, so it can open filenames we receive
                 wx.PostEvent(app_inst, myWinFileEvent(open_filename=resp_str))
@@ -2530,7 +2585,8 @@ def win_file_receiver(app_inst):
                     raise
             finally:
                 if client_done:
-                    pywintypes.CloseHandle(pipe)
+                    pass
+                    win32file.CloseHandle(filearg_pipe)
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
@@ -2553,7 +2609,7 @@ def main(argv=None):
 
     # Make sure we are only running a single instance per user
     # If not, exit
-    if another_instance_running(args):
+    if another_instance_running(args.srcfiles):
         print("Another instance of Marcam is already running.  Exiting.")
         return 1
 
