@@ -2528,7 +2528,7 @@ def win_file_receiver(wx_app):
         wx.PostEvent(wx_app, myWinFileEvent(open_filename=read_str))
 
     # for as long as this thread lives, wait for clients to write to pipe
-    winpipe.pipe_read_server(WIN_FILE_PIPE_NAME, string_read_fxn)
+    winpipe.server_pipe_read(WIN_FILE_PIPE_NAME, string_read_fxn)
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
