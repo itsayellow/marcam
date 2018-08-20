@@ -2520,7 +2520,7 @@ def another_instance_running(srcfile_args):
 
     return another_inst
 
-def win_file_receiver(app_inst):
+def win_file_receiver(wx_app):
     # for as long as this thread lives, wait for clients to write to pipe
     while True:
         no_pipe_instance = True
@@ -2569,7 +2569,7 @@ def win_file_receiver(app_inst):
                 resp_str = winpipe.pipe_read(filearg_pipe)
                 print(f"message:\n    {resp_str}")
                 # post as an Event to App, so it can open filenames we receive
-                wx.PostEvent(app_inst, myWinFileEvent(open_filename=resp_str))
+                wx.PostEvent(wx_app, myWinFileEvent(open_filename=resp_str))
             except pywintypes.error as e:
                 (winerror, funcname, strerror) = e.args
                 if winerror == 109:
@@ -2585,7 +2585,6 @@ def win_file_receiver(app_inst):
                     raise
             finally:
                 if client_done:
-                    pass
                     win32file.CloseHandle(filearg_pipe)
 
 def main(argv=None):
