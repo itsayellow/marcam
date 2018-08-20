@@ -42,13 +42,15 @@ from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
 import mcmfile
+import winpipe
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
 
 # which modules are we logging
 LOGGED_MODULES = [
-        __name__, 'image_scrolled_canvas', 'image_proc', 'mcmfile', 'common'
+        __name__, 'image_scrolled_canvas', 'image_proc', 'mcmfile', 'common',
+        'winpipe',
         ]
 
 # global logger obj for this file
@@ -2495,6 +2497,9 @@ def another_instance_running(app_args):
     return returnval
 
 def win_file_receiver(app_inst):
+    pipe_name = r"\\.\pipe\Marcam" + "-%s"%wx.GetUserId()
+    openfile_pipe = winpipe.create_named_pipe(pipe_name)
+    print("Created pipe")
     i = 0
     while True:
         time.sleep(1)
