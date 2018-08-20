@@ -17,6 +17,7 @@ import common
 # https://docs.microsoft.com/en-us/windows/desktop/api/Winbase/nf-winbase-createnamedpipea
 # http://timgolden.me.uk/pywin32-docs/win32pipe.html
 # http://timgolden.me.uk/pywin32-docs/win32file.html
+# https://docs.microsoft.com/en-us/windows/desktop/ipc/named-pipe-operations
 
 # logging stuff
 #   not necessary to make a handler since we will be child logger of marcam
@@ -125,6 +126,10 @@ def connect_and_wait_raw(pipe):
         raise
 
 def connect_and_wait(pipe_handle):
+    """Wait for a client connection, do not return until one is found.
+
+    Server function. 
+    """
     no_connection = True
     while no_connection:
         try:
@@ -175,6 +180,8 @@ def client_write_strings(pipe_name, data_strings):
 
 @debug_fxn
 def client_connect_to_pipe(pipe_name):
+    """Connect to server pipe.  Keep trying if pipe is busy.
+    """
     no_connection = True
     while no_connection:
         try:
