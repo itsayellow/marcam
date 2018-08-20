@@ -2499,23 +2499,14 @@ def another_instance_running(srcfile_args):
         # send our filename arguments to other instance running via Windows
         #   named pipe
         if const.PLATFORM=='win':
-            try:
-                pipe_handle = winpipe.client_connect_to_pipe(WIN_FILE_PIPE_NAME)
-            except pywintypes.error as e:
-                (winerror, funcname, strerror) = e.args
-                if winerror==2:
-                    print("Error: No pipe server.")
-                    return another_inst
-                else:
-                    raise
-            print("Client Connected to pipe.")
-            # send filenames to pipe
-            for filename in srcfile_args:
-                winpipe.write_to_pipe(pipe_handle, filename)
-                print("Wrote: %s"%filename)
-
-            win32file.CloseHandle(pipe_handle)
+            did_send_args = winpipe.client_write_strings(
+                    WIN_FILE_PIPE_NAME,
+                    srcfile_args
+                    )
         else:
+            did_send_args = False
+
+        if not did_send_args:
             print("Error: We must shutdown with unopened srcfiles.")
 
     return another_inst
@@ -2523,53 +2514,16 @@ def another_instance_running(srcfile_args):
 def win_file_receiver(wx_app):
     # for as long as this thread lives, wait for clients to write to pipe
     while True:
-        no_pipe_instance = True
-        while no_pipe_instance:
-            try:
-                filearg_pipe = winpipe.create_named_pipe(WIN_FILE_PIPE_NAME)
-                no_pipe_instance = False
-            except pywintypes.error as e:
-                (winerror, funcname, strerror) = e.args
-                if winerror == 231:
-                    # pipe is busy (being closed)
-                    print("Pipe is busy, trying again...")
-                else:
-                    LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
-                            winerror, funcname, strerror
-                            )
-                    # DEBUG DELETEME
-                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
-                    raise
-
+        filearg_pipe = winpipe.create_named_pipe(WIN_FILE_PIPE_NAME)
         print("Created pipe.")
         client_done = False
         print("Waiting for client...")
-        no_connection = True
-        while no_connection:
-            try:
-                winpipe.connect_and_wait(filearg_pipe)
-                no_connection = False
-            except pywintypes.error as e:
-                (winerror, funcname, strerror) = e.args
-                if winerror == 232:
-                    # The pipe is being closed, try again
-                    print("The pipe is being closed, trying again")
-                else:
-                    LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
-                            winerror, funcname, strerror
-                            )
-                    # DEBUG DELETEME
-                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
-                    raise
-
+        winpipe.connect_and_wait(filearg_pipe)
         print("Got client.")
         while not client_done:
             # keep reading from this client until it closes access to pipe
             try:
                 resp_str = winpipe.pipe_read(filearg_pipe)
-                print(f"message:\n    {resp_str}")
-                # post as an Event to App, so it can open filenames we receive
-                wx.PostEvent(wx_app, myWinFileEvent(open_filename=resp_str))
             except pywintypes.error as e:
                 (winerror, funcname, strerror) = e.args
                 if winerror == 109:
@@ -2583,6 +2537,10 @@ def win_file_receiver(wx_app):
                     print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
                     client_done = True
                     raise
+            else:
+                print(f"message:\n    {resp_str}")
+                # post as an Event to App, so it can open filenames we receive
+                wx.PostEvent(wx_app, myWinFileEvent(open_filename=resp_str))
             finally:
                 if client_done:
                     win32file.CloseHandle(filearg_pipe)

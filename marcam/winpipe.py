@@ -8,6 +8,7 @@ import time
 import sys
 import win32pipe, win32file
 #import win32security
+import pywintypes
 
 import common
 
@@ -34,8 +35,8 @@ PIPE_REJECT_REMOTE_CLIENTS = 8
 
 
 @debug_fxn
-def create_named_pipe(pipe_name):
-    pipe = win32pipe.CreateNamedPipe(
+def create_named_pipe_raw(pipe_name):
+    pipe_handle = win32pipe.CreateNamedPipe(
             # lpName
             # ----------
             # Unicode name of pipe.
@@ -87,41 +88,118 @@ def create_named_pipe(pipe_name):
             #   to set pipe security for both client and server
             None
             )
-    return pipe
+    return pipe_handle
+
+def create_named_pipe(pipe_name):
+    no_pipe_instance = True
+    while no_pipe_instance:
+        try:
+            pipe_handle = create_named_pipe_raw(pipe_name)
+        except pywintypes.error as e:
+            (winerror, funcname, strerror) = e.args
+            LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                    winerror, funcname, strerror
+                    )
+            # DEBUG DELETEME
+            print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
+            raise
+        else:
+            # created named pipe OK
+            no_pipe_instance = False
+
+    return pipe_handle
 
 @debug_fxn
-def connect_and_wait(pipe):
+def connect_and_wait_raw(pipe):
     """Wait for a client connection, do not return until one is found.
 
     Assumes create_named_pipe used PIPE_WAIT mode.
     """
     try:
         win32pipe.ConnectNamedPipe(pipe, None)
-    except win32file.error as e:
+    except pywintypes.error as e:
         (winerror, funcname, strerror) = e.args
         LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
                 winerror, funcname, strerror
                 )
         raise
 
+def connect_and_wait(pipe_handle):
+    no_connection = True
+    while no_connection:
+        try:
+            connect_and_wait_raw(pipe_handle)
+        except pywintypes.error as e:
+            (winerror, funcname, strerror) = e.args
+            if winerror == 232:
+                # The pipe is being closed, try again
+                print("The pipe is being closed, trying again")
+            else:
+                LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                        winerror, funcname, strerror
+                        )
+                # DEBUG DELETEME
+                print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
+                raise
+        else:
+            # connected pipe and waited OK
+            no_connection = False
+
+@debug_fxn
+def client_write_strings(pipe_name, data_strings):
+    """
+    Returns True on success, False on failure.
+    """
+    try:
+        pipe_handle = client_connect_to_pipe(pipe_name)
+    except pywintypes.error as e:
+        (winerror, funcname, strerror) = e.args
+        if winerror==2:
+            print("Error: No pipe server.")
+            return False
+        else:
+            raise
+    print("Client Connected to pipe.")
+    # send filenames to pipe
+    for data_string in data_strings:
+        write_to_pipe(pipe_handle, data_string)
+        print("Wrote: %s"%data_string)
+        # sometimes writing these in very fast sequence can make read server
+        #   interpret two data_strings as one message.
+        # Hack is to put in delay.  More robust insurance is needed.
+        time.sleep(1e-3)
+
+    win32file.CloseHandle(pipe_handle)
+
+    return True
+
 @debug_fxn
 def client_connect_to_pipe(pipe_name):
-    try:
-        handle = win32file.CreateFile(
-            pipe_name,
-            win32file.GENERIC_WRITE,
-            0,
-            None,
-            win32file.OPEN_EXISTING,
-            0,
-            None
-        )
-    except win32file.error as e:
-        (winerror, funcname, strerror) = e.args
-        LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
-                winerror, funcname, strerror
-                )
-        raise
+    no_connection = True
+    while no_connection:
+        try:
+            handle = win32file.CreateFile(
+                pipe_name,
+                win32file.GENERIC_WRITE,
+                0,
+                None,
+                win32file.OPEN_EXISTING,
+                0,
+                None
+            )
+        except pywintypes.error as e:
+            (winerror, funcname, strerror) = e.args
+            if winerror == 231:
+                # ERROR_PIPE_BUSY
+                print("Pipe busy, trying again")
+                time.sleep(10e-3)
+
+            LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+                    winerror, funcname, strerror
+                    )
+            raise
+        else:
+            no_connection = False
 
     return handle
 
@@ -145,7 +223,7 @@ def pipe_server(pipe_name):
         try:
             resp_str = pipe_read(pipe)
             print(f"message: {resp_str}")
-        except win32file.error as e:
+        except pywintypes.error as e:
             (winerror, funcname, strerror) = e.args
             if winerror == 109:
                 print("Client closed access to pipe.")
@@ -181,7 +259,7 @@ def pipe_client(pipe_name):
 
     try:
         handle = client_connect_to_pipe(pipe_name)
-    except win32file.error as e:
+    except pywintypes.error as e:
         (winerror, funcname, strerror) = e.args
         if winerror==2:
             print("No pipe server.")
@@ -197,7 +275,7 @@ def pipe_client(pipe_name):
                 write_to_pipe(handle, f"count: {count}")
                 time.sleep(1)
             quit = True
-        except win32file.error as e:
+        except pywintypes.error as e:
             (winerror, funcname, strerror) = e.args
             if winerror == 2:
                 # ERROR_FILE_NOT_FOUND
