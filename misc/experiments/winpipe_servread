@@ -16,7 +16,7 @@ import win32security
 
 PIPE_NAME = r'\\.\pipe\Marcam-username'
 
-def pipe_server():
+def pipe_server(pipe_name):
     print("pipe server")
     count = 0
     pipe = win32pipe.CreateNamedPipe(
@@ -36,7 +36,7 @@ def pipe_server():
             # CreateNamedPipe must use a period for the server name, as shown
             # in the following example.
             #   \\.\pipe\PipeName
-            PIPE_NAME,
+            pipe_name,
             # dwOpenMode
             # ----------
             # can be one of:
@@ -112,14 +112,14 @@ def pipe_server():
         win32file.CloseHandle(pipe)
 
 
-def pipe_client():
+def pipe_client(pipe_name):
     print("pipe client")
     quit = False
 
     while not quit:
         try:
             handle = win32file.CreateFile(
-                PIPE_NAME,
+                pipe_name,
                 win32file.GENERIC_WRITE,
                 0,
                 None,
@@ -127,14 +127,6 @@ def pipe_client():
                 0,
                 None
             )
-            res = win32pipe.SetNamedPipeHandleState(
-                    handle,
-                    win32pipe.PIPE_READMODE_MESSAGE,
-                    None,
-                    None
-                    )
-            if res == 0:
-                print(f"SetNamedPipeHandleState return code: {res}")
             for count in range(5):
                 some_data = f"count: {count}".encode(encoding='utf-8')
                 win32file.WriteFile(
@@ -182,8 +174,8 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("need s or c as argument")
     elif sys.argv[1] == "s":
-        pipe_server()
+        pipe_server(PIPE_NAME)
     elif sys.argv[1] == "c":
-        pipe_client()
+        pipe_client(PIPE_NAME)
     else:
         print(f"no can do: {sys.argv[1]}")
