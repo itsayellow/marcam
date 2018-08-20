@@ -104,8 +104,6 @@ def server_create_named_pipe(pipe_name):
             LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
                     winerror, funcname, strerror
                     )
-            # DEBUG DELETEME
-            print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
             raise
         else:
             # created named pipe OK
@@ -141,13 +139,11 @@ def server_connect_and_wait(pipe_handle):
             (winerror, funcname, strerror) = e.args
             if winerror == 232:
                 # The pipe is being closed, try again
-                print("The pipe is being closed, trying again")
+                LOGGER.info("The pipe is being closed, trying again.")
             else:
                 LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
                         winerror, funcname, strerror
                         )
-                # DEBUG DELETEME
-                print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
                 raise
         else:
             # connected pipe and waited OK
@@ -166,12 +162,11 @@ def server_pipe_read(pipe_name, string_read_fxn):
     When a message is read, execute string_read_fxn on the received string.
     """
     filearg_pipe = server_create_named_pipe(pipe_name)
-    print("Created pipe.")
     while True:
         client_done = False
-        print("Waiting for client...")
+        LOGGER.info("Waiting for client...")
         server_connect_and_wait(filearg_pipe)
-        print("Got client.")
+        LOGGER.info("Got client.")
         while not client_done:
             # keep reading from this client until it closes access to pipe
             try:
@@ -179,14 +174,12 @@ def server_pipe_read(pipe_name, string_read_fxn):
             except pywintypes.error as e:
                 (winerror, funcname, strerror) = e.args
                 if winerror == 109:
-                    print("Client closed access to pipe.")
+                    LOGGER.info("Client closed access to pipe.")
                     client_done = True
                 else:
                     LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
                             winerror, funcname, strerror
                             )
-                    # DEBUG DELETEME
-                    print("Windows error:\n    %s\n   %s\n    %s"%(winerror, funcname, strerror))
                     client_done = True
                     raise
             else:
@@ -200,6 +193,11 @@ def server_pipe_read(pipe_name, string_read_fxn):
 # ------------------------------------------------------------------------
 # CLIENT STUFF
 # ------------
+
+# For client stuff we really don't have any logging facilities currently.
+#   (We are operating without a log file because we are not the primary
+#   instance of the program.)
+
 @debug_fxn
 def client_connect_to_pipe(pipe_name):
     """Connect to server pipe.  Keep trying if pipe is busy.
@@ -220,10 +218,10 @@ def client_connect_to_pipe(pipe_name):
             (winerror, funcname, strerror) = e.args
             if winerror == 231:
                 # ERROR_PIPE_BUSY
-                print("Pipe busy, trying again")
+                print("Pipe busy, trying again after 10ms")
                 time.sleep(10e-3)
 
-            LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
+            print("Windows error:\n    %s\n   %s\n    %s",
                     winerror, funcname, strerror
                     )
             raise

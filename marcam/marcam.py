@@ -2522,8 +2522,6 @@ def win_file_receiver(wx_app):
     Only to be used on Windows
     """
     def string_read_fxn(read_str):
-        # DEBUG DELETEME
-        print(f"message:\n    {read_str}")
         # post as an Event to App, so it can open filenames we receive
         wx.PostEvent(wx_app, myWinFileEvent(open_filename=read_str))
 
