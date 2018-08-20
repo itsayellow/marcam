@@ -2217,7 +2217,7 @@ class MarcamApp(wx.App):
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
     def on_evt_win_file(self, evt):
-        print("Event received: %s"%evt.my_event_string)
+        print("Event received: %s"%evt.open_filename)
 
     def on_key_down(self, evt):
         self.file_windows.active_frame().on_key_down(evt)
@@ -2513,12 +2513,8 @@ def win_file_receiver(app_inst):
             try:
                 resp_str = winpipe.pipe_read(pipe)
                 print(f"message:\n    {resp_str}")
-                wx.PostEvent(
-                        app_inst,
-                        myWinFileEvent(
-                            my_event_string=resp_str
-                            )
-                        )
+                # post as an Event to App, so it can open filenames we receive
+                wx.PostEvent(app_inst, myWinFileEvent(open_filename=resp_str))
             except pywintypes.error as e:
                 (winerror, funcname, strerror) = e.args
                 if winerror == 109:
@@ -2535,16 +2531,6 @@ def win_file_receiver(app_inst):
             finally:
                 if client_done:
                     pywintypes.CloseHandle(pipe)
-
-    #i = 0
-    #while True:
-    #    time.sleep(1)
-    #    i += 1
-    #    #print("I'm still awake after %d iterations."%i)
-    #    wx.PostEvent(
-    #            app_inst,
-    #            myWinFileEvent(my_event_string="I'm still awake after %d iterations."%i)
-    #            )
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
