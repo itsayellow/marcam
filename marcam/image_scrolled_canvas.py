@@ -1870,6 +1870,24 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.init_image(do_zoom_fit=False)
 
     @debug_fxn
+    def image_remap_colormap(self, cmap='viridis'):
+        # return early if no image
+        if self.has_no_image():
+            return
+        # get current image
+        wx_image_orig = self.img[self.img_idx]
+
+        LongTaskThreaded(
+                thread_fxn=self.image_remap_colormap_thread,
+                thread_fxn_args=(wx_image_orig, cmap),
+                post_thread_fxn=self.image_remap_colormap_postthread,
+                post_thread_fxn_args=(),
+                progress_title="Processing Image",
+                progress_msg="Applying False Color to image.",
+                parent=self
+                )
+
+    @debug_fxn
     def image_remap_colormap_thread(self, wx_image_orig, cmap):
         # create new image (3.7s for 4276x2676 image)
         self.wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
@@ -1889,24 +1907,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
         # put new image in window (188ms for 4276x2676)
         self.init_image(do_zoom_fit=False)
-
-    @debug_fxn
-    def image_remap_colormap(self, cmap='viridis'):
-        # return early if no image
-        if self.has_no_image():
-            return
-        # get current image
-        wx_image_orig = self.img[self.img_idx]
-
-        LongTaskThreaded(
-                thread_fxn=self.image_remap_colormap_thread,
-                thread_fxn_args=(wx_image_orig, cmap),
-                post_thread_fxn=self.image_remap_colormap_postthread,
-                post_thread_fxn_args=(),
-                progress_title="Processing Image",
-                progress_msg="Applying False Color to image.",
-                parent=self
-                )
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
