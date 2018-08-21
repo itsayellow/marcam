@@ -1,6 +1,5 @@
 """Image viewing/manipulation workhorse widget.
 """
-
 # Copyright 2017-2018 Matthew A. Clapp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

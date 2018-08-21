@@ -1,6 +1,5 @@
 """mcmfile: functions to read, write, manipulate Marcam .mcm files
 """
-
 # Copyright 2017-2018 Matthew A. Clapp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
