@@ -19,7 +19,10 @@ if [ -e virt ]; then
     exit 1
 fi
 # first test if uname is present
-if hash uname 2>/dev/null ; then
+if hash systeminfo 2>/dev/null ; then
+    # systeminfo is present, we are on Windows
+    ostype="Windows"
+elif hash uname 2>/dev/null ; then
     # uname is present, use it to find ostype
     ostype="$(uname)"
 else
@@ -44,10 +47,13 @@ fi
 # install required python packages into virtual environment
 # use python3 -m pip instead of pip3, because only thing that works on
 #   stupid Windows
-if [ "$ostype" != "Darwin" ] ; then
-    # non-Mac OS
-    python3 -m pip install -r requirements.txt
-else
+if [ "$ostype" == "Windows" ] ; then
+    # Windows
+    python3 -m pip install -r requirements_win.txt
+elif [ "$ostype" == "Darwin" ] ; then
     # macOS
     python3 -m pip install -r requirements_mac.txt
+else
+    # non-Mac and non-Windows OS
+    python3 -m pip install -r requirements.txt
 fi
