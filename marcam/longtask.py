@@ -1,3 +1,6 @@
+"""Module to facilitate a generic interface to running long tasks in separate
+    threads.
+"""
 import logging
 import threading
 
@@ -22,9 +25,28 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
 class LongTaskThreaded:
+    """Class supporting long tasks that need to be in separate thread.
+
+    Handles running the thread part of the task in a separate thread,
+        wx Events, and wx ProgressDialog.
+    """
     @debug_fxn
     def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn, post_thread_fxn_args,
             progress_title, progress_msg, parent):
+        """Initialize a Long Task needing thread execution and wx support.
+
+        Args:
+            thread_fxn (function handle): long-running function to be run in
+                separate thread
+            thread_fxn_args (tuple): arguments for thread_fxn
+            post_thread_fxn (function handle): function that runs after
+                thread_fxn has finished
+            post_thread_fxn_args (tuple): arguments for post_thread_fxn
+            progress_title (str): Text for titlebar of wx.ProgressDialog
+            progress_msg (str): Text for message area of wx.ProgressDialog
+            parent (wx.Window): Window that handles events and is parent
+                of ProgressDialog
+        """
 
         self.post_thread_fxn = post_thread_fxn
         self.post_thread_fxn_args = post_thread_fxn_args
@@ -48,6 +70,12 @@ class LongTaskThreaded:
 
     @debug_fxn
     def long_task_postthread(self, evt):
+        """Function triggered when event signifies that thread fxn is done.
+
+        Args:
+            evt (myLongTaskDoneEvent): obj returned from event when long task
+                thread is finished
+        """
         # On Windows especially, must Destroy progress dialog for application
         #   to continue
         self.image_remap_dialog.Destroy()
@@ -55,5 +83,7 @@ class LongTaskThreaded:
         self.post_thread_fxn(*self.post_thread_fxn_args)
 
     def long_task_thread(self):
+        """Function that is run in separate thread
+        """
         self.thread_fxn(*self.thread_fxn_args)
         wx.PostEvent(self.win_parent, myLongTaskDoneEvent())
