@@ -1834,7 +1834,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 post_thread_fxn=self.image_remap_colormap_postthread,
                 post_thread_fxn_args=(),
                 progress_title="Processing Image",
-                progress_msg="Applying False Color to image.",
+                progress_msg="Applying False Color to image...",
                 parent=self
                 )
 
