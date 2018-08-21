@@ -38,7 +38,7 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 (myLongTaskDoneEvent, EVT_LONG_TASK_DONE) = wx.lib.newevent.NewEvent()
 
 
-class LongTaskThreaded:
+class ThreadedProgressPulse:
     """Class supporting long tasks that need to be in separate thread.
 
     Handles running the thread part of the task in a separate thread,
