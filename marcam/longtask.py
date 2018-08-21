@@ -45,9 +45,6 @@ class LongTaskThreaded:
         # Pulse seems to only be needed to be called once!  Not multiple times
         #   as the docs imply.
         self.image_remap_dialog.Pulse()
-        # for some reason this pulsing thing causes Segmentation faults
-        #   race condition??
-        #wx.CallAfter(self.pulse_image_remap_dialog)
 
     @debug_fxn
     def long_task_postthread(self, evt):
@@ -60,13 +57,3 @@ class LongTaskThreaded:
     def long_task_thread(self):
         self.thread_fxn(*self.thread_fxn_args)
         wx.PostEvent(self.win_parent, myLongTaskDoneEvent())
-
-    def pulse_image_remap_dialog(self):
-        if self.image_remap_dialog_keep_pulsing:
-            self.image_remap_dialog.Pulse()
-            wx.CallLater(100, self.pulse_image_remap_dialog)
-        else:
-            pass
-            #print("image_remap_dialog done (max value)")
-
-
