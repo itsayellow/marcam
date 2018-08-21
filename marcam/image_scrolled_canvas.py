@@ -1830,13 +1830,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_remap_colormap_postthread(self, evt):
-        # Set Value to 100 (max) to auto-hide
-        #self.image_remap_dialog.Update(100)
         # On Windows especially, must Destroy progress dialog for application
         #   to continue
-        self.image_remap_dialog_keep_pulsing = False
-        if self.image_remap_dialog:
-            self.image_remap_dialog.Destroy()
+        self.image_remap_dialog.Destroy()
 
         # delete all items after current one in list
         self.img = self.img[:self.img_idx+1]
@@ -1876,7 +1872,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 )
         self.Bind(EVT_IMG_PROC_DONE, self.image_remap_colormap_postthread)
         self.imageproc_thread.start()
-        self.image_remap_dialog_keep_pulsing = True
         self.image_remap_dialog = wx.ProgressDialog(
                 "Processing Image.",
                 "Applying False Color to image.",
