@@ -2220,7 +2220,7 @@ class MarcamApp(wx.App):
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
     def on_evt_win_file(self, evt):
-        LOGGER.info("Event received: %s"%evt.open_filename)
+        LOGGER.info("Event received: %s", evt.open_filename)
         img_ok = self.open_file(evt.open_filename)
 
     def on_key_down(self, evt):
@@ -2506,7 +2506,7 @@ def another_instance_running(srcfile_args):
     if another_inst and srcfile_args:
         # send our filename arguments to other instance running via Windows
         #   named pipe
-        if const.PLATFORM=='win':
+        if const.PLATFORM == 'win':
             did_send_args = winpipe.client_write_strings(
                     WIN_FILE_PIPE_NAME,
                     srcfile_args
