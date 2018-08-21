@@ -1854,7 +1854,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         print("4 init image: %.1fms"%((time.time()-start_time)*1000))
        
     def pulse_image_remap_dialog(self):
-        if self.image_remap_dialog.GetValue() < 100:
+        if self.image_remap_dialog and self.image_remap_dialog.GetValue() < 100:
             self.image_remap_dialog.Pulse()
             wx.CallLater(100, self.pulse_image_remap_dialog)
         else:
