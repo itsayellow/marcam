@@ -30,6 +30,9 @@ else
     ostype="UNKNOWN"
 fi
 
+# inform venv stage
+echo Creating virtual environment...
+
 # make dir to hold virtual environment
 mkdir virt
 # python3 native venv
@@ -44,16 +47,22 @@ else
     exit 1
 fi
 
+# inform venv stage
+echo Installing required python packages...
+
 # install required python packages into virtual environment
 # use python3 -m pip instead of pip3, because only thing that works on
 #   stupid Windows
 if [ "$ostype" == "Windows" ] ; then
     # Windows
+    echo python3 -m pip install -r requirements_win.txt
     python3 -m pip install -r requirements_win.txt
 elif [ "$ostype" == "Darwin" ] ; then
     # macOS
+    echo python3 -m pip install -r requirements_mac.txt
     python3 -m pip install -r requirements_mac.txt
 else
     # non-Mac and non-Windows OS
+    echo python3 -m pip install -r requirements.txt
     python3 -m pip install -r requirements.txt
 fi
