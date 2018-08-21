@@ -42,6 +42,9 @@ class LongTaskThreaded:
                 progress_msg,
                 parent=self.win_parent
                 )
+        # Pulse seems to only be needed to be called once!  Not multiple times
+        #   as the docs imply.
+        self.image_remap_dialog.Pulse()
         # for some reason this pulsing thing causes Segmentation faults
         #   race condition??
         #wx.CallAfter(self.pulse_image_remap_dialog)
