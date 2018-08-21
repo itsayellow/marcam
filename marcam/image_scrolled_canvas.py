@@ -1830,7 +1830,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def finish_image_remap_colormap(self, evt):
+        # Set Value to 100 (max) to auto-hide
         self.image_remap_dialog.Update(100)
+        # On Windows especially, must Destroy progress dialog for application
+        #   to continue
+        self.image_remap_dialog.Destroy()
         start_time = time.time()
         # delete all items after current one in list
         self.img = self.img[:self.img_idx+1]
@@ -1853,6 +1857,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.image_remap_dialog.GetValue() < 100:
             self.image_remap_dialog.Pulse()
             wx.CallLater(100, self.pulse_image_remap_dialog)
+        else:
+            pass
+            #print("image_remap_dialog done (max value)")
 
     @debug_fxn
     def image_remap_colormap(self, cmap='viridis'):
