@@ -1823,9 +1823,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.init_image(do_zoom_fit=False)
 
     @debug_fxn
-    def image_remap_colormap_thread(self, cmap):
+    def image_remap_colormap_thread(self, wx_image_orig, cmap):
         # create new image (3.7s for 4276x2676 image)
-        self.wx_image_new = image_proc.image_remap_colormap(self.wx_image_orig, cmap=cmap)
+        self.wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
         wx.PostEvent(self, myImageProcDoneEvent())
 
     @debug_fxn
@@ -1870,11 +1870,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         # get current image
-        self.wx_image_orig = self.img[self.img_idx]
+        wx_image_orig = self.img[self.img_idx]
 
         self.imageproc_thread = threading.Thread(
                 target=self.image_remap_colormap_thread,
-                args=(cmap,),
+                args=(wx_image_orig, cmap,),
                 #daemon=True,
                 )
         self.Bind(EVT_IMG_PROC_DONE, self.image_remap_colormap_postthread)
