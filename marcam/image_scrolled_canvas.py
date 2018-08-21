@@ -1825,12 +1825,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def long_task(self, thread_fxn, thread_fxn_args, post_thread_fxn,
             progress_title, progress_msg, parent):
-        self.imageproc_thread = threading.Thread(
+        imageproc_thread = threading.Thread(
                 target=thread_fxn,
                 args=thread_fxn_args,
                 )
-        self.Bind(EVT_IMG_PROC_DONE, post_thread_fxn)
-        self.imageproc_thread.start()
+        self.long_task_post_thread_fxn = post_thread_fxn
+        self.Bind(EVT_IMG_PROC_DONE, self.long_task_postthread)
+        imageproc_thread.start()
         self.image_remap_dialog = wx.ProgressDialog(
                 progress_title,
                 progress_msg,
@@ -1841,17 +1842,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #wx.CallAfter(self.pulse_image_remap_dialog)
 
     @debug_fxn
+    def long_task_postthread(self, evt):
+        # On Windows especially, must Destroy progress dialog for application
+        #   to continue
+        self.image_remap_dialog.Destroy()
+
+        self.long_task_post_thread_fxn()
+
+    @debug_fxn
     def image_remap_colormap_thread(self, wx_image_orig, cmap):
         # create new image (3.7s for 4276x2676 image)
         self.wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
         wx.PostEvent(self, myImageProcDoneEvent())
 
     @debug_fxn
-    def image_remap_colormap_postthread(self, evt):
-        # On Windows especially, must Destroy progress dialog for application
-        #   to continue
-        self.image_remap_dialog.Destroy()
-
+    def image_remap_colormap_postthread(self):
         # delete all items after current one in list
         self.img = self.img[:self.img_idx+1]
         # add new img to end of list
