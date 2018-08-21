@@ -45,6 +45,7 @@ import mcmfile
 if const.PLATFORM == 'win':
     import winpipe
 
+
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
 
@@ -62,9 +63,11 @@ LOGGER.info("MSC:ICON_DIR=%s", const.ICON_DIR)
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 
+
 WIN_FILE_PIPE_NAME = r"\\.\pipe\Marcam" + "-%s"%wx.GetUserId()
 
 (myWinFileEvent, EVT_WIN_FILE) = wx.lib.newevent.NewEvent()
+
 
 class MarcamFormatter(logging.Formatter):
     def format(self, record):
