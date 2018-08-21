@@ -1838,9 +1838,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.image_remap_dialog:
             self.image_remap_dialog.Destroy()
 
-        # for some reason without this we had some segfaults (??)
-        self.imageproc_thread.join()
-
         # delete all items after current one in list
         self.img = self.img[:self.img_idx+1]
         # add new img to end of list
