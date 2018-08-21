@@ -31,28 +31,28 @@ class LongTaskThreaded:
         wx Events, and wx ProgressDialog.
     """
     @debug_fxn
-    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn, post_thread_fxn_args,
+    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
             progress_title, progress_msg, parent):
         """Initialize a Long Task needing thread execution and wx support.
 
         Args:
             thread_fxn (function handle): long-running function to be run in
-                separate thread
+                separate thread.  Return values from this function will
+                be passed as positional arguments to post_thread_fxn.
             thread_fxn_args (tuple): arguments for thread_fxn
             post_thread_fxn (function handle): function that runs after
                 thread_fxn has finished
-            post_thread_fxn_args (tuple): arguments for post_thread_fxn
             progress_title (str): Text for titlebar of wx.ProgressDialog
             progress_msg (str): Text for message area of wx.ProgressDialog
             parent (wx.Window): Window that handles events and is parent
                 of ProgressDialog
         """
 
-        self.post_thread_fxn = post_thread_fxn
-        self.post_thread_fxn_args = post_thread_fxn_args
         self.thread_fxn = thread_fxn
         self.thread_fxn_args = thread_fxn_args
+        self.post_thread_fxn = post_thread_fxn
         self.win_parent = parent
+        self.thread_fxn_returnvals = None
 
         imageproc_thread = threading.Thread(
                 target=self.long_task_thread,
@@ -69,6 +69,27 @@ class LongTaskThreaded:
         self.image_remap_dialog.Pulse()
 
     @debug_fxn
+    def long_task_thread(self):
+        """Function that is run in separate thread
+
+        If thread_fxn returns any values, they will be passed as positional
+        arguments to post_thread_fxn.
+        """
+        thread_fxn_returnvals = self.thread_fxn(*self.thread_fxn_args)
+        if thread_fxn_returnvals is None:
+            # if returnvals = None, make empty tuple
+            self.thread_fxn_returnvals = ()
+        else:
+            try:
+                # if returnvals are iterable, convert to tuple
+                self.thread_fxn_returnvals = tuple(thread_fxn_returnvals)
+            except TypeError:
+                # if returnvals are single value, wrap in tuple
+                self.thread_fxn_returnvals = (thread_fxn_returnvals,)
+
+        wx.PostEvent(self.win_parent, myLongTaskDoneEvent())
+
+    @debug_fxn
     def long_task_postthread(self, evt):
         """Function triggered when event signifies that thread fxn is done.
 
@@ -79,11 +100,5 @@ class LongTaskThreaded:
         # On Windows especially, must Destroy progress dialog for application
         #   to continue
         self.image_remap_dialog.Destroy()
-        # execute post thread function
-        self.post_thread_fxn(*self.post_thread_fxn_args)
-
-    def long_task_thread(self):
-        """Function that is run in separate thread
-        """
-        self.thread_fxn(*self.thread_fxn_args)
-        wx.PostEvent(self.win_parent, myLongTaskDoneEvent())
+        # execute post thread function with return value(s) from thread_fxn
+        self.post_thread_fxn(*self.thread_fxn_returnvals)

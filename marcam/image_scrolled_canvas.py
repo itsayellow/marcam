@@ -1832,7 +1832,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 thread_fxn=self.image_remap_colormap_thread,
                 thread_fxn_args=(wx_image_orig, cmap),
                 post_thread_fxn=self.image_remap_colormap_postthread,
-                post_thread_fxn_args=(),
                 progress_title="Processing Image",
                 progress_msg="Applying False Color to image...",
                 parent=self
@@ -1841,14 +1840,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     @debug_fxn
     def image_remap_colormap_thread(self, wx_image_orig, cmap):
         # create new image (3.7s for 4276x2676 image)
-        self.wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
+        wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
+        return wx_image_new
 
     @debug_fxn
-    def image_remap_colormap_postthread(self):
+    def image_remap_colormap_postthread(self, wx_image_new):
         # delete all items after current one in list
         self.img = self.img[:self.img_idx+1]
         # add new img to end of list
-        self.img.append(self.wx_image_new)
+        self.img.append(wx_image_new)
         # update img pointer
         self.img_idx += 1
         # save previous image idx, and new image idx
