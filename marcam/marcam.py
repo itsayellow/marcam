@@ -50,8 +50,8 @@ DEBUG = False
 
 # which modules are we logging
 LOGGED_MODULES = [
-        __name__, 'image_scrolled_canvas', 'image_proc', 'mcmfile', 'common',
-        'winpipe',
+        __name__, 'common', 'image_proc', 'image_scrolled_canvas', 'longtask',
+        'mcmfile', 'winpipe'
         ]
 
 # global logger obj for this file
