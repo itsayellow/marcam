@@ -11,7 +11,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "-a":
 else:
     extra_arg = []
 
-if shutil.which('uname') is not None:
+def do_uname():
     returnval = subprocess.run(
             ["uname"] + extra_arg,
             stderr=subprocess.DEVNULL,
@@ -20,7 +20,7 @@ if shutil.which('uname') is not None:
     mystdout = returnval.stdout.decode('utf-8')
     print(mystdout, end="")
 
-elif shutil.which('systeminfo') is not None:
+def do_systeminfo():
     returnval = subprocess.run(
             "systeminfo",
             stderr=subprocess.DEVNULL,
@@ -47,5 +47,12 @@ elif shutil.which('systeminfo') is not None:
         print(out_str1 + " Version " + out_str2)
     else:
         print(out_str1)
-else:
-    print("UNKNOWN")
+
+
+if __name__ == "__main__":
+    if shutil.which('systeminfo') is not None:
+        do_systeminfo()
+    elif shutil.which('uname') is not None:
+        do_uname()
+    else:
+        print("UNKNOWN")
