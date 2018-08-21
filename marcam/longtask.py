@@ -104,7 +104,7 @@ class ThreadedProgressPulse:
         wx.PostEvent(self.win_parent, myLongTaskDoneEvent())
 
     @debug_fxn
-    def long_task_postthread(self, evt):
+    def long_task_postthread(self, _evt):
         """Function triggered when event signifies that thread fxn is done.
 
         Args:
