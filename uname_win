@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+import re
+import subprocess
+
+returnval = subprocess.run(
+        "systeminfo",
+        stderr=subprocess.DEVNULL,
+        stdout=subprocess.PIPE
+        )
+
+mystdout = returnval.stdout.decode('utf-8')
+
+out_str1 = None
+out_str2 = None
+
+for line in mystdout.split("\r\n"):
+    osname_re = re.search(r"^OS Name:\s+(\S.+)$", line)
+    if osname_re:
+        out_str1 = osname_re.group(1)
+
+    osver_re = re.search(r"^OS Version:\s+(\S.+)$", line)
+    if osver_re:
+        out_str2 = osver_re.group(1)
+
+    if out_str1 and out_str2:
+        break
+
+print(out_str1 + " Version " + out_str2)
