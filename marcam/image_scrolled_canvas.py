@@ -1823,6 +1823,24 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.init_image(do_zoom_fit=False)
 
     @debug_fxn
+    def long_task(self, thread_fxn, thread_fxn_args, post_thread_fxn,
+            progress_title, progress_msg, parent):
+        self.imageproc_thread = threading.Thread(
+                target=thread_fxn,
+                args=thread_fxn_args,
+                )
+        self.Bind(EVT_IMG_PROC_DONE, post_thread_fxn)
+        self.imageproc_thread.start()
+        self.image_remap_dialog = wx.ProgressDialog(
+                progress_title,
+                progress_msg,
+                parent=parent
+                )
+        # for some reason this pulsing thing causes Segmentation faults
+        #   race condition??
+        #wx.CallAfter(self.pulse_image_remap_dialog)
+
+    @debug_fxn
     def image_remap_colormap_thread(self, wx_image_orig, cmap):
         # create new image (3.7s for 4276x2676 image)
         self.wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
@@ -1861,25 +1879,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # return early if no image
         if self.has_no_image():
             return
-
         # get current image
         wx_image_orig = self.img[self.img_idx]
 
-        self.imageproc_thread = threading.Thread(
-                target=self.image_remap_colormap_thread,
-                args=(wx_image_orig, cmap,),
-                #daemon=True,
-                )
-        self.Bind(EVT_IMG_PROC_DONE, self.image_remap_colormap_postthread)
-        self.imageproc_thread.start()
-        self.image_remap_dialog = wx.ProgressDialog(
-                "Processing Image.",
-                "Applying False Color to image.",
+        self.long_task(
+                thread_fxn=self.image_remap_colormap_thread,
+                thread_fxn_args=(wx_image_orig, cmap,),
+                post_thread_fxn=self.image_remap_colormap_postthread,
+                progress_title="Processing Image",
+                progress_msg="Applying False Color to image.",
                 parent=self
                 )
-        # for some reason this pulsing thing causes Segmentation faults
-        #   race condition??
-        #wx.CallAfter(self.pulse_image_remap_dialog)
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
