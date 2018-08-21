@@ -1870,40 +1870,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.init_image(do_zoom_fit=False)
 
     @debug_fxn
-    def long_task(self, thread_fxn, thread_fxn_args, post_thread_fxn,
-            progress_title, progress_msg, parent):
-        imageproc_thread = threading.Thread(
-                target=thread_fxn,
-                args=thread_fxn_args,
-                )
-        self.long_task_post_thread_fxn = post_thread_fxn
-        self.Bind(EVT_IMG_PROC_DONE, self.long_task_postthread)
-        imageproc_thread.start()
-        self.image_remap_dialog = wx.ProgressDialog(
-                progress_title,
-                progress_msg,
-                parent=parent
-                )
-        # for some reason this pulsing thing causes Segmentation faults
-        #   race condition??
-        #wx.CallAfter(self.pulse_image_remap_dialog)
-
-    @debug_fxn
-    def long_task_postthread(self, evt):
-        # On Windows especially, must Destroy progress dialog for application
-        #   to continue
-        self.image_remap_dialog.Destroy()
-
-        self.long_task_post_thread_fxn()
-
-    @debug_fxn
     def image_remap_colormap_thread(self, wx_image_orig, cmap):
-        # create new image (3.7s for 4276x2676 image)
-        self.wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
-        wx.PostEvent(self, myImageProcDoneEvent())
-
-    @debug_fxn
-    def image_remap_colormap_thread2(self, wx_image_orig, cmap):
         # create new image (3.7s for 4276x2676 image)
         self.wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
 
@@ -1923,14 +1890,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # put new image in window (188ms for 4276x2676)
         self.init_image(do_zoom_fit=False)
 
-    def pulse_image_remap_dialog(self):
-        if self.image_remap_dialog_keep_pulsing:
-            self.image_remap_dialog.Pulse()
-            wx.CallLater(100, self.pulse_image_remap_dialog)
-        else:
-            pass
-            #print("image_remap_dialog done (max value)")
-
     @debug_fxn
     def image_remap_colormap(self, cmap='viridis'):
         # return early if no image
@@ -1940,7 +1899,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         wx_image_orig = self.img[self.img_idx]
 
         LongTaskThreaded(
-                thread_fxn=self.image_remap_colormap_thread2,
+                thread_fxn=self.image_remap_colormap_thread,
                 thread_fxn_args=(wx_image_orig, cmap),
                 post_thread_fxn=self.image_remap_colormap_postthread,
                 post_thread_fxn_args=(),
@@ -1948,14 +1907,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 progress_msg="Applying False Color to image.",
                 parent=self
                 )
-        #self.long_task(
-        #        thread_fxn=self.image_remap_colormap_thread,
-        #        thread_fxn_args=(wx_image_orig, cmap,),
-        #        post_thread_fxn=self.image_remap_colormap_postthread,
-        #        progress_title="Processing Image",
-        #        progress_msg="Applying False Color to image.",
-        #        parent=self
-        #        )
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
