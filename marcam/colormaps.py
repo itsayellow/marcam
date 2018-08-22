@@ -25,6 +25,8 @@
 # Original code at:
 # https://github.com/bids/colormap (colormap.py)
 
+import numpy as np
+
 MAGMA_DATA = [
         [0.001462, 0.000466, 0.013866],
         [0.002258, 0.001295, 0.018331],
@@ -1073,6 +1075,11 @@ PLASMA_DATA_24BIT = [
 VIRIDIS_DATA_24BIT = [
         [round(x[0]*255), round(x[1]*255), round(x[2]*255)] for x in VIRIDIS_DATA
         ]
+
+MAGMA_DATA_24BIT_NP = np.array(MAGMA_DATA_24BIT, dtype='uint8')
+INFERNO_DATA_24BIT_NP = np.array(INFERNO_DATA_24BIT, dtype='uint8')
+PLASMA_DATA_24BIT_NP = np.array(PLASMA_DATA_24BIT, dtype='uint8')
+VIRIDIS_DATA_24BIT_NP = np.array(VIRIDIS_DATA_24BIT, dtype='uint8')
 
 cmaps = {}
 for (name, data) in (('magma', MAGMA_DATA),
