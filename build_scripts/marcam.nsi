@@ -76,7 +76,7 @@ Section "Marcam (required)"
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
 
-  ; Put files there
+  ; Source Files to put in output path, relative to this nsi file
   File /r "..\dist\marcam\*"
 
   ; Write the installation path into the registry
