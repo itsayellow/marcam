@@ -176,10 +176,6 @@ def image_remap_colormap(wx_image, cmap='viridis'):
         raise Exception("Internal Error: unknown colormap")
 
     wx_image = wx.Image(width, height, new_image_data)
-    print("numpy method, w x h = (%d x %d), time = %.fms"%(
-                width, height, 1000*(time.time()-start_time)
-                )
-            )
     return wx_image
 
 #-----------------------
