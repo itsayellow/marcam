@@ -48,7 +48,7 @@ RequestExecutionLevel admin
 ; Settings for MUI2
 
 !define MUI_COMPONENTSPAGE_NODESC ; no descriptions
-;!define MUI_COMPONENTSPAGE_TEXT_TOP "Choose Components"; no descriptions
+!define MUI_ICON "..\marcam\media\marcam.ico"
 
 ;--------------------------------
 
