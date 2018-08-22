@@ -42,7 +42,8 @@ class ThreadedProgressPulse:
     """Class supporting long tasks that need to be in separate thread.
 
     Handles running the thread part of the task in a separate thread,
-        wx Events, and wx ProgressDialog.
+        wx Events, and wx ProgressDialog.  Sets ProgressDialog to "Pulse"
+        mode, which shows indeterminant progress (just activity).
     """
     @debug_fxn
     def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
