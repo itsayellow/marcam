@@ -740,31 +740,12 @@ class ImageWindow(wx.Frame):
         #       width can be variable (78w seen)
         #   in wx pixels use 24h x >24w
         #   rounded corners
-        try:
-            selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
-        except:
-            LOGGER.error("MSC:Icon doesn't exist: %s", const.SELECTBMP_FNAME)
-        try:
-            markbmp = wx.Bitmap(const.MARKBMP_FNAME)
-        except:
-            LOGGER.error("MSC:Icon doesn't exist: %s", const.MARKBMP_FNAME)
-        try:
-            toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
-        except:
-            LOGGER.error("MSC:Icon doesn't exist: %s", const.TOCLIPBMP_FNAME)
-        try:
-            zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
-        except:
-            LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMOUTBMP_FNAME)
-        try:
-            zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
-        except:
-            LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMFITBMP_FNAME)
-        try:
-            zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
-        except:
-            LOGGER.error("MSC:Icon doesn't exist: %s", const.ZOOMINBMP_FNAME)
-        #obmp = wx.Bitmap(os.path.join(ICON_DIR, 'topen32.png'))
+        selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
+        markbmp = wx.Bitmap(const.MARKBMP_FNAME)
+        toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
+        zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
+        zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
+        zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
 
         self.toolbar = self.CreateToolBar()
         #self.toolbar.SetToolBitmapSize(wx.Size(24,24))
@@ -2530,6 +2511,17 @@ def win_file_receiver(wx_app):
     # for as long as this thread lives, wait for clients to write to pipe
     winpipe.server_pipe_read(WIN_FILE_PIPE_NAME, string_read_fxn)
 
+def sanity_checks():
+    # Make sure we have access to all bitmaps.
+    bitmap_filenames = [
+            const.SELECTBMP_FNAME, const.MARKBMP_FNAME, const.TOCLIPBMP_FNAME,
+            const.ZOOMOUTBMP_FNAME, const.ZOOMINBMP_FNAME, const.ZOOMFITBMP_FNAME
+            ]
+    for bitmap_filename in bitmap_filenames:
+        if not os.path.exists(bitmap_filename):
+            LOGGER.error("Unable to find file: %s"%bitmap_filename)
+            raise Exception("Missing bitmap file: %s"%bitmap_filename)
+
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
     """
@@ -2571,6 +2563,9 @@ def main(argv=None):
 
     # see what argv and args are
     LOGGER.info(repr(args))
+
+    # Do some sanity checks before we start wx stuff, to avoid segfaults
+    sanity_checks()
 
     # setup main wx event loop
     myapp = MarcamApp(args.srcfiles, config_data)
