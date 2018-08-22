@@ -68,19 +68,19 @@ class ThreadedProgressPulse:
         self.win_parent = parent
         self.thread_fxn_returnvals = None
 
-        imageproc_thread = threading.Thread(
+        task_thread = threading.Thread(
                 target=self.long_task_thread,
                 )
         self.win_parent.Bind(EVT_LONG_TASK_DONE, self.long_task_postthread)
-        imageproc_thread.start()
-        self.image_remap_dialog = wx.ProgressDialog(
+        task_thread.start()
+        self.progress_dialog = wx.ProgressDialog(
                 progress_title,
                 progress_msg,
                 parent=self.win_parent
                 )
         # Pulse seems to only be needed to be called once!  Not multiple times
         #   as the docs imply.
-        self.image_remap_dialog.Pulse()
+        self.progress_dialog.Pulse()
 
     @debug_fxn
     def long_task_thread(self):
@@ -113,6 +113,6 @@ class ThreadedProgressPulse:
         """
         # On Windows especially, must Destroy progress dialog for application
         #   to continue
-        self.image_remap_dialog.Destroy()
+        self.progress_dialog.Destroy()
         # execute post thread function with return value(s) from thread_fxn
         self.post_thread_fxn(*self.thread_fxn_returnvals)
