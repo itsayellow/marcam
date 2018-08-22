@@ -21,6 +21,7 @@
 ; It will install example2.nsi into a directory that the user selects,
 
 ;--------------------------------
+!include MUI2.nsh
 !include "FileAssoc.nsh"
 
 ; TODO: Icon, InstProgressFlags, AddBrandingImage, SetBrandingImage,
@@ -44,15 +45,26 @@ InstallDirRegKey HKLM "Software\Marcam" "Install_Dir"
 RequestExecutionLevel admin
 
 ;--------------------------------
+; Settings for MUI2
+
+!define MUI_COMPONENTSPAGE_NODESC ; no descriptions
+;!define MUI_COMPONENTSPAGE_TEXT_TOP "Choose Components"; no descriptions
+
+;--------------------------------
 
 ; Pages
 
-Page components
-Page directory
-Page instfiles
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
 
-UninstPage uninstConfirm
-UninstPage instfiles
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+;--------------------------------
+; Languages
+
+!insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
 
