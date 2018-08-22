@@ -155,6 +155,7 @@ def image_remap_colormap(wx_image, cmap='viridis'):
             'viridis' or 'magma' or 'plasma' or 'inferno'
     """
     # numpy method is ~18x faster than pure python list comprehension method
+    start_time = time.time()
     width = wx_image.GetWidth()
     height = wx_image.GetHeight()
     image_data = np.array(wx_image.GetData())
@@ -175,6 +176,10 @@ def image_remap_colormap(wx_image, cmap='viridis'):
         raise Exception("Internal Error: unknown colormap")
 
     wx_image = wx.Image(width, height, new_image_data)
+    LOGGER.debug("TIM:image_remap_colormap(%s), w x h = (%d x %d), time = %.fms"%(
+                cmap, width, height, 1000*(time.time()-start_time)
+                )
+            )
     return wx_image
 
 #-----------------------
