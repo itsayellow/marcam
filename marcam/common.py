@@ -17,7 +17,12 @@
 import wx
 
 
-def debug_fxn_factory(logger_fxn, debug_fxn_state=[0]):
+# Stores global depth for debug_fxn's in all modules
+#   (e.g. debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE))
+DEBUG_FXN_STATE = [0]
+
+
+def debug_fxn_factory(logger_fxn, debug_fxn_state=None):
     """Factory to produce debug_fxn that logs to specified logger object
 
     Args:
@@ -28,6 +33,9 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=[0]):
             using the same variable from the same module as argument to all.
             (typically common.DEBUG_FXN_STATE)
     """
+    # default
+    if debug_fxn_state is None:
+        debug_fxn_state = DEBUG_FXN_STATE
 
     # debug decorator that announces function call/entry and lists args
     def debug_fxn(func):
@@ -54,10 +62,6 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=[0]):
         return func_wrapper
 
     return debug_fxn
-
-# Stores global depth for debug_fxn's in all modules
-#   (e.g. debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE))
-DEBUG_FXN_STATE = [0]
 
 def floor(num):
     """Simple numerical ceiling function.
@@ -142,7 +146,11 @@ def debug_print_evt_info(evt):
     """
     print("Event")
     print("    Type: %s (%d)"%(EVT_TYPES.get(evt.GetEventType(), ""), evt.GetEventType()))
-    print("    Category: %s (%d)"%(EVT_CATEGORIES.get(evt.GetEventCategory(), ""), evt.GetEventCategory()))
+    print("    Category: %s (%d)"%(
+                EVT_CATEGORIES.get(evt.GetEventCategory(), ""),
+                evt.GetEventCategory()
+                )
+            )
     print("    EventObject: " + repr(evt.GetEventObject()))
     print("    ID: " + repr(evt.GetId()))
     print("    RefData: " + repr(evt.GetRefData()))
@@ -152,4 +160,3 @@ def debug_print_evt_info(evt):
     print("        ClassName: " + repr(evt.GetClassInfo().GetClassName()))
     print("    ClassName: " + repr(evt.GetClassName()))
     print("    Timestamp: " + repr(evt.GetTimestamp()))
-

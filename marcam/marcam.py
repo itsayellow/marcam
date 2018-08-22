@@ -45,13 +45,14 @@ import mcmfile
 if const.PLATFORM == 'win':
     import winpipe
 
+
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
 
 # which modules are we logging
 LOGGED_MODULES = [
-        __name__, 'image_scrolled_canvas', 'image_proc', 'mcmfile', 'common',
-        'winpipe',
+        __name__, 'common', 'image_proc', 'image_scrolled_canvas', 'longtask',
+        'mcmfile', 'winpipe'
         ]
 
 # global logger obj for this file
@@ -62,9 +63,11 @@ LOGGER.info("MSC:ICON_DIR=%s", const.ICON_DIR)
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 
+
 WIN_FILE_PIPE_NAME = r"\\.\pipe\Marcam" + "-%s"%wx.GetUserId()
 
 (myWinFileEvent, EVT_WIN_FILE) = wx.lib.newevent.NewEvent()
+
 
 class MarcamFormatter(logging.Formatter):
     def format(self, record):
@@ -2217,7 +2220,7 @@ class MarcamApp(wx.App):
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
     def on_evt_win_file(self, evt):
-        LOGGER.info("Event received: %s"%evt.open_filename)
+        LOGGER.info("Event received: %s", evt.open_filename)
         img_ok = self.open_file(evt.open_filename)
 
     def on_key_down(self, evt):
@@ -2503,7 +2506,7 @@ def another_instance_running(srcfile_args):
     if another_inst and srcfile_args:
         # send our filename arguments to other instance running via Windows
         #   named pipe
-        if const.PLATFORM=='win':
+        if const.PLATFORM == 'win':
             did_send_args = winpipe.client_write_strings(
                     WIN_FILE_PIPE_NAME,
                     srcfile_args
