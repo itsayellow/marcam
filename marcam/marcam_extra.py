@@ -386,7 +386,7 @@ class ImageAutoContrastDialog(wx.Dialog):
         sizer.Fit(self)
         self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
 
-    def on_evt_slider(self, evt):
+    def on_evt_slider(self, _evt):
         slider_val = self.slider.GetValue()
         self.value_display.SetLabel("%d"%slider_val)
 
