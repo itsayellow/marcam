@@ -695,11 +695,21 @@ class ImageFrame(wx.Frame):
 
     @debug_fxn
     def has_image(self):
+        """Convenience function returning whether img_panel has image.
+        """
         return not self.img_panel.has_no_image()
 
     @debug_fxn
     def on_window_menu_activate(self, evt):
+        """Activate this frame when it's selected from Window menu.  Used by
+            FrameList.
+
+        Also unchecks the menu item in other frame that was clicked.
+        (Clicking on that item automatically checks it.)
+        """
+        # Activate this frame.
         self.activate()
+        # Uncheck window entry in menu of other frame.  (User click checks it.)
         menu = evt.GetEventObject()
         menuitem_id = evt.GetId()
         menuitem = menu.FindItemById(menuitem_id)
@@ -1099,6 +1109,14 @@ class ImageFrame(wx.Frame):
     # TODO: If we cannot succesfully open a file, make error dialog
     @debug_fxn
     def open_image_this_frame(self, img_path):
+        """Open new image in this frame.
+
+        Args:
+            img_path (str): full path to image.
+
+        Returns:
+            (bool) img_ok - whether image was successfully loaded into frame 
+        """
         (_, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".mcm":
             img_ok = self.load_mcmfile_from_path(img_path)
@@ -1692,6 +1710,9 @@ class ImageFrame(wx.Frame):
 
     @debug_fxn
     def debugzoom_helper(self):
+        """Companion to on_debug_benchzoom that executes one zoom level and
+            sets timer to call itself again until done.
+        """
         # on mac, we need to wait to zoom again after each zoom (CallLater), or
         #   else macOS (or wxOSX?) will skip paint events.
         # 10ms is too small.  35ms for safety (< 30Hz)
@@ -1752,6 +1773,10 @@ class ImageFrame(wx.Frame):
 
 # NOTE: closing window saves size, opening new window uses saved size
 class MarcamApp(wx.App):
+    """Main Marcam application wx.App
+
+    Handles key bindings, Frame management, OS interaction, startup, shutdown.
+    """
     @debug_fxn
     def __init__(self, open_files, config_data, *args, **kwargs):
         # reset this before calling super().__init__(), which calls
