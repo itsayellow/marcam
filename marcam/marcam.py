@@ -529,12 +529,18 @@ class ImageFrame(wx.Frame):
         # For marks display, find text width of "9999", to leave enough
         #   padding to have space to contain "999"
         text_width_px = get_text_width_px(self, "9999")
+        print("text_width_px")
+        print(text_width_px)
         self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
         self.marks_num_display = wx.TextCtrl(
                 self.toolbar, wx.ID_ANY, size=wx.Size(text_width_px, -1),
                 #style=wx.TE_READONLY | wx.BORDER_NONE
                 style=wx.TE_READONLY
                 )
+        print('get_text_width_px(self.marks_num_display, "9999"')
+        print(get_text_width_px(self.marks_num_display, "9999"))
+        print('self.marks_num_display.GetMargins()')
+        print(self.marks_num_display.GetMargins())
         self.toolbar.AddControl(self.marks_num_display)
         tocliptool = self.toolbar.AddTool(
                 wx.ID_ANY, 'Copy', toclipbmp,
