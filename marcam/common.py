@@ -14,7 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 import wx
+
+
+# logging stuff
+#   not necessary to make a handler since we will be child logger of marcam
+#   we use NullHandler so if no config at top level we won't default to printing
+#       to stderr
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(logging.NullHandler())
 
 
 # Stores global depth for debug_fxn's in all modules
@@ -62,6 +72,12 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=None):
         return func_wrapper
 
     return debug_fxn
+
+
+# create debug function using this file's logger
+debug_fxn = debug_fxn_factory(LOGGER.info, DEBUG_FXN_STATE)
+debug_fxn_debug = debug_fxn_factory(LOGGER.debug, DEBUG_FXN_STATE)
+
 
 def floor(num):
     """Simple numerical ceiling function.
