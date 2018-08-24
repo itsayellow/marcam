@@ -1847,10 +1847,11 @@ class MarcamApp(wx.App):
         Args:
             evt (wx.KeyEvent):
         """
-        # TODO: on Windows this can get activated while showing Dialog, in
-        #   which case there is "no active frame"
-        print("on_key_down")
-        self.file_windows.active_frame().on_key_down(evt)
+        active_frame = self.file_windows.active_frame()
+        if active_frame is not None:
+            active_frame.on_key_down(evt)
+        else:
+            evt.Skip()
 
     def on_key_up(self, evt):
         """Event handler for any key up event in the Application.  Calls
@@ -1859,10 +1860,11 @@ class MarcamApp(wx.App):
         Args:
             evt (wx.KeyEvent):
         """
-        # TODO: on Windows this can get activated while showing Dialog, in
-        #   which case there is "no active frame"
-        print("on_key_up")
-        self.file_windows.active_frame().on_key_up(evt)
+        active_frame = self.file_windows.active_frame()
+        if active_frame is not None:
+            active_frame.on_key_up(evt)
+        else:
+            evt.Skip()
 
     @debug_fxn
     def shutdown_frame(self, frame_to_close_id, force_close=False,
