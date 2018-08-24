@@ -625,10 +625,10 @@ class ImageWindow(wx.Frame):
                 "I&nvert Image\tShift+Ctrl+N",
                 )
         tools_imgautocontrastdialog_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast...",
+                "Image &Auto-Contrast...\tShift+Ctrl+J",
                 )
         tools_imgautocontrast0_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 0\tShift+Ctrl+J",
+                "Image &Auto-Contrast 0",
                 )
         tools_imgautocontrast2_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 2",
@@ -639,8 +639,11 @@ class ImageWindow(wx.Frame):
         tools_imgautocontrast6_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 6",
                 )
+        tools_imgfcolordialog_item = tools_menu.Append(wx.ID_ANY,
+                "Image False Color...\tShift+Ctrl+C",
+                )
         tools_imgfcolorviridis_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color (Viridis)\tShift+Ctrl+C",
+                "Image False Color (Viridis)",
                 )
         tools_imgfcolorplasma_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color (Plasma)",
@@ -716,6 +719,7 @@ class ImageWindow(wx.Frame):
                 tools_imgautocontrast2_item,
                 tools_imgautocontrast4_item,
                 tools_imgautocontrast6_item,
+                tools_imgfcolordialog_item,
                 tools_imgfcolorviridis_item,
                 tools_imgfcolorplasma_item,
                 tools_imgfcolormagma_item,
@@ -889,6 +893,7 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast2, tools_imgautocontrast2_item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast4, tools_imgautocontrast4_item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast6, tools_imgautocontrast6_item)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolordialog, tools_imgfcolordialog_item)
         self.Bind(wx.EVT_MENU, self.on_imgfalsecolorviridis, tools_imgfcolorviridis_item)
         self.Bind(wx.EVT_MENU, self.on_imgfalsecolorplasma, tools_imgfcolorplasma_item)
         self.Bind(wx.EVT_MENU, self.on_imgfalsecolormagma, tools_imgfcolormagma_item)
@@ -1766,6 +1771,23 @@ class ImageWindow(wx.Frame):
         self.img_panel.image_invert()
 
     @debug_fxn
+    def on_imgfalsecolordialog(self, _evt):
+        """Tools->False Color... menu item
+
+        Args:
+            _evt (wx.CommandEvent):
+        """
+        dialog = ImageFalseColorDialog(
+                self,
+                wx.ID_ANY,
+                style=wx.DEFAULT_DIALOG_STYLE
+                )
+        dialog_val = dialog.ShowModal()
+        if dialog_val == wx.ID_OK:
+            cmap = dialog.get_colormap()
+            self.img_panel.image_remap_colormap(cmap=cmap)
+
+    @debug_fxn
     def on_imgfalsecolorviridis(self, _evt):
         """Tools->False Color menu item
 
@@ -1811,7 +1833,6 @@ class ImageWindow(wx.Frame):
         dialog = ImageAutoContrastDialog(
                 self,
                 wx.ID_ANY,
-                title="Image Auto-Contrast",
                 style=wx.DEFAULT_DIALOG_STYLE
                 )
         dialog_val = dialog.ShowModal()
@@ -1987,8 +2008,8 @@ class ImageWindow(wx.Frame):
 
 
 class ImageAutoContrastDialog(wx.Dialog):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, title="Image Auto-Contrast", **kwargs)
 
         starting_val = 0
 
@@ -2059,6 +2080,63 @@ class ImageAutoContrastDialog(wx.Dialog):
     def on_evt_slider(self, evt):
         slider_val = self.slider.GetValue()
         self.value_display.SetLabel("%d"%slider_val)
+
+
+class ImageFalseColorDialog(wx.Dialog):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, title="Image False Color", **kwargs)
+
+        self.cmap_choices = ['Viridis', 'Plasma', 'Magma', 'Inferno']
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        sizer.AddSpacer(10)
+        # Choice widget selects one of many string options
+        text_width_px = get_text_width_px(self, "999")
+        sizer_h = wx.BoxSizer(wx.HORIZONTAL)
+        static_text = wx.StaticText(self, wx.ID_ANY, "Use colormap:")
+        sizer_h.AddSpacer(20)
+        sizer_h.Add(static_text, flag=wx.ALIGN_CENTER, proportion=0)
+        self.colormap_choice = wx.Choice(
+                self,
+                id=wx.ID_ANY,
+                choices=self.cmap_choices,
+                )
+        sizer_h.Add(
+                self.colormap_choice,
+                proportion=0,
+                flag=wx.ALIGN_CENTER
+                #flag=wx.ALIGN_CENTER | wx.TOP,
+                #border=10
+                )
+        sizer_h.AddSpacer(20)
+        sizer.Add(
+                sizer_h,
+                proportion=0,
+                #flag=wx.ALIGN_CENTER | wx.TOP,
+                flag=wx.ALIGN_LEFT | wx.ALL,
+                border=10
+                )
+
+        # OK, Cancel Buttons
+        btnsizer = self.CreateStdDialogButtonSizer(wx.OK | wx.CANCEL)
+        sizer.Add(
+                btnsizer,
+                proportion=0,
+                flag=wx.BOTTOM | wx.ALIGN_RIGHT,
+                border=5
+                )
+
+        self.SetSizer(sizer)
+        sizer.Fit(self)
+        #self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
+
+    def get_colormap(self):
+        return self.cmap_choices[self.colormap_choice.GetSelection()].lower()
+
+    #def on_evt_slider(self, evt):
+    #    slider_val = self.slider.GetValue()
+    #    self.value_display.SetLabel("%d"%slider_val)
 
 
 class HelpFrame(wx.Frame):
