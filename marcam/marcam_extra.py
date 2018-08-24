@@ -19,49 +19,26 @@
 # TODO: Mac OS X specific things to possibly try:
 #   wx.TopLevelWindow.OSXSetModified()
 
-import argparse
-from datetime import datetime
-import json
 import logging
-import os
 import os.path # TODO: consider pathlib
-import platform
-import re
-import sys
-import threading
-import time
 
 import wx
-import wx.adv
 import wx.html2
-import wx.lib.dialogs
-import wx.lib.newevent
 
-import image_proc
-from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
-import mcmfile
-if const.PLATFORM == 'win':
-    import winpipe
 
 
-# DEBUG defaults to False.  Is set to True if debug switch found
-DEBUG = False
-
-# which modules are we logging
-LOGGED_MODULES = [
-        __name__, 'common', 'image_proc', 'image_scrolled_canvas', 'longtask',
-        'mcmfile', 'winpipe'
-        ]
-
-# global logger obj for this file
+# logging stuff
+#   not necessary to make a handler since we will be child logger of marcam
+#   we use NullHandler so if no config at top level we won't default to printing
+#       to stderr
 LOGGER = logging.getLogger(__name__)
-
-LOGGER.info("MSC:ICON_DIR=%s", const.ICON_DIR)
+LOGGER.addHandler(logging.NullHandler())
 
 # create debug function using this file's logger
 debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
+debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
 @debug_fxn
