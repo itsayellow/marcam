@@ -2119,7 +2119,7 @@ def sanity_checks():
             ]
     for bitmap_filename in bitmap_filenames:
         if not os.path.exists(bitmap_filename):
-            LOGGER.error("Unable to find file: %s"%bitmap_filename)
+            LOGGER.error("Unable to find file: %s", bitmap_filename)
             raise Exception("Missing bitmap file: %s"%bitmap_filename)
 
 def main(argv=None):
