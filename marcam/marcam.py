@@ -624,6 +624,9 @@ class ImageWindow(wx.Frame):
         tools_imginvert_item = tools_menu.Append(wx.ID_ANY,
                 "I&nvert Image\tShift+Ctrl+N",
                 )
+        tools_imgautocontrastdialog_item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast...",
+                )
         tools_imgautocontrast0_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast 0\tShift+Ctrl+J",
                 )
@@ -708,6 +711,7 @@ class ImageWindow(wx.Frame):
                 # Tools
                 tools_imginfo_item,
                 tools_imginvert_item,
+                tools_imgautocontrastdialog_item,
                 tools_imgautocontrast0_item,
                 tools_imgautocontrast2_item,
                 tools_imgautocontrast4_item,
@@ -880,6 +884,7 @@ class ImageWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
         self.Bind(wx.EVT_MENU, self.on_imginfo, tools_imginfo_item)
         self.Bind(wx.EVT_MENU, self.on_imginvert, tools_imginvert_item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrastdialog, tools_imgautocontrastdialog_item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast0, tools_imgautocontrast0_item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast2, tools_imgautocontrast2_item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrast4, tools_imgautocontrast4_item)
@@ -1797,6 +1802,24 @@ class ImageWindow(wx.Frame):
         self.img_panel.image_remap_colormap(cmap='inferno')
 
     @debug_fxn
+    def on_imgautocontrastdialog(self, _evt):
+        """Tools->Image Auto-Contrast... menu item
+
+        Args:
+            _evt (wx.CommandEvent):
+        """
+        dialog = ImageAutoContrastDialog(
+                self,
+                wx.ID_ANY,
+                title="Image Auto-Contrast",
+                style=wx.DEFAULT_DIALOG_STYLE
+                )
+        dialog_val = dialog.ShowModal()
+        if dialog_val == wx.ID_OK:
+            slider_val = dialog.slider.GetValue()
+            self.img_panel.image_autocontrast(cutoff=slider_val)
+
+    @debug_fxn
     def on_imgautocontrast0(self, _evt):
         """Tools->Image Auto-Contrast 0 menu item
 
@@ -1961,6 +1984,81 @@ class ImageWindow(wx.Frame):
             self.SetSize(self.benchzoom_origwinsize)
             # zoom back to normal
             self.on_zoomfit(None)
+
+
+class ImageAutoContrastDialog(wx.Dialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        starting_val = 0
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # Slider Value Display
+        # Find text width of "999", large enough to show 0 through 20
+        text_width_px = get_text_width_px(self, "999")
+        sizer_h = wx.BoxSizer(wx.HORIZONTAL)
+        static_text = wx.StaticText(self, wx.ID_ANY, "Auto-Contrast Level:")
+        sizer_h.Add(static_text, flag=wx.ALIGN_CENTER, proportion=0)
+        self.value_display = wx.TextCtrl(
+                self,
+                id=wx.ID_ANY,
+                value="%d"%starting_val,
+                size=wx.Size(text_width_px, -1),
+                style=wx.TE_READONLY
+                #style=wx.TE_READONLY | wx.TE_CENTRE
+                )
+        sizer_h.Add(
+                self.value_display,
+                proportion=0,
+                flag=wx.ALIGN_CENTER
+                #flag=wx.ALIGN_CENTER | wx.TOP,
+                #border=10
+                )
+        sizer.AddSpacer(10)
+        sizer.Add(
+                sizer_h,
+                proportion=0,
+                #flag=wx.ALIGN_CENTER | wx.TOP,
+                flag=wx.ALIGN_LEFT | wx.TOP | wx.LEFT | wx.RIGHT,
+                border=10
+                )
+
+        # Slider Control
+        self.slider = wx.Slider(
+                self,
+                id=wx.ID_ANY,
+                value=starting_val,
+                minValue=0, maxValue=20,
+                size=(250, -1),
+                #style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_MIN_MAX_LABELS
+                style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS
+                )
+        self.slider.SetTickFreq(1)
+        sizer.Add(
+                self.slider,
+                proportion=0,
+                #flag=wx.LEFT | wx.RIGHT,
+                flag=wx.ALL,
+                border=10
+                )
+
+        # OK, Cancel Buttons
+        btnsizer = self.CreateStdDialogButtonSizer(wx.OK | wx.CANCEL)
+        sizer.Add(
+                btnsizer,
+                proportion=0,
+                flag=wx.BOTTOM | wx.ALIGN_RIGHT,
+                border=5
+                )
+
+        self.SetSizer(sizer)
+        sizer.Fit(self)
+        self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
+
+    def on_evt_slider(self, evt):
+        slider_val = self.slider.GetValue()
+        self.value_display.SetLabel("%d"%slider_val)
 
 
 class HelpFrame(wx.Frame):
