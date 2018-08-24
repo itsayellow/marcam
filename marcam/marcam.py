@@ -1114,7 +1114,7 @@ class ImageFrame(wx.Frame):
             img_path (str): full path to image.
 
         Returns:
-            (bool) img_ok - whether image was successfully loaded into frame 
+            (bool) img_ok - whether image was successfully loaded into frame
         """
         (_, imgfile_ext) = os.path.splitext(img_path)
         if imgfile_ext == ".mcm":
@@ -1841,9 +1841,21 @@ class MarcamApp(wx.App):
         img_ok = self.open_file(evt.open_filename)
 
     def on_key_down(self, evt):
+        """Event handler for any key down event in the Application. Calls
+        on_key_down of the frame that is active.
+
+        Args:
+            evt (wx.KeyEvent):
+        """
         self.file_windows.active_frame().on_key_down(evt)
 
     def on_key_up(self, evt):
+        """Event handler for any key up event in the Application.  Calls
+        on_key_up of the frame that is active.
+
+        Args:
+            evt (wx.KeyEvent):
+        """
         self.file_windows.active_frame().on_key_up(evt)
 
     @debug_fxn
