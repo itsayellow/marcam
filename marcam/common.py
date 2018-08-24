@@ -123,6 +123,38 @@ def clip(num, num_min=None, num_max=None):
     else:
         return num
 
+@debug_fxn
+def get_text_width_px(window, text_str):
+    """Using window settings, find width in pixels of a text str.
+
+    Args:
+        window (wx.Window): Window to contain string using default font
+        text_str (str): string to find the width of
+
+    Returns:
+        (int) width of text_str in pixels in the given window
+    """
+    # get width in pixels of the given font
+    screen_dc = wx.ScreenDC()
+    screen_dc.SetFont(window.GetFont())
+    (text_width_px, _) = screen_dc.GetTextExtent(text_str)
+    del screen_dc
+
+    # add horizontal margins if present
+    try:
+        margins = window.GetMargins()
+    except AttributeError:
+        margins = wx.Point(-1, -1)
+    if margins.x > 0:
+        text_width_px = text_width_px + margins.x * 2
+
+    print("window.GetFont()")
+    print("    GetPixelSize(): "+repr(window.GetFont().GetPixelSize()))
+    print("    GetPointSize(): "+repr(window.GetFont().GetPointSize()))
+    print("margins.x")
+    print(margins.x)
+
+    return text_width_px
 
 def on_evt_debug(evt):
     debug_print_evt_info(evt)

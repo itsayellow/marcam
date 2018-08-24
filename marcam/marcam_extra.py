@@ -42,16 +42,6 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
-@debug_fxn
-def get_text_width_px(window, text_str):
-    screen_dc = wx.ScreenDC()
-    screen_dc.SetFont(window.GetFont())
-    (text_width_px, _) = screen_dc.GetTextExtent(text_str)
-    del screen_dc
-
-    return text_width_px
-
-
 class MarcamFormatter(logging.Formatter):
     def format(self, record):
         """Overload of default format fxn, make all lines after first indented
@@ -329,7 +319,7 @@ class ImageAutoContrastDialog(wx.Dialog):
 
         # Slider Value Display
         # Find text width of "999", large enough to show 0 through 20
-        text_width_px = get_text_width_px(self, "999")
+        text_width_px = common.get_text_width_px(self, "999")
         sizer_h = wx.BoxSizer(wx.HORIZONTAL)
         static_text = wx.StaticText(self, wx.ID_ANY, "Auto-Contrast Level:")
         sizer_h.Add(static_text, flag=wx.ALIGN_CENTER, proportion=0)

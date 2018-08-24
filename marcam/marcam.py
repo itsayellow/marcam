@@ -203,40 +203,6 @@ def save_config(config_data):
 
     return status
 
-@debug_fxn
-def get_text_width_px(window, text_str):
-    """Using window settings, find width in pixels of a text str.
-
-    Args:
-        window (wx.Window): Window to contain string using default font
-        text_str (str): string to find the width of
-
-    Returns:
-        (int) width of text_str in pixels in the given window
-    """
-    # get width in pixels of the given font
-    screen_dc = wx.ScreenDC()
-    screen_dc.SetFont(window.GetFont())
-    (text_width_px, _) = screen_dc.GetTextExtent(text_str)
-    del screen_dc
-
-    # add horizontal margins if present
-    try:
-        margins = window.GetMargins()
-    except AttributeError:
-        margins = wx.Point(-1, -1)
-    if margins.x > 0:
-        text_width_px = text_width_px + margins.x * 2
-
-    print("window.GetFont()")
-    print("    GetPixelSize(): "+repr(window.GetFont().GetPixelSize()))
-    print("    GetPointSize(): "+repr(window.GetFont().GetPointSize()))
-    print("margins.x")
-    print(margins.x)
-
-    return text_width_px
-
-
 class ImageFrame(wx.Frame):
     """Application Level Frame, one for each open image file.
     """
@@ -547,10 +513,8 @@ class ImageFrame(wx.Frame):
         # throwaway object with default constructor (with parent)
         #   to set default font for get_text_width_px
         textctrl_deleteme = wx.TextCtrl(self.toolbar)
-        text_width_px = get_text_width_px(textctrl_deleteme, "9999")
+        text_width_px = common.get_text_width_px(textctrl_deleteme, "9999")
         textctrl_deleteme.Destroy()
-        print("text_width_px")
-        print(text_width_px)
         self.marks_num_display = wx.TextCtrl(
                 self.toolbar,
                 wx.ID_ANY,
@@ -558,10 +522,6 @@ class ImageFrame(wx.Frame):
                 #style=wx.TE_READONLY | wx.BORDER_NONE
                 style=wx.TE_READONLY
                 )
-        print('get_text_width_px(self.marks_num_display, "9999"')
-        print(get_text_width_px(self.marks_num_display, "9999"))
-        print('self.marks_num_display.GetMargins()')
-        print(self.marks_num_display.GetMargins())
         self.toolbar.AddControl(self.marks_num_display)
         tocliptool = self.toolbar.AddTool(
                 wx.ID_ANY, 'Copy', toclipbmp,
@@ -579,7 +539,7 @@ class ImageFrame(wx.Frame):
                 )
         self.statusbar.SetFieldsCount(
                 2,
-                [-1, get_text_width_px(self.statusbar, "Zoom: 99999.9%")]
+                [-1, common.get_text_width_px(self.statusbar, "Zoom: 99999.9%")]
                 )
         self.statusbar.SetStatusText('Ready.', 0)
 
