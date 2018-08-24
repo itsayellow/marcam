@@ -544,12 +544,14 @@ class ImageFrame(wx.Frame):
         # For marks display, find text width of "9999", to leave enough
         #   padding to have space to contain "999"
         self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
-        # default constructor (with parent) to set default font for get_text_width_px
-        self.marks_num_display = wx.TextCtrl(self.toolbar)
-        text_width_px = get_text_width_px(self.marks_num_display, "9999")
+        # throwaway object with default constructor (with parent)
+        #   to set default font for get_text_width_px
+        textctrl_deleteme = wx.TextCtrl(self.toolbar)
+        text_width_px = get_text_width_px(textctrl_deleteme, "9999")
+        textctrl_deleteme.Destroy()
         print("text_width_px")
         print(text_width_px)
-        self.marks_num_display.Create(
+        self.marks_num_display = wx.TextCtrl(
                 self.toolbar,
                 wx.ID_ANY,
                 size=wx.Size(text_width_px, -1),
