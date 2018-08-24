@@ -102,8 +102,7 @@ SectionEnd
 ; Optional section (can be disabled by the user)
 Section "Start Menu Shortcuts"
 
-  CreateDirectory "$SMPROGRAMS\Marcam"
-  CreateShortcut "$SMPROGRAMS\Marcam\Marcam.lnk" "$INSTDIR\marcam.exe" "" "$INSTDIR\marcam.exe" 0
+  CreateShortcut "$SMPROGRAMS\Marcam.lnk" "$INSTDIR\marcam.exe" "" "$INSTDIR\marcam.exe" 0
 
 SectionEnd
 
@@ -128,10 +127,12 @@ Section "Uninstall"
   Delete $INSTDIR\*.*
 
   ; Remove shortcuts, if any
+  Delete "$SMPROGRAMS\Marcam.lnk"
+  ; These are for possible old versions of Marcam
   Delete "$SMPROGRAMS\Marcam\*.*"
+  RMDir /r "$SMPROGRAMS\Marcam"
 
   ; Remove directories used
-  RMDir /r "$SMPROGRAMS\Marcam"
   RMDir /r "$INSTDIR"
 
 SectionEnd
