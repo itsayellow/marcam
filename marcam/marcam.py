@@ -226,6 +226,14 @@ def save_config(config_data):
 
     return status
 
+@debug_fxn
+def get_text_width_px(window, text_str):
+    screen_dc = wx.ScreenDC()
+    screen_dc.SetFont(window.GetFont())
+    (text_width_px, _) = screen_dc.GetTextExtent(text_str)
+    del screen_dc
+
+    return text_width_px
 
 class EditHistory():
     """Keeps track of Edit History, undo, redo, whether save is needed
@@ -719,12 +727,6 @@ class ImageWindow(wx.Frame):
         self.frame_history.register_undo_menu_item(edit_undo_item)
         self.frame_history.register_redo_menu_item(edit_redo_item)
 
-        # For marks display, find text width of "9999", to leave enough
-        #   padding to have space to contain "999"
-        screen_dc = wx.ScreenDC()
-        screen_dc.SetFont(self.GetFont())
-        (text_width_px, _) = screen_dc.GetTextExtent("9999")
-        del screen_dc
 
         # Toolbar
         # INFO: wx toolbar buttons
@@ -778,6 +780,10 @@ class ImageWindow(wx.Frame):
         # init marks_num_display before ImageScrolledCanvas so ISC can
         #   update number on its init
         # using TextCtrl to allow copy to clipboard
+
+        # For marks display, find text width of "9999", to leave enough
+        #   padding to have space to contain "999"
+        text_width_px = get_text_width_px(self, "9999")
         self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
         self.marks_num_display = wx.TextCtrl(
                 self.toolbar, wx.ID_ANY, size=wx.Size(text_width_px, -1),
