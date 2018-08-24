@@ -401,7 +401,6 @@ class ImageFalseColorDialog(wx.Dialog):
 
         sizer.AddSpacer(10)
         # Choice widget selects one of many string options
-        text_width_px = get_text_width_px(self, "999")
         sizer_h = wx.BoxSizer(wx.HORIZONTAL)
         static_text = wx.StaticText(self, wx.ID_ANY, "Use colormap:")
         sizer_h.AddSpacer(20)
