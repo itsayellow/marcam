@@ -177,6 +177,11 @@ def load_config():
 
 @debug_fxn
 def save_config(config_data):
+    """Save config file at the proper path
+
+    Args:
+        config_data (dict): config data to save
+    """
     # create config dir if necessary
     os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
 
@@ -200,6 +205,15 @@ def save_config(config_data):
 
 @debug_fxn
 def get_text_width_px(window, text_str):
+    """Using window settings, find width in pixels of a text str.
+
+    Args:
+        window (wx.Window): Window to contain string using default font
+        text_str (str): string to find the width of
+
+    Returns:
+        (int) width of text_str in pixels in the given window
+    """
     screen_dc = wx.ScreenDC()
     screen_dc.SetFont(window.GetFont())
     (text_width_px, _) = screen_dc.GetTextExtent(text_str)
@@ -208,7 +222,9 @@ def get_text_width_px(window, text_str):
     return text_width_px
 
 
-class ImageWindow(wx.Frame):
+class ImageFrame(wx.Frame):
+    """Application Level Frame, one for each open image file.
+    """
     def __init__(self, parent, **kwargs):
         # no parent window, so use None as only *arg
         super().__init__(None, **kwargs)
@@ -1942,7 +1958,7 @@ class MarcamApp(wx.App):
                     new_pos.x = 0
                 elif y_too_big:
                     new_pos.y = 0
-            new_frame = ImageWindow(
+            new_frame = ImageFrame(
                     self,
                     size=new_size,
                     pos=new_pos
