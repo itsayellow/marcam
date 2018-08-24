@@ -247,12 +247,8 @@ class ImageFrame(wx.Frame):
         self.started_temp_zoom = False
         self.menu_items_disable_no_image = None
 
-        # App configuration
-        self.config = wx.Config("Marcam", "itsayellow.com")
-
-        # File history
-        self.file_history = wx.FileHistory()
-        self.file_history.Load(self.config)
+        # FileHistory is held in MarcamApp parent
+        self.file_history = self.parent.file_history
 
         if DEBUG:
             start_time = time.time()
@@ -787,8 +783,6 @@ class ImageFrame(wx.Frame):
             # normally close window
             winsize = self.GetSize()
             self.parent.config_data['winsize'] = list(winsize)
-            # TODO: do we only need to save file_history on quit?
-            self.file_history.Save(self.config)
             # continue with normal event handling
             evt.Skip()
 
@@ -821,7 +815,7 @@ class ImageFrame(wx.Frame):
         events but only one EVT_KEY_UP when user releases the key.
 
         Args:
-            evt (wx.): TODO
+            evt (wx.KeyEvent): wx Event for this handler
         """
 
         key_code = evt.GetKeyCode()
@@ -924,7 +918,7 @@ class ImageFrame(wx.Frame):
         events but only one EVT_KEY_UP when user releases the key.
 
         Args:
-            evt (wx.): TODO
+            evt (wx.KeyEvent): wx Event for this handler
         """
         key_code = evt.GetKeyCode()
         LOGGER.debug(
@@ -1059,7 +1053,7 @@ class ImageFrame(wx.Frame):
         """File->Open Recent-> sub-menu handler for Main Window
 
         Args:
-            evt (wx.): TODO
+            evt (wx.CommandEvent): wx Event for this handler
         """
         # get path from file_history
         img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
@@ -1789,6 +1783,13 @@ class MarcamApp(wx.App):
         #   new frames
         super().__init__(*args, **kwargs)
 
+        # App configuration (especially for FileHistory)
+        # TODO: combine config_data into wxconfig?
+        self.wxconfig = wx.Config("Marcam", "itsayellow.com")
+        # File history (TODO: should this be handled by MarcamApp ?)
+        self.file_history = wx.FileHistory()
+        self.file_history.Load(self.wxconfig)
+
         # this next statement can only be after calling __init__ of wx.App
         # gives just window-placeable screen area
         self.display_size = wx.Display().GetClientArea().GetSize()
@@ -2023,7 +2024,7 @@ class MarcamApp(wx.App):
                     )
             self.file_windows.append(new_frame)
             if open_filename is not None:
-                ## TODO: handle what happens if bad image, if img_ok==False
+                # TODO: handle what happens if bad image, if img_ok==False
                 new_frame.open_image_this_frame(open_filename)
             # need to actually GetPosition to get real position, in case both
             #   self.last_frame_pos = (-1, -1) and new_pos = (-1, -1)
@@ -2098,6 +2099,8 @@ class MarcamApp(wx.App):
         Returns:
             Whatever AppConsole.OnExit() returns
         """
+        # save file_history on quit
+        self.file_history.Save(self.wxconfig)
         # save config_data right before app is about to exit
         save_config(self.config_data)
         return super().OnExit()
