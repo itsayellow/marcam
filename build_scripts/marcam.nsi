@@ -103,7 +103,6 @@ SectionEnd
 Section "Start Menu Shortcuts"
 
   CreateDirectory "$SMPROGRAMS\Marcam"
-  CreateShortcut "$SMPROGRAMS\Marcam\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortcut "$SMPROGRAMS\Marcam\Marcam.lnk" "$INSTDIR\marcam.exe" "" "$INSTDIR\marcam.exe" 0
 
 SectionEnd
