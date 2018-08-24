@@ -33,7 +33,6 @@ import time
 
 import wx
 import wx.adv
-import wx.html2
 import wx.lib.dialogs
 import wx.lib.newevent
 
@@ -155,7 +154,15 @@ def default_config_data():
 
 @debug_fxn
 def create_config_file(config_filepath):
+    """Create a config file at the requested path
+
+    Args:
+        config_filepath (str): full path of config file to create
+    """
     config_data = default_config_data()
+
+    # create config dir if necessary
+    os.makedirs(os.path.dirname(config_filepath), exist_ok=True)
 
     try:
         with open(config_filepath, 'w') as config_fh:
@@ -170,9 +177,6 @@ def create_config_file(config_filepath):
 def load_config():
     # start with defaults, override later with any/all actual config data
     config_data = default_config_data()
-
-    # create config dir if necessary
-    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
 
     config_filepath = os.path.join(
             const.USER_CONFIG_DIR,
