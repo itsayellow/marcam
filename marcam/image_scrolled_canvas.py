@@ -1575,7 +1575,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 (win_size.x / self.img_size_x),
                 (win_size.y / self.img_size_y)
                 )
-        ok_zooms = [x for x in self.zoom_list if x < max_fit_zoom]
+        ok_zooms = [x for x in self.zoom_list if x <= max_fit_zoom]
         self.zoom_idx = self.zoom_list.index(max(ok_zooms))
 
         # record floating point zoom
