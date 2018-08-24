@@ -167,8 +167,7 @@ def get_text_width_px(window, text_str):
     print("window.GetFont()")
     print("    GetPixelSize(): "+repr(window.GetFont().GetPixelSize()))
     print("    GetPointSize(): "+repr(window.GetFont().GetPointSize()))
-    print("margins.x")
-    print(margins.x)
+    print("margins.x: " + repr(margins.x))
 
     return text_width_px
 
