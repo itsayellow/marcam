@@ -1991,7 +1991,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                             )
                 else:
                     # TODO: IS THIS WRONG?  Should we delete this?
-                    self.history.new(['NOP'])
+                    self.history.new(['NOP'], description="Nothing.")
         else:
             # we allow click outside of image in case we drag onto image
 

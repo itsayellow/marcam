@@ -190,10 +190,12 @@ class EditHistory():
 
         if save_loc < self.history_ptr:
             edits_since_save = self.history[save_loc+1:self.history_ptr+1]
+            edits_since_save = [x for x in edits_since_save if x['edit_action'][0] != 'NOP']
             edits_since_save = [x['description'] for x in edits_since_save]
         else:
             # save_loc > self.history_ptr:
             edits_since_save = self.history[self.history_ptr+1:save_loc+1]
+            edits_since_save = [x for x in edits_since_save if x['edit_action'][0] != 'NOP']
             edits_since_save = ["Undo " + x['description'] for x in edits_since_save]
             edits_since_save.reverse()
 
