@@ -543,9 +543,18 @@ class ImageFrame(wx.Frame):
         self.toclip_tool_id = tocliptool.GetId()
         self.toolbar.Realize()
 
-        # status bar stuff
-        self.statusbar = self.CreateStatusBar()
-        self.statusbar.SetStatusText('Ready.')
+        # Setup StatusBar
+        #   Field 0 is operating messages, menu hints, etc.
+        #   Field 1 is current zoom ratio.
+        self.statusbar = self.CreateStatusBar(
+                number=2,
+                style=wx.STB_DEFAULT_STYLE,
+                )
+        self.statusbar.SetFieldsCount(
+                2,
+                [-1, get_text_width_px(self.statusbar, "Zoom: 99999.9%")]
+                )
+        self.statusbar.SetStatusText('Ready.', 0)
 
         # Panel keeps things from spilling over the frame, statusbar, etc.
         #   also accepts key focus
@@ -882,7 +891,7 @@ class ImageFrame(wx.Frame):
                         evt.GetPosition()
                         )
                 if zoom:
-                    self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+                    self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100), 1)
 
                 # indicate we have actually initiated a temp zoom (so we
                 #   don't keep zooming if user holds down temp zoom key
@@ -937,7 +946,7 @@ class ImageFrame(wx.Frame):
                     )
             # update statusbar zoom message
             zoom = self.img_panel.zoom_list[self.temp_scroll_zoom_state[1]]
-            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100), 1)
 
             # indicate end of temp zoom state
             self.started_temp_zoom = False
@@ -1003,7 +1012,7 @@ class ImageFrame(wx.Frame):
 
     @debug_fxn
     def on_open(self, _evt):
-        """File->Open Image Data... menu handler for Main Window
+        """File->Open Image... menu handler for Main Window
 
         Args:
             _evt (wx.CommandEvent):
@@ -1119,6 +1128,13 @@ class ImageFrame(wx.Frame):
             # By not calling self.frame_history.save_notify(), indicate needs save
 
         if img_ok:
+            # TODO: is this superfluous?
+            self.statusbar.SetStatusText(
+                    "Image Data " + img_path + " loaded OK.",
+                    0
+                    )
+            zoom = self.img_panel.get_zoom_val()
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100), 1)
             self.menu_items_enable_disable()
             if const.PLATFORM == 'mac':
                 # on Mac we hide the last frame we close.  So when opening
@@ -1161,10 +1177,6 @@ class ImageFrame(wx.Frame):
             # self.img_path if from mcm is file path to file
             self.img_path = imdata_path
             self.save_filepath = imdata_path
-            # TODO: is this superfluous?
-            self.statusbar.SetStatusText(
-                    "Image Data " + imdata_path + " loaded OK."
-                    )
             # Set window title to filename
             self.SetTitle(os.path.basename(imdata_path))
             # on Mac sets file icon in titlebar with right-click showing
@@ -1217,8 +1229,6 @@ class ImageFrame(wx.Frame):
             self.img_panel.new_img(img)
             # init image in window
             self.img_panel.init_image()
-            # TODO: is this superfluous?
-            self.statusbar.SetStatusText("Image " + img_file + " loaded OK.")
             # reset filepath for mcm file to nothing if we load new image
             self.img_path = img_file
             self.save_filepath = None
@@ -1274,7 +1284,7 @@ class ImageFrame(wx.Frame):
             # make scrolled window show no image
             self.img_panel.set_no_image()
             # update statusbar text
-            self.statusbar.SetStatusText('Ready.')
+            self.statusbar.SetStatusText('Ready.', 0)
             # Set window title to generic app name
             self.SetTitle('Marcam')
 
@@ -1464,7 +1474,7 @@ class ImageFrame(wx.Frame):
         """
         zoom = self.img_panel.zoom(-1)
         if zoom:
-            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100), 1)
 
     @debug_fxn
     def on_zoomin(self, _evt):
@@ -1475,7 +1485,7 @@ class ImageFrame(wx.Frame):
         """
         zoom = self.img_panel.zoom(1)
         if zoom:
-            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100), 1)
 
     @debug_fxn
     def on_zoomfit(self, _evt):
@@ -1486,7 +1496,7 @@ class ImageFrame(wx.Frame):
         """
         zoom = self.img_panel.zoom_fit()
         if zoom:
-            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100))
+            self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100), 1)
 
     @debug_fxn
     def on_imginfo(self, _evt):

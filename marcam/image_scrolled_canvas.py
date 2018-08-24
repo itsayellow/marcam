@@ -1556,6 +1556,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Update()
 
     @debug_fxn
+    def get_zoom_val(self):
+        return self.zoom_val
+
+    @debug_fxn
     def zoom_fit(self, max_zoom=None, do_refresh=True):
         # return early if no image
         if self.has_no_image():
