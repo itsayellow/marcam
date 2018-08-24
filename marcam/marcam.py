@@ -228,6 +228,12 @@ def get_text_width_px(window, text_str):
     if margins.x > 0:
         text_width_px = text_width_px + margins.x * 2
 
+    print("window.GetFont()")
+    print("    GetPixelSize(): "+repr(window.GetFont().GetPixelSize()))
+    print("    GetPointSize(): "+repr(window.GetFont().GetPointSize()))
+    print("margins.x")
+    print(margins.x)
+
     return text_width_px
 
 
@@ -537,12 +543,16 @@ class ImageFrame(wx.Frame):
 
         # For marks display, find text width of "9999", to leave enough
         #   padding to have space to contain "999"
-        text_width_px = get_text_width_px(self, "9999")
+        self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
+        # default constructor (with parent) to set default font for get_text_width_px
+        self.marks_num_display = wx.TextCtrl(self.toolbar)
+        text_width_px = get_text_width_px(self.marks_num_display, "9999")
         print("text_width_px")
         print(text_width_px)
-        self.toolbar.AddControl(wx.StaticText(self.toolbar, wx.ID_ANY, "Marks:"))
-        self.marks_num_display = wx.TextCtrl(
-                self.toolbar, wx.ID_ANY, size=wx.Size(text_width_px, -1),
+        self.marks_num_display.Create(
+                self.toolbar,
+                wx.ID_ANY,
+                size=wx.Size(text_width_px, -1),
                 #style=wx.TE_READONLY | wx.BORDER_NONE
                 style=wx.TE_READONLY
                 )
