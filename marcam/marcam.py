@@ -1158,9 +1158,8 @@ class ImageFrame(wx.Frame):
             # init image in window
             self.img_panel.init_image()
             # set save_filepath to path of mcm file we loaded
-            # self.img_path if from mcm is list: [<mcmfilepath>, <member_name>]
-            # TODO: do we even care about this list, or img_name?
-            self.img_path = [imdata_path, img_name]
+            # self.img_path if from mcm is file path to file
+            self.img_path = imdata_path
             self.save_filepath = imdata_path
             # TODO: is this superfluous?
             self.statusbar.SetStatusText(
@@ -1243,10 +1242,7 @@ class ImageFrame(wx.Frame):
         """
         if not self.frame_history.is_saved():
             self.activate()
-            try:
-                image_to_close = os.path.basename(self.img_path)
-            except TypeError:
-                image_to_close = os.path.basename(self.img_path[0])
+            image_to_close = os.path.basename(self.img_path)
 
             # changes list
             changes_list = self.frame_history.get_actions_since_save()
@@ -1322,13 +1318,8 @@ class ImageFrame(wx.Frame):
         if self.save_filepath:
             (default_dir, default_filename) = os.path.split(self.save_filepath)
         else:
-            if isinstance(self.img_path, list):
-                img_path = self.img_path[0]
-            else:
-                img_path = self.img_path
-            (img_path_root, _) = os.path.splitext(
-                    os.path.basename(img_path)
-                    )
+            img_path = self.img_path
+            (img_path_root, _) = os.path.splitext(os.path.basename(img_path))
             default_save_path = img_path_root + ".mcm"
             (default_dir, default_filename) = os.path.split(default_save_path)
 
@@ -1351,7 +1342,7 @@ class ImageFrame(wx.Frame):
             if arc_names is not None:
                 self.save_filepath = pathname
                 # set img_path
-                self.img_path = [pathname, arc_names[0]]
+                self.img_path = pathname
                 # signify we have saved content
                 self.frame_history.save_notify()
                 # add successful file save as to file history
@@ -1385,7 +1376,7 @@ class ImageFrame(wx.Frame):
             img_path = self.save_filepath
         else:
             # if we have no save_filepath, we have not loaded .mcm image
-            #   thus self.img_path cannot be list, but must be string
+            #   thus use self.img_path
             img_path = self.img_path
 
         # create new filename based on old one but ending with _export.png
@@ -1786,7 +1777,9 @@ class MarcamApp(wx.App):
         # App configuration (especially for FileHistory)
         # TODO: combine config_data into wxconfig?
         self.wxconfig = wx.Config("Marcam", "itsayellow.com")
-        # File history (TODO: should this be handled by MarcamApp ?)
+        # File history
+        # TODO: paths loaded from config are full paths in menu, but paths
+        #   added as app runs are just the filename (??)
         self.file_history = wx.FileHistory()
         self.file_history.Load(self.wxconfig)
 
