@@ -481,7 +481,16 @@ class FrameList():
     @debug_fxn
     def active_frame(self):
         """Return the frame in FrameList that is currently active.
+
+        Returns:
+            (None or wx.Frame): None if no frame is active, or the wx.Frame
+                that is currently active.
         """
+        # If we never find an active frame, return None.
+        #   Can happen if Modal Dialog is present on current frame.
+        return_frame = None
+
+        # Search all frames for an active one.
         for frame_id in self.frame_dict:
             if self.frame_dict[frame_id]['frame'].IsActive():
                 return_frame = self.frame_dict[frame_id]['frame']
@@ -491,8 +500,16 @@ class FrameList():
     @debug_fxn
     def frame_with_file(self, img_file):
         """Return the frame in FrameList that has img_file inside it.
+
+        Args:
+            img_file (str): full path to img_file to check Frame for.
+
+        Returns:
+            (None or wx.Frame): None if no frame contains file, or the wx.Frame
+                that is currently contains the file.
         """
         return_frame = None
+
         for frame_id in self.frame_dict:
             if (
                     self.frame_dict[frame_id]['frame'].img_path == img_file or
