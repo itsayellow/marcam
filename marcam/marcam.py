@@ -81,7 +81,7 @@ def can_read_image(image_path):
     if mcmfile.is_valid(image_path):
         img_ok = True
     elif image_path_ext == ".1sc":
-        img_ok = not not image_proc.file1sc_to_image(image_path)
+        img_ok = bool(image_proc.file1sc_to_image(image_path))
     else:
         # for all other image files
         # wx.Image.CanRead has its own error log, which is setup to cause
@@ -155,28 +155,10 @@ def default_config_data():
     return config_data
 
 @debug_fxn
-def create_config_file(config_filepath):
-    """Create a config file at the requested path
-
-    Args:
-        config_filepath (str): full path of config file to create
-    """
-    config_data = default_config_data()
-
-    # create config dir if necessary
-    os.makedirs(os.path.dirname(config_filepath), exist_ok=True)
-
-    try:
-        with open(config_filepath, 'w') as config_fh:
-            json.dump(
-                    config_data,
-                    config_fh,
-                    )
-    except OSError as err:
-        LOGGER.warning("Can't create config file '%s': %s", config_filepath, err)
-
-@debug_fxn
 def load_config():
+    """Load config--from file if present or else defaults.  Create config file
+        with default config data if one is not present.
+    """
     # start with defaults, override later with any/all actual config data
     config_data = default_config_data()
 
@@ -189,7 +171,7 @@ def load_config():
             config_data.update(json.load(config_fh))
     except FileNotFoundError:
         # if no config.json file, create
-        create_config_file(config_filepath)
+        save_config(config_data)
 
     return config_data
 
@@ -666,6 +648,8 @@ class ImageWindow(wx.Frame):
 
     @debug_fxn
     def activate(self):
+        """Bring window to the front and make the active window
+        """
         self.Raise()
         self.SetFocus()
 
