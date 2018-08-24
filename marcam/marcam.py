@@ -1106,7 +1106,6 @@ class ImageFrame(wx.Frame):
 
         return img_ok
 
-    # TODO: If we cannot succesfully open a file, make error dialog
     @debug_fxn
     def open_image_this_frame(self, img_path):
         """Open new image in this frame.
@@ -1832,6 +1831,12 @@ class MarcamApp(wx.App):
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
     def on_evt_win_file(self, evt):
+        """Event handler for our custom Event receiving Windows file open
+            events from other application instances.
+
+        Args:
+            evt (wx.Event): event object having attribute with filename to open.
+        """
         LOGGER.info("Event received: %s", evt.open_filename)
         img_ok = self.open_file(evt.open_filename)
 
