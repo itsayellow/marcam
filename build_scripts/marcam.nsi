@@ -102,6 +102,10 @@ SectionEnd
 ; Optional section (can be disabled by the user)
 Section "Start Menu Shortcuts"
 
+  ; Set $SMPROGRAMS and other shell folders to affect all users, not just the
+  ;   current one
+  SetShellVarContext all
+
   CreateShortcut "$SMPROGRAMS\Marcam.lnk" "$INSTDIR\marcam.exe" "" "$INSTDIR\marcam.exe" 0
 
 SectionEnd
@@ -111,6 +115,10 @@ SectionEnd
 ; Uninstaller
 
 Section "Uninstall"
+
+  ; Set $SMPROGRAMS and other shell folders to affect all users, not just the
+  ;   current one
+  SetShellVarContext all
 
   ; Remove registry keys
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Marcam"
