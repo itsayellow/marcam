@@ -1974,6 +1974,14 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def new_frame_open_file(self, open_filename):
+        """Open specified file in new frame
+
+        Args:
+            open_filename (str): filename to open in new frame
+
+        Returns:
+            (bool): True if image loaded successfully, False otherwise.
+        """
         if open_filename is not None:
             already_open_frame = self.file_windows.frame_with_file(open_filename)
             if already_open_frame:
@@ -2025,6 +2033,12 @@ class MarcamApp(wx.App):
 
     @debug_fxn
     def quit_app(self):
+        """Quit App by closing every single frame.
+
+        When all frames are closed, wx automatically shuts down App.
+        If Cancel is ever clicked and frame is not closed, then quit process
+            aborts.
+        """
         self.trying_to_quit = True
         # we need to copy this because frame.Close() will end up modifying
         #   self.file_windows, which will corrupt the loop in progress
@@ -2057,6 +2071,14 @@ class MarcamApp(wx.App):
                 LOGGER.info("MacOpenFiles: not img_ok: %s", open_filename)
 
     def open_file(self, open_filename):
+        """Open specified filename in either this frame or new frame
+
+        Args:
+            open_filename (str): image filename to open
+
+        Returns:
+            (bool): True if image loaded successfully, False otherwise.
+        """
         # open in blank window, or
         #   add to file_windows list of file windows
         if self.file_windows.has_zero() or self.file_windows.all_have_image():
@@ -2068,6 +2090,14 @@ class MarcamApp(wx.App):
         return img_ok
 
     def OnExit(self):
+        """Overloaded function that is called before App finally exits
+
+        "wx.AppConsole.OnExit which is called when the application exits but
+        before wxPython cleans up its internal structures."
+
+        Returns:
+            Whatever AppConsole.OnExit() returns
+        """
         # save config_data right before app is about to exit
         save_config(self.config_data)
         return super().OnExit()
@@ -2130,6 +2160,18 @@ def log_debug_main():
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
 def another_instance_running(srcfile_args):
+    """Check if another instance of app is running, process open file arguments
+        on Windows if they are present.
+
+    Args:
+        srcfile_args (list): list of files to open in main App instance.
+            (Only applies to Windows as MacOpenFiles in main instance receives
+            files to open in Mac without trying to start new App.)
+
+    Returns:
+        (bool): True if another instance of Marcam is already running for this
+            user, False otherwise.
+    """
     # make global to persist until app is closed
     global singleinst_instance
     singleinst_name = "Marcam-%s"%wx.GetUserId()
@@ -2168,6 +2210,10 @@ def win_file_receiver(wx_app):
     winpipe.server_pipe_read(WIN_FILE_PIPE_NAME, string_read_fxn)
 
 def sanity_checks():
+    """Things to check before we startup wx.App
+
+    Raises Exceptions and logs errors for problems, mainly internal to app.
+    """
     # Make sure we have access to all bitmaps.
     bitmap_filenames = [
             const.SELECTBMP_FNAME, const.MARKBMP_FNAME, const.TOCLIPBMP_FNAME,
