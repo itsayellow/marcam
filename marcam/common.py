@@ -164,11 +164,6 @@ def get_text_width_px(window, text_str):
     if margins.x > 0:
         text_width_px = text_width_px + margins.x * 2
 
-    print("window.GetFont()")
-    print("    GetPixelSize(): "+repr(window.GetFont().GetPixelSize()))
-    print("    GetPointSize(): "+repr(window.GetFont().GetPointSize()))
-    print("margins.x: " + repr(margins.x))
-
     return text_width_px
 
 def on_evt_debug(evt):
