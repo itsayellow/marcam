@@ -344,16 +344,16 @@ class ImageFrame(wx.Frame):
                 "I&nvert Image\tShift+Ctrl+N",
                 )
         tools_imgautocontrastdialog_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast...\tShift+Ctrl+J",
+                "Image &Auto-Contrast...",
                 )
         self.tools_imgautocontrastlast_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast (%d)"%self.parent.get_last_autocontrast_level(),
+                "Image &Auto-Contrast (%d)\tShift+Ctrl+J"%self.parent.get_last_autocontrast_level(),
                 )
         tools_imgfcolordialog_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color...\tShift+Ctrl+C",
+                "Image False Color...",
                 )
         self.tools_imgfcolorlast_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color (%s)"%(self.parent.get_last_falsecolor().capitalize()),
+                "Image False Color (%s)\tShift+Ctrl+C"%(self.parent.get_last_falsecolor().capitalize()),
                 )
         menubar.Append(tools_menu, "&Tools")
         # Window
@@ -1813,8 +1813,12 @@ class MarcamApp(wx.App):
         self.last_autocontrast_level = level
 
         for frame in self.file_windows.get_list_copy():
+            key_accel = frame.tools_imgautocontrastlast_item.GetItemLabel().split('\t')[1]
             frame.tools_imgautocontrastlast_item.SetItemLabel(
-                    "Image &Auto-Contrast (%d)"%self.get_last_autocontrast_level(),
+                    "Image &Auto-Contrast (%d)\t%s"%(
+                        self.get_last_autocontrast_level(),
+                        key_accel
+                        )
                     )
 
     def get_last_autocontrast_level(self):
@@ -1835,8 +1839,12 @@ class MarcamApp(wx.App):
         self.last_falsecolor = cmap
 
         for frame in self.file_windows.get_list_copy():
+            key_accel = frame.tools_imgfcolorlast_item.GetItemLabel().split('\t')[1]
             frame.tools_imgfcolorlast_item.SetItemLabel(
-                    "Image False Color (%s)"%(self.get_last_falsecolor().capitalize())
+                    "Image False Color (%s)\t%s"%(
+                        self.get_last_falsecolor().capitalize(),
+                        key_accel
+                        )
                     )
 
     def get_last_falsecolor(self):
