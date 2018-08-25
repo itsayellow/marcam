@@ -167,6 +167,12 @@ def get_text_width_px(window, text_str):
     return text_width_px
 
 def on_evt_debug(evt):
+    """
+    Debugging for events: print all info and Skip
+
+    Args:
+        evt (wx.Event): any Event
+    """
     debug_print_evt_info(evt)
     evt.Skip()
 
