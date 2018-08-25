@@ -1324,32 +1324,73 @@ class ImageFrame(wx.Frame):
             # save the current contents in the file
             pathname = file_dialog.GetPath()
 
-            save_ok = self.save_img_data(pathname)
-            if save_ok:
-                self.save_filepath = pathname
-                # set img_path
-                self.img_path = pathname
-                # signify we have saved content
-                self.frame_history.save_notify()
-                # add successful file save as to file history
-                self.file_history.AddFileToHistory(pathname)
-                # Set window title to newly-saved filename
-                self.SetTitle(os.path.basename(pathname))
-                # on Mac sets file icon in titlebar with right-click showing
-                #   dir hierarchy
-                self.SetRepresentedFilename(pathname)
-                # on Mac update Window menu frame list with new title
-                self.parent.file_windows.update_window_menu()
-            else:
-                # error in saving dialog
-                # wx.ICON_ERROR has no effect on Mac
-                wx.MessageDialog(None,
-                        message="Unable to save file: %s"%pathname,
-                        caption="File Write Error",
-                        #style=wx.OK
-                        #style=wx.OK | wx.ICON_ERROR
-                        style=wx.OK | wx.ICON_EXCLAMATION
-                        ).ShowModal()
+            longtask.ThreadedProgressPulse(
+                    thread_fxn=self.on_saveas_thread,
+                    thread_fxn_args=(pathname,),
+                    post_thread_fxn=self.on_saveas_postthread,
+                    progress_title="Saving Image",
+                    progress_msg="Saving %s..."%os.path.basename(pathname),
+                    parent=self
+                    )
+            #save_ok = self.save_img_data(pathname)
+            #if save_ok:
+            #    self.save_filepath = pathname
+            #    # set img_path
+            #    self.img_path = pathname
+            #    # signify we have saved content
+            #    self.frame_history.save_notify()
+            #    # add successful file save as to file history
+            #    self.file_history.AddFileToHistory(pathname)
+            #    # Set window title to newly-saved filename
+            #    self.SetTitle(os.path.basename(pathname))
+            #    # on Mac sets file icon in titlebar with right-click showing
+            #    #   dir hierarchy
+            #    self.SetRepresentedFilename(pathname)
+            #    # on Mac update Window menu frame list with new title
+            #    self.parent.file_windows.update_window_menu()
+            #else:
+            #    # error in saving dialog
+            #    # wx.ICON_ERROR has no effect on Mac
+            #    wx.MessageDialog(None,
+            #            message="Unable to save file: %s"%pathname,
+            #            caption="File Write Error",
+            #            #style=wx.OK
+            #            #style=wx.OK | wx.ICON_ERROR
+            #            style=wx.OK | wx.ICON_EXCLAMATION
+            #            ).ShowModal()
+
+    @debug_fxn
+    def on_saveas_thread(self, pathname):
+        save_ok = self.save_img_data(pathname)
+        return (save_ok, pathname)
+
+    @debug_fxn
+    def on_saveas_postthread(self, save_ok, pathname):
+        if save_ok:
+            self.save_filepath = pathname
+            # set img_path
+            self.img_path = pathname
+            # signify we have saved content
+            self.frame_history.save_notify()
+            # add successful file save as to file history
+            self.file_history.AddFileToHistory(pathname)
+            # Set window title to newly-saved filename
+            self.SetTitle(os.path.basename(pathname))
+            # on Mac sets file icon in titlebar with right-click showing
+            #   dir hierarchy
+            self.SetRepresentedFilename(pathname)
+            # on Mac update Window menu frame list with new title
+            self.parent.file_windows.update_window_menu()
+        else:
+            # error in saving dialog
+            # wx.ICON_ERROR has no effect on Mac
+            wx.MessageDialog(None,
+                    message="Unable to save file: %s"%pathname,
+                    caption="File Write Error",
+                    #style=wx.OK
+                    #style=wx.OK | wx.ICON_ERROR
+                    style=wx.OK | wx.ICON_EXCLAMATION
+                    ).ShowModal()
 
     @debug_fxn
     def on_export_image(self, _evt):
