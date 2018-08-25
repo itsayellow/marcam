@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+"""Windows-only named pipe implementation
+"""
 # Copyright 2018 Matthew A. Clapp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,8 +21,8 @@
 import logging
 import time
 import sys
-import win32pipe, win32file
-#import win32security
+import win32pipe
+import win32file
 import pywintypes
 
 import common
@@ -54,6 +55,14 @@ PIPE_REJECT_REMOTE_CLIENTS = 8
 # ------------
 @debug_fxn
 def server_create_named_pipe_raw(pipe_name):
+    """Create Named Pipe with given name
+
+    Args:
+        pipe_name (str): name of pipe
+
+    Returns:
+        (TODO): handle to named pipe
+    """
     pipe_handle = win32pipe.CreateNamedPipe(
             # lpName
             # ----------
@@ -109,12 +118,20 @@ def server_create_named_pipe_raw(pipe_name):
     return pipe_handle
 
 def server_create_named_pipe(pipe_name):
+    """Create a named pipe for a server
+
+    Args:
+        pipe_name (str): name of pipe
+
+    Returns:
+        (TODO): handle to named pipe
+    """
     no_pipe_instance = True
     while no_pipe_instance:
         try:
             pipe_handle = server_create_named_pipe_raw(pipe_name)
-        except pywintypes.error as e:
-            (winerror, funcname, strerror) = e.args
+        except pywintypes.error as err:
+            (winerror, funcname, strerror) = err.args
             LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
                     winerror, funcname, strerror
                     )
@@ -133,8 +150,8 @@ def server_connect_and_wait_raw(pipe):
     """
     try:
         win32pipe.ConnectNamedPipe(pipe, None)
-    except pywintypes.error as e:
-        (winerror, funcname, strerror) = e.args
+    except pywintypes.error as err:
+        (winerror, funcname, strerror) = err.args
         LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
                 winerror, funcname, strerror
                 )
@@ -143,14 +160,14 @@ def server_connect_and_wait_raw(pipe):
 def server_connect_and_wait(pipe_handle):
     """Wait for a client connection, do not return until one is found.
 
-    Server function. 
+    Server function.
     """
     no_connection = True
     while no_connection:
         try:
             server_connect_and_wait_raw(pipe_handle)
-        except pywintypes.error as e:
-            (winerror, funcname, strerror) = e.args
+        except pywintypes.error as err:
+            (winerror, funcname, strerror) = err.args
             if winerror == 232:
                 # The pipe is being closed, try again
                 LOGGER.info("The pipe is being closed, trying again.")
@@ -164,8 +181,16 @@ def server_connect_and_wait(pipe_handle):
             no_connection = False
 
 @debug_fxn
-def pipe_read(pipe):
-    (hr, resp_bytes) = win32file.ReadFile(pipe, 64*1024)
+def pipe_read(pipe_handle):
+    """Read bytes from pipe and decode (using utf-8) into string
+
+    Args:
+        pipe_handle (TODO): pipe handle to read from
+
+    Returns:
+        (str): string read from pipe
+    """
+    (_, resp_bytes) = win32file.ReadFile(pipe_handle, 64*1024)
     resp_str = resp_bytes.decode(encoding='utf-8')
     return resp_str
 
@@ -185,8 +210,8 @@ def server_pipe_read(pipe_name, string_read_fxn):
             # keep reading from this client until it closes access to pipe
             try:
                 resp_str = pipe_read(filearg_pipe)
-            except pywintypes.error as e:
-                (winerror, funcname, strerror) = e.args
+            except pywintypes.error as err:
+                (winerror, funcname, strerror) = err.args
                 if winerror == 109:
                     LOGGER.info("Client closed access to pipe.")
                     client_done = True
@@ -228,8 +253,8 @@ def client_connect_to_pipe(pipe_name):
                 0,
                 None
             )
-        except pywintypes.error as e:
-            (winerror, funcname, strerror) = e.args
+        except pywintypes.error as err:
+            (winerror, funcname, strerror) = err.args
             if winerror == 231:
                 # ERROR_PIPE_BUSY
                 print("Pipe busy, trying again after 10ms")
@@ -244,11 +269,19 @@ def client_connect_to_pipe(pipe_name):
 
     return handle
 
-def pipe_write(handle, data_string):
+def pipe_write(pipe_handle, data_string):
+    """Write encoded bytes to pipe (using utf-8) from string
+
+    Args:
+        pipe_handle (TODO): pipe handle to read from
+        data_string (str): string to write to pipe
+
+    Returns:
+    """
     data_bytes = data_string.encode(encoding='utf-8')
     win32file.WriteFile(
             # handle to Named Pipe
-            handle,
+            pipe_handle,
             # data in bytes format
             data_bytes
             )
@@ -260,13 +293,12 @@ def client_write_strings(pipe_name, data_strings):
     """
     try:
         pipe_handle = client_connect_to_pipe(pipe_name)
-    except pywintypes.error as e:
-        (winerror, funcname, strerror) = e.args
-        if winerror==2:
+    except pywintypes.error as err:
+        (winerror, _funcname, _strerror) = err.args
+        if winerror == 2:
             print("Error: No pipe server.")
             return False
-        else:
-            raise
+        raise
     print("Client Connected to pipe.")
     # send filenames to pipe
     for data_string in data_strings:
@@ -288,6 +320,11 @@ def client_write_strings(pipe_name, data_strings):
 # ---------------------------
 @debug_fxn
 def pipe_server(pipe_name):
+    """Full-fledged pipe server that receives messages.
+
+    Args:
+        pipe_name (str): name of Windows named pipe
+    """
     print("pipe server")
     client_done = False
 
@@ -300,8 +337,8 @@ def pipe_server(pipe_name):
         try:
             resp_str = pipe_read(pipe)
             print(f"message: {resp_str}")
-        except pywintypes.error as e:
-            (winerror, funcname, strerror) = e.args
+        except pywintypes.error as err:
+            (winerror, funcname, strerror) = err.args
             if winerror == 109:
                 print("Client closed access to pipe.")
                 print("    {0}".format(winerror))
@@ -322,29 +359,33 @@ def pipe_server(pipe_name):
 
 @debug_fxn
 def pipe_client(pipe_name):
+    """Full-fledged pipe client that writes messages to server.
+
+    Args:
+        pipe_name (str): name of Windows named pipe
+    """
     print("pipe client")
-    quit = False
+    pipe_quit = False
 
     try:
         handle = client_connect_to_pipe(pipe_name)
-    except pywintypes.error as e:
-        (winerror, funcname, strerror) = e.args
-        if winerror==2:
+    except pywintypes.error as err:
+        (winerror, funcname, strerror) = err.args
+        if winerror == 2:
             print("No pipe server.")
             return
-        else:
-            raise
+        raise
 
     print("Client Connected to pipe.")
 
-    while not quit:
+    while not pipe_quit:
         try:
             for count in range(5):
                 pipe_write(handle, f"count: {count}")
                 time.sleep(1)
-            quit = True
-        except pywintypes.error as e:
-            (winerror, funcname, strerror) = e.args
+            pipe_quit = True
+        except pywintypes.error as err:
+            (winerror, funcname, strerror) = err.args
             if winerror == 2:
                 # ERROR_FILE_NOT_FOUND
                 #   The system cannot find the file specified
@@ -360,7 +401,7 @@ def pipe_client(pipe_name):
                 print("    {0}".format(winerror))
                 print("    {0}".format(funcname))
                 print("    {0}".format(strerror))
-                quit = True
+                pipe_quit = True
             elif winerror == 232:
                 # ERROR_NO_DATA
                 #   The pipe is being closed.
@@ -368,21 +409,22 @@ def pipe_client(pipe_name):
                 print("    {0}".format(winerror))
                 print("    {0}".format(funcname))
                 print("    {0}".format(strerror))
-                quit = True
+                pipe_quit = True
             else:
                 print("Windows error:")
                 print("    {0}".format(winerror))
                 print("    {0}".format(funcname))
                 print("    {0}".format(strerror))
 
+
 if __name__ == '__main__':
-    pipe_name = r'\\.\pipe\Marcam-username'
+    PIPE_NAME_TEST = r'\\.\pipe\Marcam-username'
 
     if len(sys.argv) < 2:
         print("need s or c as argument")
     elif sys.argv[1] == "s":
-        pipe_server(pipe_name)
+        pipe_server(PIPE_NAME_TEST)
     elif sys.argv[1] == "c":
-        pipe_client(pipe_name)
+        pipe_client(PIPE_NAME_TEST)
     else:
         print(f"no can do: {sys.argv[1]}")
