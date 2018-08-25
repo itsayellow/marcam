@@ -42,6 +42,7 @@ import image_proc
 from image_scrolled_canvas import ImageScrolledCanvasMarks
 import const
 import common
+import longtask
 import marcam_extra
 import mcmfile
 if const.PLATFORM == 'win':
@@ -1260,20 +1261,37 @@ class ImageFrame(wx.Frame):
             # we've never "Save As..." so do that instead
             self.on_saveas(evt)
         else:
-            # use current filename/path to save
-            if self.save_img_data(self.save_filepath):
-                # signify we have saved content
-                self.frame_history.save_notify()
-            else:
-                # error in saving dialog
-                # wx.ICON_ERROR has no effect on Mac
-                wx.MessageDialog(None,
-                        message="Unable to save file: %s"%self.save_filepath,
-                        caption="File Write Error",
-                        #style=wx.OK
-                        #style=wx.OK | wx.ICON_ERROR
-                        style=wx.OK | wx.ICON_EXCLAMATION
-                        ).ShowModal()
+            # Normal Save
+            longtask.ThreadedProgressPulse(
+                    thread_fxn=self.on_save_thread,
+                    thread_fxn_args=(),
+                    post_thread_fxn=self.on_save_postthread,
+                    progress_title="Saving Image",
+                    progress_msg="Saving %s..."%os.path.basename(self.save_filepath),
+                    parent=self
+                    )
+
+    @debug_fxn
+    def on_save_thread(self):
+        # use current filename/path to save
+        save_ok = self.save_img_data(self.save_filepath)
+        return save_ok
+
+    @debug_fxn
+    def on_save_postthread(self, save_ok):
+        if save_ok:
+            # signify we have saved content
+            self.frame_history.save_notify()
+        else:
+            # error in saving dialog
+            # wx.ICON_ERROR has no effect on Mac
+            wx.MessageDialog(None,
+                    message="Unable to save file: %s"%self.save_filepath,
+                    caption="File Write Error",
+                    #style=wx.OK
+                    #style=wx.OK | wx.ICON_ERROR
+                    style=wx.OK | wx.ICON_EXCLAMATION
+                    ).ShowModal()
 
     @debug_fxn
     def on_saveas(self, _evt):
@@ -1306,7 +1324,8 @@ class ImageFrame(wx.Frame):
             # save the current contents in the file
             pathname = file_dialog.GetPath()
 
-            if self.save_img_data(pathname):
+            save_ok = self.save_img_data(pathname)
+            if save_ok:
                 self.save_filepath = pathname
                 # set img_path
                 self.img_path = pathname
