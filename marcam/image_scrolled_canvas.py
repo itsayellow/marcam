@@ -209,8 +209,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     big enough.  If image is smaller than window it is auto-centered
     """
     @debug_fxn
-    def __init__(self, parent, win_history, *args, id_=wx.ID_ANY, **kwargs):
-        super().__init__(parent, id_, *args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        # get win_history and don't pass on to wx.ScrolledCanvas
+        win_history = kwargs.pop('win_history', None)
+        assert win_history is not None
+
+        super().__init__(parent, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
         #   proper init)
@@ -1988,9 +1992,15 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     Also allow for setting, selecting, deleting, marks.
     """
     @debug_fxn
-    def __init__(self, parent, win_history, marks_num_update_fxn,
-            *args, id_=wx.ID_ANY, **kwargs):
-        super().__init__(parent, win_history, id_, *args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        # get win_history and pass on to ImageScrolledCanvas
+        # get marks_num_update_fxn and don't pass on to ImageScrolledCanvas
+        win_history = kwargs.get('win_history', None)
+        marks_num_update_fxn = kwargs.pop('marks_num_update_fxn', None)
+        assert win_history is not None
+        assert marks_num_update_fxn is not None
+
+        super().__init__(parent, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
         #   proper init)

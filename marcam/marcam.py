@@ -529,8 +529,8 @@ class ImageFrame(wx.Frame):
         #   what we need
         self.img_panel = ImageScrolledCanvasMarks(
                 self,
-                self.frame_history,
-                self.marks_num_update,
+                win_history=self.frame_history,
+                marks_num_update_fxn=self.marks_num_update,
                 # the following always makes scrollbars,
                 #   Mac: they appear tiny and all the way to 0 (not
                 #       disabled, and bad looking)
