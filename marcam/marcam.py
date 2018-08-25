@@ -55,7 +55,7 @@ DEBUG = False
 # which modules are we logging
 LOGGED_MODULES = [
         __name__, 'common', 'image_proc', 'image_scrolled_canvas', 'longtask',
-        'mcmfile', 'winpipe'
+        'marcam_extra', 'mcmfile', 'winpipe'
         ]
 
 # global logger obj for this file
@@ -400,7 +400,7 @@ class ImageFrame(wx.Frame):
         self.SetMenuBar(menubar)
         self.menu_items_disable_no_image = [
                 file_close_item,
-                file_save_item,
+                #file_save_item, # under EditHistory control
                 file_saveas_item,
                 file_exportimage_item,
                 # Edit
@@ -425,8 +425,9 @@ class ImageFrame(wx.Frame):
         self.file_history.UseMenu(open_recent_menu)
         self.file_history.AddFilesToMenu()
 
-        # register Undo, Redo menu items so EditHistory obj can
+        # register Save, Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
+        self.frame_history.register_save_menu_item(file_save_item)
         self.frame_history.register_undo_menu_item(edit_undo_item)
         self.frame_history.register_redo_menu_item(edit_redo_item)
 

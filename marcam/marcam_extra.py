@@ -65,6 +65,7 @@ class EditHistory():
     def __init__(self):
         self.undo_menu_item = None
         self.redo_menu_item = None
+        self.save_menu_item = None
         self.history = []
         self.history_ptr = -1
         self._update_menu_items()
@@ -116,6 +117,9 @@ class EditHistory():
         # set current edit history action save flags to True
         if self.history_ptr > -1:
             self.history[self.history_ptr]['save_flag'] = True
+
+        # update Save, Redo, Undo menu items
+        self._update_menu_items()
 
     @debug_fxn
     def is_saved(self):
@@ -224,6 +228,9 @@ class EditHistory():
     def _update_menu_items(self):
         """Update the Enabled/Disabled quality of Undo, Redo Menu items
         """
+        if self.save_menu_item is not None:
+            self.save_menu_item.Enable(not self.is_saved())
+
         if self.undo_menu_item is not None:
             self.undo_menu_item.Enable(self._can_undo())
             if self._can_undo():
@@ -251,6 +258,19 @@ class EditHistory():
                 self.redo_menu_item.SetItemLabel(
                         "Redo\t" + key_accel
                         )
+
+    @debug_fxn
+    def register_save_menu_item(self, save_menu_item):
+        """Give this class instance the Save menu item instance so it can
+        Enable and Disable menu item on its own
+
+        Save is disabled if currently we are in a saved state.
+
+        Args:
+            undo_menu_item (wx.MenuItem): menu item instance for Undo
+        """
+        self.save_menu_item = save_menu_item
+        self._update_menu_items()
 
     @debug_fxn
     def register_undo_menu_item(self, undo_menu_item):
