@@ -164,13 +164,13 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
             # denominators must be divis. by 4 because img_dc_div4
             possible_denoms = range(4, 4*max_num_denom + 1, 4)
 
-        (zoom, num, denom, error) = find_low_rational(
+        (zoom, num, denom, _error) = find_low_rational(
                 zoom_ideal,
                 possible_nums,
                 possible_denoms,
                 error_tol
                 )
-        #errors.append(error)
+        #errors.append(_error)
         zoom_list.append(zoom)
         zoom_frac_list.append((num, denom))
 
@@ -209,7 +209,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     big enough.  If image is smaller than window it is auto-centered
     """
     @debug_fxn
-    def __init__(self, parent, win_history, id_=wx.ID_ANY, *args, **kwargs):
+    def __init__(self, parent, win_history, *args, id_=wx.ID_ANY, **kwargs):
         super().__init__(parent, id_, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
@@ -337,6 +337,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn_debug
     def has_no_image(self):
+        """Returns whether Window contains an image or not.
+
+        Returns:
+            (bool): True if Window has image
+        """
         return self.img_dc is None
 
     @debug_fxn
@@ -800,8 +805,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def _debug_paint_client_area(self):
-        # DEBUG: Make whole background red for debug (allows us to see
-        #   what parts are not getting subsequently repainted)
+        """DEBUG: Make whole background of Window red for debug (allows us to
+            see what parts are not getting subsequently repainted)
+        """
         (size_x, size_y) = self.GetSize()
         self.SetVirtualSizeNoSizeEvt(size_x, size_y)
         client_dc = wx.ClientDC(self)
@@ -818,10 +824,19 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def _erase_lowerright_corner(self, skip_virt_size=False):
-        # Can't get ScreenDC to draw to screen, so to erase the
-        #   lower right corner between scrollbars, resize virtual area
-        #   to window size and draw to ClientDC
-        # Color lower right corner of client area background color, to erase it
+        """Erase lower-right corner between scrollbars.
+
+        Can't get ScreenDC to draw to screen, so to erase the lower right
+            corner between scrollbars, resize virtual area to window size and
+            draw to ClientDC.
+
+        Color lower right corner of client area background color, to erase it
+
+        Args:
+            skip_virt_size (bool): if True, don't bother changing Virtual Size
+                to smaller than Window first (assume no scrollbars currently
+                visible.)
+        """
 
         # TODO: at init time find width of scrollbar and make that the
         #   edge size of this square.  Can find width of scrollbar by
@@ -856,6 +871,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def set_virt_size_and_pos(self):
+        """Set virtual size and position based on object info about image
+
+        Also Freeze and Thaw around operations so image movement isn't visible
+            as zoom and position are changed.
+        """
         # Freeze before changing virtual size and moving image
         #   so we don't see window jittering with updates
         self.Freeze()
@@ -1496,15 +1516,30 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def get_current_img(self):
+        """Get current Image in list of edit history of images
+
+        Returns:
+            (wx.Image): Current image
+        """
         return self.img[self.img_idx]
 
     @debug_fxn
     def new_img(self, img):
+        """Create edit history image list and put Image as first member
+
+        Args:
+            img (wx.Image): Current image
+        """
         self.img = [img]
         self.img_idx = 0
 
     @debug_fxn
     def set_img_idx(self, idx_set):
+        """Set current index for edit history image list of images
+
+        Args:
+            idx_set (int): Index to desired image
+        """
         self.img_idx = idx_set
 
     @debug_fxn
@@ -1512,7 +1547,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """Load and initialize image
 
         Args:
-            img (wx.Image): wx Image to display in window
+            do_zoom_fit (bool): if True then zoom to fit image in window
         """
         if LOGGER.isEnabledFor(logging.DEBUG):
             staticdc_start = time.time()
@@ -1557,10 +1592,20 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def get_zoom_val(self):
+        """Convenience function to return current zoom ratio
+        """
         return self.zoom_val
 
     @debug_fxn
     def zoom_fit(self, max_zoom=None, do_refresh=True):
+        """Zoom in to the maximum amount such that the image is still smaller
+            than the window
+
+        Args:
+            max_zoom (float or None): Maximum allowed zoom ratio
+            do_refresh (bool): whether to Refresh and Update Window after
+                zooming
+        """
         # return early if no image
         if self.has_no_image():
             return None
@@ -1767,6 +1812,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def export_to_image(self):
+        """Export current Device Context to wx.Image
+
+        Resulting Image looks as though it were a Window drawn at 100%
+
+        Returns:
+            (wx.Image): image output
+        """
         dc_source = self.img_dc
 
         # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
@@ -1781,11 +1833,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   use bmp as SelectObject
         # Tell the memory DC to use our Bitmap
         # all drawing action on the memory DC will go to the Bitmap now
-        memDC = wx.MemoryDC(bmp)
+        mem_dc = wx.MemoryDC(bmp)
 
         # Blit (in this case copy) the actual screen on the memory DC
         # and thus the Bitmap
-        memDC.Blit(0, 0,    # dest position
+        mem_dc.Blit(0, 0,    # dest position
             size.width, size.height, # src, dest size
             dc_source,      # From where do we copy?
             0, 0            # src position
@@ -1793,7 +1845,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # Select the Bitmap out of the memory DC by selecting a new
         # uninitialized Bitmap
-        memDC.SelectObject(wx.NullBitmap)
+        mem_dc.SelectObject(wx.NullBitmap)
 
         img = bmp.ConvertToImage()
         #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
@@ -1801,6 +1853,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_invert(self):
+        """Invert (color negative) the image currently being shown.
+        """
         # return early if no image
         if self.has_no_image():
             return
@@ -1824,6 +1878,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_remap_colormap(self, cmap='viridis'):
+        """Apply False color colormap to the image currently being shown.
+
+        Args:
+            cmap (string): the name of the colormap to use to remap the colors
+        """
         # return early if no image
         if self.has_no_image():
             return
@@ -1841,12 +1900,26 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_remap_colormap_thread(self, wx_image_orig, cmap):
+        """Thread part of Apply False Color colormap to image
+
+        Args:
+            wx_image_orig (wx.Image): original image
+            cmap (str): name of colormap to remap colors
+
+        Returns:
+            (wx.Image): output color-remapped version of input image
+        """
         # create new image (3.7s for 4276x2676 image)
         wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
         return wx_image_new
 
     @debug_fxn
     def image_remap_colormap_postthread(self, wx_image_new):
+        """Post-Thread part of Apply False Color colormap to image
+
+        Args:
+            wx_image_new (wx.Image): output color-remapped version of image
+        """
         # delete all items after current one in list
         self.img = self.img[:self.img_idx+1]
         # add new img to end of list
@@ -1863,6 +1936,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
+        """Apply Auto-Contrast to the image currently being shown.
+
+        Remap all brightness values so brightest pixel has max value and
+            darkest pixel has min value.
+
+        Args:
+            cutoff (int): what percentage of the lightest and darkest pixels
+                to exclude from remapping.
+        """
         # return early if no image
         if self.has_no_image():
             return
@@ -1886,6 +1968,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def get_image_info(self):
+        """Get image info about current image shown, return text
+
+        Returns:
+            (str): text describing image statistics
+        """
         # return early if no image
         if self.has_no_image():
             return None
@@ -1902,7 +1989,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
     """
     @debug_fxn
     def __init__(self, parent, win_history, marks_num_update_fxn,
-            id_=wx.ID_ANY, *args, **kwargs):
+            *args, id_=wx.ID_ANY, **kwargs):
         super().__init__(parent, win_history, id_, *args, **kwargs)
 
         # init all properties to None (cause error if accessed before
@@ -2254,6 +2341,13 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
     @debug_fxn
     def move_mark(self, from_mark_pt, to_mark_pt, is_selected):
+        """Move mark from one location to another
+
+        Args:
+            from_mark_pt (tuple): (x,y) original mark location
+            to_mark_pt (tuple): (x,y) new mark location
+            is_selected (bool): whether mark is currently selected
+        """
         # delete orig position of dragged mark from normal list of marks
         #   if still present
         if from_mark_pt in self.marks:
@@ -2603,7 +2697,14 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                             )
 
     @debug_fxn
-    def export_to_image(self):
+    def export_to_image_marks(self):
+        """Export current Device Context with marks to wx.Image
+
+        Resulting Image looks as though it were a Window drawn at 100%
+
+        Returns:
+            (wx.Image): image output
+        """
         dc_source = self.img_dc
 
         # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
@@ -2618,11 +2719,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         #   use bmp as SelectObject
         # Tell the memory DC to use our Bitmap
         # all drawing action on the memory DC will go to the Bitmap now
-        memDC = wx.MemoryDC(bmp)
+        mem_dc = wx.MemoryDC(bmp)
 
         # Blit (in this case copy) the actual screen on the memory DC
         # and thus the Bitmap
-        memDC.Blit(0, 0,    # dest position
+        mem_dc.Blit(0, 0,    # dest position
             size.width, size.height, # src, dest size
             dc_source,      # From where do we copy?
             0, 0            # src position
@@ -2637,13 +2738,13 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # save current self.img_coord_xlation_{x,y}
         img_coord_xlation_x_save = self.img_coord_xlation.x
         img_coord_xlation_y_save = self.img_coord_xlation.y
-        # set all mark-affecting parameters for output memDC
+        # set all mark-affecting parameters for output mem_dc
         self.zoom_val = 1
         self.img_coord_xlation.x = 0
         self.img_coord_xlation.y = 0
 
         self.draw_marks(
-                memDC,
+                mem_dc,
                 (0 - sq_size/2), (0 - sq_size/2),
                 (size.width + sq_size), (size.height + sq_size))
 
@@ -2654,7 +2755,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
 
         # Select the Bitmap out of the memory DC by selecting a new
         # uninitialized Bitmap
-        memDC.SelectObject(wx.NullBitmap)
+        mem_dc.SelectObject(wx.NullBitmap)
 
         img = bmp.ConvertToImage()
         #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)

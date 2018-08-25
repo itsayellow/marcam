@@ -52,7 +52,7 @@ def file1sc_to_image(file1sc_file):
         file1sc_file (str): path to .1sc file
 
     Returns:
-        wx.Image: image object
+        (wx.Image): image object
     """
     try:
         read1sc = biorad1sc_reader.Reader(file1sc_file)
@@ -76,9 +76,16 @@ def file1sc_to_image(file1sc_file):
 @debug_fxn
 def image2memorydc(in_image, white_bg=False):
     """Converts wx.Image to wx.MemoryDC
+
+    Args:
+        in_image (wx.Image): input image
+        white_bg (bool): whether to put an opaque white background behind
+            rendered MemoryDC
+    Returns:
+        (wx.MemoryDC): output Device Context
     """
     # Create MemoryDC to return
-    image_dc = wx.MemoryDC()
+    mem_dc = wx.MemoryDC()
     # convert image to bitmap
     image_bmp = wx.Bitmap(in_image)
     if white_bg:
@@ -86,31 +93,63 @@ def image2memorydc(in_image, white_bg=False):
         bg_image = wx.Image(in_image.GetWidth(), in_image.GetHeight())
         bg_image.Clear(value=b'\xff')
         bg_bmp = wx.Bitmap(bg_image)
-        # use image_dc to draw onto bg_bmp
-        image_dc.SelectObject(bg_bmp)
-        image_dc.DrawBitmap(image_bmp, 0, 0)
+        # use mem_dc to draw onto bg_bmp
+        mem_dc.SelectObject(bg_bmp)
+        mem_dc.DrawBitmap(image_bmp, 0, 0)
     else:
-        image_dc.SelectObject(image_bmp)
+        mem_dc.SelectObject(image_bmp)
 
-    return image_dc
+    return mem_dc
 
 @debug_fxn
-def memorydc2image(wx_imagedc):
-    wx_bitmap = wx_imagedc.GetAsBitmap()
+def memorydc2image(wx_memdc):
+    """Convert wx.MemoryDC to wx.Image
+
+    Args:
+        wx_memdc (wx.MemoryDC): MemoryDC to convert to Image
+
+    Returns:
+        (wx.Image): Image
+    """
+    wx_bitmap = wx_memdc.GetAsBitmap()
     return wx_bitmap.ConvertToImage()
 
 @debug_fxn
-def wximagedc2pilimage(wx_imagedc):
-    wx_bitmap = wx_imagedc.GetAsBitmap()
+def wxmemorydc2pilimage(wx_memdc):
+    """Convert wx.MemoryDC to PIL.Image
+
+    Args:
+        wx_memdc (wx.MemoryDC): Device Context input
+
+    Returns:
+        (PIL.Image): Image output
+    """
+    wx_bitmap = wx_memdc.GetAsBitmap()
     return wxbitmap2pilimage(wx_bitmap)
 
 @debug_fxn
 def wxbitmap2pilimage(wx_bitmap):
+    """Convert wx.Bitmap to PIL.Image
+
+    Args:
+        wx_bitmap (wx.Bitmap): Bitmap input
+
+    Returns:
+        (PIL.Image): Image output
+    """
     wx_image = wx_bitmap.ConvertToImage()
     return wximage2pilimage(wx_image)
 
 @debug_fxn
 def wximage2pilimage(wx_image):
+    """Convert wx.Image to PIL.Image
+
+    Args:
+        wx_image (wx.Image): Image input
+
+    Returns:
+        (PIL.Image): Image output
+    """
     image_data = wx_image.GetData()
     #pil_image = PIL.Image.new('RGB', (wx_image.GetWidth(), wx_image.GetHeight()))
     pil_image = PIL.Image.frombytes(
@@ -122,6 +161,14 @@ def wximage2pilimage(wx_image):
 
 @debug_fxn
 def pilimage2wximage(pil_image):
+    """Convert wx.Image to PIL.Image
+
+    Args:
+        (PIL.Image): Image output
+
+    Returns:
+        (wx.Image): Image input
+    """
     (width, height) = pil_image.size
     pil_image_data = pil_image.tobytes()
     wx_image = wx.Image(width, height, pil_image_data)
@@ -132,6 +179,14 @@ def pilimage2wximage(pil_image):
 
 @debug_fxn
 def image_invert(wx_image):
+    """Invert image like a color negative
+
+    Args:
+        wx_image (wx.Image): input image
+
+    Returns:
+        (wx.Image): output inverted color image
+    """
     pil_image = wximage2pilimage(wx_image)
     new_pil_image = PIL.ImageOps.invert(pil_image)
     wx_image = pilimage2wximage(new_pil_image)
@@ -139,6 +194,20 @@ def image_invert(wx_image):
 
 @debug_fxn
 def image_autocontrast(wx_image, cutoff=0):
+    """Remap brightnesses of image to increase contrast.
+
+    Eliminating the "cutoff" brightest and darkest percentage of pixels,
+    remap the remaining brightness levels so that the brightest is at maximum
+    value and the darkest is at minimum value.
+
+    Args:
+        wx_image (wx.Image): input image
+        cutoff (int): percentage of brightest and darkest pixels to omit
+            from brightest/darkest calculation
+
+    Returns:
+        (wx.Image): output image with brightness values scaled from min to max
+    """
     pil_image = wximage2pilimage(wx_image)
     new_pil_image = PIL.ImageOps.autocontrast(pil_image, cutoff=cutoff)
     wx_image = pilimage2wximage(new_pil_image)
@@ -151,8 +220,12 @@ def image_remap_colormap(wx_image, cmap='viridis'):
     Intended to give false color to Black and White images.
 
     Args:
+        wx_image (wx.Image): input image
         cmap (string): desired colormap to map image to:
             'viridis' or 'magma' or 'plasma' or 'inferno'
+
+    Returns:
+        (wx.Image): output image with false color new colormap
     """
     # numpy method is ~18x faster than pure python list comprehension method
     start_time = time.time()
@@ -164,21 +237,20 @@ def image_remap_colormap(wx_image, cmap='viridis'):
     #   is grayscale.
     image_data_gray = image_data[::3]
 
-    if cmap=='viridis':
+    if cmap == 'viridis':
         new_image_data = colormaps.VIRIDIS_DATA[image_data_gray].flatten()
-    elif cmap=='plasma':
+    elif cmap == 'plasma':
         new_image_data = colormaps.PLASMA_DATA[image_data_gray].flatten()
-    elif cmap=='magma':
+    elif cmap == 'magma':
         new_image_data = colormaps.MAGMA_DATA[image_data_gray].flatten()
-    elif cmap=='inferno':
+    elif cmap == 'inferno':
         new_image_data = colormaps.INFERNO_DATA[image_data_gray].flatten()
     else:
         raise Exception("Internal Error: unknown colormap")
 
     wx_image = wx.Image(width, height, new_image_data)
-    LOGGER.debug("TIM:image_remap_colormap(%s), w x h = (%d x %d), time = %.fms"%(
+    LOGGER.debug("TIM:image_remap_colormap(%s), w x h = (%d x %d), time = %.fms",
                 cmap, width, height, 1000*(time.time()-start_time)
-                )
             )
     return wx_image
 
@@ -186,11 +258,20 @@ def image_remap_colormap(wx_image, cmap='viridis'):
 # Image information
 
 @debug_fxn
-def get_image_info(image_dc):
+def get_image_info(mem_dc):
+    """Get basic image information including color channels, brightness,
+        histograms
+
+    Args:
+        mem_dc (wx.MemoryDC): input Device Context
+
+    Returns:
+        (str): text describing statistics of the image
+    """
     return_text = ""
 
     # convert image to PIL.Image
-    pil_image = wximagedc2pilimage(image_dc)
+    pil_image = wxmemorydc2pilimage(mem_dc)
 
     # get band names
     band_names = pil_image.getbands()

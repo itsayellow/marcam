@@ -1425,7 +1425,7 @@ class ImageFrame(wx.Frame):
             # save the current contents in the file
             pathname = file_dialog.GetPath()
             # saves from memorydc
-            export_image = self.img_panel.export_to_image()
+            export_image = self.img_panel.export_to_image_marks()
             export_image.SaveFile(pathname)
 
     @debug_fxn
