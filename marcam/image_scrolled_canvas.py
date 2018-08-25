@@ -1830,14 +1830,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # get current image
         wx_image_orig = self.img[self.img_idx]
 
-        # TODO: should parent be self.parent ?
         longtask.ThreadedProgressPulse(
                 thread_fxn=self.image_remap_colormap_thread,
                 thread_fxn_args=(wx_image_orig, cmap),
                 post_thread_fxn=self.image_remap_colormap_postthread,
                 progress_title="Processing Image",
                 progress_msg="Applying False Color to image...",
-                parent=self
+                parent=self.parent # can be None, a Frame, or another Dialog
                 )
 
     @debug_fxn
