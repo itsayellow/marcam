@@ -48,6 +48,8 @@ MCM_INFO_NAME = 'info.json'
 MCM_LEGACY_IMAGE_PREFIX = 'image.'
 
 class McmFileError(Exception):
+    """Any mcm-specific file error.
+    """
     pass
 
 
@@ -63,6 +65,8 @@ def image_readable(image_path):
 
 @debug_fxn
 def read_image(image_path):
+    """wx.Image read from file, with wx errror logging turned off.
+    """
     # disable logging, we don't care if there is e.g. TIFF image
     #   with unknown fields
     # TODO: could also just raise loglevel to Error and above
@@ -75,10 +79,12 @@ def read_image(image_path):
 
 @debug_fxn
 def is_legacy_mcm_file(mcm_path):
+    """Determine if this is a legacy mcm file (different format).
+    """
     try:
         with zipfile.ZipFile(mcm_path) as mcm_container:
             legacy_mcm = MCM_INFO_NAME not in mcm_container.namelist()
-    except (zipfile.BadZipFile, OSError) as err:
+    except (zipfile.BadZipFile, OSError):
         #raise McmFileError
         return False
     return legacy_mcm
@@ -268,7 +274,6 @@ def legacy_load(imdata_path):
                         marks = json.load(json_fh)
                     marks = [tuple(x) for x in marks]
     except OSError:
-        # TODO: need real error dialog
         img_ok = False
         LOGGER.warning(
                 "Cannot open data in file '%s'.", imdata_path,
