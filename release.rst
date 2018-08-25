@@ -25,3 +25,7 @@ Summary
 
    i. In Windows, upload installer as "Marcam <version_num> Windows Installer.exe" to Github release.
    #. On Mac, upload dmg file as "Marcam <version_num> Mac.dmg" to Github release.
+
+#. Update Website for new release
+
+   i. Edit the front page of website under branch gh-pages under Downloads
