@@ -26,10 +26,10 @@ addition, it allows you to make other key image modifications.
 
 # Downloads
 
-### Latest Release -- 2018 Aug 3
-[Marcam 0.7 (macOS)](https://github.com/itsayellow/marcam/releases/download/v0.7/Marcam.0.7.Mac.dmg)
+### Latest Release -- 2018 Aug 25
+[Marcam 0.8 (macOS)](https://github.com/itsayellow/marcam/releases/download/v0.8/Marcam.0.8.Mac.dmg)
 
-[Marcam 0.7 (Windows)](https://github.com/itsayellow/marcam/releases/download/v0.7/Marcam.0.7.Windows.Installer.exe)
+[Marcam 0.8 (Windows)](https://github.com/itsayellow/marcam/releases/download/v0.8/Marcam.0.8.Windows.Installer.exe)
 
 ### All Releases
 [Marcam Github Releases](https://github.com/itsayellow/marcam/releases)
