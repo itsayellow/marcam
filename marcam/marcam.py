@@ -345,32 +345,14 @@ class ImageFrame(wx.Frame):
         tools_imgautocontrastdialog_item = tools_menu.Append(wx.ID_ANY,
                 "Image &Auto-Contrast...\tShift+Ctrl+J",
                 )
-        tools_imgautocontrast0_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 0",
-                )
-        tools_imgautocontrast2_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 2",
-                )
-        tools_imgautocontrast4_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 4",
-                )
-        tools_imgautocontrast6_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast 6",
+        self.tools_imgautocontrastlast_item = tools_menu.Append(wx.ID_ANY,
+                "Image &Auto-Contrast (%d)"%self.parent.get_last_autocontrast_level(),
                 )
         tools_imgfcolordialog_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color...\tShift+Ctrl+C",
                 )
-        tools_imgfcolorviridis_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color (Viridis)",
-                )
-        tools_imgfcolorplasma_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color (Plasma)",
-                )
-        tools_imgfcolormagma_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color (Magma)",
-                )
-        tools_imgfcolorinferno_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color (Inferno)",
+        self.tools_imgfcolorlast_item= tools_menu.Append(wx.ID_ANY,
+                "Image False Color (%s)"%(self.parent.get_last_falsecolor().capitalize()),
                 )
         menubar.Append(tools_menu, "&Tools")
         # Window
@@ -433,15 +415,9 @@ class ImageFrame(wx.Frame):
                 tools_imginfo_item,
                 tools_imginvert_item,
                 tools_imgautocontrastdialog_item,
-                tools_imgautocontrast0_item,
-                tools_imgautocontrast2_item,
-                tools_imgautocontrast4_item,
-                tools_imgautocontrast6_item,
+                self.tools_imgautocontrastlast_item,
                 tools_imgfcolordialog_item,
-                tools_imgfcolorviridis_item,
-                tools_imgfcolorplasma_item,
-                tools_imgfcolormagma_item,
-                tools_imgfcolorinferno_item,
+                self.tools_imgfcolorlast_item,
                 ]
 
         # register Open Recent menu, put under control of FileHistory obj
@@ -622,15 +598,9 @@ class ImageFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_imginfo, tools_imginfo_item)
         self.Bind(wx.EVT_MENU, self.on_imginvert, tools_imginvert_item)
         self.Bind(wx.EVT_MENU, self.on_imgautocontrastdialog, tools_imgautocontrastdialog_item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast0, tools_imgautocontrast0_item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast2, tools_imgautocontrast2_item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast4, tools_imgautocontrast4_item)
-        self.Bind(wx.EVT_MENU, self.on_imgautocontrast6, tools_imgautocontrast6_item)
+        self.Bind(wx.EVT_MENU, self.on_imgautocontrastlast, self.tools_imgautocontrastlast_item)
         self.Bind(wx.EVT_MENU, self.on_imgfalsecolordialog, tools_imgfcolordialog_item)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorviridis, tools_imgfcolorviridis_item)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorplasma, tools_imgfcolorplasma_item)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolormagma, tools_imgfcolormagma_item)
-        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorinferno, tools_imgfcolorinferno_item)
+        self.Bind(wx.EVT_MENU, self.on_imgfalsecolorlast, self.tools_imgfcolorlast_item)
         # Help menu items
         self.Bind(wx.EVT_MENU, self.on_about, help_about_item)
         self.Bind(wx.EVT_MENU, self.on_help, help_help_item)
@@ -1527,43 +1497,19 @@ class ImageFrame(wx.Frame):
         dialog_val = dialog.ShowModal()
         if dialog_val == wx.ID_OK:
             cmap = dialog.get_colormap()
+            self.parent.set_last_falsecolor(cmap=cmap)
             self.img_panel.image_remap_colormap(cmap=cmap)
 
     @debug_fxn
-    def on_imgfalsecolorviridis(self, _evt):
+    def on_imgfalsecolorlast(self, _evt):
         """Tools->False Color menu item
 
         Args:
             _evt (wx.CommandEvent):
         """
-        self.img_panel.image_remap_colormap(cmap='viridis')
-
-    @debug_fxn
-    def on_imgfalsecolorplasma(self, _evt):
-        """Tools->False Color menu item
-
-        Args:
-            _evt (wx.CommandEvent):
-        """
-        self.img_panel.image_remap_colormap(cmap='plasma')
-
-    @debug_fxn
-    def on_imgfalsecolormagma(self, _evt):
-        """Tools->False Color menu item
-
-        Args:
-            _evt (wx.CommandEvent):
-        """
-        self.img_panel.image_remap_colormap(cmap='magma')
-
-    @debug_fxn
-    def on_imgfalsecolorinferno(self, _evt):
-        """Tools->False Color menu item
-
-        Args:
-            _evt (wx.CommandEvent):
-        """
-        self.img_panel.image_remap_colormap(cmap='inferno')
+        self.img_panel.image_remap_colormap(
+                cmap=self.parent.get_last_falsecolor()
+                )
 
     @debug_fxn
     def on_imgautocontrastdialog(self, _evt):
@@ -1580,43 +1526,19 @@ class ImageFrame(wx.Frame):
         dialog_val = dialog.ShowModal()
         if dialog_val == wx.ID_OK:
             slider_val = dialog.slider.GetValue()
+            self.parent.set_last_autocontrast_level(level=slider_val)
             self.img_panel.image_autocontrast(cutoff=slider_val)
 
     @debug_fxn
-    def on_imgautocontrast0(self, _evt):
+    def on_imgautocontrastlast(self, _evt):
         """Tools->Image Auto-Contrast 0 menu item
 
         Args:
             _evt (wx.CommandEvent):
         """
-        self.img_panel.image_autocontrast(cutoff=0)
-
-    @debug_fxn
-    def on_imgautocontrast2(self, _evt):
-        """Tools->Image Auto-Contrast 2 menu item
-
-        Args:
-            _evt (wx.CommandEvent):
-        """
-        self.img_panel.image_autocontrast(cutoff=2)
-
-    @debug_fxn
-    def on_imgautocontrast4(self, _evt):
-        """Tools->Image Auto-Contrast 4 menu item
-
-        Args:
-            _evt (wx.CommandEvent):
-        """
-        self.img_panel.image_autocontrast(cutoff=4)
-
-    @debug_fxn
-    def on_imgautocontrast6(self, _evt):
-        """Tools->Image Auto-Contrast 6 menu item
-
-        Args:
-            _evt (wx.CommandEvent):
-        """
-        self.img_panel.image_autocontrast(cutoff=6)
+        self.img_panel.image_autocontrast(
+                cutoff=self.parent.get_last_autocontrast_level()
+                )
 
     @debug_fxn
     def save_img_data(self, imdata_path):
@@ -1766,6 +1688,8 @@ class MarcamApp(wx.App):
         self.config_data = config_data
         self.last_frame_pos = wx.DefaultPosition
         self.trying_to_quit = False
+        self.last_falsecolor = 'viridis'
+        self.last_autocontrast_level = 0
 
         # may call MacOpenFiles and add files to self.file_windows and make
         #   new frames
@@ -1820,6 +1744,28 @@ class MarcamApp(wx.App):
                     )
             win_file_thread.start()
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
+
+    def set_last_autocontrast_level(self, level=0):
+        self.last_autocontrast_level = level
+
+        for frame in self.file_windows.get_list_copy():
+            frame.tools_imgautocontrastlast_item.SetItemLabel(
+                    "Image &Auto-Contrast (%d)"%self.get_last_autocontrast_level(),
+                    )
+
+    def get_last_autocontrast_level(self):
+        return self.last_autocontrast_level
+
+    def set_last_falsecolor(self, cmap="viridis"):
+        self.last_falsecolor = cmap
+
+        for frame in self.file_windows.get_list_copy():
+            frame.tools_imgfcolorlast_item.SetItemLabel(
+                    "Image False Color (%s)"%(self.get_last_falsecolor().capitalize())
+                    )
+
+    def get_last_falsecolor(self):
+        return self.last_falsecolor
 
     def on_evt_win_file(self, evt):
         """Event handler for our custom Event receiving Windows file open
