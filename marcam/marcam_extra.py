@@ -43,6 +43,8 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
 class MarcamFormatter(logging.Formatter):
+    """Our specific Formatter for logging
+    """
     def format(self, record):
         """Overload of default format fxn, make all lines after first indented
         of a log message
@@ -330,6 +332,8 @@ class FileDropTarget(wx.FileDropTarget):
 
 
 class ImageAutoContrastDialog(wx.Dialog):
+    """Dialog to ask user for level of Auto-Contrast (0 through 20) desired.
+    """
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, title="Image Auto-Contrast", **kwargs)
 
@@ -400,11 +404,15 @@ class ImageAutoContrastDialog(wx.Dialog):
         self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
 
     def on_evt_slider(self, _evt):
+        """When Slider is changed, change label showing value.
+        """
         slider_val = self.slider.GetValue()
         self.value_display.SetLabel("%d"%slider_val)
 
 
 class ImageFalseColorDialog(wx.Dialog):
+    """Dialog to ask user which colormap for False Color desired.
+    """
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, title="Image False Color", **kwargs)
 
@@ -453,6 +461,8 @@ class ImageFalseColorDialog(wx.Dialog):
         #self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
 
     def get_colormap(self):
+        """Return lower-case canonical colormap string that was selected.
+        """
         return self.cmap_choices[self.colormap_choice.GetSelection()].lower()
 
     #def on_evt_slider(self, evt):
@@ -483,6 +493,8 @@ class HelpFrame(wx.Frame):
 
 
 class FrameList():
+    """Manager for all top-level Frames in Marcam App.
+    """
     @debug_fxn
     def __init__(self):
         # index dict by ID, as we use this most often
@@ -652,6 +664,12 @@ class FrameList():
 
     @debug_fxn
     def register_window_menu(self, frame_inst, window_menu):
+        """Add another Frame's Window menu to the menus this class manages.
+
+        Args:
+            frame_inst: Frame object containing the menu.
+            window_menu: Menu object that is the "Window" menu of Frame.
+        """
         # init to empty dict if not already
         self.frame_dict.setdefault(frame_inst.GetId(), {})
         self.frame_dict[frame_inst.GetId()]['menu'] = window_menu
@@ -660,5 +678,7 @@ class FrameList():
 
     @debug_fxn
     def get_list_copy(self):
+        """Get a copy of the list of frame object instances.
+        """
         # TODO: hopefully we won't need this forever, stopgap
         return [self.frame_dict[id]['frame'] for id in self.frame_dict]
