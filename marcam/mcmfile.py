@@ -177,6 +177,9 @@ def save(imdata_path, img, marks):
 
     Args:
         imdata_path (str): full path to filename to save to
+
+    Returns:
+        (bool): whether save was successful, True or False
     """
     # make temp file for image file
     #   must make actual file for use with zipfile
@@ -209,10 +212,9 @@ def save(imdata_path, img, marks):
                     )
     except OSError:
         LOGGER.warning("Cannot save current data in file '%s'.", imdata_path)
-        returnval = None
+        returnval = False
     else:
-        # TODO: do we really want these return values?
-        returnval = (MCM_IMAGE_NAME, MCM_INFO_NAME)
+        returnval = True
     finally:
         # remove temp file
         os.unlink(temp_img_name)

@@ -1261,7 +1261,7 @@ class ImageFrame(wx.Frame):
             self.on_saveas(evt)
         else:
             # use current filename/path to save
-            if self.save_img_data(self.save_filepath) is not None:
+            if self.save_img_data(self.save_filepath):
                 # signify we have saved content
                 self.frame_history.save_notify()
             else:
@@ -1305,8 +1305,8 @@ class ImageFrame(wx.Frame):
 
             # save the current contents in the file
             pathname = file_dialog.GetPath()
-            arc_names = self.save_img_data(pathname)
-            if arc_names is not None:
+
+            if self.save_img_data(pathname):
                 self.save_filepath = pathname
                 # set img_path
                 self.img_path = pathname
@@ -1547,11 +1547,12 @@ class ImageFrame(wx.Frame):
         Args:
             imdata_path (str): full path to filename to save to
         """
-        return mcmfile.save(
+        returnval = mcmfile.save(
                 imdata_path,
                 self.img_panel.get_current_img(),
                 self.img_panel.marks
                 )
+        return returnval
 
     @debug_fxn
     def on_about(self, _evt):
