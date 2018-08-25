@@ -165,13 +165,13 @@ def image_remap_colormap(wx_image, cmap='viridis'):
     image_data_gray = image_data[::3]
 
     if cmap=='viridis':
-        new_image_data = colormaps.VIRIDIS_DATA_24BIT_NP[image_data_gray].flatten()
+        new_image_data = colormaps.VIRIDIS_DATA[image_data_gray].flatten()
     elif cmap=='plasma':
-        new_image_data = colormaps.PLASMA_DATA_24BIT_NP[image_data_gray].flatten()
+        new_image_data = colormaps.PLASMA_DATA[image_data_gray].flatten()
     elif cmap=='magma':
-        new_image_data = colormaps.MAGMA_DATA_24BIT_NP[image_data_gray].flatten()
+        new_image_data = colormaps.MAGMA_DATA[image_data_gray].flatten()
     elif cmap=='inferno':
-        new_image_data = colormaps.INFERNO_DATA_24BIT_NP[image_data_gray].flatten()
+        new_image_data = colormaps.INFERNO_DATA[image_data_gray].flatten()
     else:
         raise Exception("Internal Error: unknown colormap")
 
