@@ -352,7 +352,7 @@ class ImageFrame(wx.Frame):
         tools_imgfcolordialog_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color...\tShift+Ctrl+C",
                 )
-        self.tools_imgfcolorlast_item= tools_menu.Append(wx.ID_ANY,
+        self.tools_imgfcolorlast_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color (%s)"%(self.parent.get_last_falsecolor().capitalize()),
                 )
         menubar.Append(tools_menu, "&Tools")
@@ -1274,12 +1274,24 @@ class ImageFrame(wx.Frame):
 
     @debug_fxn
     def on_save_thread(self):
+        """Thread portion of File->Save menu handler
+
+        Returns:
+            (bool): whether file was saved ok (to be passed to
+                on_save_posttthread).
+        """
         # use current filename/path to save
         save_ok = self.save_img_data(self.save_filepath)
         return save_ok
 
     @debug_fxn
     def on_save_postthread(self, save_ok):
+        """Post-Thread portion of File->Save handler
+
+        Args:
+            save_ok (bool): whether file was saved successfully in
+                on_save_thread
+        """
         if save_ok:
             # signify we have saved content
             self.frame_history.save_notify()
@@ -1336,11 +1348,22 @@ class ImageFrame(wx.Frame):
 
     @debug_fxn
     def on_saveas_thread(self, pathname):
+        """Thread portion of File->Save As... menu handler
+
+        Args:
+            pathname (str): full path to save image file
+        """
         save_ok = self.save_img_data(pathname)
         return (save_ok, pathname)
 
     @debug_fxn
     def on_saveas_postthread(self, save_ok, pathname):
+        """Post-Thread portion of File->Save As... menu handler
+
+        Args:
+            save_ok (bool): whether file was saved successfully
+            pathname (str): full path image file was saved to
+        """
         if save_ok:
             self.save_filepath = pathname
             # set img_path
@@ -1782,6 +1805,11 @@ class MarcamApp(wx.App):
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
     def set_last_autocontrast_level(self, level=0):
+        """Set "last autocontrast" menuitem in all windows with given level
+
+        Args:
+            level (integer): auto-contrast level
+        """
         self.last_autocontrast_level = level
 
         for frame in self.file_windows.get_list_copy():
@@ -1790,9 +1818,20 @@ class MarcamApp(wx.App):
                     )
 
     def get_last_autocontrast_level(self):
+        """Get "last autocontrast" level used in any window for Auto-Contrast
+            image operation.
+
+        Returns:
+            (integer): auto-contrast level last used in any window
+        """
         return self.last_autocontrast_level
 
     def set_last_falsecolor(self, cmap="viridis"):
+        """Set "last false color" menuitem in all windows with given colormap
+
+        Args:
+            cmap (str): string (lower-case) representing the colormap
+        """
         self.last_falsecolor = cmap
 
         for frame in self.file_windows.get_list_copy():
@@ -1801,6 +1840,12 @@ class MarcamApp(wx.App):
                     )
 
     def get_last_falsecolor(self):
+        """Get "last false color" colormap used in any window for False Color
+            image operation.
+
+        Returns:
+            (str): string (lower-case) representing the colormap
+        """
         return self.last_falsecolor
 
     def on_evt_win_file(self, evt):
