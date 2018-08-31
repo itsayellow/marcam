@@ -39,8 +39,6 @@ LOGGER.addHandler(logging.NullHandler())
 debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
-# TODO: may want to use threads for some time-consuming operations
-
 
 #-----------------------
 # Image data conversions
@@ -62,10 +60,9 @@ def file1sc_to_image(file1sc_file):
 
     (img_x, img_y, img_data) = read1sc.get_img_data()
 
-    # TODO: wx.Image is probably only 8-bits each color channel
-    #   yet we have 16-bit images
+    # NOTE: wx.Image is probably only 8-bits each color channel
+    #   yet we have 16-bit images. 8 bits are thrown away in that case.
     # wx.Image wants img_x * img_y * 3
-    # TODO: shadow data with full 16-bit info
     img_data_rgb = np.zeros(img_data.size*3, dtype='uint8')
     img_data_rgb[0::3] = img_data//256
     img_data_rgb[1::3] = img_data//256
