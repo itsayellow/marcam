@@ -182,7 +182,7 @@ CROSS_9x9_RED_BMP = wx.Bitmap.FromBufferRGBA(
         )
 
 
-# TODO: attempts to make bg shadow or glow just end up making it look like
+# NOTE: attempts to make bg shadow or glow just end up making it look like
 #       marks are blurry or odd.  unsuccessful
 pix_transluc50_black = b'\x00\x00\x00\x80'
 pix_transluc50_white = b'\xff\xff\xff\x80'
