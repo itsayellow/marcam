@@ -243,7 +243,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # prevent erasing of background before paint events
         #   we will be responsible for painting entire window, which we
         #   usually do anyway.
-        # TODO: also style=wx.BUFFER_VIRTUAL_AREA for Windows flicker?
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
         # ScrollRate of (10,10) is default
@@ -1064,11 +1063,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
         #   to try and avoid flicker in systems without double-buffered DC.
-        #   (also style=wx.BUFFER_VIRTUAL_AREA ?)
-        # TODO: still helpful? on which platforms?
-        # TODO: currently (7/27/2018) using AutoBufferedPaintDC makes
+        # NOTE: currently (7/27/2018) using AutoBufferedPaintDC makes
         #   our drag rubberband box fail.
-        #   Possibly related to wx.GraphicsContext ??
+        #   https://github.com/wxWidgets/Phoenix/issues/944
         #paint_dc = wx.AutoBufferedPaintDC(self)
 
         # Since AutoBufferedPaintDC isn't working for us, do it manually
@@ -1363,7 +1360,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   employing the clipping mask behavior of PaintDC to make sure we
         #   only display in the area of the window
         # copy region from self.img_dc into paintdc with possible stretching
-        # TODO: clipping max to only blit to image area?
         paintdc.StretchBlit(*stretch_blit_args)
 
         # paint margins bg color if image is smaller than window
