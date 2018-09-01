@@ -234,6 +234,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.overlay = wx.Overlay() # for making rubber-band box during drag
         self.rubberband_draw_rect = None
         self.rubberband_refresh_rect = None
+        self.scrollbar_widths = (30, 30) # overly large default, we set later
         self.zoom_frac_list = None
         self.zoom_idx = None
         self.zoom_list = None
@@ -274,12 +275,32 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
         self.Bind(wx.EVT_MOTION, self.on_motion)
 
+        # determine widths of scrollbars
+        self.get_scrollbar_size()
+
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
         self.Refresh()
         # Update immediately repaints invalidated areas
         #   without this, repainting will happen next iteration of event loop
         self.Update()
+
+    def get_scrollbar_size(self):
+        # get original Virtual Size
+        (orig_virtsize_x, orig_virtsize_y) = self.GetVirtualSize()
+        # get Size
+        (size_x, size_y) = self.GetSize()
+
+        # enlarge Virtual Size bigger than Size so scrollbars appear
+        self.SetVirtualSizeNoSizeEvt(size_x + 100, size_y + 100)
+
+        # measure scrollbar widths by difference between Size and ClientSize
+        (client_size_x, client_size_y) = self.GetClientSize()
+        (size_x, size_y) = self.GetSize()
+        self.scrollbar_widths = (size_x - client_size_x, size_y - client_size_y)
+
+        # set virtual size back the way it was
+        self.SetVirtualSizeNoSizeEvt(orig_virtsize_x, orig_virtsize_y)
 
     @debug_fxn
     def SetVirtualSizeNoSizeEvt(self, *args, **kwargs):
@@ -840,13 +861,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 to smaller than Window first (assume no scrollbars currently
                 visible.)
         """
-
-        # TODO: at init time find width of scrollbar and make that the
-        #   edge size of this square.  Can find width of scrollbar by
-        #   enlarging virtual area huge, then measure difference in
-        #   self.GetSize() and self.GetClientSize()
-        edge_width = 20
-
         (size_x, size_y) = self.GetSize()
         if not skip_virt_size:
             # if we currently have scrollbars, we need to resize virtual size
@@ -866,10 +880,10 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                     style=wx.BRUSHSTYLE_SOLID
                     )
                 )
-        # draw square in lower-right corner with edge size edge_width
+        # draw square in lower-right corner of size scrollbar_width on edge
         client_dc.DrawRectangle(
-                size_x-edge_width, size_y-edge_width,
-                edge_width, edge_width
+                size_x - self.scrollbar_widths[0], size_y - self.scrollbar_widths[1],
+                self.scrollbar_widths[0], self.scrollbar_widths[1],
                 )
 
     @debug_fxn
