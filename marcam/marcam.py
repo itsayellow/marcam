@@ -2233,14 +2233,14 @@ def sanity_checks():
     Raises Exceptions and logs errors for problems, mainly internal to app.
     """
     # Make sure we have access to all bitmaps.
-    bitmap_filenames = [
+    bitmap_paths = [
             const.SELECTBMP_FNAME, const.MARKBMP_FNAME, const.TOCLIPBMP_FNAME,
             const.ZOOMOUTBMP_FNAME, const.ZOOMINBMP_FNAME, const.ZOOMFITBMP_FNAME
             ]
-    for bitmap_filename in bitmap_filenames:
-        if not bitmap_filename.is_file():
-            LOGGER.error("Unable to find file: %s", bitmap_filename)
-            raise Exception("Missing bitmap file: %s"%bitmap_filename)
+    for bitmap_path in bitmap_paths:
+        if not bitmap_path.is_file():
+            LOGGER.error("Unable to find file: %s", bitmap_path)
+            raise Exception("Missing bitmap file: %s"%bitmap_path)
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
