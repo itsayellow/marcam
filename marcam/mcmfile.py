@@ -17,7 +17,7 @@
 import json
 import logging
 import os
-import os.path
+import pathlib
 import shutil
 import tempfile
 import zipfile
@@ -56,9 +56,15 @@ class McmFileError(Exception):
 @debug_fxn
 def image_readable(image_path):
     """Check if wx.Image can read this file without making error dialog
+
+    Args:
+        image_path (pathlike): path of image to check for readability
+
+    Returns:
+        bool: True if image was readable by wx.Image
     """
     no_log = wx.LogNull()
-    img_ok = wx.Image.CanRead(image_path)
+    img_ok = wx.Image.CanRead(str(image_path))
     # re-enable logging
     del no_log
     return img_ok
@@ -66,11 +72,17 @@ def image_readable(image_path):
 @debug_fxn
 def read_image(image_path):
     """wx.Image read from file, with wx errror logging turned off.
+
+    Args:
+        image_path (pathlike): path of image to read
+
+    Returns:
+        wx.Image: wx Image object read from file
     """
     # disable logging, we don't care if there is e.g. TIFF image
     #   with unknown fields
     no_log = wx.LogNull()
-    img = wx.Image(image_path)
+    img = wx.Image(str(image_path))
     # re-enable logging
     del no_log
 
@@ -79,9 +91,15 @@ def read_image(image_path):
 @debug_fxn
 def is_legacy_mcm_file(mcm_path):
     """Determine if this is a legacy mcm file (different format).
+
+    Args:
+        mcm_path (pathlike): path of mcm file to check if legacy
+
+    Returns:
+        bool: True if file is a legacy mcm file
     """
     try:
-        with zipfile.ZipFile(mcm_path) as mcm_container:
+        with zipfile.ZipFile(str(mcm_path)) as mcm_container:
             legacy_mcm = MCM_INFO_NAME not in mcm_container.namelist()
     except (zipfile.BadZipFile, OSError):
         #raise McmFileError
@@ -93,6 +111,12 @@ def is_valid(mcm_path):
     """Detect if this image is readable by this program.
 
     Detects any readable .mcm file.
+
+    Args:
+        mcm_path (pathlike): path of mcm file to check if valid
+
+    Returns:
+        bool: True if file is a valid mcm file
     """
     # if legacy file use legacy file function
     if is_legacy_mcm_file(mcm_path):
@@ -101,17 +125,17 @@ def is_valid(mcm_path):
         file_ok = (legacy_load(mcm_path) != (None, None, None))
         return file_ok
 
-    if zipfile.is_zipfile(mcm_path):
+    if zipfile.is_zipfile(str(mcm_path)):
         # for .mcm files
         # verify internals of zipfile
         try:
             tmp_dir = tempfile.mkdtemp()
-            with zipfile.ZipFile(mcm_path) as mcm_container:
+            with zipfile.ZipFile(str(mcm_path)) as mcm_container:
                 image_name = [
                         x for x in mcm_container.namelist() if x.startswith(MCM_LEGACY_IMAGE_PREFIX)
                         ][0]
                 mcm_container.extract(image_name, tmp_dir)
-                mcm_ok = image_readable(os.path.join(tmp_dir, image_name))
+                mcm_ok = image_readable(pathlib.Path(tmp_dir) / image_name)
         except zipfile.BadZipFile:
             mcm_ok = False
         finally:
@@ -127,7 +151,10 @@ def load(imdata_path):
     """Load native app .mcm file
 
     Args:
-        imdata_path (str): path to .mcm file to open
+        imdata_path (pathlike): path to .mcm file to open
+
+    Returns:
+        (wx.Image, list, str): (wx Image, list of mark coordinates, image name)
     """
     raise_mcm_file_error = False
     # init img_ok to False in case we don't load image
@@ -141,7 +168,7 @@ def load(imdata_path):
     # first load image from zip
     try:
         tmp_dir = tempfile.mkdtemp()
-        with zipfile.ZipFile(imdata_path, 'r') as container_fh:
+        with zipfile.ZipFile(str(imdata_path), 'r') as container_fh:
             with container_fh.open(MCM_INFO_NAME, 'r') as info_fh:
                 info = json.load(info_fh)
             marks = info['marks']
@@ -149,7 +176,7 @@ def load(imdata_path):
             image_name = info['mcm_image_name']
             container_fh.extract(image_name, tmp_dir)
 
-            img = read_image(os.path.join(tmp_dir, image_name))
+            img = read_image(pathlib.Path(tmp_dir) / image_name)
             # check if img loaded ok
             img_ok = img.IsOk()
 
@@ -181,10 +208,10 @@ def save(imdata_path, img, marks):
     """Save image and mark locations to .mcm zipfile
 
     Args:
-        imdata_path (str): full path to filename to save to
+        imdata_path (pathlike): full path to filename to save to
 
     Returns:
-        (bool): whether save was successful, True or False
+        bool: whether save was successful, True or False
     """
     # make temp file for image file
     #   must make actual file for use with zipfile
@@ -207,7 +234,7 @@ def save(imdata_path, img, marks):
             }
     # write new save file
     try:
-        with zipfile.ZipFile(imdata_path, 'w') as container_fh:
+        with zipfile.ZipFile(str(imdata_path), 'w') as container_fh:
             # write image file to archive
             container_fh.write(temp_img_name, arcname=MCM_IMAGE_NAME)
             # write json text file to archive
@@ -234,28 +261,31 @@ def legacy_load(imdata_path):
     Load legacy app .mcm file
 
     Args:
-        imdata_path (str): path to .mcm file to open
+        imdata_path (pathlike): path to .mcm file to open
+
+    Returns:
+        (wx.Image, list, str): (wx Image, list of mark coordinates, image name)
     """
     # init img_ok to False in case we don't load image
     img_ok = False
 
     # first load image from zip
     try:
-        with zipfile.ZipFile(imdata_path, 'r') as container_fh:
+        with zipfile.ZipFile(str(imdata_path), 'r') as container_fh:
             namelist = container_fh.namelist()
             for name in namelist:
                 if name.startswith(MCM_LEGACY_IMAGE_PREFIX):
-                    tmp_dir = tempfile.mkdtemp()
-                    container_fh.extract(name, tmp_dir)
+                    tmp_dir_path = pathlib.Path(tempfile.mkdtemp())
+                    container_fh.extract(name, str(tmp_dir_path))
 
                     if name.endswith(".1sc"):
-                        img = image_proc.file1sc_to_image(os.path.join(tmp_dir, name))
+                        img = image_proc.file1sc_to_image(tmp_dir_path / name)
                     else:
                         # disable logging, we don't care if there is e.g. TIFF image
                         #   with unknown fields
                         no_log = wx.LogNull()
 
-                        img = wx.Image(os.path.join(tmp_dir, name))
+                        img = wx.Image(str(tmp_dir_path / name))
 
                         # re-enable logging
                         del no_log
@@ -264,8 +294,8 @@ def legacy_load(imdata_path):
                     img_name = name
 
                     # remove temp dir
-                    os.remove(os.path.join(tmp_dir, name))
-                    os.rmdir(tmp_dir)
+                    (tmp_dir_path / name).unlink()
+                    tmp_dir_path.rmdir()
 
                 if name == "marks.txt":
                     with container_fh.open(name, 'r') as json_fh:
