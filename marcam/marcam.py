@@ -1238,6 +1238,8 @@ class ImageFrame(wx.Frame):
             self.img_panel.set_no_image()
             # Set window title to generic app name
             self.SetTitle('Marcam')
+            # Reset zoom portion of statusbar to show nothing
+            self.statusbar.SetStatusText("", 1)
 
         self.menu_items_enable_disable()
 
