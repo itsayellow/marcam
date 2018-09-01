@@ -516,7 +516,6 @@ class ImageFrame(wx.Frame):
                 2,
                 [-1, common.get_text_width_px(self.statusbar, "Zoom: 99999.9%")]
                 )
-        self.statusbar.SetStatusText('Ready.', 0)
 
         # Panel keeps things from spilling over the frame, statusbar, etc.
         #   also accepts key focus
@@ -1089,11 +1088,6 @@ class ImageFrame(wx.Frame):
             # By not calling self.frame_history.save_notify(), indicate needs save
 
         if img_ok:
-            # TODO: is this superfluous?
-            self.statusbar.SetStatusText(
-                    "Image Data " + str(img_path) + " loaded OK.",
-                    0
-                    )
             zoom = self.img_panel.get_zoom_val()
             self.statusbar.SetStatusText("Zoom: %.1f%%"%(zoom*100), 1)
             self.menu_items_enable_disable()
@@ -1242,8 +1236,6 @@ class ImageFrame(wx.Frame):
             self.save_filepath = None
             # make scrolled window show no image
             self.img_panel.set_no_image()
-            # update statusbar text
-            self.statusbar.SetStatusText('Ready.', 0)
             # Set window title to generic app name
             self.SetTitle('Marcam')
 
