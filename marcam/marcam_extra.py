@@ -19,7 +19,6 @@
 
 
 import logging
-import pathlib
 
 import wx
 import wx.html2
