@@ -276,7 +276,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_MOTION, self.on_motion)
 
         # determine widths of scrollbars
-        self.get_scrollbar_size()
+        self.get_scrollbar_widths()
 
         # force a paint event with Refresh and Update
         # Refresh Invalidates the window
@@ -285,7 +285,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   without this, repainting will happen next iteration of event loop
         self.Update()
 
-    def get_scrollbar_size(self):
+    @debug_fxn
+    def get_scrollbar_widths(self):
         # get original Virtual Size
         (orig_virtsize_x, orig_virtsize_y) = self.GetVirtualSize()
         # get Size
@@ -298,6 +299,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         (client_size_x, client_size_y) = self.GetClientSize()
         (size_x, size_y) = self.GetSize()
         self.scrollbar_widths = (size_x - client_size_x, size_y - client_size_y)
+        LOGGER.info(
+                "MSC:self.scrollbar_widths=(%d,%d)",
+                self.scrollbar_widths[0],
+                self.scrollbar_widths[1],
+                )
 
         # set virtual size back the way it was
         self.SetVirtualSizeNoSizeEvt(orig_virtsize_x, orig_virtsize_y)
