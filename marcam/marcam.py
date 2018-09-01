@@ -212,7 +212,7 @@ class ImageFrame(wx.Frame):
         # internal state
         self.frame_history = marcam_extra.EditHistory()
         self.img_path = None
-        self.save_filepath = None
+        self.save_filepath = None # NONE or pathlib.Path
         self.temp_scroll_zoom_state = None
         self.parent = parent
         self.close_source = None
@@ -1137,7 +1137,7 @@ class ImageFrame(wx.Frame):
             # set save_filepath to path of mcm file we loaded
             # self.img_path if from mcm is file path to file
             self.img_path = str(imdata_path)
-            self.save_filepath = str(imdata_path)
+            self.save_filepath = imdata_path
             # Set window title to filename
             self.SetTitle(str(imdata_path.name))
             # on Mac sets file icon in titlebar with right-click showing
@@ -1267,7 +1267,7 @@ class ImageFrame(wx.Frame):
                     thread_fxn_args=(),
                     post_thread_fxn=self.on_save_postthread,
                     progress_title="Saving Image",
-                    progress_msg="Saving %s..."%os.path.basename(self.save_filepath),
+                    progress_msg="Saving %s..."%self.save_filepath.name,
                     parent=self
                     )
 
@@ -1312,13 +1312,12 @@ class ImageFrame(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        if self.save_filepath:
-            (default_dir, default_filename) = os.path.split(self.save_filepath)
+        if self.save_filepath is not None:
+            default_dir = self.save_filepath.parent
+            default_filename = self.save_filepath.name
         else:
-            img_path = self.img_path
-            (img_path_root, _) = os.path.splitext(os.path.basename(img_path))
-            default_save_path = img_path_root + ".mcm"
-            (default_dir, default_filename) = os.path.split(default_save_path)
+            default_dir = pathlib.Path(self.img_path).parent
+            default_filename = pathlib.Path(self.img_path).stem + ".mcm"
 
         # native Mac open dialog has no title message
         with wx.FileDialog(
@@ -1326,7 +1325,7 @@ class ImageFrame(wx.Frame):
                 "" if const.PLATFORM == 'mac' else "Save MCM file",
                 wildcard="MCM files (*.mcm)|*.mcm",
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
-                defaultDir=default_dir,
+                defaultDir=str(default_dir),
                 defaultFile=default_filename,
                 ) as file_dialog:
 
@@ -1364,7 +1363,7 @@ class ImageFrame(wx.Frame):
             pathname (pathlib.Path): full path image file was saved to
         """
         if save_ok:
-            self.save_filepath = str(pathname)
+            self.save_filepath = pathname
             # set img_path
             self.img_path = str(pathname)
             # signify we have saved content
@@ -1401,12 +1400,11 @@ class ImageFrame(wx.Frame):
         else:
             # if we have no save_filepath, we have not loaded .mcm image
             #   thus use self.img_path
-            img_path = self.img_path
+            img_path = pathlib.Path(self.img_path)
 
         # create new filename based on old one but ending with _export.png
-        (default_dir, default_filename) = os.path.split(img_path)
-        (filename_root, _) = os.path.splitext(default_filename)
-        default_filename = filename_root + "_export.png"
+        default_dir = img_path.parent
+        default_filename = img_path.stem + "_export.png"
 
         # native Mac open dialog has no title message
         with wx.FileDialog(
@@ -1414,7 +1412,7 @@ class ImageFrame(wx.Frame):
                 "" if const.PLATFORM == 'mac' else "Export Image and Marks as Image",
                 wildcard=wx.Image.GetImageExtWildcard(),
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
-                defaultDir=default_dir,
+                defaultDir=str(default_dir),
                 defaultFile=default_filename,
                 ) as file_dialog:
 
