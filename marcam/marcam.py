@@ -211,7 +211,7 @@ class ImageFrame(wx.Frame):
 
         # internal state
         self.frame_history = marcam_extra.EditHistory()
-        self.img_path = None
+        self.img_path = None # NONE or pathlib.Path
         self.save_filepath = None # NONE or pathlib.Path
         self.temp_scroll_zoom_state = None
         self.parent = parent
@@ -1136,7 +1136,7 @@ class ImageFrame(wx.Frame):
             self.img_panel.init_image()
             # set save_filepath to path of mcm file we loaded
             # self.img_path if from mcm is file path to file
-            self.img_path = str(imdata_path)
+            self.img_path = imdata_path
             self.save_filepath = imdata_path
             # Set window title to filename
             self.SetTitle(str(imdata_path.name))
@@ -1188,7 +1188,7 @@ class ImageFrame(wx.Frame):
             # init image in window
             self.img_panel.init_image()
             # reset filepath for mcm file to nothing if we load new image
-            self.img_path = str(img_file)
+            self.img_path = img_file
             self.save_filepath = None
             # Set window title to filename
             self.SetTitle(str(img_file.name))
@@ -1210,7 +1210,7 @@ class ImageFrame(wx.Frame):
         """
         if not self.frame_history.is_saved():
             self.activate()
-            image_to_close = os.path.basename(self.img_path)
+            image_to_close = self.img_path.name
 
             # changes list
             changes_list = self.frame_history.get_actions_since_save()
@@ -1316,8 +1316,8 @@ class ImageFrame(wx.Frame):
             default_dir = self.save_filepath.parent
             default_filename = self.save_filepath.name
         else:
-            default_dir = pathlib.Path(self.img_path).parent
-            default_filename = pathlib.Path(self.img_path).stem + ".mcm"
+            default_dir = self.img_path.parent
+            default_filename = self.img_path.stem + ".mcm"
 
         # native Mac open dialog has no title message
         with wx.FileDialog(
@@ -1365,7 +1365,7 @@ class ImageFrame(wx.Frame):
         if save_ok:
             self.save_filepath = pathname
             # set img_path
-            self.img_path = str(pathname)
+            self.img_path = pathname
             # signify we have saved content
             self.frame_history.save_notify()
             # add successful file save as to file history
@@ -1400,7 +1400,7 @@ class ImageFrame(wx.Frame):
         else:
             # if we have no save_filepath, we have not loaded .mcm image
             #   thus use self.img_path
-            img_path = pathlib.Path(self.img_path)
+            img_path = self.img_path
 
         # create new filename based on old one but ending with _export.png
         default_dir = img_path.parent
