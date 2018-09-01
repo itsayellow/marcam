@@ -1771,8 +1771,6 @@ class MarcamApp(wx.App):
             self.wxconfig = wx.Config("Marcam", "itsayellow.com")
 
         # File history
-        # TODO: paths loaded from config are full paths in menu, but paths
-        #   added as app runs are just the filename (??)
         self.file_history = wx.FileHistory()
         self.file_history.Load(self.wxconfig)
 
