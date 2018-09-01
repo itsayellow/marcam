@@ -421,7 +421,7 @@ class ImageFrame(wx.Frame):
 
         # register Open Recent menu, put under control of FileHistory obj
         self.file_history.UseMenu(open_recent_menu)
-        self.file_history.AddFilesToMenu()
+        self.file_history.AddFilesToMenu(open_recent_menu)
 
         # register Save, Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
