@@ -178,7 +178,7 @@ def create_rational_zooms(mag_step, total_mag_steps, error_tol):
     #print(zoom_frac_list)
     #print("zoom max. perc error: %.2f%%"%np.max(perc_errors))
 
-    # DEBUG DELETEME
+    # DEBUG
     print("mag_step = ")
     print(mag_step)
     print("total_mag_steps = ")
@@ -554,7 +554,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                         )
             except TypeError as exc:
                 # topLeft = NoneType. Attempting to double click image or something
-                # DEBUG DELETEME
                 #LOGGER.warning("Drag but TypeError: returning")
                 return
             except Exception as exc:
@@ -2198,7 +2197,6 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                             )
                 except TypeError as exc:
                     # topLeft = NoneType. Attempting to double click image or something
-                    # DEBUG DELETEME
                     #LOGGER.warning("Drag but TypeError: returning")
                     return
                 except Exception as exc:
