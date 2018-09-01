@@ -1167,10 +1167,6 @@ class ImageFrame(wx.Frame):
         else:
             # disable logging, we don't care if there is e.g. TIFF image
             #   with unknown fields
-            # TODO: could also just raise loglevel to Error and above
-            #       wx.Log.SetLogLevel()
-            #       wx.Log.EnableLogging(True or False)
-            #       wx.Log.Suspend(), wx.Log.Resume()
             no_log = wx.LogNull()
 
             img = wx.Image(img_file)
