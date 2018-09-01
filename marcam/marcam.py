@@ -1766,7 +1766,6 @@ class MarcamApp(wx.App):
         self.display_size = wx.Display().GetClientArea().GetSize()
 
         for open_filename in open_files:
-            # TODO: what to do with files that can't open because error
             img_ok = self.new_frame_open_file(open_filename)
 
         # if after giving chances to open files from command-line, OS events,
@@ -2047,7 +2046,6 @@ class MarcamApp(wx.App):
                     )
             self.file_windows.append(new_frame)
             if open_filename is not None:
-                # TODO: handle what happens if bad image, if img_ok==False
                 new_frame.open_image_this_frame(open_filename)
             # need to actually GetPosition to get real position, in case both
             #   self.last_frame_pos = (-1, -1) and new_pos = (-1, -1)
@@ -2087,8 +2085,6 @@ class MarcamApp(wx.App):
         LOGGER.debug(file_names)
         for open_filename in file_names:
             img_ok = self.open_file(open_filename)
-            # TODO: figure out how to ignore bad openFiles from command-line
-            #   what to do with files that can't open because error
             if img_ok:
                 LOGGER.info("MacOpenFiles: img_ok: %s", open_filename)
             else:
