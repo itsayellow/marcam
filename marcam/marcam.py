@@ -18,8 +18,6 @@
 
 # GUI for displaying an image and counting cells
 
-# TODO: Mac OS X specific things to possibly try:
-#   wx.TopLevelWindow.OSXSetModified()
 
 import argparse
 from datetime import datetime
