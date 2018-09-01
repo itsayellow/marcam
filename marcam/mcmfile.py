@@ -69,7 +69,6 @@ def read_image(image_path):
     """
     # disable logging, we don't care if there is e.g. TIFF image
     #   with unknown fields
-    # TODO: could also just raise loglevel to Error and above
     no_log = wx.LogNull()
     img = wx.Image(image_path)
     # re-enable logging
@@ -254,7 +253,6 @@ def legacy_load(imdata_path):
                     else:
                         # disable logging, we don't care if there is e.g. TIFF image
                         #   with unknown fields
-                        # TODO: could also just raise loglevel to Error and above
                         no_log = wx.LogNull()
 
                         img = wx.Image(os.path.join(tmp_dir, name))
