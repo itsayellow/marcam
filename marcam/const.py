@@ -48,19 +48,19 @@ else:
 ICON_DIR = EXE_DIR / 'media'
 
 if PLATFORM == 'mac':
-    SELECTBMP_FNAME = os.path.join(ICON_DIR, 'selectmode24_mac.png')
-    MARKBMP_FNAME = os.path.join(ICON_DIR, 'markmode24_mac.png')
-    TOCLIPBMP_FNAME = os.path.join(ICON_DIR, 'toclip24_mac.png')
-    ZOOMOUTBMP_FNAME = os.path.join(ICON_DIR, 'zoomout24_mac.png')
-    ZOOMINBMP_FNAME = os.path.join(ICON_DIR, 'zoomin24_mac.png')
-    ZOOMFITBMP_FNAME = os.path.join(ICON_DIR, 'zoomfit24_mac.png')
+    SELECTBMP_FNAME = ICON_DIR / 'selectmode24_mac.png'
+    MARKBMP_FNAME = ICON_DIR / 'markmode24_mac.png'
+    TOCLIPBMP_FNAME = ICON_DIR / 'toclip24_mac.png'
+    ZOOMOUTBMP_FNAME = ICON_DIR / 'zoomout24_mac.png'
+    ZOOMINBMP_FNAME = ICON_DIR / 'zoomin24_mac.png'
+    ZOOMFITBMP_FNAME = ICON_DIR / 'zoomfit24_mac.png'
 else:
-    SELECTBMP_FNAME = os.path.join(ICON_DIR, 'selectmode32.png')
-    MARKBMP_FNAME = os.path.join(ICON_DIR, 'marktool32.png')
-    TOCLIPBMP_FNAME = os.path.join(ICON_DIR, 'toclip32.png')
-    ZOOMOUTBMP_FNAME = os.path.join(ICON_DIR, 'zoomout32.png')
-    ZOOMINBMP_FNAME = os.path.join(ICON_DIR, 'zoomin32.png')
-    ZOOMFITBMP_FNAME = os.path.join(ICON_DIR, 'zoomfit32.png')
+    SELECTBMP_FNAME = ICON_DIR / 'selectmode32.png'
+    MARKBMP_FNAME = ICON_DIR / 'marktool32.png'
+    TOCLIPBMP_FNAME = ICON_DIR / 'toclip32.png'
+    ZOOMOUTBMP_FNAME = ICON_DIR / 'zoomout32.png'
+    ZOOMINBMP_FNAME = ICON_DIR / 'zoomin32.png'
+    ZOOMFITBMP_FNAME = ICON_DIR / 'zoomfit32.png'
 
 # for mag_step=1.1, total_mag_steps=69:
 #   error_tol      max numerator

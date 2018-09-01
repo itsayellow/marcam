@@ -444,12 +444,12 @@ class ImageFrame(wx.Frame):
         #       width can be variable (78w seen)
         #   in wx pixels use 24h x >24w
         #   rounded corners
-        selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
-        markbmp = wx.Bitmap(const.MARKBMP_FNAME)
-        toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
-        zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
-        zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
-        zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
+        selectbmp = wx.Bitmap(str(const.SELECTBMP_FNAME))
+        markbmp = wx.Bitmap(str(const.MARKBMP_FNAME))
+        toclipbmp = wx.Bitmap(str(const.TOCLIPBMP_FNAME))
+        zoomoutbmp = wx.Bitmap(str(const.ZOOMOUTBMP_FNAME))
+        zoomfitbmp = wx.Bitmap(str(const.ZOOMFITBMP_FNAME))
+        zoominbmp = wx.Bitmap(str(const.ZOOMINBMP_FNAME))
 
         self.toolbar = self.CreateToolBar()
         #self.toolbar.SetToolBitmapSize(wx.Size(24,24))
@@ -2238,7 +2238,7 @@ def sanity_checks():
             const.ZOOMOUTBMP_FNAME, const.ZOOMINBMP_FNAME, const.ZOOMFITBMP_FNAME
             ]
     for bitmap_filename in bitmap_filenames:
-        if not os.path.exists(bitmap_filename):
+        if not bitmap_filename.is_file():
             LOGGER.error("Unable to find file: %s", bitmap_filename)
             raise Exception("Missing bitmap file: %s"%bitmap_filename)
 
