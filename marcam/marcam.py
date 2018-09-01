@@ -114,7 +114,7 @@ def logging_setup(log_level=logging.DEBUG):
             )
 
     # make sure log file dir exists
-    const.USER_LOG_DIR.mkdir(exist_ok=True)
+    const.USER_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     # canonical logfile full path
     logfile_name = 'marcam.log'
@@ -167,10 +167,7 @@ def load_config():
     # start with defaults, override later with any/all actual config data
     config_data = default_config_data()
 
-    config_filepath = os.path.join(
-            const.USER_CONFIG_DIR,
-            "config.json"
-            )
+    config_filepath = const.USER_CONFIG_DIR / "config.json"
     try:
         with open(config_filepath, 'r') as config_fh:
             config_data.update(json.load(config_fh))
@@ -188,12 +185,9 @@ def save_config(config_data):
         config_data (dict): config data to save
     """
     # create config dir if necessary
-    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
+    const.USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-    config_filepath = os.path.join(
-            const.USER_CONFIG_DIR,
-            "config.json"
-            )
+    config_filepath = const.USER_CONFIG_DIR / "config.json"
     # if no config.json file, create
     try:
         with open(config_filepath, 'w') as config_fh:
@@ -2209,11 +2203,10 @@ def another_instance_running(srcfile_args):
     # make global to persist until app is closed
     global singleinst_instance
     singleinst_name = "Marcam-%s"%wx.GetUserId()
-    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
-    singleinst_path = const.USER_CONFIG_DIR
+    const.USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     singleinst_instance = wx.SingleInstanceChecker(
             singleinst_name,
-            singleinst_path,
+            str(const.USER_CONFIG_DIR),
             )
     another_inst = singleinst_instance.IsAnotherRunning()
     if another_inst and srcfile_args:
