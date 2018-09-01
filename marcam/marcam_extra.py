@@ -521,7 +521,7 @@ class FrameList():
         """Return the frame in FrameList that has img_file inside it.
 
         Args:
-            img_file (str): full path to img_file to check Frame for.
+            img_file (pathlib.Path): full path to img_file to check Frame for.
 
         Returns:
             (None or wx.Frame): None if no frame contains file, or the wx.Frame

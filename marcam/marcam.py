@@ -2011,7 +2011,7 @@ class MarcamApp(wx.App):
         if open_filename is not None:
             open_filename = pathlib.Path(open_filename)
 
-            already_open_frame = self.file_windows.frame_with_file(str(open_filename))
+            already_open_frame = self.file_windows.frame_with_file(open_filename)
             if already_open_frame:
                 # Already have a frame with that file open, don't open a dup
                 #   just move it to front
