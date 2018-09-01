@@ -1757,7 +1757,12 @@ class MarcamApp(wx.App):
 
         # App configuration (especially for FileHistory)
         # TODO: combine config_data into wxconfig?
-        self.wxconfig = wx.Config("Marcam", "itsayellow.com")
+        self.wxconfig = wx.Config(
+                "Marcam",
+                "itsayellow.com",
+                localFilename=str(const.USER_CONFIG_DIR / "Marcam_Preferences"),
+                style=wx.CONFIG_USE_LOCAL_FILE
+                )
         # File history
         # TODO: paths loaded from config are full paths in menu, but paths
         #   added as app runs are just the filename (??)
