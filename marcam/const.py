@@ -17,7 +17,6 @@
 import sys
 import wx
 import appdirs
-import os.path
 import pathlib
 
 APP_NAME = 'Marcam'
@@ -43,8 +42,9 @@ if getattr(sys, 'frozen', False) and getattr(sys, '_MEIPASS', False):
     #   on win: "Marcam/"
     # mac has symlink in EXE_DIR to media in "Marcam.app/Contents/Resources"
 else:
-    EXE_DIR = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+    EXE_DIR = pathlib.Path(__file__).resolve().parent
     # for now the paths are the same
+
 ICON_DIR = EXE_DIR / 'media'
 
 if PLATFORM == 'mac':
