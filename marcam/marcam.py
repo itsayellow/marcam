@@ -24,7 +24,7 @@ from datetime import datetime
 import json
 import logging
 import os
-import os.path # TODO: consider pathlib
+import pathlib
 import platform
 import re
 import sys
@@ -75,18 +75,25 @@ def can_read_image(image_path):
     """Detect if this image is readable by this program.
 
     Detects any readable plain image file, or .mcm file.
+
+    Args:
+        image_path (pathlike): path to image to check if readable
+
+    Returns:
+        bool: True if image is readable by wx.Image()
     """
-    (_, image_path_ext) = os.path.splitext(image_path)
+    image_path = pathlib.Path(image_path)
+
     if mcmfile.is_valid(image_path):
         img_ok = True
-    elif image_path_ext == ".1sc":
+    elif image_path.suffix == ".1sc":
         img_ok = bool(image_proc.file1sc_to_image(image_path))
     else:
         # for all other image files
         # wx.Image.CanRead has its own error log, which is setup to cause
         #   error dialog.  Disable it if because want to use our own
         no_log = wx.LogNull()
-        img_ok = wx.Image.CanRead(image_path)
+        img_ok = wx.Image.CanRead(str(image_path))
         # re-enable logging
         del no_log
 
@@ -106,25 +113,23 @@ def logging_setup(log_level=logging.DEBUG):
             )
 
     # make sure log file dir exists
-    os.makedirs(const.USER_LOG_DIR, exist_ok=True)
+    const.USER_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     # canonical logfile full path
-    logfile_path = os.path.join(
-            const.USER_LOG_DIR,
-            'marcam.log'
-            )
+    logfile_name = 'marcam.log'
+    logfile_path = const.USER_LOG_DIR / logfile_name
 
     # rename all old log files
     #   (log.txt.2 -> log.txt.3, log.txt.1 -> log.txt.2, log.txt -> log.txt.1
     num_logfile_hist = 10
     for i in range(num_logfile_hist-1, -1, -1):
-        fname = logfile_path + ".%d"%i if i != 0 else logfile_path
-        fname_plus_1 = logfile_path + ".%d"%(i+1)
-        if os.path.exists(fname):
-            os.replace(fname, fname_plus_1)
+        fname = const.USER_LOG_DIR / (logfile_name + (".%d"%i if i != 0 else ""))
+        fname_plus_1 = const.USER_LOG_DIR / (logfile_name + ".%d"%(i+1))
+        if fname.exists():
+            fname.replace(fname_plus_1)
 
     # file handler
-    file_handler = logging.FileHandler(logfile_path)
+    file_handler = logging.FileHandler(str(logfile_path))
     file_handler.setLevel(log_level)
     # add global formatter to file handler
     file_handler.setFormatter(formatter)
@@ -161,10 +166,7 @@ def load_config():
     # start with defaults, override later with any/all actual config data
     config_data = default_config_data()
 
-    config_filepath = os.path.join(
-            const.USER_CONFIG_DIR,
-            "config.json"
-            )
+    config_filepath = const.USER_CONFIG_DIR / "config.json"
     try:
         with open(config_filepath, 'r') as config_fh:
             config_data.update(json.load(config_fh))
@@ -182,12 +184,9 @@ def save_config(config_data):
         config_data (dict): config data to save
     """
     # create config dir if necessary
-    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
+    const.USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-    config_filepath = os.path.join(
-            const.USER_CONFIG_DIR,
-            "config.json"
-            )
+    config_filepath = const.USER_CONFIG_DIR / "config.json"
     # if no config.json file, create
     try:
         with open(config_filepath, 'w') as config_fh:
@@ -211,8 +210,8 @@ class ImageFrame(wx.Frame):
 
         # internal state
         self.frame_history = marcam_extra.EditHistory()
-        self.img_path = None
-        self.save_filepath = None
+        self.img_path = None # NONE or pathlib.Path
+        self.save_filepath = None # NONE or pathlib.Path
         self.temp_scroll_zoom_state = None
         self.parent = parent
         self.close_source = None
@@ -444,12 +443,12 @@ class ImageFrame(wx.Frame):
         #       width can be variable (78w seen)
         #   in wx pixels use 24h x >24w
         #   rounded corners
-        selectbmp = wx.Bitmap(const.SELECTBMP_FNAME)
-        markbmp = wx.Bitmap(const.MARKBMP_FNAME)
-        toclipbmp = wx.Bitmap(const.TOCLIPBMP_FNAME)
-        zoomoutbmp = wx.Bitmap(const.ZOOMOUTBMP_FNAME)
-        zoomfitbmp = wx.Bitmap(const.ZOOMFITBMP_FNAME)
-        zoominbmp = wx.Bitmap(const.ZOOMINBMP_FNAME)
+        selectbmp = wx.Bitmap(str(const.SELECTBMP_FNAME))
+        markbmp = wx.Bitmap(str(const.MARKBMP_FNAME))
+        toclipbmp = wx.Bitmap(str(const.TOCLIPBMP_FNAME))
+        zoomoutbmp = wx.Bitmap(str(const.ZOOMOUTBMP_FNAME))
+        zoomfitbmp = wx.Bitmap(str(const.ZOOMFITBMP_FNAME))
+        zoominbmp = wx.Bitmap(str(const.ZOOMINBMP_FNAME))
 
         self.toolbar = self.CreateToolBar()
         #self.toolbar.SetToolBitmapSize(wx.Size(24,24))
@@ -608,7 +607,7 @@ class ImageFrame(wx.Frame):
         self.SetTitle('Marcam')
 
         # set icon in title bar for Windows (and unix?)
-        my_icon_bundle = wx.IconBundle(os.path.join(const.ICON_DIR, 'marcam.ico'))
+        my_icon_bundle = wx.IconBundle(str(const.ICON_DIR / 'marcam.ico'))
         self.SetIcons(my_icon_bundle)
 
         # Make sure we are the same size we meant to be at start of this fxn.
@@ -1022,8 +1021,10 @@ class ImageFrame(wx.Frame):
             evt (wx.CommandEvent): wx Event for this handler
         """
         # get path from file_history
-        img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
-        if os.path.exists(img_path):
+        img_path = pathlib.Path(
+                self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
+                )
+        if img_path.exists():
             img_ok = self.open_image(img_path)
             if not img_ok:
                 # wx.ICON_ERROR has no effect on Mac
@@ -1053,12 +1054,14 @@ class ImageFrame(wx.Frame):
         dialog if img_ok is returned False
 
         Args:
-            img_path (str): full path to image to open
+            img_path (pathlike): full path to image to open
 
         Returns:
             (bool) img_ok - whether image was successfully loaded into current
                 or new frame
         """
+        img_path = pathlib.Path(img_path)
+
         if self.img_panel.has_no_image():
             img_ok = self.open_image_this_frame(img_path)
         else:
@@ -1071,13 +1074,14 @@ class ImageFrame(wx.Frame):
         """Open new image in this frame.
 
         Args:
-            img_path (str): full path to image.
+            img_path (pathlike): full path to image.
 
         Returns:
             (bool) img_ok - whether image was successfully loaded into frame
         """
-        (_, imgfile_ext) = os.path.splitext(img_path)
-        if imgfile_ext == ".mcm":
+        img_path = pathlib.Path(img_path)
+
+        if img_path.suffix == ".mcm":
             img_ok = self.load_mcmfile_from_path(img_path)
         else:
             # image or *.1sc file
@@ -1087,7 +1091,7 @@ class ImageFrame(wx.Frame):
         if img_ok:
             # TODO: is this superfluous?
             self.statusbar.SetStatusText(
-                    "Image Data " + img_path + " loaded OK.",
+                    "Image Data " + str(img_path) + " loaded OK.",
                     0
                     )
             zoom = self.img_panel.get_zoom_val()
@@ -1106,8 +1110,9 @@ class ImageFrame(wx.Frame):
         """Load native app .mcm file
 
         Args:
-            imdata_path (str): path to .mcm file to open
+            imdata_path (pathlike): path to .mcm file to open
         """
+        imdata_path = pathlib.Path(imdata_path)
         # init img_ok to False in case we don't load image
         img_ok = False
 
@@ -1135,14 +1140,14 @@ class ImageFrame(wx.Frame):
             self.img_path = imdata_path
             self.save_filepath = imdata_path
             # Set window title to filename
-            self.SetTitle(os.path.basename(imdata_path))
+            self.SetTitle(str(imdata_path.name))
             # on Mac sets file icon in titlebar with right-click showing
             #   dir hierarchy
-            self.SetRepresentedFilename(imdata_path)
+            self.SetRepresentedFilename(str(imdata_path))
             # on Mac update Window menu frame list with new title
             self.parent.file_windows.update_window_menu()
             # add successful file open to file history
-            self.file_history.AddFileToHistory(imdata_path)
+            self.file_history.AddFileToHistory(str(imdata_path))
             # we just loaded .mcm file, so have nothing to save
             self.frame_history.save_notify()
 
@@ -1156,20 +1161,21 @@ class ImageFrame(wx.Frame):
         Separate from on_open so we can use this with argv_emulation
 
         Args:
-            img_file (str): full path to image file (JPG, TIFF, etc.)
+            img_file (pathlike): full path to image file (JPG, TIFF, etc.)
         """
+        img_file = pathlib.Path(img_file)
         img_ok = False
 
         # check for 1sc files and get image data to send to Image
-        (_, imgfile_ext) = os.path.splitext(img_file)
-        if imgfile_ext == ".1sc":
+
+        if img_file.suffix == ".1sc":
             img = image_proc.file1sc_to_image(img_file)
         else:
             # disable logging, we don't care if there is e.g. TIFF image
             #   with unknown fields
             no_log = wx.LogNull()
 
-            img = wx.Image(img_file)
+            img = wx.Image(str(img_file))
 
             # re-enable logging
             del no_log
@@ -1186,10 +1192,10 @@ class ImageFrame(wx.Frame):
             self.img_path = img_file
             self.save_filepath = None
             # Set window title to filename
-            self.SetTitle(os.path.basename(img_file))
+            self.SetTitle(str(img_file.name))
             # on Mac sets file icon in titlebar with right-click showing
             #   dir hierarchy
-            self.SetRepresentedFilename(img_file)
+            self.SetRepresentedFilename(str(img_file))
             # on Mac update Window menu frame list with new title
             self.parent.file_windows.update_window_menu()
 
@@ -1205,7 +1211,7 @@ class ImageFrame(wx.Frame):
         """
         if not self.frame_history.is_saved():
             self.activate()
-            image_to_close = os.path.basename(self.img_path)
+            image_to_close = self.img_path.name
 
             # changes list
             changes_list = self.frame_history.get_actions_since_save()
@@ -1262,7 +1268,7 @@ class ImageFrame(wx.Frame):
                     thread_fxn_args=(),
                     post_thread_fxn=self.on_save_postthread,
                     progress_title="Saving Image",
-                    progress_msg="Saving %s..."%os.path.basename(self.save_filepath),
+                    progress_msg="Saving %s..."%self.save_filepath.name,
                     parent=self
                     )
 
@@ -1307,13 +1313,12 @@ class ImageFrame(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
-        if self.save_filepath:
-            (default_dir, default_filename) = os.path.split(self.save_filepath)
+        if self.save_filepath is not None:
+            default_dir = self.save_filepath.parent
+            default_filename = self.save_filepath.name
         else:
-            img_path = self.img_path
-            (img_path_root, _) = os.path.splitext(os.path.basename(img_path))
-            default_save_path = img_path_root + ".mcm"
-            (default_dir, default_filename) = os.path.split(default_save_path)
+            default_dir = self.img_path.parent
+            default_filename = self.img_path.stem + ".mcm"
 
         # native Mac open dialog has no title message
         with wx.FileDialog(
@@ -1321,7 +1326,7 @@ class ImageFrame(wx.Frame):
                 "" if const.PLATFORM == 'mac' else "Save MCM file",
                 wildcard="MCM files (*.mcm)|*.mcm",
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
-                defaultDir=default_dir,
+                defaultDir=str(default_dir),
                 defaultFile=default_filename,
                 ) as file_dialog:
 
@@ -1329,14 +1334,14 @@ class ImageFrame(wx.Frame):
                 return     # the user changed their mind
 
             # save the current contents in the file
-            pathname = file_dialog.GetPath()
+            pathname = pathlib.Path(file_dialog.GetPath())
 
             longtask.ThreadedProgressPulse(
                     thread_fxn=self.on_saveas_thread,
                     thread_fxn_args=(pathname,),
                     post_thread_fxn=self.on_saveas_postthread,
                     progress_title="Saving Image",
-                    progress_msg="Saving %s..."%os.path.basename(pathname),
+                    progress_msg="Saving %s..."%pathname.name,
                     parent=self
                     )
 
@@ -1345,7 +1350,7 @@ class ImageFrame(wx.Frame):
         """Thread portion of File->Save As... menu handler
 
         Args:
-            pathname (str): full path to save image file
+            pathname (pathlib.Path): full path to save image file
         """
         save_ok = self.save_img_data(pathname)
         return (save_ok, pathname)
@@ -1356,7 +1361,7 @@ class ImageFrame(wx.Frame):
 
         Args:
             save_ok (bool): whether file was saved successfully
-            pathname (str): full path image file was saved to
+            pathname (pathlib.Path): full path image file was saved to
         """
         if save_ok:
             self.save_filepath = pathname
@@ -1365,12 +1370,12 @@ class ImageFrame(wx.Frame):
             # signify we have saved content
             self.frame_history.save_notify()
             # add successful file save as to file history
-            self.file_history.AddFileToHistory(pathname)
+            self.file_history.AddFileToHistory(str(pathname))
             # Set window title to newly-saved filename
-            self.SetTitle(os.path.basename(pathname))
+            self.SetTitle(str(pathname.name))
             # on Mac sets file icon in titlebar with right-click showing
             #   dir hierarchy
-            self.SetRepresentedFilename(pathname)
+            self.SetRepresentedFilename(str(pathname))
             # on Mac update Window menu frame list with new title
             self.parent.file_windows.update_window_menu()
         else:
@@ -1399,9 +1404,8 @@ class ImageFrame(wx.Frame):
             img_path = self.img_path
 
         # create new filename based on old one but ending with _export.png
-        (default_dir, default_filename) = os.path.split(img_path)
-        (filename_root, _) = os.path.splitext(default_filename)
-        default_filename = filename_root + "_export.png"
+        default_dir = img_path.parent
+        default_filename = img_path.stem + "_export.png"
 
         # native Mac open dialog has no title message
         with wx.FileDialog(
@@ -1409,7 +1413,7 @@ class ImageFrame(wx.Frame):
                 "" if const.PLATFORM == 'mac' else "Export Image and Marks as Image",
                 wildcard=wx.Image.GetImageExtWildcard(),
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
-                defaultDir=default_dir,
+                defaultDir=str(default_dir),
                 defaultFile=default_filename,
                 ) as file_dialog:
 
@@ -1597,7 +1601,7 @@ class ImageFrame(wx.Frame):
         """Save image and mark locations to .mcm file
 
         Args:
-            imdata_path (str): full path to filename to save to
+            imdata_path (pathlike): full path to filename to save to
         """
         returnval = mcmfile.save(
                 imdata_path,
@@ -1711,10 +1715,8 @@ class ImageFrame(wx.Frame):
             benchzoom_data['python_ver'] = sys.version.replace('\n', '')
             benchzoom_data['wx_ver'] = wx.__version__
             benchzoom_data['datetime'] = datetime.now().strftime('%Y%m%d_%H:%M:%S')
-            data_filename = os.path.join(
-                    const.USER_LOG_DIR,
-                    "data_benchzoom_" + datetime.now().strftime('%Y%m%d_%H%M%S')+ ".json"
-                    )
+            data_filename = const.USER_LOG_DIR / \
+                    "data_benchzoom_" + benchzoom_data['datetime'] + ".json"
             with open(data_filename, 'w') as data_fh:
                 json.dump(benchzoom_data, data_fh, separators=(',', ':'))
             LOGGER.debug("Wrote benchzoom data to file: %s", data_filename)
@@ -1735,6 +1737,11 @@ class MarcamApp(wx.App):
     """
     @debug_fxn
     def __init__(self, open_files, config_data, *args, **kwargs):
+        """
+        Args:
+            open_files (list of pathlike): files to open as startup occurs
+            config_data (dict): configuration info
+        """
         # reset this before calling super().__init__(), which calls
         #   MacOpenFiles()
         self.file_windows = marcam_extra.FrameList()
@@ -1996,12 +2003,14 @@ class MarcamApp(wx.App):
         """Open specified file in new frame
 
         Args:
-            open_filename (str): filename to open in new frame
+            open_filename (pathlike or None): filename to open in new frame
 
         Returns:
             (bool): True if image loaded successfully, False otherwise.
         """
         if open_filename is not None:
+            open_filename = pathlib.Path(open_filename)
+
             already_open_frame = self.file_windows.frame_with_file(open_filename)
             if already_open_frame:
                 # Already have a frame with that file open, don't open a dup
@@ -2073,7 +2082,7 @@ class MarcamApp(wx.App):
         Over-ridden to process files.
 
         Args:
-            file_names: list of file names to open
+            file_names: list of (str) file names to open
         """
         # NOTE: works great in bundled app,
         #   but cmd-line invocation causes file_names to be last argument
@@ -2090,7 +2099,7 @@ class MarcamApp(wx.App):
         """Open specified filename in either this frame or new frame
 
         Args:
-            open_filename (str): image filename to open
+            open_filename (pathlike): image filename to open
 
         Returns:
             (bool): True if image loaded successfully, False otherwise.
@@ -2193,11 +2202,10 @@ def another_instance_running(srcfile_args):
     # make global to persist until app is closed
     global singleinst_instance
     singleinst_name = "Marcam-%s"%wx.GetUserId()
-    os.makedirs(const.USER_CONFIG_DIR, exist_ok=True)
-    singleinst_path = const.USER_CONFIG_DIR
+    const.USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     singleinst_instance = wx.SingleInstanceChecker(
             singleinst_name,
-            singleinst_path,
+            str(const.USER_CONFIG_DIR),
             )
     another_inst = singleinst_instance.IsAnotherRunning()
     if another_inst and srcfile_args:
@@ -2233,14 +2241,14 @@ def sanity_checks():
     Raises Exceptions and logs errors for problems, mainly internal to app.
     """
     # Make sure we have access to all bitmaps.
-    bitmap_filenames = [
+    bitmap_paths = [
             const.SELECTBMP_FNAME, const.MARKBMP_FNAME, const.TOCLIPBMP_FNAME,
             const.ZOOMOUTBMP_FNAME, const.ZOOMINBMP_FNAME, const.ZOOMFITBMP_FNAME
             ]
-    for bitmap_filename in bitmap_filenames:
-        if not os.path.exists(bitmap_filename):
-            LOGGER.error("Unable to find file: %s", bitmap_filename)
-            raise Exception("Missing bitmap file: %s"%bitmap_filename)
+    for bitmap_path in bitmap_paths:
+        if not bitmap_path.is_file():
+            LOGGER.error("Unable to find file: %s", bitmap_path)
+            raise Exception("Missing bitmap file: %s"%bitmap_path)
 
 def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop

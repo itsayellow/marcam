@@ -19,7 +19,6 @@
 
 
 import logging
-import pathlib
 
 import wx
 import wx.html2
@@ -482,9 +481,7 @@ class HelpFrame(wx.Frame):
 
         # use wx.html2 to allow better rendering (and CSS in future)
         self.html = wx.html2.WebView.New(self)
-        self.html.LoadURL(
-                (pathlib.Path(const.ICON_DIR) / help_filename).as_uri()
-                )
+        self.html.LoadURL((const.ICON_DIR / help_filename).as_uri())
 
         self.SetTitle("Marcam Help")
         self.SetSize((500, 600))
@@ -524,7 +521,7 @@ class FrameList():
         """Return the frame in FrameList that has img_file inside it.
 
         Args:
-            img_file (str): full path to img_file to check Frame for.
+            img_file (pathlib.Path): full path to img_file to check Frame for.
 
         Returns:
             (None or wx.Frame): None if no frame contains file, or the wx.Frame

@@ -47,13 +47,13 @@ def file1sc_to_image(file1sc_file):
     """Read in file1sc file and convert to wx.Image
 
     Args:
-        file1sc_file (str): path to .1sc file
+        file1sc_file (pathlike): path to .1sc file
 
     Returns:
         (wx.Image): image object
     """
     try:
-        read1sc = biorad1sc_reader.Reader(file1sc_file)
+        read1sc = biorad1sc_reader.Reader(str(file1sc_file))
     except (BioRadInvalidFileError, BioRadParsingError):
         # img_ok is false if 1sc is not valid 1sc file
         return False
