@@ -2670,40 +2670,30 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
             src_size_x (float): x size in img coords of region
             src_size_y (float): y size in img coords of region
         """
-        pts_in_box = []
         marks_unselected = [x for x in self.marks if x not in self.marks_selected]
         for (x, y) in marks_unselected:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
                 cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
-                if cross_win not in pts_in_box:
-                    # only draw bitmap if this is not a duplicate
-                    # TODO: is this unnecessary and obsolete?
-                    pts_in_box.append(cross_win)
-                    # NOTE: if you change the size of this bmp, also change
-                    #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
-                    dc.DrawBitmap(
-                            const.CROSS_UNSEL_BMP,
-                            cross_win - const.CROSS_CENTER_COORDS
-                            )
+                # NOTE: if you change the size of this bmp, also change
+                #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
+                dc.DrawBitmap(
+                        const.CROSS_UNSEL_BMP,
+                        cross_win - const.CROSS_CENTER_COORDS
+                        )
 
-        pts_in_box = []
         for (x, y) in self.marks_selected:
             if (src_pos_x <= x <= src_pos_x + src_size_x and
                     src_pos_y <= y <= src_pos_y + src_size_y):
                 # add half pixel so cross is in center of pix square when zoomed
                 cross_win = self.img2logical_coord(x + 0.5, y + 0.5)
-                if cross_win not in pts_in_box:
-                    # only draw bitmap if this is not a duplicate
-                    # TODO: is this unnecessary and obsolete?
-                    pts_in_box.append(cross_win)
-                    # NOTE: if you change the size of this bmp, also change
-                    #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
-                    dc.DrawBitmap(
-                            const.CROSS_SEL_BMP,
-                            cross_win - const.CROSS_CENTER_COORDS
-                            )
+                # NOTE: if you change the size of this bmp, also change
+                #   the RefreshRect size const.CROSS_REFRESH_SQ_SIZE
+                dc.DrawBitmap(
+                        const.CROSS_SEL_BMP,
+                        cross_win - const.CROSS_CENTER_COORDS
+                        )
 
         if self.mark_dragging is not None:
             (x, y) = self.mark_dragging
