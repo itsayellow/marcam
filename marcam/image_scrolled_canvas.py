@@ -2097,6 +2097,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                 img_pt = (int(img_x), int(img_y))
                 mark_added = self.mark_point(img_pt)
                 if mark_added:
+                    # mark only added if not duplicate of previous point
                     self.history.new(
                             ['MARK', img_pt],
                             description="Add Mark"
