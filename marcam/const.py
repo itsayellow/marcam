@@ -18,6 +18,7 @@ import sys
 import wx
 import appdirs
 import os.path
+import pathlib
 
 APP_NAME = 'Marcam'
 VERSION_STR = "0.8.0"
@@ -37,14 +38,14 @@ else:
 # Determine exe and icon dir, for frozen/nonfrozen
 #   EXE_DIR is the same dir where the executable lives
 if getattr(sys, 'frozen', False) and getattr(sys, '_MEIPASS', False):
-    EXE_DIR = sys._MEIPASS
+    EXE_DIR = pathlib.Path(sys._MEIPASS)
     #   on mac: "Marcam.app/Contents/MacOS/"
     #   on win: "Marcam/"
     # mac has symlink in EXE_DIR to media in "Marcam.app/Contents/Resources"
 else:
-    EXE_DIR = os.path.dirname(os.path.realpath(__file__))
+    EXE_DIR = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
     # for now the paths are the same
-ICON_DIR = os.path.join(EXE_DIR, 'media')
+ICON_DIR = EXE_DIR / 'media'
 
 if PLATFORM == 'mac':
     SELECTBMP_FNAME = os.path.join(ICON_DIR, 'selectmode24_mac.png')

@@ -482,9 +482,7 @@ class HelpFrame(wx.Frame):
 
         # use wx.html2 to allow better rendering (and CSS in future)
         self.html = wx.html2.WebView.New(self)
-        self.html.LoadURL(
-                (pathlib.Path(const.ICON_DIR) / help_filename).as_uri()
-                )
+        self.html.LoadURL((const.ICON_DIR / help_filename).as_uri())
 
         self.SetTitle("Marcam Help")
         self.SetSize((500, 600))
