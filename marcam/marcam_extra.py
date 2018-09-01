@@ -675,5 +675,4 @@ class FrameList():
     def get_list_copy(self):
         """Get a copy of the list of frame object instances.
         """
-        # TODO: hopefully we won't need this forever, stopgap
         return [self.frame_dict[id]['frame'] for id in self.frame_dict]
