@@ -2104,7 +2104,8 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                             )
                 else:
                     # TODO: IS THIS WRONG?  Should we delete this?
-                    self.history.new(['NOP'], description="Nothing.")
+                    #   This causes Undo to say "Undo Nothing"
+                    self.history.new(['NOP'], description="Nothing")
         else:
             # we allow click outside of image in case we drag onto image
 
