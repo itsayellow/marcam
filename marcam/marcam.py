@@ -145,61 +145,6 @@ def logging_setup(log_level=logging.DEBUG):
             "Global log level set to %s", logging.getLevelName(log_eff_level)
             )
 
-@debug_fxn
-def default_config_data():
-    """Canonical default config data
-
-    Used when creating new config data file, or as defaults when reading
-    From an old config data file with fewer keys.
-    """
-    config_data = {}
-    config_data['winsize'] = [800, 600]
-    config_data['debug'] = False
-
-    return config_data
-
-@debug_fxn
-def load_config():
-    """Load config--from file if present or else defaults.  Create config file
-        with default config data if one is not present.
-    """
-    # start with defaults, override later with any/all actual config data
-    config_data = default_config_data()
-
-    config_filepath = const.USER_CONFIG_DIR / "config.json"
-    try:
-        with open(config_filepath, 'r') as config_fh:
-            config_data.update(json.load(config_fh))
-    except FileNotFoundError:
-        # if no config.json file, create
-        save_config(config_data)
-
-    return config_data
-
-@debug_fxn
-def save_config(config_data):
-    """Save config file at the proper path
-
-    Args:
-        config_data (dict): config data to save
-    """
-    # create config dir if necessary
-    const.USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-
-    config_filepath = const.USER_CONFIG_DIR / "config.json"
-    # if no config.json file, create
-    try:
-        with open(config_filepath, 'w') as config_fh:
-            json.dump(
-                    config_data,
-                    config_fh
-                    )
-        status = True
-    except OSError as err:
-        LOGGER.warning("Can't save config file '%s': %s", config_filepath, err)
-        status = False
-
-    return status
 
 class ImageFrame(wx.Frame):
     """Application Level Frame, one for each open image file.
@@ -1730,16 +1675,15 @@ class MarcamApp(wx.App):
     Handles key bindings, Frame management, OS interaction, startup, shutdown.
     """
     @debug_fxn
-    def __init__(self, open_files, config_data, *args, **kwargs):
+    def __init__(self, open_files, *args, **kwargs):
         """
         Args:
             open_files (list of pathlike): files to open as startup occurs
-            config_data (dict): configuration info
         """
         # reset this before calling super().__init__(), which calls
         #   MacOpenFiles()
         self.file_windows = marcam_extra.FrameList()
-        self.config_data = config_data
+        self.config_data = {}
         self.last_frame_pos = wx.DefaultPosition
         self.trying_to_quit = False
         self.last_falsecolor = 'viridis'
@@ -1749,24 +1693,13 @@ class MarcamApp(wx.App):
         #   new frames
         super().__init__(*args, **kwargs)
 
-        # App configuration (especially for FileHistory)
-        # TODO: combine config_data into wxconfig?
-        if const.PLATFORM == 'mac':
-            # on Mac, put the wx.Config preferences file in the same dir as
-            #   our own config.json file
-            self.wxconfig = wx.Config(
-                    "Marcam",
-                    "itsayellow.com",
-                    localFilename=str(const.USER_CONFIG_DIR / "Marcam_Preferences"),
-                    style=wx.CONFIG_USE_LOCAL_FILE
-                    )
-        else:
-            # use mostly defaults if we might have to use the Registry
-            self.wxconfig = wx.Config("Marcam", "itsayellow.com")
+        # App configuration
+        self.wx_config = wx.Config("Marcam", "itsayellow.com")
+        self.read_config()
 
         # File history
         self.file_history = wx.FileHistory()
-        self.file_history.Load(self.wxconfig)
+        self.file_history.Load(self.wx_config)
 
         # this next statement can only be after calling __init__ of wx.App
         # gives just window-placeable screen area
@@ -2118,6 +2051,42 @@ class MarcamApp(wx.App):
 
         return img_ok
 
+    @debug_fxn
+    def read_config(self):
+        """Load config--from file if present or else defaults.  Create config file
+            with default config data if one is not present.
+        """
+        # winsize
+        self.config_data['winsize'] = json.loads(
+                self.wx_config.Read(
+                    'winsize',
+                    defaultVal=json.dumps([800,600])
+                    )
+                )
+
+        # debug
+        self.config_data['debug'] = self.wx_config.ReadBool(
+                'debug',
+                defaultVal=False
+                )
+
+    @debug_fxn
+    def write_config(self):
+        """Load config--from file if present or else defaults.  Create config file
+            with default config data if one is not present.
+        """
+        # winsize
+        self.wx_config.Write(
+                'winsize',
+                json.dumps(self.config_data['winsize'])
+                )
+
+        # debug
+        self.wx_config.WriteBool(
+                'debug',
+                self.config_data['debug']
+                )
+
     def OnExit(self):
         """Overloaded function that is called before App finally exits
 
@@ -2128,9 +2097,9 @@ class MarcamApp(wx.App):
             Whatever AppConsole.OnExit() returns
         """
         # save file_history on quit
-        self.file_history.Save(self.wxconfig)
+        self.file_history.Save(self.wx_config)
         # save config_data right before app is about to exit
-        save_config(self.config_data)
+        self.write_config()
         return super().OnExit()
 
 
@@ -2279,13 +2248,12 @@ def main(argv=None):
         print("Another instance of Marcam is already running.  Exiting.")
         return 1
 
-    # fetch configuration from file
-    config_data = load_config()
-
-    # allow debug mode to turn on also from config_data
-    if config_data['debug']:
-        DEBUG = True
-        log_level = logging.DEBUG
+    ## fetch configuration just to check debug state in user preferences
+    #config = wx.Config("Marcam", "itsayellow.com")
+    ## allow debug mode to turn on also from config_data
+    #if config.ReadBool('debug', defaultVal=False):
+    #    DEBUG = True
+    #    log_level = logging.DEBUG
 
     # setup logging
     logging_setup(log_level)
@@ -2300,7 +2268,7 @@ def main(argv=None):
     sanity_checks()
 
     # setup main wx event loop
-    myapp = MarcamApp(args.srcfiles, config_data)
+    myapp = MarcamApp(args.srcfiles)
     myapp.MainLoop()
 
     # return 0 to indicate "STATUS OK"
