@@ -24,7 +24,6 @@ from datetime import datetime
 import json
 import logging
 import os
-import os.path
 import pathlib
 import platform
 import re
@@ -1022,8 +1021,10 @@ class ImageFrame(wx.Frame):
             evt (wx.CommandEvent): wx Event for this handler
         """
         # get path from file_history
-        img_path = self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
-        if os.path.exists(img_path):
+        img_path = pathlib.Path(
+                self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
+                )
+        if img_path.exists():
             img_ok = self.open_image(img_path)
             if not img_ok:
                 # wx.ICON_ERROR has no effect on Mac
@@ -1340,7 +1341,7 @@ class ImageFrame(wx.Frame):
                     thread_fxn_args=(pathname,),
                     post_thread_fxn=self.on_saveas_postthread,
                     progress_title="Saving Image",
-                    progress_msg="Saving %s..."%os.path.basename(pathname),
+                    progress_msg="Saving %s..."%pathname.name,
                     parent=self
                     )
 
