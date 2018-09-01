@@ -963,12 +963,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         orig_x_scrolled = win_size.GetWidth() != orig_client_size.GetWidth()
         orig_y_scrolled = win_size.GetHeight() != orig_client_size.GetHeight()
 
-        # compute necessary virtual size, either win_size or bigger if needed
-        #virt_size = wx.Size(
-        #        max(self.img_size_x * self.zoom_val, win_size.GetWidth()),
-        #        max(self.img_size_y * self.zoom_val, win_size.GetHeight())
-        #        )
-
         # TODO: if one of these is True, the other might be incorrect
         #       (need to compare not to win_size, but win_size - scroll width)
         x_scrolled = self.img_size_x * self.zoom_val > win_size.GetWidth()
