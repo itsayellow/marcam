@@ -289,13 +289,17 @@ class ImageFrame(wx.Frame):
                 "Image &Auto-Contrast...",
                 )
         self.tools_imgautocontrastlast_item = tools_menu.Append(wx.ID_ANY,
-                "Image &Auto-Contrast (%d)\tShift+Ctrl+J"%self.parent.get_last_autocontrast_level(),
+                "Image &Auto-Contrast (%d)\tShift+Ctrl+J"%(
+                    self.parent.get_last_autocontrast_level(),
+                    )
                 )
         tools_imgfcolordialog_item = tools_menu.Append(wx.ID_ANY,
                 "Image False Color...",
                 )
         self.tools_imgfcolorlast_item = tools_menu.Append(wx.ID_ANY,
-                "Image False Color (%s)\tShift+Ctrl+C"%(self.parent.get_last_falsecolor().capitalize()),
+                "Image False Color (%s)\tShift+Ctrl+C"%(
+                    self.parent.get_last_falsecolor().capitalize()
+                    ),
                 )
         menubar.Append(tools_menu, "&Tools")
         # Window
@@ -2060,7 +2064,7 @@ class MarcamApp(wx.App):
         self.config_data['winsize'] = json.loads(
                 self.wx_config.Read(
                     'winsize',
-                    defaultVal=json.dumps([800,600])
+                    defaultVal=json.dumps([800, 600])
                     )
                 )
 
