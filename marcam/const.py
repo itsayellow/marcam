@@ -26,7 +26,7 @@ VERSION_STR = "0.8.0"
 # Use appauthor=False (only applicable to Windows) to indicate only one
 #   dir level with name appname
 USER_CONFIG_DIR = appdirs.user_config_dir(appname=APP_NAME, appauthor=False)
-USER_LOG_DIR = appdirs.user_log_dir(appname=APP_NAME, appauthor=False)
+USER_LOG_DIR = pathlib.Path(appdirs.user_log_dir(appname=APP_NAME, appauthor=False))
 if sys.platform == 'darwin':
     PLATFORM = 'mac'
 elif sys.platform == 'win32':
