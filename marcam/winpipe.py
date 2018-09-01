@@ -61,7 +61,7 @@ def server_create_named_pipe_raw(pipe_name):
         pipe_name (str): name of pipe
 
     Returns:
-        (TODO): handle to named pipe
+        (PyHANDLE): handle to named pipe
     """
     pipe_handle = win32pipe.CreateNamedPipe(
             # lpName
@@ -124,7 +124,7 @@ def server_create_named_pipe(pipe_name):
         pipe_name (str): name of pipe
 
     Returns:
-        (TODO): handle to named pipe
+        (PyHANDLE): handle to named pipe
     """
     no_pipe_instance = True
     while no_pipe_instance:
@@ -185,7 +185,7 @@ def pipe_read(pipe_handle):
     """Read bytes from pipe and decode (using utf-8) into string
 
     Args:
-        pipe_handle (TODO): pipe handle to read from
+        pipe_handle (PyHANDLE): pipe handle to read from
 
     Returns:
         (str): string read from pipe
@@ -273,7 +273,7 @@ def pipe_write(pipe_handle, data_string):
     """Write encoded bytes to pipe (using utf-8) from string
 
     Args:
-        pipe_handle (TODO): pipe handle to read from
+        pipe_handle (PyHANDLE): pipe handle to read from
         data_string (str): string to write to pipe
 
     Returns:
