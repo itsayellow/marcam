@@ -162,31 +162,6 @@ CROSS_CENTER_COORDS = (6, 6)
 
 # ARCHIVE BELOW ---------------------------------------------------------
 
-# red cross, 5px x 5px
-centerline_5 = pix_clr*2 + pix_red + pix_clr*2
-crossline_5 = pix_red*5
-CROSS_5x5_RED_BMP = wx.Bitmap.FromBufferRGBA(
-        5, 5,
-        centerline_5*2 + crossline_5 + centerline_5*2
-        )
-
-# red cross, 7px x 7px
-centerline_7 = pix_clr*3 + pix_red + pix_clr*3
-crossline_7 = pix_red*7
-CROSS_7x7_RED_BMP = wx.Bitmap.FromBufferRGBA(
-        7, 7,
-        centerline_7*3 + crossline_7 + centerline_7*3
-        )
-
-# red cross, 9px x 9px
-centerline_9 = pix_clr*4 + pix_red + pix_clr*4
-crossline_9 = pix_red*9
-CROSS_9x9_RED_BMP = wx.Bitmap.FromBufferRGBA(
-        9, 9,
-        centerline_9*4 + crossline_9 + centerline_9*4
-        )
-
-
 # NOTE: attempts to make bg shadow or glow just end up making it look like
 #       marks are blurry or odd.  unsuccessful
 pix_transluc50_black = b'\x00\x00\x00\x80'
