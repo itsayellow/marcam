@@ -1259,7 +1259,7 @@ class ImageFrame(wx.Frame):
             default_filename = self.save_filepath.name
         else:
             default_dir = self.img_path.parent
-            default_filename = self.img_path.stem + ".mcm"
+            default_filename = self.img_path.with_suffix(".mcm")
 
         # native Mac open dialog has no title message
         with wx.FileDialog(
