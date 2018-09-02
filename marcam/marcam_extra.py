@@ -42,9 +42,6 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 class FileHistory(wx.FileHistory):
     """Like wx.FileHistory, but changing how menu items are displayed
-
-    In contrast to wx.FileHistory, obliterates managed menus (don't put any
-    other items in menu.)
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -84,14 +81,14 @@ class FileHistory(wx.FileHistory):
         for file_hist_i in range(starting_file, super().GetCount()):
             menu.Append(
                     self.base_id + file_hist_i,
-                    self.FormatFilePath(super().GetHistoryFile(file_hist_i))
+                    self.FormatFilePathMenu(super().GetHistoryFile(file_hist_i))
                     )
 
     def _add_all_files_to_menus(self):
         for menu in self.managed_menus:
             self._add_all_files_to_menu(menu)
 
-    def FormatFilePath(self, file_path):
+    def FormatFilePathMenu(self, file_path):
         file_path = pathlib.Path(file_path)
         try:
             # Attempt to find path relative to home directory
