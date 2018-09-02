@@ -973,17 +973,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 x_scrolled = False
                 virt_size = wx.Size(win_size.x - self.scrollbar_widths.x, img_zoomed_size.y)
                 # one scroll bar, so don't need to erase corner between them
-        else:
-            print("Huh??")
-            print("img_zoomed_size.x")
-            print(img_zoomed_size.x)
-            print("win_size.x")
-            print(win_size.x)
-            print("img_zoomed_size.y")
-            print(img_zoomed_size.y)
-            print("win_size.y")
-            print(win_size.y)
 
+        # need to erase corner if we now have both scrollbars
         erase_corner = x_scrolled and y_scrolled
 
         # TODO: a problem: when window on one dimension has scrollbar, and
@@ -1022,9 +1013,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Freeze()
         LOGGER.debug("Freeze()")
 
-        # Max size of client (without scrollbars)
-        win_size = self.GetSize()
-
         # Compute virtual size and other booleans
         (virt_size, erase_corner) = self._compute_virt_size()
 
@@ -1039,6 +1027,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.SetVirtualSizeNoSizeEvt(virt_size)
 
         # center image if Virtual Size is larger than image
+
+        # Max size of client (without scrollbars)
+        win_size = self.GetSize()
 
         # center in window, not client area, so presence/absence of scrollbar
         #   doesn't affect placement
