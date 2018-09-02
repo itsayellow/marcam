@@ -2073,9 +2073,11 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
                             description="Add Mark"
                             )
                 else:
-                    # TODO: IS THIS WRONG?  Should we delete this?
-                    #   This causes Undo to say "Undo Nothing"
-                    self.history.new(['NOP'], description="Nothing")
+                    # simulate the making of a mark while actually doing nothing
+                    # this allows the user to undo what seems like the last mark
+                    #   without making an actual duplicate mark in the same
+                    #   location.
+                    self.history.new(['NOP'], description="Add Mark")
         else:
             # we allow click outside of image in case we drag onto image
 
