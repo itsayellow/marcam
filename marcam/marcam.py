@@ -2247,12 +2247,9 @@ def main(argv=None):
         print("Another instance of Marcam is already running.  Exiting.")
         return 1
 
-    ## fetch configuration just to check debug state in user preferences
-    #config = wx.Config("Marcam", "itsayellow.com")
-    ## allow debug mode to turn on also from config_data
-    #if config.ReadBool('debug', defaultVal=False):
-    #    DEBUG = True
-    #    log_level = logging.DEBUG
+    if (const.USER_CONFIG_DIR / 'debug' ).exists():
+        DEBUG = True
+        log_level = logging.DEBUG
 
     # setup logging
     logging_setup(log_level)
