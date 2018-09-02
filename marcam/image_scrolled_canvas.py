@@ -955,11 +955,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # need to erase corner if we now have both scrollbars
         erase_corner = x_scrolled and y_scrolled
 
-        # TODO: a problem: when window on one dimension has scrollbar, and
-        #   on other dimension doesn't, keeping the image centered could
-        #   cause gray area opposite scrollbar while scrollbar crops some of
-        #   image.
-
         return (virt_size, erase_corner)
 
     @debug_fxn
