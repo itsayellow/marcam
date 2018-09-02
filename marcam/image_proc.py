@@ -99,19 +99,6 @@ def image2memorydc(in_image, white_bg=False):
     return mem_dc
 
 @debug_fxn
-def memorydc2image(wx_memdc):
-    """Convert wx.MemoryDC to wx.Image
-
-    Args:
-        wx_memdc (wx.MemoryDC): MemoryDC to convert to Image
-
-    Returns:
-        (wx.Image): Image
-    """
-    wx_bitmap = wx_memdc.GetAsBitmap()
-    return wx_bitmap.ConvertToImage()
-
-@debug_fxn
 def wxmemorydc2pilimage(wx_memdc):
     """Convert wx.MemoryDC to PIL.Image
 
