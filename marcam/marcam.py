@@ -1688,7 +1688,6 @@ class MarcamApp(wx.App):
         self.file_windows = marcam_extra.FrameList()
         self.config_data = {}
         self.last_frame_pos = wx.DefaultPosition
-        self.trying_to_quit = False
         self.last_falsecolor = 'viridis'
         self.last_autocontrast_level = 0
 
@@ -2006,7 +2005,6 @@ class MarcamApp(wx.App):
         If Cancel is ever clicked and frame is not closed, then quit process
             aborts.
         """
-        self.trying_to_quit = True
         # we need to copy this because frame.Close() will end up modifying
         #   self.file_windows, which will corrupt the loop in progress
         for frame in self.file_windows.get_list_copy():
@@ -2014,7 +2012,6 @@ class MarcamApp(wx.App):
             frame_closed = frame.Close()
             if not frame_closed:
                 break
-        self.trying_to_quit = False
 
     @debug_fxn
     def MacOpenFiles(self, file_names):
