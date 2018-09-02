@@ -1469,33 +1469,33 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         return (img_x, img_y)
 
-    @debug_fxn
-    def logical2img_coord(self, logical_coord, scale_dc=1):
-        """Given logical unscrolled canvas coordinates, return image coordinates
+    #@debug_fxn
+    #def logical2img_coord(self, logical_coord, scale_dc=1):
+    #    """Given logical unscrolled canvas coordinates, return image coordinates
 
-        Args:
-            logical_coord (wx.Point): logical canvas (unscrolled) coordinates
+    #    Args:
+    #        logical_coord (wx.Point): logical canvas (unscrolled) coordinates
 
-        Returns:
-            (int, int): (img_x, img_y) position in src image coordinates
-        """
-        (z_numer, z_denom) = self.zoom_frac_list[self.zoom_idx]
+    #    Returns:
+    #        (int, int): (img_x, img_y) position in src image coordinates
+    #    """
+    #    (z_numer, z_denom) = self.zoom_frac_list[self.zoom_idx]
 
-        # img_coord_xlation_{x,y} = 0 unless window is bigger than image
-        #   in which case this is non-zero translation of left,top padding
-        # self.img_coord_xlation_{x,y} is in window coordinates
-        #   divide by zoom to get to img coordinates
-        # TODO: remove these someday when we are confident
-        assert isinstance(self.img_coord_xlation.x, int)
-        assert isinstance(self.img_coord_xlation.y, int)
-        # TODO: use integer division when we are confident answer is always int
-        img_x = (logical_coord.x - self.img_coord_xlation.x) * z_denom / z_numer / scale_dc
-        img_y = (logical_coord.y - self.img_coord_xlation.y) * z_denom / z_numer / scale_dc
-        # TODO: remove these someday when we are confident
-        assert img_x == int(img_x)
-        assert img_y == int(img_y)
+    #    # img_coord_xlation_{x,y} = 0 unless window is bigger than image
+    #    #   in which case this is non-zero translation of left,top padding
+    #    # self.img_coord_xlation_{x,y} is in window coordinates
+    #    #   divide by zoom to get to img coordinates
+    #    # TODO: remove these someday when we are confident
+    #    assert isinstance(self.img_coord_xlation.x, int)
+    #    assert isinstance(self.img_coord_xlation.y, int)
+    #    # TODO: use integer division when we are confident answer is always int
+    #    img_x = (logical_coord.x - self.img_coord_xlation.x) * z_denom / z_numer / scale_dc
+    #    img_y = (logical_coord.y - self.img_coord_xlation.y) * z_denom / z_numer / scale_dc
+    #    # TODO: remove these someday when we are confident
+    #    assert img_x == int(img_x)
+    #    assert img_y == int(img_y)
 
-        return (int(img_x), int(img_y))
+    #    return (int(img_x), int(img_y))
 
     # this happens too many times, don't print to logs normally
     #@debug_fxn
