@@ -925,75 +925,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # Max size of client (without scrollbars)
         win_size = self.GetSize()
-        # original Client Size before changing virt size
-        orig_client_size = self.GetClientSize()
-        # Boolean whether originally we have no scrollbars
-        orig_has_no_scrollbars = win_size == orig_client_size
-        # NOTE: do not depend on self.HasScrollbar, because it can be updated
-        #   immediately on resize even when orig_client_size == win_size
-        #   showing no scrollbar width
-        orig_x_scrolled = win_size.GetWidth() != orig_client_size.GetWidth()
-        orig_y_scrolled = win_size.GetHeight() != orig_client_size.GetHeight()
-
-        # TODO: if one of these is True, the other might be incorrect
-        #       (need to compare not to win_size, but win_size - scroll width)
-        x_scrolled = self.img_size_x * self.zoom_val > win_size.GetWidth()
-        y_scrolled = self.img_size_y * self.zoom_val > win_size.GetHeight()
-        #only_one_scrolled = x_scrolled != y_scrolled
-        both_or_none_scrolled = x_scrolled == y_scrolled
-
-        if both_or_none_scrolled:
-            virt_size = wx.Size(
-                    max(self.img_size_x * self.zoom_val, win_size.GetWidth()),
-                    max(self.img_size_y * self.zoom_val, win_size.GetHeight())
-                    )
-            # erase corner only needs to set virt size before erasing client
-            #   area if we currently have scrollbars
-            skip_virt_size = orig_has_no_scrollbars
-        else:
-            # only one of x_scrolled, y_scrolled is true (xor)
-
-            # compute necessary virtual size, either client_size or bigger if needed
-            virt_size = wx.Size(
-                    max(self.img_size_x * self.zoom_val, orig_client_size.GetWidth()),
-                    max(self.img_size_y * self.zoom_val, orig_client_size.GetHeight())
-                    )
-            # No need to recompute virt size:
-            #   if orig_x_scrolled to x_scrolled only
-            #       (then y client size stays the same)
-            #   or if orig_y_scrolled to y_scrolled only
-            #       (then x client size stays the same)
-            #   and we use client_size for max in virt_size above
-            if (x_scrolled and not orig_x_scrolled) or (y_scrolled and not orig_y_scrolled):
-                # set new virtual size
-                self.SetVirtualSizeNoSizeEvt(virt_size)
-                # re-compute virtual size with new client size,
-                #   because one scrollbar will affect Client Size of one dimension
-                new_client_size = self.GetClientSize()
-                virt_size = wx.Size(
-                        max(self.img_size_x * self.zoom_val, new_client_size.GetWidth()),
-                        max(self.img_size_y * self.zoom_val, new_client_size.GetHeight())
-                        )
-            # We have at least one scroll bar now, so erase corner needs to
-            #   set virt size before erasing client area
-            skip_virt_size = False
-
-        # Here we have set:
-        return (virt_size, skip_virt_size, x_scrolled, y_scrolled)
-
-    @debug_fxn
-    def _compute_virt_size2(self):
-        # NICE: self.GetSize() always returns maximum size of client area
-        #           as it would be sized without scrollbars.
-        # NICE: self.GetRect() always returns maximum size of client area
-        #           as it would be sized without scrollbars.
-        #       Seems to always have position at (0,0), but width, height are
-        #           good.
-        # USELESS: self.GetMaxClientSize() always = (-1,-1)
-        # USELESS: self.GetMaxSize() always = (-1,-1)
-
-        # Max size of client (without scrollbars)
-        win_size = self.GetSize()
         # size of image at current zoom in pixels
         img_zoomed_size = wx.Size(
                 self.img_size_x * self.zoom_val,
@@ -1046,14 +977,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             print("win_size.y")
             print(win_size.y)
 
-        skip_virt_size = not (x_scrolled and y_scrolled)
+        erase_corner = x_scrolled and y_scrolled
 
         # TODO: a problem: when window on one dimension has scrollbar, and 
         #   on other dimension doesn't, keeping the image centered could 
         #   cause gray area opposite scrollbar while scrollbar crops some of
         #   image.
 
-        return (virt_size, skip_virt_size, x_scrolled, y_scrolled)
+        return (virt_size, erase_corner)
 
     @debug_fxn
     def set_virt_size_with_min(self):
@@ -1088,18 +1019,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         win_size = self.GetSize()
 
         # Compute virtual size and other booleans
-        (virt_size, skip_virt_size, x_scrolled, y_scrolled) = self._compute_virt_size2()
+        (virt_size, erase_corner) = self._compute_virt_size()
 
         # erase the corner between scroll bars
         #   NOTE: only need to do this on mac, and if window has
         #       self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         if const.PLATFORM == 'mac':
-            # strictly speaking, this should be x_scrolled and y_scrolled,
-            #   but to predict if the following SetVirtualSize will make both
-            #   scrollbars, we'd need to know scrollbar width
-            if x_scrolled or y_scrolled:
+            if erase_corner:
                 # only need to erase if corner is inaccessible to client
-                self._erase_lowerright_corner(skip_virt_size=skip_virt_size)
+                self._erase_lowerright_corner(skip_virt_size=not erase_corner)
         # set new virtual size
         self.SetVirtualSizeNoSizeEvt(virt_size)
 
