@@ -1488,8 +1488,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # TODO: remove these someday when we are confident
         assert isinstance(self.img_coord_xlation.x, int)
         assert isinstance(self.img_coord_xlation.y, int)
-        #img_x = (logical_coord.x - self.img_coord_xlation.x) / self.zoom_val / scale_dc
-        #img_y = (logical_coord.y - self.img_coord_xlation.y) / self.zoom_val / scale_dc
         # TODO: use integer division when we are confident answer is always int
         img_x = (logical_coord.x - self.img_coord_xlation.x) * z_denom / z_numer / scale_dc
         img_y = (logical_coord.y - self.img_coord_xlation.y) * z_denom / z_numer / scale_dc
