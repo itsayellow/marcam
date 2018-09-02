@@ -914,6 +914,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def _compute_virt_size(self):
+        """Compute virtual size for current image and zoom, and whether we
+        need to erase between scrollbars.
+
+        Returns:
+            (wx.Size, bool): (virtual size of scrolled window, True if we need
+                to erase corner between scrollbars)
+        """
         # NICE: self.GetSize() always returns maximum size of client area
         #           as it would be sized without scrollbars.
         # NICE: self.GetRect() always returns maximum size of client area
@@ -979,8 +986,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         erase_corner = x_scrolled and y_scrolled
 
-        # TODO: a problem: when window on one dimension has scrollbar, and 
-        #   on other dimension doesn't, keeping the image centered could 
+        # TODO: a problem: when window on one dimension has scrollbar, and
+        #   on other dimension doesn't, keeping the image centered could
         #   cause gray area opposite scrollbar while scrollbar crops some of
         #   image.
 
