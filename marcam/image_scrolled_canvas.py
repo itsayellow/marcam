@@ -1477,8 +1477,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             logical_coord (wx.Point): logical canvas (unscrolled) coordinates
 
         Returns:
-            tuple: (img_x (float), img_y (float)) position in src image
-                coordinates
+            (int, int): (img_x, img_y) position in src image coordinates
         """
         (z_numer, z_denom) = self.zoom_frac_list[self.zoom_idx]
 
@@ -1489,9 +1488,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # TODO: remove these someday when we are confident
         assert isinstance(self.img_coord_xlation.x, int)
         assert isinstance(self.img_coord_xlation.y, int)
-        assert isinstance(z_numer, int)
-        assert isinstance(z_denom, int)
-        assert isinstance(scale_dc, int)
         #img_x = (logical_coord.x - self.img_coord_xlation.x) / self.zoom_val / scale_dc
         #img_y = (logical_coord.y - self.img_coord_xlation.y) / self.zoom_val / scale_dc
         # TODO: use integer division when we are confident answer is always int
