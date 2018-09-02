@@ -914,34 +914,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Thaw()
 
     @debug_fxn
-    def set_virt_size_with_min(self):
-        """Set size of unscrolled canvas for image_size, making virtual size
-        same as image if image is zoomed larger than window, or as large as
-        window if image is smaller than window in order to be able to center
-        image in window.
-
-        Uses instance variables:
-            self.img_size_x
-            self.img_size_y
-            self.zoom_val
-
-        Affects instance variables:
-            self.img_coord_xlation
-        """
-
-        # Paint entire client area red to debug possible repaint problems.
-        #   (Can see red if we're not repainting over something.)
-        #pylint: disable=using-constant-test
-        if False:
-            self._debug_paint_client_area()
-        #pylint: enable=using-constant-test
-
-        # Don't allow the window to update anything while we do a ton of
-        #   playing around with the Virtual Size and scrolling to move to
-        #   center.
-        self.Freeze()
-        LOGGER.debug("Freeze()")
-
+    def _compute_virt_size(self):
         # NICE: self.GetSize() always returns maximum size of client area
         #           as it would be sized without scrollbars.
         # NICE: self.GetRect() always returns maximum size of client area
@@ -1005,6 +978,45 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             # We have at least one scroll bar now, so erase corner needs to
             #   set virt size before erasing client area
             skip_virt_size = False
+
+
+        # Here we have set:
+        return (virt_size, skip_virt_size, x_scrolled, y_scrolled)
+
+    @debug_fxn
+    def set_virt_size_with_min(self):
+        """Set size of unscrolled canvas for image_size, making virtual size
+        same as image if image is zoomed larger than window, or as large as
+        window if image is smaller than window in order to be able to center
+        image in window.
+
+        Uses instance variables:
+            self.img_size_x
+            self.img_size_y
+            self.zoom_val
+
+        Affects instance variables:
+            self.img_coord_xlation
+        """
+
+        # Paint entire client area red to debug possible repaint problems.
+        #   (Can see red if we're not repainting over something.)
+        #pylint: disable=using-constant-test
+        if False:
+            self._debug_paint_client_area()
+        #pylint: enable=using-constant-test
+
+        # Don't allow the window to update anything while we do a ton of
+        #   playing around with the Virtual Size and scrolling to move to
+        #   center.
+        self.Freeze()
+        LOGGER.debug("Freeze()")
+
+        # Max size of client (without scrollbars)
+        win_size = self.GetSize()
+
+        # Compute virtual size and other booleans
+        (virt_size, skip_virt_size, x_scrolled, y_scrolled) = self._compute_virt_size()
 
         # erase the corner between scroll bars
         #   NOTE: only need to do this on mac, and if window has
