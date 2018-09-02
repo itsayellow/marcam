@@ -231,7 +231,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.is_dragging = False
         self.mouse_left_down = None
         self.parent = parent # for drop target opening of files
-        self.overlay = wx.Overlay() # for making rubber-band box during drag
         self.rubberband_draw_rect = None
         self.rubberband_refresh_rect = None
         self.scrollbar_widths = wx.Size(30, 30) # overly large default, we set later
