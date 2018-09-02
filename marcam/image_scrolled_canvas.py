@@ -2358,7 +2358,7 @@ class ImageScrolledCanvasMarks(ImageScrolledCanvas):
         # if dragged mark was selected, add to marks_selected too
         if is_selected:
             self.marks_selected.append(to_mark_pt)
-        # TODO necessary?
+        # Finally force a repaint of all invalidated areas
         self.Update()
 
     @debug_fxn
