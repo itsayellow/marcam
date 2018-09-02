@@ -1699,7 +1699,7 @@ class MarcamApp(wx.App):
         self.read_config()
 
         # File history
-        self.file_history = wx.FileHistory()
+        self.file_history = marcam_extra.FileHistory()
         self.file_history.Load(self.wx_config)
 
         # this next statement can only be after calling __init__ of wx.App

@@ -39,6 +39,28 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
+class FileHistory(wx.FileHistory):
+    """Like wx.FileHistory, but changing how menu items are displayed
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def UseMenu(self, menu):
+        super().UseMenu(menu)
+
+    def RemoveMenu(self, menu):
+        super().RemoveMenu(menu)
+
+    def AddFilesToMenu(self, *args, **kwargs):
+        super().AddFilesToMenu(*args, **kwargs)
+
+    def AddFileToHistory(self, filename):
+        super().AddFileToHistory(filename)
+
+    def RemoveFileFromHistory(self, i):
+        super().RemoveFileFromHistory(i)
+
+
 class MarcamFormatter(logging.Formatter):
     """Our specific Formatter for logging
     """
