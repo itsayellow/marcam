@@ -1044,12 +1044,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #   size
         self.set_virt_size_and_pos()
 
-        # TODO: on Windows we need a Refresh/Update cycle as well,
-        #   should we skip on Mac (and possibly unix?)
-        # force a paint event with Refresh
-        self.Refresh()
-        #self.Update() # Update not necessary on Windows
-
     # GetClientSize is size of window graphics not including scrollbars
     # GetSize is size of window including scrollbars
     @debug_fxn
