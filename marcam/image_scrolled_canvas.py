@@ -39,27 +39,6 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
 @debug_fxn
-def find_nearest_rational(input_num, possible_nums, possible_denoms):
-    """Find nearest rational number to input_num
-    """
-    nums_denoms = []
-    for denom in possible_denoms:
-        test_nums = np.array(possible_nums)/denom
-        errors = np.abs(test_nums - np.array([input_num]*len(possible_nums)))
-        num = possible_nums[np.argmin(errors)]
-        nums_denoms.append((num, denom))
-
-    test_nums = np.array([x[0]/x[1] for x in nums_denoms])
-    errors = np.abs(test_nums - np.array([input_num]*len(possible_denoms)))
-    i = np.argmin(errors)
-    (num, denom) = nums_denoms[i]
-    zoom = test_nums[i]
-    error = errors[i]
-
-    # cast numpy.uint16 to plain ints
-    return (zoom, int(num), int(denom), error)
-
-@debug_fxn
 def find_low_rational(input_num, possible_nums, possible_denoms, error_tol):
     """Find rational number close to input_num with lowest (num, denom) within
     error tolerance.
