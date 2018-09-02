@@ -450,7 +450,6 @@ class ImageFrame(wx.Frame):
                 wx.ID_ANY, 'Copy', toclipbmp,
                 'Copy to Clipboard'
                 )
-        self.toclip_tool_id = tocliptool.GetId()
         self.toolbar.Realize()
 
         # Setup StatusBar
