@@ -265,6 +265,14 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def get_scrollbar_widths(self):
+        """Determine scrollbar widths by temporarily expanding virtual size.
+
+        With virtual size larger than window, compare client size to window
+        size to determine scrollbar widths. (The difference between the two.)
+
+        Affects:
+            self.scrollbar_widths (wx.Size)
+        """
         # get original Virtual Size
         (orig_virtsize_x, orig_virtsize_y) = self.GetVirtualSize()
         # get Size
