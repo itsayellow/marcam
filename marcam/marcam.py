@@ -166,6 +166,7 @@ class ImageFrame(wx.Frame):
         self.select_tool_id = None
         self.mark_menu_item = None
         self.select_menu_item = None
+        self.open_recent_menu = None
         self.toolbar = None
         self.started_temp_zoom = False
         self.menu_items_disable_no_image = None
@@ -195,13 +196,13 @@ class ImageFrame(wx.Frame):
         # menu bar stuff
         menubar = wx.MenuBar()
         # File
-        open_recent_menu = wx.Menu()
+        self.open_recent_menu = wx.Menu()
         file_menu = wx.Menu()
         file_open_item = file_menu.Append(wx.ID_OPEN,
                 'Open Image...\tCtrl+O',
                 'Open image file'
                 )
-        file_menu.AppendSubMenu(open_recent_menu,
+        file_menu.AppendSubMenu(self.open_recent_menu,
                 'Open Recent',
                 'Open recent .mcm files'
                 )
@@ -367,8 +368,8 @@ class ImageFrame(wx.Frame):
                 ]
 
         # register Open Recent menu, put under control of FileHistory obj
-        self.file_history.UseMenu(open_recent_menu)
-        self.file_history.AddFilesToMenu(open_recent_menu)
+        self.file_history.UseMenu(self.open_recent_menu)
+        self.file_history.AddFilesToMenu(self.open_recent_menu)
 
         # register Save, Undo, Redo menu items so EditHistory obj can
         #   enable or disable them as needed
@@ -1927,6 +1928,7 @@ class MarcamApp(wx.App):
 
         if close_window:
             self.file_windows.remove_id(frame_to_close_id)
+            self.file_history.RemoveMenu(frame_to_close.open_recent_menu)
 
         if hide_window:
             # on Mac we hide the last frame we close.
