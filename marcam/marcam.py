@@ -1260,7 +1260,7 @@ class ImageFrame(wx.Frame):
             default_filename = self.save_filepath.name
         else:
             default_dir = self.img_path.parent
-            default_filename = self.img_path.with_suffix(".mcm")
+            default_filename = self.img_path.with_suffix(".mcm").name
 
         # native Mac open dialog has no title message
         with wx.FileDialog(
@@ -1269,7 +1269,7 @@ class ImageFrame(wx.Frame):
                 wildcard="MCM files (*.mcm)|*.mcm",
                 style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 defaultDir=str(default_dir),
-                defaultFile=default_filename,
+                defaultFile=str(default_filename),
                 ) as file_dialog:
 
             if file_dialog.ShowModal() == wx.ID_CANCEL:
