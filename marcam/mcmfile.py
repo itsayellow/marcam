@@ -68,22 +68,6 @@ def image_readable_fh(image_fh):
     return img_ok
 
 @debug_fxn
-def image_readable(image_path):
-    """Check if wx.Image can read this file without making error dialog
-
-    Args:
-        image_path (pathlike): path of image to check for readability
-
-    Returns:
-        bool: True if image was readable by wx.Image
-    """
-    no_log = wx.LogNull()
-    img_ok = wx.Image.CanRead(str(image_path))
-    # re-enable logging
-    del no_log
-    return img_ok
-
-@debug_fxn
 def read_image_fh(image_fh):
     """wx.Image read from file, with wx errror logging turned off.
 
@@ -97,25 +81,6 @@ def read_image_fh(image_fh):
     #   with unknown fields
     no_log = wx.LogNull()
     img = wx.Image(image_fh)
-    # re-enable logging
-    del no_log
-
-    return img
-
-@debug_fxn
-def read_image(image_path):
-    """wx.Image read from file, with wx errror logging turned off.
-
-    Args:
-        image_path (pathlike): path of image to read
-
-    Returns:
-        wx.Image: wx Image object read from file
-    """
-    # disable logging, we don't care if there is e.g. TIFF image
-    #   with unknown fields
-    no_log = wx.LogNull()
-    img = wx.Image(str(image_path))
     # re-enable logging
     del no_log
 
