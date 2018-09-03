@@ -1161,7 +1161,7 @@ class ImageFrame(wx.Frame):
                 extra_str = "[%d more...]"%(len(changes_list) - 3)
                 changes_list = changes_list[:3] + [extra_str,]
             if changes_list is not None:
-                changes_str = "\n".join(["    - "+x for x in changes_list])
+                changes_str = "\n".join(["    \u2022 "+x for x in changes_list])
 
             save_query = wx.MessageDialog(
                     self,

@@ -40,6 +40,14 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
+class StderrToLog:
+    """Replace sys.stderr with this to route stderr messages to LOGGER
+    """
+    def write(self, text):
+        LOGGER.error("From sys.stderr:\n%s\n", text)
+        return len(text)
+
+
 class FileHistory(wx.FileHistory):
     """Like wx.FileHistory, but changing how menu items are displayed
     """
