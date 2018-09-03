@@ -2033,6 +2033,7 @@ class MarcamApp(wx.App):
         if self.config_data is None:
             LOGGER.debug("Postponing MacOpenFiles until we have config_data.")
             wx.CallAfter(self.MacOpenFiles, file_names)
+            return
 
         LOGGER.debug(file_names)
         for open_filename in file_names:
