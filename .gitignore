@@ -10,6 +10,8 @@ virt/
 # build dirs
 build/
 dist/
+# pytest
+.pytest_cache/
 
 #----------------
 # RANDOM
