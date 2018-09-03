@@ -219,10 +219,6 @@ def save(imdata_path, img, marks):
     temp_img = os.fdopen(temp_img_fd, mode='wb')
 
     # copy source image into temp file
-    # self.img_path: path to image we originally loaded
-    # self.save_filepath: path to mcm file we've saved
-    # self.img_panel.img_dc: max-res image data MemoryDC
-
     img.SaveFile(temp_img, wx.BITMAP_TYPE_PNG)
     temp_img.close()
 
