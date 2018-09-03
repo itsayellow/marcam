@@ -2033,6 +2033,7 @@ class MarcamApp(wx.App):
             else:
                 LOGGER.info("MacOpenFiles: not img_ok: %s", open_filename)
 
+    @debug_fxn
     def open_file(self, open_filename):
         """Open specified filename in either this frame or new frame
 
@@ -2249,7 +2250,7 @@ def main(argv=None):
         print("Another instance of Marcam is already running.  Exiting.")
         return 1
 
-    if (const.USER_CONFIG_DIR / 'debug' ).exists():
+    if (const.USER_CONFIG_DIR / 'debug').exists():
         DEBUG = True
         log_level = logging.DEBUG
 
