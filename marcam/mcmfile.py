@@ -20,7 +20,6 @@ import logging
 import os
 import pathlib
 import shutil
-import tempfile
 import zipfile
 
 import wx
@@ -314,27 +313,19 @@ def legacy_load(imdata_path):
             namelist = container_fh.namelist()
             for name in namelist:
                 if name.startswith(MCM_LEGACY_IMAGE_PREFIX):
-                    tmp_dir_path = pathlib.Path(tempfile.mkdtemp())
-                    container_fh.extract(name, str(tmp_dir_path))
+                    img_mem_file = io.BytesIO()
+                    with container_fh.open(name, 'r') as img_fh:
+                        img_mem_file.write(img_fh.read())
+                    img_mem_file.seek(0)
 
                     if name.endswith(".1sc"):
-                        img = image_proc.file1sc_to_image(tmp_dir_path / name)
+                        img = image_proc.fh_1sc_to_image(img_mem_file)
                     else:
-                        # disable logging, we don't care if there is e.g. TIFF image
-                        #   with unknown fields
-                        no_log = wx.LogNull()
+                        img = read_image_fh(img_mem_file)
 
-                        img = wx.Image(str(tmp_dir_path / name))
-
-                        # re-enable logging
-                        del no_log
                     # check if img loaded ok
                     img_ok = img.IsOk()
                     img_name = name
-
-                    # remove temp dir
-                    (tmp_dir_path / name).unlink()
-                    tmp_dir_path.rmdir()
 
                 if name == "marks.txt":
                     with container_fh.open(name, 'r') as json_fh:
