@@ -44,8 +44,14 @@ class StderrToLog:
     """Replace sys.stderr with this to route stderr messages to LOGGER
     """
     def write(self, text):
-        LOGGER.error("From sys.stderr:\n%s\n", text)
+        LOGGER.error(text)
         return len(text)
+
+    def writelines(self, lines):
+        self.write("".join(lines))
+
+    def flush(self):
+        pass
 
 
 class FileHistory(wx.FileHistory):

@@ -2260,6 +2260,9 @@ def main(argv=None):
     # setup logging
     logging_setup(log_level)
 
+    # Route stderr to log
+    sys.stderr = marcam_extra.StderrToLog()
+
     # get basic debug info
     log_debug_main()
 
