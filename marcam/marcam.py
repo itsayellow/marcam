@@ -1696,6 +1696,7 @@ class MarcamApp(wx.App):
         super().__init__(*args, **kwargs)
 
         # App configuration
+        # Must be called after wx.App initialized with super().__init__()
         self.wx_config = wx.Config("Marcam", "itsayellow.com")
         self.read_config()
 
@@ -1968,6 +1969,7 @@ class MarcamApp(wx.App):
             img_ok = True
 
         if img_ok:
+            # Issue #134: seems to get to hear and then die with no errors visible
             new_size = wx.Size(self.config_data['winsize'])
             if self.last_frame_pos == wx.DefaultPosition:
                 new_pos = self.last_frame_pos
