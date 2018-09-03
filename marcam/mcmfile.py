@@ -55,6 +55,23 @@ class McmFileError(Exception):
 
 
 @debug_fxn
+def image_readable_fh(image_fh):
+    """Check if wx.Image can read this file without making error dialog
+
+    Args:
+        image_fh (filehandle): filehandle of image stream to check for
+            readability
+
+    Returns:
+        bool: True if image was readable by wx.Image
+    """
+    no_log = wx.LogNull()
+    img_ok = wx.Image.CanRead(image_fh)
+    # re-enable logging
+    del no_log
+    return img_ok
+
+@debug_fxn
 def image_readable(image_path):
     """Check if wx.Image can read this file without making error dialog
 
@@ -69,6 +86,25 @@ def image_readable(image_path):
     # re-enable logging
     del no_log
     return img_ok
+
+@debug_fxn
+def read_image_fh(image_fh):
+    """wx.Image read from file, with wx errror logging turned off.
+
+    Args:
+        image_fh (filehandle): filehandle of image stream to read
+
+    Returns:
+        wx.Image: wx Image object read from file
+    """
+    # disable logging, we don't care if there is e.g. TIFF image
+    #   with unknown fields
+    no_log = wx.LogNull()
+    img = wx.Image(image_fh)
+    # re-enable logging
+    del no_log
+
+    return img
 
 @debug_fxn
 def read_image(image_path):
@@ -126,22 +162,30 @@ def is_valid(mcm_path):
         file_ok = (legacy_load(mcm_path) != (None, None, None))
         return file_ok
 
+    # Modern MCM (version > 1.0)
     if zipfile.is_zipfile(str(mcm_path)):
         # for .mcm files
         # verify internals of zipfile
         try:
-            tmp_dir = tempfile.mkdtemp()
-            with zipfile.ZipFile(str(mcm_path)) as mcm_container:
-                image_name = [
-                        x for x in mcm_container.namelist() if x.startswith(MCM_LEGACY_IMAGE_PREFIX)
-                        ][0]
-                mcm_container.extract(image_name, tmp_dir)
-                mcm_ok = image_readable(pathlib.Path(tmp_dir) / image_name)
+            with zipfile.ZipFile(str(mcm_path), 'r') as container_fh:
+                with container_fh.open(MCM_INFO_NAME, 'r') as info_fh:
+                    info = json.load(info_fh)
+
+                marks_ok = info.get('marks', None) is not None
+                image_name = info['mcm_image_name']
+
+                png_mem_file = io.BytesIO()
+                with container_fh.open(image_name, 'r') as img_fh:
+                    png_mem_file.write(img_fh.read())
+                png_mem_file.seek(0)
+
+                # check if img is readable
+                img_ok = image_readable_fh(png_mem_file)
+
+                mcm_ok = img_ok and marks_ok
+
         except zipfile.BadZipFile:
             mcm_ok = False
-        finally:
-            # remove temp dir
-            shutil.rmtree(tmp_dir)
     else:
         mcm_ok = False
 
@@ -157,6 +201,9 @@ def load(imdata_path):
     Returns:
         (wx.Image, list, str): (wx Image, list of mark coordinates, image name)
     """
+    # Using BytesIO is almost 20% faster on a large image than using tempfile
+    #   in one test (iMac, Fusion Drive)  (Average 375ms vs. 461ms)
+
     raise_mcm_file_error = False
     # init img_ok to False in case we don't load image
     img_ok = False
@@ -168,16 +215,19 @@ def load(imdata_path):
     # Modern MCM (version > 1.0)
     # first load image from zip
     try:
-        tmp_dir = tempfile.mkdtemp()
         with zipfile.ZipFile(str(imdata_path), 'r') as container_fh:
             with container_fh.open(MCM_INFO_NAME, 'r') as info_fh:
                 info = json.load(info_fh)
+
             marks = info['marks']
-
             image_name = info['mcm_image_name']
-            container_fh.extract(image_name, tmp_dir)
 
-            img = read_image(pathlib.Path(tmp_dir) / image_name)
+            png_mem_file = io.BytesIO()
+            with container_fh.open(image_name, 'r') as img_fh:
+                png_mem_file.write(img_fh.read())
+            png_mem_file.seek(0)
+            img = read_image_fh(png_mem_file)
+
             # check if img loaded ok
             img_ok = img.IsOk()
 
@@ -187,9 +237,7 @@ def load(imdata_path):
                 exc_info=True
                 )
         raise_mcm_file_error = True
-    finally:
-        # remove temp dir
-        shutil.rmtree(tmp_dir)
+
     if raise_mcm_file_error:
         # Do this here so this raise allows the finally above to execute
         raise McmFileError
@@ -201,6 +249,7 @@ def load(imdata_path):
     # make sure marks coordinates are tuples
     marks = [tuple(x) for x in marks]
 
+    print("Elapsed time: %.1fms"%((time.time()-time_start)*1000))
     return (img, marks, image_name)
 
 
