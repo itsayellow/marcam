@@ -17,9 +17,6 @@
 import io
 import json
 import logging
-import os
-import pathlib
-import shutil
 import zipfile
 
 import wx
