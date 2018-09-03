@@ -1686,7 +1686,7 @@ class MarcamApp(wx.App):
         # reset this before calling super().__init__(), which calls
         #   MacOpenFiles()
         self.file_windows = marcam_extra.FrameList()
-        self.config_data = {}
+        self.config_data = None
         self.last_frame_pos = wx.DefaultPosition
         self.last_falsecolor = 'viridis'
         self.last_autocontrast_level = 0
@@ -2027,6 +2027,13 @@ class MarcamApp(wx.App):
         # NOTE: works great in bundled app,
         #   but cmd-line invocation causes file_names to be last argument
         #       of cmd-line, even if that's the script name (???)
+
+        # if we haven't set up config yet, schedule this to be run after
+        #   we finish setting up
+        if self.config_data is None:
+            LOGGER.debug("Postponing MacOpenFiles until we have config_data.")
+            wx.CallAfter(self.MacOpenFiles, file_names)
+
         LOGGER.debug(file_names)
         for open_filename in file_names:
             img_ok = self.open_file(open_filename)
@@ -2060,6 +2067,9 @@ class MarcamApp(wx.App):
         """Load config--from file if present or else defaults.  Create config file
             with default config data if one is not present.
         """
+        # initialize dict
+        self.config_data = {}
+
         # winsize
         self.config_data['winsize'] = json.loads(
                 self.wx_config.Read(
