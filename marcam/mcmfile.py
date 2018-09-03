@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import json
 import logging
 import os
@@ -213,14 +214,10 @@ def save(imdata_path, img, marks):
     Returns:
         bool: whether save was successful, True or False
     """
-    # make temp file for image file
-    #   must make actual file for use with zipfile
-    (temp_img_fd, temp_img_name) = tempfile.mkstemp()
-    temp_img = os.fdopen(temp_img_fd, mode='wb')
-
-    # copy source image into temp file
-    img.SaveFile(temp_img, wx.BITMAP_TYPE_PNG)
-    temp_img.close()
+    # In-memory filehandle to save PNG data to from Image
+    png_mem_file = io.BytesIO()
+    img.SaveFile(png_mem_file, wx.BITMAP_TYPE_PNG)
+    png_mem_file.seek(0)
 
     mcm_info = {
             'mcm_version':MCM_VERSION,
@@ -231,8 +228,8 @@ def save(imdata_path, img, marks):
     # write new save file
     try:
         with zipfile.ZipFile(str(imdata_path), 'w') as container_fh:
-            # write image file to archive
-            container_fh.write(temp_img_name, arcname=MCM_IMAGE_NAME)
+            # write image file data to archive
+            container_fh.writestr(MCM_IMAGE_NAME, png_mem_file.read())
             # write json text file to archive
             container_fh.writestr(
                     MCM_INFO_NAME,
@@ -243,9 +240,6 @@ def save(imdata_path, img, marks):
         returnval = False
     else:
         returnval = True
-    finally:
-        # remove temp file
-        os.unlink(temp_img_name)
 
     return returnval
 
