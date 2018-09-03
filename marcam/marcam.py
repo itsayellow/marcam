@@ -955,8 +955,6 @@ class ImageFrame(wx.Frame):
             wx.MessageDialog(None,
                     message="Unable to open file: %s"%img_path,
                     caption="File Read Error",
-                    #style=wx.OK
-                    #style=wx.OK | wx.ICON_ERROR
                     style=wx.OK | wx.ICON_EXCLAMATION
                     ).ShowModal()
 
@@ -978,8 +976,6 @@ class ImageFrame(wx.Frame):
                 wx.MessageDialog(None,
                         message="Unable to open file: %s"%img_path,
                         caption="File Read Error",
-                        #style=wx.OK
-                        #style=wx.OK | wx.ICON_ERROR
                         style=wx.OK | wx.ICON_EXCLAMATION
                         ).ShowModal()
         else:
@@ -988,8 +984,6 @@ class ImageFrame(wx.Frame):
                     message="Unable to find file: %s"%img_path,
                     caption="File Not Found",
                     style=wx.OK
-                    #style=wx.OK | wx.ICON_ERROR
-                    #style=wx.OK | wx.ICON_EXCLAMATION
                     ).ShowModal()
 
     @debug_fxn
@@ -1167,7 +1161,7 @@ class ImageFrame(wx.Frame):
                     self,
                     "\nChanges since last save:\n%s\n"%changes_str,
                     "Save changes to \"%s\" before closing?"%image_to_close,
-                    wx.CANCEL | wx.YES_NO | wx.YES_DEFAULT | wx.ICON_EXCLAMATION,
+                    wx.CANCEL | wx.YES_NO | wx.YES_DEFAULT
                     )
             save_query.SetYesNoLabels("&Save", "&Don't Save")
             save_query_response = save_query.ShowModal()
@@ -1243,8 +1237,6 @@ class ImageFrame(wx.Frame):
             wx.MessageDialog(None,
                     message="Unable to save file: %s"%self.save_filepath,
                     caption="File Write Error",
-                    #style=wx.OK
-                    #style=wx.OK | wx.ICON_ERROR
                     style=wx.OK | wx.ICON_EXCLAMATION
                     ).ShowModal()
 
@@ -1326,8 +1318,6 @@ class ImageFrame(wx.Frame):
             wx.MessageDialog(None,
                     message="Unable to save file: %s"%pathname,
                     caption="File Write Error",
-                    #style=wx.OK
-                    #style=wx.OK | wx.ICON_ERROR
                     style=wx.OK | wx.ICON_EXCLAMATION
                     ).ShowModal()
 
