@@ -210,7 +210,6 @@ def load(imdata_path):
     # make sure marks coordinates are tuples
     marks = [tuple(x) for x in marks]
 
-    print("Elapsed time: %.1fms"%((time.time()-time_start)*1000))
     return (img, marks, image_name)
 
 
