@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# get directory of this script
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 # first test if uname is present
 if hash uname 2>/dev/null ; then
     # uname is present, use it to find ostype
@@ -33,4 +36,4 @@ fi
 source virt/bin/activate
 
 # dmgbuild
-dmgbuild -s build_scripts/dmgbuild_settings.py "Marcam" dist/Marcam.dmg
+dmgbuild -s $script_dir/dmgbuild_settings.py "Marcam" dist/Marcam.dmg

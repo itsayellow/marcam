@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# get directory of this script
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 # first test if uname is present
 if hash uname 2>/dev/null ; then
     # uname is present, use it to find ostype
@@ -29,6 +32,6 @@ if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
     exit 1
 fi
 
-makensis build_scripts/marcam.nsi
+makensis $script_dir/marcam.nsi
 
 cp "dist/Marcam_Installer.exe" "dist/Marcam Windows Installer.exe"

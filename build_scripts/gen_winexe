@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# get directory of this script
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 # first test if uname is present
 if hash uname 2>/dev/null ; then
     # uname is present, use it to find ostype
@@ -31,13 +34,13 @@ if [ "$ostype" == "Darwin" -o "$ostype" == "Linux" ] ; then
 fi
 
 # Add git info to VERSION_STR in marcam/const.py
-build_scripts/git_version_str win marcam/const.py
+$script_dir/git_version_str win marcam/const.py
 
 # activate virtual environment for python
 source virt/Scripts/activate
 
 # build app using pyinstaller
-pyinstaller build_scripts/marcam_win.spec
+pyinstaller $script_dir/marcam_win.spec
 
 # move back original const.py file
 mv marcam/const.py.bak marcam/const.py

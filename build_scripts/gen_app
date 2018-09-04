@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# get directory of this script
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 # first test if uname is present
 if hash uname 2>/dev/null ; then
     # uname is present, use it to find ostype
@@ -30,16 +33,16 @@ if [ "$ostype" != "Darwin" ] ; then
 fi
 
 # Add git info to VERSION_STR in marcam/const.py
-build_scripts/git_version_str mac marcam/const.py
+$script_dir/git_version_str mac marcam/const.py
 
 # activate virtual environment for python
 source virt/bin/activate
 
 # build app using pyinstaller
-pyinstaller build_scripts/marcam_macos.spec
+pyinstaller $script_dir/marcam_macos.spec
 
 # copy original Info.plist
-cp build_scripts/Info.plist dist/Marcam.app/Contents/
+cp $script_dir/Info.plist dist/Marcam.app/Contents/
 
 # move back original const.py file
 mv marcam/const.py.bak marcam/const.py
