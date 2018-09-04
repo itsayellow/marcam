@@ -86,6 +86,7 @@ exe = EXE(
         console=False,
         # relative to execute dir (./)
         icon=abspath('marcam/media/marcam.ico')
+        )
 
 coll = COLLECT(
         exe,
