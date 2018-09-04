@@ -1,4 +1,4 @@
-.PHONY: clean clean_all app dmg exe wininstall
+.PHONY: clean clean_all tests
 clean:
 	rm -rf build dist
 
