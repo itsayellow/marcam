@@ -7,7 +7,7 @@ Summary
 1. Make sure it builds, installs, runs on all platforms.
 #. Increase version numbers
 
-   i. file: build_scripts/Info.plist 
+   i. file: scripts/Info.plist
 
       a. ``<string>``\ <version_num>\ ``</string>``
       #. ``<string>``\ <version_num>\ ``</string>``

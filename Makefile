@@ -18,7 +18,7 @@ tests: virt_test tests/*
 	@echo "---------------------------------------------------------------"
 	@echo "Execute tests"
 	@echo ""
-	./build_scripts/do_tests
+	./scripts/do_tests
 
 virt_test: requirements_test.txt requirements.txt requirements_mac.txt
 	@echo ""
@@ -26,7 +26,7 @@ virt_test: requirements_test.txt requirements.txt requirements_mac.txt
 	@echo "Make virtual test environment"
 	@echo ""
 	rm -rf virt_test
-	./build_scripts/gen_virt_test
+	./scripts/gen_virt_test
 
 virt: requirements.txt requirements_mac.txt
 	@echo ""
@@ -34,34 +34,34 @@ virt: requirements.txt requirements_mac.txt
 	@echo "Make virtual environment"
 	@echo ""
 	rm -rf virt
-	./build_scripts/gen_virt
+	./scripts/gen_virt
 
 dist/Marcam.app: marcam/* virt
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make app (MacOS)"
 	@echo ""
-	./build_scripts/gen_app
+	./scripts/gen_app
 
 dist/Marcam.dmg: dist/Marcam.app
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make dmg (MacOS)"
 	@echo ""
-	./build_scripts/gen_dmg
+	./scripts/gen_dmg
 
 dist/marcam/Marcam.exe: marcam/* virt
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make exe (Windows)"
 	@echo ""
-	./build_scripts/gen_winexe
+	./scripts/gen_winexe
 
 dist/Marcam_Installer.exe: dist/marcam/Marcam.exe
 	@echo ""
 	@echo "---------------------------------------------------------------"
 	@echo "Make installer (Windows)"
 	@echo ""
-	./build_scripts/gen_wininstaller
+	./scripts/gen_wininstaller
 
 # vim: nowrap noexpandtab sw=8 sts=0
