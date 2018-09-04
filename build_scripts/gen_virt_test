@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Copyright 2017-2018 Matthew A. Clapp
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+if [ -e virt_test ]; then
+    echo "Directory 'virt_test' already exists.  Remove it before running this script"
+    exit 1
+fi
+# first test if uname is present
+if hash systeminfo 2>/dev/null ; then
+    # systeminfo is present, we are on Windows
+    ostype="Windows"
+elif hash uname 2>/dev/null ; then
+    # uname is present, use it to find ostype
+    ostype="$(uname)"
+else
+    # uname is not present, where are we??
+    ostype="UNKNOWN"
+fi
+
+# inform venv stage
+echo Creating Test virtual environment...
+
+# make dir to hold virtual environment
+mkdir virt_test
+# python3 native venv
+python3 -m venv virt_test
+# activate virtual environment
+if [ -e "virt_test/bin/activate" ]; then
+    source virt_test/bin/activate
+elif [ -e "virt_test/Scripts/activate" ]; then
+    source virt_test/Scripts/activate
+else
+    echo "No virt_test/bin/activate or virt_test/Scripts/activate found. Exiting"
+    exit 1
+fi
+
+# inform venv stage
+echo Installing required python packages...
+
+# install required python packages into virtual environment
+# use python3 -m pip instead of pip3, because only thing that works on
+#   stupid Windows
+if [ "$ostype" == "Windows" ] ; then
+    # Windows
+    echo python3 -m pip install -r requirements_win.txt
+    python3 -m pip install -r requirements_win.txt
+elif [ "$ostype" == "Darwin" ] ; then
+    # macOS
+    echo python3 -m pip install -r requirements_mac.txt
+    python3 -m pip install -r requirements_mac.txt
+else
+    # non-Mac and non-Windows OS
+    echo python3 -m pip install -r requirements.txt
+    python3 -m pip install -r requirements.txt
+fi
+
+# finally install pytest
+python3 -m pip install -r requirements_test.txt

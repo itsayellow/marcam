@@ -1,4 +1,4 @@
-.PHONY: clean clean_all app dmg
+.PHONY: clean clean_all app dmg exe wininstall
 clean:
 	rm -rf build dist
 
@@ -12,6 +12,21 @@ dmg: dist/Marcam.dmg
 exe: dist/marcam/Marcam.exe
 
 wininstall: dist/Marcam_Installer.exe
+
+tests: virt_test tests/*
+	@echo ""
+	@echo "---------------------------------------------------------------"
+	@echo "Execute tests"
+	@echo ""
+	./build_scripts/do_tests
+
+virt_test: requirements_test.txt requirements.txt requirements_mac.txt
+	@echo ""
+	@echo "---------------------------------------------------------------"
+	@echo "Make virtual test environment"
+	@echo ""
+	rm -rf virt_test
+	./build_scripts/gen_virt_test
 
 virt: requirements.txt requirements_mac.txt
 	@echo ""
