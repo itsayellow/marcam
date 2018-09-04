@@ -14,33 +14,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os.path
+import pathlib
 import sys
+
+def abspath(file_path):
+    """From path relative to cwd, return string of absolute path.
+
+    Args:
+        file_path (pathlike): path relative to cwd
+
+    Returns:
+        str: absolute path string
+    """
+    return str(pathlib.Path(file_path).resolve())
 
 # add ./marcam to PYTHONPATH to allow loading const.py
 #   relative to execute dir (./)
-sys.path.append(os.path.abspath('marcam'))
+sys.path.append(abspath('marcam'))
+
 import const
 
 block_cipher = None
 
-# datas are sources relative to dir of this file (./build_scripts)
+# datas are sources relative to dir of this file
+# Use computed absolute paths so we don't have to care.
+# Paths seem to work but str() to be safe
 marcam_datas = [
-        ('../marcam/media/marcam.ico', 'media'),
-        ('../marcam/media/marcam_doc.icns', 'media'),
-        ('../marcam/media/marcam_help_mac.html', 'media'),
-        # toolbar icons
-        (os.path.relpath(const.SELECTBMP_FNAME, start='build_scripts'), 'media'),
-        (os.path.relpath(const.MARKBMP_FNAME, start='build_scripts'), 'media'),
-        (os.path.relpath(const.TOCLIPBMP_FNAME, start='build_scripts'), 'media'),
-        (os.path.relpath(const.ZOOMOUTBMP_FNAME, start='build_scripts'), 'media'),
-        (os.path.relpath(const.ZOOMINBMP_FNAME, start='build_scripts'), 'media'),
-        (os.path.relpath(const.ZOOMFITBMP_FNAME, start='build_scripts'), 'media'),
+        (abspath('marcam/media/marcam.ico'), 'media'),
+        (abspath('marcam/media/marcam_doc.icns'), 'media'),
+        (abspath('marcam/media/marcam_help_mac.html'), 'media'),
+        # toolbar icons (absolute paths from const)
+        (abspath(const.SELECTBMP_FNAME), 'media'),
+        (abspath(const.MARKBMP_FNAME), 'media'),
+        (abspath(const.TOCLIPBMP_FNAME), 'media'),
+        (abspath(const.ZOOMOUTBMP_FNAME), 'media'),
+        (abspath(const.ZOOMINBMP_FNAME), 'media'),
+        (abspath(const.ZOOMFITBMP_FNAME), 'media'),
         ]
 
 a = Analysis(
-        # relative to dir of this file (./build_scripts)
-        ['../marcam/marcam.py'],
+        # relative to dir of this file
+        # Use computed absolute paths so we don't have to care.
+        [abspath('marcam/marcam.py')],
         # relative to execute dir (./)
         pathex=['marcam', '.'],
         binaries=[],
