@@ -21,13 +21,11 @@ pipeline {
             steps {
                 sh 'make tests'
             }
-            /*
             post {
                 always {
-                    junit 'test-reports/results.xml'
+                    junit 'pytest_results.xml'
                 }
             }
-            */
         }
         stage('Deploy') {
             steps {
