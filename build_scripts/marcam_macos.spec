@@ -70,7 +70,8 @@ a = Analysis(
         )
 
 pyz = PYZ(
-        a.pure, a.zipped_data,
+        a.pure,
+        a.zipped_data,
         cipher=block_cipher
         )
 
@@ -84,7 +85,7 @@ exe = EXE(
         upx=True,
         console=False,
         # relative to execute dir (./)
-        icon='marcam/media/marcam.icns'
+        icon=abspath('marcam/media/marcam.icns')
         )
 
 coll = COLLECT(
