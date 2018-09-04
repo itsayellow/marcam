@@ -5,8 +5,9 @@ __pycache__
 .DS_Store
 # vim swap files
 .*.swp
-# virtual environment for python
+# virtual environments for python
 virt/
+virt_test/
 # build dirs
 build/
 dist/
