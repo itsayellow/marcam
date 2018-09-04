@@ -3,7 +3,7 @@ clean:
 	rm -rf build dist
 
 clean_all:
-	rm -rf build dist virt
+	rm -rf build dist virt virt_test
 
 app: dist/Marcam.app
 
