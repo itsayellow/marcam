@@ -12,6 +12,18 @@ pipeline {
                 sh 'make app'
             }
         }
+        stage('Test') {
+            steps {
+                sh 'make tests'
+            }
+            /*
+            post {
+                always {
+                    junit 'test-reports/results.xml'
+                }
+            }
+            */
+        }
         stage('Deploy') {
             steps {
                 sh 'make dmg'
