@@ -11,3 +11,20 @@ TESTDATA_PATH = TESTS_PATH / 'testdata'
 def test_is_valid():
     mcm_testfile = TESTDATA_PATH / 'checkerboard.mcm'
     assert mcmfile.is_valid(mcm_testfile) is True
+
+def test_load_legacy_mcm_file():
+    # legacy mcm file
+    legacy_mcm_1sc_testfile = TESTDATA_PATH / 'legacy_mcm_1sc_A11 2015-12-15 11hr 55min.mcm'
+    (wx_image, marks, img_name) = mcmfile.load(legacy_mcm_1sc_testfile)
+    assert wx_image.IsOk()
+    assert isinstance(marks, list)
+    assert isinstance(img_name, str)
+
+def test_load_mcm_1_0_file():
+    # legacy mcm file
+    mcm_testfile = TESTDATA_PATH / 'single_pixel_lines.mcm'
+    (wx_image, marks, img_name) = mcmfile.load(mcm_testfile)
+    assert wx_image.IsOk()
+    assert isinstance(marks, list)
+    assert isinstance(img_name, str)
+
