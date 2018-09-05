@@ -1,4 +1,4 @@
-# Version 0.8 What's New
+# Version 0.8: Lots of Fun at Parties 
 
 Marcam inside the dmg file should run on any Mac OS X that is Yosemite (10.10.5) or later.
 
