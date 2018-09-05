@@ -1,5 +1,9 @@
 # Version 0.7: More Solid, Better Behaved, More Polite
 
+date: 2018 Aug 03
+tag: v0.7
+commit: 22fd8f0
+
 Marcam inside the dmg file should run on any Mac OS X that is Yosemite (10.10.5) or later.
 
 The Marcam Windows Installer was created on a Windows 10 Home version 1803.
@@ -11,7 +15,7 @@ Notable improvements:
   * Image False Color
   * Image Auto-contrast (Issue #77)
   * Image Info
-* Edit->Undo/Redo now tell you in the menu text what you are about to Undo or Redo (Issue #92)
+* Edit-\>Undo/Redo now tell you in the menu text what you are about to Undo or Redo (Issue #92)
 * Filename now in titlebar of window.  (Also right-clickable icon on Mac.) (Issue #82)
 * Windows: now knows Marcam handles .mcm files, Marcam file icons on .mcm files in Windows. (Issues #79, #84)
 * Windows: remove jitter during zoom
@@ -22,3 +26,4 @@ Notable improvements:
 * Images with an Alpha channel now are displayed on white background, rendered properly. (Issue #73)
 * New Debug Menu (only visible if developer is in Debug mode)
 * Dragging while scrolling improved (but not perfect)
+* New version of the \*.mcm file format.  Program still opens legacy files.  New files saved in new version.

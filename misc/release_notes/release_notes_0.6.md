@@ -1,5 +1,9 @@
 # Version 0.6: More Functionality, More Polish, More Bugfixes
 
+date: 2018 Jul 21
+tag: v0.6
+commit: edfa28f
+
 Notable Improvements:
 * Toolbar buttons look nicer, and more toolbar buttons.
 * Zoom In, Zoom Out, Zoom Fit: New menu items, new toolbar buttons.

@@ -1,5 +1,9 @@
 # Version 0.8: Lots of Fun at Parties 
 
+date: 2018 Aug 25
+tag: v0.8
+commit: 9d31425
+
 Marcam inside the dmg file should run on any Mac OS X that is Yosemite (10.10.5) or later.
 
 The Marcam Windows Installer was created on a Windows 10 Home version 1803.

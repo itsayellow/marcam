@@ -1,5 +1,9 @@
 # Version 0.5: Copy Marks Total and Windows Bugfixes
 
+date: 2018 Jul 09
+tag: v0.5
+commit: b850650
+
 Notable Improvements:
 * Now Ctrl-C / Cmd-C or pushing the "To Clipboard" toolbar button copies the total number of marks to the clipboard.
 * Changed Temporary Zoom to be activated with space bar (instead of Option / Alt key as before).  This allows it to function properly on Windows.
