@@ -51,7 +51,7 @@ class McmFileError(Exception):
 
 
 @debug_fxn
-def image_readable_fh(image_fh):
+def _image_readable_fh(image_fh):
     """Check if wx.Image can read this file without making error dialog
 
     Args:
@@ -68,7 +68,7 @@ def image_readable_fh(image_fh):
     return img_ok
 
 @debug_fxn
-def read_image_fh(image_fh):
+def _read_image_fh(image_fh):
     """wx.Image read from file, with wx errror logging turned off.
 
     Args:
@@ -87,7 +87,7 @@ def read_image_fh(image_fh):
     return img
 
 @debug_fxn
-def is_legacy_mcm_file(mcm_path):
+def _is_legacy_mcm_file(mcm_path):
     """Determine if this is a legacy mcm file (different format).
 
     Args:
@@ -105,7 +105,7 @@ def is_legacy_mcm_file(mcm_path):
     return legacy_mcm
 
 @debug_fxn
-def legacy_load(imdata_path):
+def _legacy_load(imdata_path):
     """For old mcm files only (before they contained 'info.json')
 
     Load legacy app .mcm file
@@ -133,7 +133,7 @@ def legacy_load(imdata_path):
                     if name.endswith(".1sc"):
                         img = image_proc.fh_1sc_to_image(img_mem_file)
                     else:
-                        img = read_image_fh(img_mem_file)
+                        img = _read_image_fh(img_mem_file)
 
                     # check if img loaded ok
                     img_ok = img.IsOk()
@@ -172,10 +172,10 @@ def is_valid(mcm_path):
         bool: True if file is a valid mcm file
     """
     # if legacy file use legacy file function
-    if is_legacy_mcm_file(mcm_path):
+    if _is_legacy_mcm_file(mcm_path):
         # Actually try and load file.  This is slow, but hopefully we
         #   won't often need to test legacy files.
-        file_ok = (legacy_load(mcm_path) != (None, None, None))
+        file_ok = (_legacy_load(mcm_path) != (None, None, None))
         return file_ok
 
     # Modern MCM (version > 1.0)
@@ -196,7 +196,7 @@ def is_valid(mcm_path):
                 png_mem_file.seek(0)
 
                 # check if img is readable
-                img_ok = image_readable_fh(png_mem_file)
+                img_ok = _image_readable_fh(png_mem_file)
 
                 mcm_ok = img_ok and marks_ok
 
@@ -225,8 +225,8 @@ def load(imdata_path):
     img_ok = False
 
     # if legacy file use legacy file function
-    if is_legacy_mcm_file(imdata_path):
-        return legacy_load(imdata_path)
+    if _is_legacy_mcm_file(imdata_path):
+        return _legacy_load(imdata_path)
 
     # Modern MCM (version > 1.0)
     # first load image from zip
@@ -242,7 +242,7 @@ def load(imdata_path):
             with container_fh.open(image_name, 'r') as img_fh:
                 png_mem_file.write(img_fh.read())
             png_mem_file.seek(0)
-            img = read_image_fh(png_mem_file)
+            img = _read_image_fh(png_mem_file)
 
             # check if img loaded ok
             img_ok = img.IsOk()
