@@ -46,3 +46,5 @@ def test_save():
     save_returnval = mcmfile.save(str(SAVE_MCM_FILEPATH), test_img, test_marks)
     assert save_returnval
     assert zipfile.is_zipfile(str(SAVE_MCM_FILEPATH))
+    # delete test save file
+    SAVE_MCM_FILEPATH.unlink()
