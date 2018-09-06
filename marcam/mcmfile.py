@@ -105,6 +105,61 @@ def is_legacy_mcm_file(mcm_path):
     return legacy_mcm
 
 @debug_fxn
+def legacy_load(imdata_path):
+    """For old mcm files only (before they contained 'info.json')
+
+    Load legacy app .mcm file
+
+    Args:
+        imdata_path (pathlike): path to .mcm file to open
+
+    Returns:
+        (wx.Image, list, str): (wx Image, list of mark coordinates, image name)
+    """
+    # init img_ok to False in case we don't load image
+    img_ok = False
+
+    # first load image from zip
+    try:
+        with zipfile.ZipFile(str(imdata_path), 'r') as container_fh:
+            namelist = container_fh.namelist()
+            for name in namelist:
+                if name.startswith(MCM_LEGACY_IMAGE_PREFIX):
+                    img_mem_file = io.BytesIO()
+                    with container_fh.open(name, 'r') as img_fh:
+                        img_mem_file.write(img_fh.read())
+                    img_mem_file.seek(0)
+
+                    if name.endswith(".1sc"):
+                        img = image_proc.fh_1sc_to_image(img_mem_file)
+                    else:
+                        img = read_image_fh(img_mem_file)
+
+                    # check if img loaded ok
+                    img_ok = img.IsOk()
+                    img_name = name
+
+                if name == "marks.txt":
+                    with container_fh.open(name, 'r') as json_fh:
+                        marks = json.load(json_fh)
+                    marks = [tuple(x) for x in marks]
+    except OSError:
+        img_ok = False
+        LOGGER.warning(
+                "Cannot open data in file '%s'.", imdata_path,
+                exc_info=True
+                )
+    # error return
+    if not img_ok:
+        return (None, None, None)
+
+    # make sure marks coordinates are tuples
+    marks = [tuple(x) for x in marks]
+
+    return (img, marks, img_name)
+
+
+@debug_fxn
 def is_valid(mcm_path):
     """Detect if this image is readable by this program.
 
@@ -212,7 +267,6 @@ def load(imdata_path):
 
     return (img, marks, image_name)
 
-
 @debug_fxn
 def save(imdata_path, img, marks):
     """Save image and mark locations to .mcm zipfile
@@ -251,58 +305,3 @@ def save(imdata_path, img, marks):
         returnval = True
 
     return returnval
-
-
-@debug_fxn
-def legacy_load(imdata_path):
-    """For old mcm files only (before they contained 'info.json')
-
-    Load legacy app .mcm file
-
-    Args:
-        imdata_path (pathlike): path to .mcm file to open
-
-    Returns:
-        (wx.Image, list, str): (wx Image, list of mark coordinates, image name)
-    """
-    # init img_ok to False in case we don't load image
-    img_ok = False
-
-    # first load image from zip
-    try:
-        with zipfile.ZipFile(str(imdata_path), 'r') as container_fh:
-            namelist = container_fh.namelist()
-            for name in namelist:
-                if name.startswith(MCM_LEGACY_IMAGE_PREFIX):
-                    img_mem_file = io.BytesIO()
-                    with container_fh.open(name, 'r') as img_fh:
-                        img_mem_file.write(img_fh.read())
-                    img_mem_file.seek(0)
-
-                    if name.endswith(".1sc"):
-                        img = image_proc.fh_1sc_to_image(img_mem_file)
-                    else:
-                        img = read_image_fh(img_mem_file)
-
-                    # check if img loaded ok
-                    img_ok = img.IsOk()
-                    img_name = name
-
-                if name == "marks.txt":
-                    with container_fh.open(name, 'r') as json_fh:
-                        marks = json.load(json_fh)
-                    marks = [tuple(x) for x in marks]
-    except OSError:
-        img_ok = False
-        LOGGER.warning(
-                "Cannot open data in file '%s'.", imdata_path,
-                exc_info=True
-                )
-    # error return
-    if not img_ok:
-        return (None, None, None)
-
-    # make sure marks coordinates are tuples
-    marks = [tuple(x) for x in marks]
-
-    return (img, marks, img_name)
