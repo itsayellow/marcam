@@ -1,10 +1,14 @@
 #!/usr/bin/env/python3
 
+import json
 import pathlib
 import wx
 import zipfile
 
 import mcmfile
+
+# current MCM file version
+MCM_FILE_VERSION = '1.0.0'
 
 # the parent of this file is the tests directory
 TESTS_PATH = pathlib.Path(__file__).resolve().parent
@@ -46,5 +50,14 @@ def test_save():
     save_returnval = mcmfile.save(str(SAVE_MCM_FILEPATH), test_img, test_marks)
     assert save_returnval
     assert zipfile.is_zipfile(str(SAVE_MCM_FILEPATH))
-    # delete test save file
+    with zipfile.ZipFile(SAVE_MCM_FILEPATH, 'r') as test_open_fh:
+        with test_open_fh.open(mcmfile.MCM_INFO_NAME, 'r') as info_fh:
+            info = json.load(info_fh)
+        test_open_fh.extract(info['mcm_image_name'])
+    assert info.get('mcm_version', None) == MCM_FILE_VERSION 
+    assert [tuple(x) for x in info['marks']] == test_marks
+    assert wx.Image(info['mcm_image_name'], type=wx.BITMAP_TYPE_PNG)
+
+    # delete test save files
     SAVE_MCM_FILEPATH.unlink()
+    pathlib.Path(info['mcm_image_name']).unlink()
