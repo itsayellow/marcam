@@ -124,7 +124,7 @@ def server_create_named_pipe(pipe_name):
         pipe_name (str): name of pipe
 
     Returns:
-        (PyHANDLE): handle to named pipe
+        PyHANDLE: handle to named pipe
     """
     no_pipe_instance = True
     while no_pipe_instance:
@@ -143,13 +143,16 @@ def server_create_named_pipe(pipe_name):
     return pipe_handle
 
 @debug_fxn
-def server_connect_and_wait_raw(pipe):
+def server_connect_and_wait_raw(pipe_handle):
     """Wait for a client connection, do not return until one is found.
 
     Assumes server_create_named_pipe used PIPE_WAIT mode.
+
+    Args:
+        pipe_handle (PyHANDLE): pipe handle to connect to
     """
     try:
-        win32pipe.ConnectNamedPipe(pipe, None)
+        win32pipe.ConnectNamedPipe(pipe_handle, None)
     except pywintypes.error as err:
         (winerror, funcname, strerror) = err.args
         LOGGER.error("Windows error:\n    %s\n   %s\n    %s",
@@ -161,6 +164,9 @@ def server_connect_and_wait(pipe_handle):
     """Wait for a client connection, do not return until one is found.
 
     Server function.
+
+    Args:
+        pipe_handle (PyHANDLE): pipe handle to connect to
     """
     no_connection = True
     while no_connection:
@@ -199,6 +205,10 @@ def server_pipe_read(pipe_name, string_read_fxn):
     """Create a pipe server that reads only.
 
     When a message is read, execute string_read_fxn on the received string.
+
+    Args:
+        pipe_name (str): name of named pipe
+        string_read_fxn (fxn_handle): handle to function that accepts str
     """
     filearg_pipe = server_create_named_pipe(pipe_name)
     while True:
@@ -240,6 +250,12 @@ def server_pipe_read(pipe_name, string_read_fxn):
 @debug_fxn
 def client_connect_to_pipe(pipe_name):
     """Connect to server pipe.  Keep trying if pipe is busy.
+
+    Args:
+        pipe_name (str): name of named pipe
+
+    Returns:
+        PyHANDLE: pipe handle
     """
     no_connection = True
     while no_connection:
@@ -275,8 +291,6 @@ def pipe_write(pipe_handle, data_string):
     Args:
         pipe_handle (PyHANDLE): pipe handle to read from
         data_string (str): string to write to pipe
-
-    Returns:
     """
     data_bytes = data_string.encode(encoding='utf-8')
     win32file.WriteFile(
@@ -288,8 +302,13 @@ def pipe_write(pipe_handle, data_string):
 
 @debug_fxn
 def client_write_strings(pipe_name, data_strings):
-    """
-    Returns True on success, False on failure.
+    """Write strings to a named pipe as a pipe client
+    Args:
+        pipe_name (str): name of named pipe
+        data_strings (list): list of strings to write to pipe
+
+    Returns:
+        bool: True on success, False on failure.
     """
     try:
         pipe_handle = client_connect_to_pipe(pipe_name)
