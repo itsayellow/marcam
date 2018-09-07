@@ -15,3 +15,36 @@
 # limitations under the License.
 
 import image_proc
+
+def test_fh_1sc_to_image():
+    pass
+
+def test_file1sc_to_image():
+    pass
+
+def test_image2memorydc():
+    pass
+
+def test_wxmemorydc2pilimage():
+    pass
+
+def test_wxbitmap2pilimage():
+    pass
+
+def test_wximage2pilimage():
+    pass
+
+def test_pilimage2wximage():
+    pass
+
+def test_image_invert():
+    pass
+
+def test_image_autocontrast():
+    pass
+
+def test_image_remap_colormap():
+    pass
+
+def test_get_image_info():
+    pass
