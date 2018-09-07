@@ -1,3 +1,21 @@
+# BUNDLED GEMS
+# ------------
+# from Gemfile
+
+# install gems
+bundle install
+
+# upgrade gems
+bundle upgrade
+
+# rebuild the site using my gems.
+bundle exec jekyll serve -w -l -o
+
+
+# TO SERVE WEBPAGE LOCALLY (with no local gems)
+# ---------------------------------------------
+
 # -w, --[no-]watch   Watch for changes and rebuild
 # -l, --livereload   Use LiveReload to automatically refresh browsers
-jekyll serve -w -l
+# -o, --open-url     Launch your site in a browser
+jekyll serve -w -l -o
