@@ -1,0 +1,3 @@
+# -w, --[no-]watch   Watch for changes and rebuild
+# -l, --livereload   Use LiveReload to automatically refresh browsers
+jekyll serve -w -l
