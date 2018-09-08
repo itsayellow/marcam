@@ -31,6 +31,9 @@ USER_CONFIG_DIR = pathlib.Path(
 USER_LOG_DIR = pathlib.Path(
         appdirs.user_log_dir(appname=APP_NAME, appauthor=False)
         )
+USER_CACHE_DIR = pathlib.Path(
+        appdirs.user_cache_dir(appname=APP_NAME, appauthor=False)
+        )
 if sys.platform == 'darwin':
     PLATFORM = 'mac'
 elif sys.platform == 'win32':
