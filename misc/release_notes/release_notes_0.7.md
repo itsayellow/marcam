@@ -23,7 +23,6 @@ Notable improvements:
 * Mac: Closing last window keeps app open with no windows, as is typical for a Mac app.
 * Dialog boxes handle all errors for file open, save, etc. (Issue #96)
 * Menu items disabled appropriately when no image. (Issue #97)
-* Images with an Alpha channel now are displayed on white background, rendered properly. (Issue #73)
 * New Debug Menu (only visible if developer is in Debug mode)
 * Dragging while scrolling improved (but not perfect)
 * New version of the \*.mcm file format.  Program still opens legacy files.  New files saved in new version.
