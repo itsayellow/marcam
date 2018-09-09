@@ -37,11 +37,13 @@ def main():
     # imread from tiff
     test_tiff_load = plt.imread('testme.tif')
     # pil open from png
-    test_png_pil_load = list(PIL.Image.open('testme.png').getdata())
+    pil_png_image = PIL.Image.open('testme.png')
+    test_png_pil_load = list(pil_png_image.getdata())
     # just get first row, and R of RGBA
     test_png_pil_load = [x[0] for x in test_png_pil_load[0:256]]
     # pil open from tiff
-    test_tiff_pil_load = list(PIL.Image.open('testme.tif').getdata())
+    pil_tiff_image = PIL.Image.open('testme.tif')
+    test_tiff_pil_load = list(pil_tiff_image.getdata())
     # just get first row
     test_tiff_pil_load = test_png_pil_load[0:256]
 
@@ -68,4 +70,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
