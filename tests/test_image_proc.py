@@ -14,7 +14,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pathlib
+
+import numpy as np
+import wx
+
 import image_proc
+
+# the parent of this file is the tests directory
+TESTS_PATH = pathlib.Path(__file__).resolve().parent
+# path to testdata dir
+TESTDATA_PATH = TESTS_PATH / 'testdata'
+# path to testdata dir for image_proc.py
+TESTDATA_IMAGEPROC = TESTDATA_PATH / 'image_proc'
+
+TEST_INPUT_IMAGE = TESTDATA_IMAGEPROC / 'test_gray.png'
+
+
+# necessary for using some wx functions
+app = wx.App()
+
+
+def image_same(wx_image_ref, wx_image_test):
+    wx_image_ref_data = wx_image_ref.GetData()[::3]
+    wx_image_test_data = wx_image_test.GetData()[::3]
+
+    test_result = wx_image_ref_data == wx_image_test_data
+
+    if not test_result:
+        for i in range(int(len(wx_image_test_data)/16)):
+            print("ref: ", end="")
+            for j in range(16):
+                byte = wx_image_ref_data[i*16 + j]
+                print("%02x"%byte, end=" ")
+            print("")
+            print("tst: ", end="")
+            for j in range(16):
+                byte = wx_image_test_data[i*16 + j]
+                print("%02x"%byte, end=" ")
+            print("")
+        print("")
+
+    return test_result
 
 def test_fh_1sc_to_image():
     pass
@@ -38,7 +79,10 @@ def test_pilimage2wximage():
     pass
 
 def test_image_invert():
-    pass
+    test_input = wx.Image(str(TEST_INPUT_IMAGE))
+    correct_output = wx.Image(str(TESTDATA_IMAGEPROC / 'test_gray_invert.png' ))
+    test_output = image_proc.image_invert(test_input)
+    assert image_same(correct_output, test_output)
 
 def test_image_autocontrast():
     pass
