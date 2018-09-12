@@ -181,6 +181,69 @@ class RealPoint(wx.RealPoint):
         return "RealPoint(" + repr(self.x) + ", " + repr(self.y) + ")"
 
 
+class ImageList:
+    """An object that keeps track of memory- and file-cached images in
+        the edit history
+    """
+    @debug_fxn
+    def __init__(self, cache_dir, img=None):
+        self.cache_dir = cache_dir
+        self.img_list = None
+        self.img_idx = None
+        if img is not None:
+            pass
+
+    @debug_fxn
+    def set_no_image(self):
+        """Reset image list
+        """
+        self.img = None
+        self.img_idx = None
+
+    @debug_fxn
+    def get_current_img(self):
+        """Get current Image in list of edit history of images
+
+        Returns:
+            (wx.Image): Current image
+        """
+        return self.img[self.img_idx]
+
+    @debug_fxn
+    def new_img(self, img):
+        """Create edit history image list and put Image as first member
+
+        Args:
+            img (wx.Image): Current image
+        """
+        # TODO: cache_dir
+        self.img = [img]
+        self.img_idx = 0
+
+    @debug_fxn
+    def replace_endlist_with_new(self, image_new):
+        # TODO: cache_dir
+        # delete all items after current one in list
+        self.img = self.img[:self.img_idx+1]
+        # add new img to end of list
+        self.img.append(image_new)
+        # update img pointer
+        self.img_idx += 1
+
+    @debug_fxn
+    def set_img_idx(self, idx_set):
+        """Set current index for edit history image list of images
+
+        Args:
+            idx_set (int): Index to desired image
+        """
+        self.img_idx = idx_set
+
+    @debug_fxn
+    def get_img_idx(self):
+        return self.img_idx
+
+
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
     """Window (in the wx sense) widget that displays an image, zooms in and
