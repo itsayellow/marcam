@@ -43,15 +43,19 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 class StderrToLog:
     """Replace sys.stderr with this to route stderr messages to LOGGER
     """
+    def __init__(self):
+        self.buffer = ""
+
     def write(self, text):
         LOGGER.error(text)
         return len(text)
 
     def writelines(self, lines):
+        LOGGER.error("StderrToLog.writelines()")
         self.write("".join(lines))
 
     def flush(self):
-        pass
+        LOGGER.error("StderrToLog.flush()")
 
 
 class FileHistory(wx.FileHistory):
