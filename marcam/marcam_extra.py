@@ -20,6 +20,7 @@
 
 import logging
 import pathlib
+import re
 
 import wx
 import wx.html2
@@ -47,15 +48,15 @@ class StderrToLog:
         self.buffer = ""
 
     def write(self, text):
-        LOGGER.error(text)
+        LOGGER.error("STDERR: " + text)
         return len(text)
 
     def writelines(self, lines):
-        LOGGER.error("StderrToLog.writelines()")
+        LOGGER.error("STDERR: " + "StderrToLog.writelines()")
         self.write("".join(lines))
 
     def flush(self):
-        LOGGER.error("StderrToLog.flush()")
+        LOGGER.error("STDERR: " + "StderrToLog.flush()")
 
 
 class FileHistory(wx.FileHistory):
@@ -142,6 +143,10 @@ class FileHistory(wx.FileHistory):
 class MarcamFormatter(logging.Formatter):
     """Our specific Formatter for logging
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.last_was_stderr = False
+
     def format(self, record):
         """Overload of default format fxn, make all lines after first indented
         of a log message
@@ -152,9 +157,28 @@ class MarcamFormatter(logging.Formatter):
         Returns:
             out_string: processed log message
         """
-        out_string = super().format(record)
-        # indent all lines after main format string
-        out_string = out_string.replace("\n", "\n    ")
+        # constant of initial string we're searching for for STDERR
+        stderr_str = "STDERR: "
+        # is this current log message starting with stderr string?
+        now_stderr = record.getMessage().startswith(stderr_str)
+
+        if self.last_was_stderr and now_stderr:
+            # print stderr lines with no format if prev. was stderr
+
+            # get message of record with user args substituted
+            out_string = record.getMessage()
+            # remove ending CR, LF
+            out_string = out_string.rstrip()
+            # remove beginning stderr_str and indent
+            out_string = " "*4 + out_string[len(stderr_str):]
+        else:
+            # normal message formatting
+            out_string = super().format(record)
+            # indent all lines after main format string
+            out_string = out_string.replace("\n", "\n    ")
+
+        self.last_was_stderr = now_stderr
+
         return out_string
 
 
