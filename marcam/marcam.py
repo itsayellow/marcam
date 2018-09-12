@@ -38,7 +38,7 @@ import wx.lib.dialogs
 import wx.lib.newevent
 
 import image_proc
-from image_scrolled_canvas import ImageScrolledCanvasMarks
+from image_scrolled_canvas_marks import ImageScrolledCanvasMarks
 import const
 import common
 import longtask
@@ -53,8 +53,9 @@ DEBUG = False
 
 # which modules are we logging
 LOGGED_MODULES = [
-        __name__, 'common', 'image_proc', 'image_scrolled_canvas', 'longtask',
-        'marcam_extra', 'mcmfile', 'winpipe'
+        __name__, 'common', 'image_proc', 'image_scrolled_canvas',
+        'image_scrolled_canvas_marks', 'longtask', 'marcam_extra', 'mcmfile',
+        'winpipe'
         ]
 
 # global logger obj for this file
@@ -480,6 +481,7 @@ class ImageFrame(wx.Frame):
                 self,
                 win_history=self.frame_history,
                 marks_num_update_fxn=self.marks_num_update,
+                cache_dir=self.cache_dir,
                 # the following always makes scrollbars,
                 #   Mac: they appear tiny and all the way to 0 (not
                 #       disabled, and bad looking)
