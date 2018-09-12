@@ -198,7 +198,7 @@ class ImageList:
         """Reset image list
         """
         # TODO: remove all files in cache_dir
-        self.img = None
+        self.img_list = None
         self.img_idx = None
 
     @debug_fxn
@@ -208,7 +208,7 @@ class ImageList:
         Returns:
             (wx.Image): Current image
         """
-        return self.img[self.img_idx]
+        return self.img_list[self.img_idx]
 
     @debug_fxn
     def new_img(self, img):
@@ -218,16 +218,16 @@ class ImageList:
             img (wx.Image): Current image
         """
         # TODO: cache_dir
-        self.img = [img]
+        self.img_list = [img]
         self.img_idx = 0
 
     @debug_fxn
     def replace_endlist_with_new(self, image_new):
         # TODO: cache_dir
         # delete all items after current one in list
-        self.img = self.img[:self.img_idx+1]
+        self.img_list = self.img_list[:self.img_idx+1]
         # add new img to end of list
-        self.img.append(image_new)
+        self.img_list.append(image_new)
         # update img pointer
         self.img_idx += 1
 
