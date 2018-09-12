@@ -26,7 +26,9 @@ import logging
 import pathlib
 import platform
 import re
+import shutil
 import sys
+import tempfile
 import threading
 import time
 
@@ -159,6 +161,9 @@ class ImageFrame(wx.Frame):
         self.temp_scroll_zoom_state = None
         self.parent = parent
         self.close_source = None
+        # make dir for saving cache images of this window
+        const.USER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        self.cache_dir = tempfile.mkdtemp(dir=const.USER_CACHE_DIR)
 
         # GUI-related
         self.html = None
@@ -693,6 +698,8 @@ class ImageFrame(wx.Frame):
             evt.Veto()
         else:
             # normally close window
+            # remove cache dir for this window
+            shutil.rmtree(self.cache_dir)
             winsize = self.GetSize()
             self.parent.config_data['winsize'] = list(winsize)
             # continue with normal event handling
