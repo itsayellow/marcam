@@ -15,10 +15,12 @@
 # limitations under the License.
 
 import logging
+import pathlib
+import threading
 import time
 
-import wx
 import numpy as np
+import wx
 
 import const
 import common
@@ -187,28 +189,42 @@ class ImageList:
     """
     @debug_fxn
     def __init__(self, cache_dir, img=None):
-        self.cache_dir = cache_dir
+        """Initialize
+
+        Assumes that this class owns all files in cache_dir
+        """
+        self.cache_dir = pathlib.Path(cache_dir)
+        self.cache_unique_id = 0
         self.img_list = None
         self.img_idx = None
         if img is not None:
-            pass
+            self.initialize(img)
 
     @debug_fxn
     def reset(self):
         """Reset image list
         """
-        # TODO: remove all files in cache_dir
+        self._remove_indicies()
         self.img_list = None
         self.img_idx = None
 
     @debug_fxn
-    def get_current(self):
+    def get_current_imgmem(self):
         """Get current Image in list of edit history of images
 
         Returns:
             (wx.Image): Current image
         """
-        return self.img_list[self.img_idx]
+        return self.img_list[self.img_idx][0]
+
+    @debug_fxn
+    def get_current_imgcache(self):
+        """Get current Image in list of edit history of images
+
+        Returns:
+            (wx.Image): Current image
+        """
+        return self.img_list[self.img_idx][1]
 
     @debug_fxn
     def initialize(self, img):
@@ -217,19 +233,19 @@ class ImageList:
         Args:
             img (wx.Image): Current image
         """
-        # TODO: cache_dir
-        self.img_list = [img]
-        self.img_idx = 0
+        # remove all indicies in list, delete all cache files
+        self._remove_indicies()
+        # add new and only value to list
+        self.img_list = []
+        self._add_new(img)
 
     @debug_fxn
     def replace_endlist_with_new(self, image_new):
-        # TODO: cache_dir
         # delete all items after current one in list
-        self.img_list = self.img_list[:self.img_idx+1]
-        # add new img to end of list
-        self.img_list.append(image_new)
-        # update img pointer
-        self.img_idx += 1
+        self._remove_indicies(self.img_idx+1)
+        # Add new img to end of list.
+        # Put place holder cache id in place of eventual path to cache file.
+        self._add_new(image_new)
 
     @debug_fxn
     def set_idx(self, idx_set):
@@ -243,6 +259,44 @@ class ImageList:
     @debug_fxn
     def get_idx(self):
         return self.img_idx
+
+    @debug_fxn
+    def _remove_indicies(self, start_idx=0):
+        """Remove all list items in self.img_list, starting with start_idx
+            to and including the end of the self.img_list.  Remove all cache
+            files associated with removed list items.
+
+        Args:
+            start_idx (int): starting index of img_list to delete
+        """
+        if self.img_list is None:
+            return
+
+        while len(self.img_list) > start_idx:
+            # To prevent race conditions, pop the item off list, so that
+            #   if a thread is still preparing a file, it will find that this
+            #   item with its corresponding cache_unique_id doesn't exist
+            #   anymore and end gracefully without saving
+            (_, (cache_path, cache_lock)) = self.img_list.pop()
+            # TODO: use thread to remove item, waiting on item_cache_lock.acquire()
+            #   before removing
+
+        # reset self.img_idx to end of list now
+        self.img_idx = len(self.img_list) - 1
+
+    def _add_new(self, img):
+        # put place holder cache id in place of eventual path to cache file
+        cache_file_lock = threading.Lock()
+        cache_file_lock.acquire()
+        cache_filepath = self.cache_dir / ('image%9d.png'%self.cache_unique_id)
+        # add img bitmap, and file with lock to list
+        self.img_list.append([img, [cache_filepath, cache_file_lock]])
+        # set img_idx to end of list
+        self.img_idx = len(self.img_list) - 1
+        # update cache_unique_id to next
+        self.cache_unique_id += 1
+        # TODO: use thread to create cache_filepath from img, releaseing
+        #   cache_file_lock when done
 
 
 # really a Scrolled Window
@@ -1550,7 +1604,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             (wx.Image): Current image
         """
-        return self.img.get_current()
+        return self.img.get_current_imgmem()
 
     @debug_fxn
     def new_img(self, img):
@@ -1582,7 +1636,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # before calling init_image, must call new_img, or set_img_idx
         #   so this is correct
-        img = self.img.get_current()
+        img = self.img.get_current_imgmem()
 
         self.img_size_y = img.GetHeight()
         self.img_size_x = img.GetWidth()
@@ -1888,7 +1942,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         # get current image
-        wx_image_orig = self.img.get_current()
+        wx_image_orig = self.img.get_current_imgmem()
         # create new image
         wx_image_new = image_proc.image_invert(wx_image_orig)
         # delete all items after current one in list
@@ -1912,7 +1966,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.has_no_image():
             return
         # get current image
-        wx_image_orig = self.img.get_current()
+        wx_image_orig = self.img.get_current_imgmem()
 
         longtask.ThreadedProgressPulse(
                 thread_fxn=self.image_remap_colormap_thread,
@@ -1972,7 +2026,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         # get current image
-        wx_image_orig = self.img.get_current()
+        wx_image_orig = self.img.get_current_imgmem()
         # create new image
         wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=cutoff)
         # delete all items after current one in list
