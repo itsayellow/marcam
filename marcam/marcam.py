@@ -20,15 +20,11 @@
 
 
 import argparse
-from datetime import datetime
 import json
 import logging
 import pathlib
 import platform
-import re
-import shutil
 import sys
-import tempfile
 import threading
 import time
 
@@ -38,11 +34,9 @@ import wx.lib.dialogs
 import wx.lib.newevent
 
 import image_proc
-from image_scrolled_canvas_marks import ImageScrolledCanvasMarks
 from marcam_image_frame import ImageFrame
 import const
 import common
-import longtask
 import marcam_extra
 import mcmfile
 if const.PLATFORM == 'win':
