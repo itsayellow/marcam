@@ -197,6 +197,7 @@ class ImageList:
     def set_no_image(self):
         """Reset image list
         """
+        # TODO: remove all files in cache_dir
         self.img = None
         self.img_idx = None
 
@@ -266,8 +267,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history = win_history
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
-        self.img = None
-        self.img_idx = None
+        self.img = ImageList(self.cache_dir)
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
@@ -391,9 +391,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history.reset()
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
-        # TODO: cache_dir
-        self.img = None
-        self.img_idx = None
+        self.img.set_no_image()
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
@@ -406,8 +404,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # make sure canvas is no larger than window
         self.set_virt_size_with_min()
-
-        # TODO: remove all files in cache_dir
 
         # if we are using this in an inherited class method via super, option to
         #   refresh and update only in inherited method (not here)
@@ -1554,7 +1550,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             (wx.Image): Current image
         """
-        return self.img[self.img_idx]
+        return self.img.get_current_img()
 
     @debug_fxn
     def new_img(self, img):
@@ -1563,9 +1559,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             img (wx.Image): Current image
         """
-        # TODO: cache_dir
-        self.img = [img]
-        self.img_idx = 0
+        self.img.new_img(img)
 
     @debug_fxn
     def set_img_idx(self, idx_set):
@@ -1574,7 +1568,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             idx_set (int): Index to desired image
         """
-        self.img_idx = idx_set
+        self.img.set_img_idx(idx_set)
 
     @debug_fxn
     def init_image(self, do_zoom_fit=True):
@@ -1588,7 +1582,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # before calling init_image, must call new_img, or set_img_idx
         #   so this is correct
-        img = self.img[self.img_idx]
+        img = self.img.get_current_img()
 
         self.img_size_y = img.GetHeight()
         self.img_size_x = img.GetWidth()
@@ -1894,20 +1888,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         # get current image
-        wx_image_orig = self.img[self.img_idx]
+        wx_image_orig = self.img.get_current_img()
         # create new image
         wx_image_new = image_proc.image_invert(wx_image_orig)
         # delete all items after current one in list
-        # TODO: cache_dir
-        self.img = self.img[:self.img_idx+1]
         # add new img to end of list
-        # TODO: cache_dir
-        self.img.append(wx_image_new)
-        # update img pointer
-        self.img_idx += 1
+        self.img.replace_endlist_with_new(wx_image_new)
         # save previous image idx, and new image idx
         self.history.new(
-                ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
+                ['IMAGE_XFORM', self.img.get_img_idx() - 1, self.img.get_img_idx()],
                 description="Invert Image"
                 )
         self.init_image(do_zoom_fit=False)
@@ -1923,7 +1912,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.has_no_image():
             return
         # get current image
-        wx_image_orig = self.img[self.img_idx]
+        wx_image_orig = self.img.get_current_img()
 
         longtask.ThreadedProgressPulse(
                 thread_fxn=self.image_remap_colormap_thread,
@@ -1957,16 +1946,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             wx_image_new (wx.Image): output color-remapped version of image
         """
         # delete all items after current one in list
-        # TODO: cache_dir
-        self.img = self.img[:self.img_idx+1]
         # add new img to end of list
-        # TODO: cache_dir
-        self.img.append(wx_image_new)
-        # update img pointer
-        self.img_idx += 1
+        self.img.replace_endlist_with_new(wx_image_new)
         # save previous image idx, and new image idx
         self.history.new(
-                ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
+                ['IMAGE_XFORM', self.img.get_img_idx() - 1, self.img.get_img_idx()],
                 description="Image False Color"
                 )
         # put new image in window (188ms for 4276x2676)
@@ -1988,20 +1972,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             return
 
         # get current image
-        wx_image_orig = self.img[self.img_idx]
+        wx_image_orig = self.img.get_current_img()
         # create new image
         wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=cutoff)
         # delete all items after current one in list
-        # TODO: cache_dir
-        self.img = self.img[:self.img_idx+1]
         # add new img to end of list
-        # TODO: cache_dir
-        self.img.append(wx_image_new)
-        # update img pointer
-        self.img_idx += 1
+        self.img.replace_endlist_with_new(wx_image_new)
         # save previous image idx, and new image idx
         self.history.new(
-                ['IMAGE_XFORM', self.img_idx - 1, self.img_idx],
+                ['IMAGE_XFORM', self.img.get_img_idx() - 1, self.img.get_img_idx()],
                 description="Image Auto-Contrast"
                 )
         self.init_image(do_zoom_fit=False)
