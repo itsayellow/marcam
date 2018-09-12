@@ -19,7 +19,16 @@ def print_arrays_cols(*args):
         else:
             print(" ****")
 
-def main():
+def simple_test():
+    img_row = np.array(range(256))
+    img = np.vstack((img_row, img_row))
+    image = matplotlib.image.AxesImage(None, cmap='gray')
+    image.set_data(img)
+    im = image.to_rgba(image._A, bytes=True)
+    for col in range(256):
+        print(im[0, col])
+
+def orig_test():
     plt.gray()
     test_array = np.vstack((np.arange(0,256), np.arange(0,256)))
     test_array_cm_gray = matplotlib.cm.gray(test_array)
@@ -69,4 +78,5 @@ def main():
             )
 
 if __name__ == '__main__':
-    main()
+    #orig_test()
+    simple_test()
