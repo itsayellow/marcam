@@ -17,6 +17,7 @@
 
 import logging
 import threading
+import time
 
 import wx
 
@@ -73,7 +74,6 @@ class ThreadedProgressPulse:
                 target=self.long_task_thread,
                 )
         self.win_parent.Bind(EVT_LONG_TASK_DONE, self.long_task_postthread)
-        task_thread.start()
         self.progress_dialog = wx.ProgressDialog(
                 progress_title,
                 progress_msg,
@@ -82,6 +82,11 @@ class ThreadedProgressPulse:
         # Pulse seems to only be needed to be called once!  Not multiple times
         #   as the docs imply.
         self.progress_dialog.Pulse()
+        # Start task thread computing.
+        # Do this last, so that if it ends super fast we are not trying to
+        #   still do things with self.progress_dialog after long_task_postthread
+        #   Destroys the dialog.
+        task_thread.start()
 
     @debug_fxn
     def long_task_thread(self):
