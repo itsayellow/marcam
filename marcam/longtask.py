@@ -63,7 +63,7 @@ class Threaded:
         self.win_parent = parent
         self.thread_fxn_returnvals = None
 
-        # We could normally omit events altogether if post_thread_Fxn is None,
+        # We could normally omit events altogether if post_thread_fxn is None,
         #   but we'll keep these in in case a derived class needs the machinery
 
         # get new Event and EventBinder for this instance only
