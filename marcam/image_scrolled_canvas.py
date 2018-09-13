@@ -183,7 +183,7 @@ class RealPoint(wx.RealPoint):
         return "RealPoint(" + repr(self.x) + ", " + repr(self.y) + ")"
 
 
-class ImageList:
+class ImageCache:
     """An object that keeps track of memory- and file-cached images in
         the edit history
     """
@@ -344,7 +344,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history = win_history
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
-        self.img = ImageList(self.cache_dir, self)
+        self.img = ImageCache(self.cache_dir, self)
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
