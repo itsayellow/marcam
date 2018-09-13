@@ -65,6 +65,9 @@ class Threaded:
 
         # We could normally omit events altogether if post_thread_fxn is None,
         #   but we'll keep these in in case a derived class needs the machinery
+        # NOTE: IT MIGHT BE that binding an event to self.long_task_postthread
+        #   prevents this class instance from being deleted if the calling code
+        #   goes out of scope.  (??)
 
         # get new Event and EventBinder for this instance only
         (self.myLongTaskDoneEvent, evt_long_task_done) = wx.lib.newevent.NewEvent()
