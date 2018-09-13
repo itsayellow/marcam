@@ -283,9 +283,16 @@ class ImageCache:
             #   if a thread is still preparing a file, it will find that this
             #   item with its corresponding cache_unique_id doesn't exist
             #   anymore and end gracefully without saving
-            (_, (cache_path, cache_lock)) = self.img_list.pop()
-            # TODO: use thread to remove item, waiting on item_cache_lock.acquire()
-            #   before removing
+            (_, (cache_filepath, cache_file_lock)) = self.img_list.pop()
+            # remove associated cache file
+            remove_cache_file_task = longtask.Threaded(
+                    self._remove_cache_file_thread,
+                    (cache_filepath, cache_file_lock),
+                    None,
+                    self.parent
+                    )
+            # TODO: if remove_cache_file_task goes out of scope here, is it
+            #   deleted??  Does that make things break?
 
         # reset self.img_idx to end of list now
         self.img_idx = len(self.img_list) - 1
@@ -302,7 +309,7 @@ class ImageCache:
         self.img_idx = len(self.img_list) - 1
         # update cache_unique_id to next
         self.cache_unique_id += 1
-        # TODO: use thread to create cache_filepath from img, releaseing
+        # use thread to create cache_filepath from img, releasing
         #   cache_file_lock when done
         create_cache_file_task = longtask.Threaded(
                 self._create_cache_file_thread,
@@ -310,6 +317,8 @@ class ImageCache:
                 None,
                 self.parent
                 )
+        # TODO: if create_cache_file_task goes out of scope here, is it
+        #   deleted??  Does that make things break?
 
     @debug_fxn
     def _create_cache_file_thread(self, img, cache_filepath, cache_file_lock):
@@ -318,6 +327,14 @@ class ImageCache:
         img.SaveFile(str(cache_filepath), wx.BITMAP_TYPE_PNG)
         cache_file_lock.release()
 
+    def _remove_cache_file_thread(self, cache_filepath, cache_file_lock):
+        # wait until we acquire lock correpsonding to cache_filepath
+        #   (in case it is still being saved).
+        cache_file_lock.acquire()
+        # delete file
+        cache_filepath.unlink()
+        # release lock (may not be necessary but can't hurt)
+        cache_file_lock.release()
 
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
