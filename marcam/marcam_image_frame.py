@@ -1447,9 +1447,9 @@ class ImageFrame(wx.Frame):
         Args:
             imdata_path (pathlike): full path to filename to save to
         """
-        returnval = mcmfile.save(
+        returnval = mcmfile.save_cached(
                 imdata_path,
-                self.img_panel.get_current_img(),
+                *self.img_panel.get_current_img_cachefile(),
                 self.img_panel.marks
                 )
         return returnval

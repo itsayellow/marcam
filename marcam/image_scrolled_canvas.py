@@ -1636,6 +1636,16 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         return (win_x, win_y)
 
     @debug_fxn
+    def get_current_img_cachefile(self):
+        """Get current Image in list of edit history of images
+
+        Returns:
+            (pathlib.Path, threading.Lock): (path to current image's cache file,
+                lock corresponding to current image cache file)
+        """
+        return self.img_cache.get_current_imgcache()
+
+    @debug_fxn
     def get_current_img(self):
         """Get current Image in list of edit history of images
 

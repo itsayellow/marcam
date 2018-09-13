@@ -305,3 +305,45 @@ def save(imdata_path, img, marks):
         returnval = True
 
     return returnval
+
+@debug_fxn
+def save_cached(imdata_path, img_cache_file, img_cache_lock, marks):
+    """Save image and mark locations to .mcm zipfile
+
+    Args:
+        imdata_path (pathlike): full path to filename to save to
+
+    Returns:
+        bool: whether save was successful, True or False
+    """
+    # MCM file info dictionary
+    mcm_info = {
+            'mcm_version':MCM_VERSION,
+            'mcm_image_name':MCM_IMAGE_NAME,
+            'mcm_info_name':MCM_INFO_NAME,
+            'marks':marks
+            }
+
+    # acquire lock to cache file to make sure it's ready to be read
+    img_cache_lock.acquire()
+
+    # write new save file
+    try:
+        with zipfile.ZipFile(str(imdata_path), 'w') as container_fh:
+            # write image file data to archive
+            container_fh.write(img_cache_file, MCM_IMAGE_NAME)
+            # write json text file to archive
+            container_fh.writestr(
+                    MCM_INFO_NAME,
+                    json.dumps(mcm_info)
+                    )
+    except OSError:
+        LOGGER.warning("Cannot save current data in file '%s'.", imdata_path)
+        returnval = False
+    else:
+        returnval = True
+    finally:
+        # release lock to cache file to allow other operations to access
+        img_cache_lock.release()
+
+    return returnval
