@@ -106,7 +106,8 @@ def logging_setup(log_level=logging.DEBUG):
 
     # create formatter
     formatter = marcam_extra.MarcamFormatter(
-            "%(asctime)s:%(name)s:%(levelname)s:\n%(message)s"
+            "%(asctime)s:%(name)s:%(levelname)s:\n%(message)s",
+            add_terminator=True
             )
 
     # make sure log file dir exists
@@ -127,6 +128,9 @@ def logging_setup(log_level=logging.DEBUG):
 
     # file handler
     file_handler = logging.FileHandler(str(logfile_path))
+    # don't automatically add \n to end of log messages, we will do that
+    #   conditionally in MarcamFormatter
+    file_handler.terminator = ''
     file_handler.setLevel(log_level)
     # add global formatter to file handler
     file_handler.setFormatter(formatter)

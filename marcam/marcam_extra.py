@@ -41,6 +41,9 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
+STDERR_STR = "STDERR: "
+
+
 class StderrToLog:
     """Replace sys.stderr with this to route stderr messages to LOGGER
     """
@@ -48,15 +51,15 @@ class StderrToLog:
         self.buffer = ""
 
     def write(self, text):
-        LOGGER.error("STDERR: " + text)
+        LOGGER.error(STDERR_STR + text)
         return len(text)
 
     def writelines(self, lines):
-        LOGGER.error("STDERR: " + "StderrToLog.writelines()")
+        LOGGER.error(STDERR_STR + "StderrToLog.writelines()")
         self.write("".join(lines))
 
     def flush(self):
-        LOGGER.error("STDERR: " + "StderrToLog.flush()")
+        LOGGER.error(STDERR_STR + "StderrToLog.flush()")
 
 
 class FileHistory(wx.FileHistory):
@@ -144,6 +147,15 @@ class MarcamFormatter(logging.Formatter):
     """Our specific Formatter for logging
     """
     def __init__(self, *args, **kwargs):
+        """Init mostly the same as parent, but with extra option add_terminator.
+
+        Args:
+            add_terminator (bool): if True, every line will have a \n added
+                except for all stderr lines but the last one.
+        """
+        # If boolean add_terminator is present, save to object and remove
+        #   from passed kwargs.
+        self.add_terminator = kwargs.pop('add_terminator', False)
         super().__init__(*args, **kwargs)
         self.last_was_stderr = False
 
@@ -151,31 +163,41 @@ class MarcamFormatter(logging.Formatter):
         """Overload of default format fxn, make all lines after first indented
         of a log message
 
+        If lines are from piped stderr, then format the first line, and do
+        not format the following stderr lines.  Also do not add a terminator
+        if requested by self.add_terminator for all lines except the last one.
+
         Args:
             record (Logger.LogRecord): log message
 
         Returns:
             out_string: processed log message
         """
-        # constant of initial string we're searching for for STDERR
-        stderr_str = "STDERR: "
         # is this current log message starting with stderr string?
-        now_stderr = record.getMessage().startswith(stderr_str)
+        now_stderr = record.getMessage().startswith(STDERR_STR)
+
+        if now_stderr:
+            # Remove STDERR_STR from beginning of message
+            record.msg = record.msg[len(STDERR_STR):]
 
         if self.last_was_stderr and now_stderr:
             # print stderr lines with no format if prev. was stderr
 
             # get message of record with user args substituted
             out_string = record.getMessage()
-            # remove ending CR, LF
-            out_string = out_string.rstrip()
-            # remove beginning stderr_str and indent
-            out_string = " "*4 + out_string[len(stderr_str):]
         else:
             # normal message formatting
             out_string = super().format(record)
             # indent all lines after main format string
             out_string = out_string.replace("\n", "\n    ")
+
+        if self.add_terminator and self.last_was_stderr and not now_stderr:
+            # finish previous stderr with a CR before printing this string
+            out_string = "\n" + out_string
+
+        if self.add_terminator and not now_stderr:
+            # finish this string with a CR before printing this string
+            out_string = out_string + "\n"
 
         self.last_was_stderr = now_stderr
 
