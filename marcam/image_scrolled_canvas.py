@@ -307,7 +307,7 @@ class ImageCache:
         create_cache_file_task = longtask.Threaded(
                 self._create_cache_file_thread,
                 (img, cache_filepath, cache_file_lock),
-                self._create_cache_file_postthread,
+                None,
                 self.parent
                 )
 
@@ -318,9 +318,6 @@ class ImageCache:
         img.SaveFile(str(cache_filepath), wx.BITMAP_TYPE_PNG)
         cache_file_lock.release()
 
-    @debug_fxn
-    def _create_cache_file_postthread(self):
-        print("finished saving")
 
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
