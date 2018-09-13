@@ -188,11 +188,12 @@ class ImageList:
         the edit history
     """
     @debug_fxn
-    def __init__(self, cache_dir, img=None):
+    def __init__(self, cache_dir, parent, img=None):
         """Initialize
 
         Assumes that this class owns all files in cache_dir
         """
+        self.parent = parent
         self.cache_dir = pathlib.Path(cache_dir)
         self.cache_unique_id = 0
         self.img_list = None
@@ -241,6 +242,11 @@ class ImageList:
 
     @debug_fxn
     def replace_endlist_with_new(self, image_new):
+        """Remove list after current idx, add new image to end of list,
+            then move index to new image
+        Args:
+            image_new (wx.Image): Image to add to end of list
+        """
         # delete all items after current one in list
         self._remove_indicies(self.img_idx+1)
         # Add new img to end of list.
@@ -284,11 +290,12 @@ class ImageList:
         # reset self.img_idx to end of list now
         self.img_idx = len(self.img_list) - 1
 
+    @debug_fxn
     def _add_new(self, img):
         # put place holder cache id in place of eventual path to cache file
         cache_file_lock = threading.Lock()
         cache_file_lock.acquire()
-        cache_filepath = self.cache_dir / ('image%9d.png'%self.cache_unique_id)
+        cache_filepath = self.cache_dir / ('image%09d.png'%self.cache_unique_id)
         # add img bitmap, and file with lock to list
         self.img_list.append([img, [cache_filepath, cache_file_lock]])
         # set img_idx to end of list
@@ -297,7 +304,23 @@ class ImageList:
         self.cache_unique_id += 1
         # TODO: use thread to create cache_filepath from img, releaseing
         #   cache_file_lock when done
+        create_cache_file_task = longtask.Threaded(
+                self._create_cache_file_thread,
+                (img, cache_filepath, cache_file_lock),
+                self._create_cache_file_postthread,
+                self.parent
+                )
 
+    @debug_fxn
+    def _create_cache_file_thread(self, img, cache_filepath, cache_file_lock):
+        # Lock is already acquired by spawner.  Only need to release it when
+        #   done
+        img.SaveFile(str(cache_filepath), wx.BITMAP_TYPE_PNG)
+        cache_file_lock.release()
+
+    @debug_fxn
+    def _create_cache_file_postthread(self):
+        print("finished saving")
 
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
@@ -321,7 +344,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.history = win_history
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
-        self.img = ImageList(self.cache_dir)
+        self.img = ImageList(self.cache_dir, self)
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None
