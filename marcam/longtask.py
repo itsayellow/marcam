@@ -62,13 +62,19 @@ class Threaded:
         self.post_thread_fxn = post_thread_fxn
         self.win_parent = parent
         self.thread_fxn_returnvals = None
+
+        # We could normally omit events altogether if post_thread_Fxn is None,
+        #   but we'll keep these in in case a derived class needs the machinery
+
         # get new Event and EventBinder for this instance only
         (self.myLongTaskDoneEvent, evt_long_task_done) = wx.lib.newevent.NewEvent()
+        # bind postthread function to "done" event
+        self.win_parent.Bind(evt_long_task_done, self.long_task_postthread)
 
+        # build thread
         task_thread = threading.Thread(
                 target=self.long_task_thread,
                 )
-        self.win_parent.Bind(evt_long_task_done, self.long_task_postthread)
         # Start task thread computing.
         # Do this last, so that if it ends super fast we are not trying to
         #   still do things with self.progress_dialog after long_task_postthread
@@ -104,8 +110,10 @@ class Threaded:
             evt (self.myLongTaskDoneEvent): obj returned from event when long task
                 thread is finished
         """
-        # execute post thread function with return value(s) from thread_fxn
-        self.post_thread_fxn(*self.thread_fxn_returnvals)
+        # if it exists, execute post thread function with return value(s)
+        #   from thread_fxn
+        if self.post_thread_fxn is not None:
+            self.post_thread_fxn(*self.thread_fxn_returnvals)
 
 
 class ThreadedProgressPulse(Threaded):
