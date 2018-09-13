@@ -67,12 +67,12 @@ class Threaded:
         self.win_parent = parent
         self.thread_fxn_returnvals = None
         # get new Event and EventBinder for this instance only
-        (self.myLongTaskDoneEvent, self.EVT_LONG_TASK_DONE) = wx.lib.newevent.NewEvent()
+        (self.myLongTaskDoneEvent, evt_long_task_done) = wx.lib.newevent.NewEvent()
 
         task_thread = threading.Thread(
                 target=self.long_task_thread,
                 )
-        self.win_parent.Bind(self.EVT_LONG_TASK_DONE, self.long_task_postthread)
+        self.win_parent.Bind(evt_long_task_done, self.long_task_postthread)
         # Start task thread computing.
         # Do this last, so that if it ends super fast we are not trying to
         #   still do things with self.progress_dialog after long_task_postthread
@@ -143,12 +143,12 @@ class ThreadedProgressPulse:
         self.win_parent = parent
         self.thread_fxn_returnvals = None
         # get new Event and EventBinder for this instance only
-        (self.myLongTaskDoneEvent, self.EVT_LONG_TASK_DONE) = wx.lib.newevent.NewEvent()
+        (self.myLongTaskDoneEvent, evt_long_task_done) = wx.lib.newevent.NewEvent()
 
         task_thread = threading.Thread(
                 target=self.long_task_thread,
                 )
-        self.win_parent.Bind(self.EVT_LONG_TASK_DONE, self.long_task_postthread)
+        self.win_parent.Bind(evt_long_task_done, self.long_task_postthread)
         self.progress_dialog = wx.ProgressDialog(
                 progress_title,
                 progress_msg,
