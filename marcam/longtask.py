@@ -40,12 +40,10 @@ class Threaded:
     """Class supporting long tasks that need to be in separate thread.
 
     Handles running the thread part of the task in a separate thread,
-        wx Events, and wx ProgressDialog.  Sets ProgressDialog to "Pulse"
-        mode, which shows indeterminant progress (just activity).
+        and wx Events needed to invoke post-thread actions.
     """
     @debug_fxn
-    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
-            progress_title, progress_msg, parent):
+    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn, parent):
         """Initialize a Long Task needing thread execution and wx support.
 
         Args:
@@ -55,8 +53,6 @@ class Threaded:
             thread_fxn_args (tuple): arguments for thread_fxn
             post_thread_fxn (function handle): function that runs after
                 thread_fxn has finished
-            progress_title (str): Text for titlebar of wx.ProgressDialog
-            progress_msg (str): Text for message area of wx.ProgressDialog
             parent (wx.Window): Window that handles events and is parent
                 of ProgressDialog
         """
@@ -116,8 +112,9 @@ class ThreadedProgressPulse:
     """Class supporting long tasks that need to be in separate thread.
 
     Handles running the thread part of the task in a separate thread,
-        wx Events, and wx ProgressDialog.  Sets ProgressDialog to "Pulse"
-        mode, which shows indeterminant progress (just activity).
+        wx Events needed to invoke post-thread actions, and wx ProgressDialog.
+        Sets ProgressDialog to "Pulse" mode, which shows indeterminant progress
+        (just activity).
     """
     @debug_fxn
     def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
