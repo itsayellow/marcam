@@ -36,7 +36,80 @@ debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
 debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 
 
-(myLongTaskDoneEvent, EVT_LONG_TASK_DONE) = wx.lib.newevent.NewEvent()
+class Threaded:
+    """Class supporting long tasks that need to be in separate thread.
+
+    Handles running the thread part of the task in a separate thread,
+        wx Events, and wx ProgressDialog.  Sets ProgressDialog to "Pulse"
+        mode, which shows indeterminant progress (just activity).
+    """
+    @debug_fxn
+    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
+            progress_title, progress_msg, parent):
+        """Initialize a Long Task needing thread execution and wx support.
+
+        Args:
+            thread_fxn (function handle): long-running function to be run in
+                separate thread.  Return values from this function will
+                be passed as positional arguments to post_thread_fxn.
+            thread_fxn_args (tuple): arguments for thread_fxn
+            post_thread_fxn (function handle): function that runs after
+                thread_fxn has finished
+            progress_title (str): Text for titlebar of wx.ProgressDialog
+            progress_msg (str): Text for message area of wx.ProgressDialog
+            parent (wx.Window): Window that handles events and is parent
+                of ProgressDialog
+        """
+
+        self.thread_fxn = thread_fxn
+        self.thread_fxn_args = thread_fxn_args
+        self.post_thread_fxn = post_thread_fxn
+        self.win_parent = parent
+        self.thread_fxn_returnvals = None
+        # get new Event and EventBinder for this instance only
+        (self.myLongTaskDoneEvent, self.EVT_LONG_TASK_DONE) = wx.lib.newevent.NewEvent()
+
+        task_thread = threading.Thread(
+                target=self.long_task_thread,
+                )
+        self.win_parent.Bind(self.EVT_LONG_TASK_DONE, self.long_task_postthread)
+        # Start task thread computing.
+        # Do this last, so that if it ends super fast we are not trying to
+        #   still do things with self.progress_dialog after long_task_postthread
+        #   Destroys the dialog.
+        task_thread.start()
+
+    @debug_fxn
+    def long_task_thread(self):
+        """Function that is run in separate thread
+
+        If thread_fxn returns any values, they will be passed as positional
+        arguments to post_thread_fxn.
+        """
+        thread_fxn_returnvals = self.thread_fxn(*self.thread_fxn_args)
+        if thread_fxn_returnvals is None:
+            # if returnvals = None, make empty tuple
+            self.thread_fxn_returnvals = ()
+        else:
+            try:
+                # if returnvals are iterable, convert to tuple
+                self.thread_fxn_returnvals = tuple(thread_fxn_returnvals)
+            except TypeError:
+                # if returnvals are single value, wrap in tuple
+                self.thread_fxn_returnvals = (thread_fxn_returnvals,)
+
+        wx.PostEvent(self.win_parent, self.myLongTaskDoneEvent())
+
+    @debug_fxn
+    def long_task_postthread(self, _evt):
+        """Function triggered when event signifies that thread fxn is done.
+
+        Args:
+            evt (self.myLongTaskDoneEvent): obj returned from event when long task
+                thread is finished
+        """
+        # execute post thread function with return value(s) from thread_fxn
+        self.post_thread_fxn(*self.thread_fxn_returnvals)
 
 
 class ThreadedProgressPulse:
