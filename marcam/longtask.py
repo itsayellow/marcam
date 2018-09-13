@@ -69,11 +69,13 @@ class ThreadedProgressPulse:
         self.post_thread_fxn = post_thread_fxn
         self.win_parent = parent
         self.thread_fxn_returnvals = None
+        # get new Event and EventBinder for this instance only
+        (self.myLongTaskDoneEvent, self.EVT_LONG_TASK_DONE) = wx.lib.newevent.NewEvent()
 
         task_thread = threading.Thread(
                 target=self.long_task_thread,
                 )
-        self.win_parent.Bind(EVT_LONG_TASK_DONE, self.long_task_postthread)
+        self.win_parent.Bind(self.EVT_LONG_TASK_DONE, self.long_task_postthread)
         self.progress_dialog = wx.ProgressDialog(
                 progress_title,
                 progress_msg,
@@ -107,14 +109,14 @@ class ThreadedProgressPulse:
                 # if returnvals are single value, wrap in tuple
                 self.thread_fxn_returnvals = (thread_fxn_returnvals,)
 
-        wx.PostEvent(self.win_parent, myLongTaskDoneEvent())
+        wx.PostEvent(self.win_parent, self.myLongTaskDoneEvent())
 
     @debug_fxn
     def long_task_postthread(self, _evt):
         """Function triggered when event signifies that thread fxn is done.
 
         Args:
-            evt (myLongTaskDoneEvent): obj returned from event when long task
+            evt (self.myLongTaskDoneEvent): obj returned from event when long task
                 thread is finished
         """
         # On Windows especially, must Destroy progress dialog for application
