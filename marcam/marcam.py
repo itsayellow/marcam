@@ -45,6 +45,8 @@ if const.PLATFORM == 'win':
 
 # DEBUG defaults to False.  Is set to True if debug switch found
 DEBUG = False
+# Placeholder.  This is set in another_instance_running()
+SINGLEINST_INSTANCE = None
 
 # which modules are we logging
 LOGGED_MODULES = [
@@ -677,14 +679,14 @@ def another_instance_running(srcfile_args):
             user, False otherwise.
     """
     # make global to persist until app is closed
-    global singleinst_instance
+    global SINGLEINST_INSTANCE
     singleinst_name = "Marcam-%s"%wx.GetUserId()
     const.USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    singleinst_instance = wx.SingleInstanceChecker(
+    SINGLEINST_INSTANCE = wx.SingleInstanceChecker(
             singleinst_name,
             str(const.USER_CONFIG_DIR),
             )
-    another_inst = singleinst_instance.IsAnotherRunning()
+    another_inst = SINGLEINST_INSTANCE.IsAnotherRunning()
     if another_inst and srcfile_args:
         # send our filename arguments to other instance running via Windows
         #   named pipe
