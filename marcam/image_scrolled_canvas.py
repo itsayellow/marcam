@@ -264,6 +264,11 @@ class ImageCache:
 
     @debug_fxn
     def get_idx(self):
+        """Get the current index
+
+        Returns:
+            int: index (pointer) of current cache image in ImageCache
+        """
         return self.img_idx
 
     @debug_fxn
