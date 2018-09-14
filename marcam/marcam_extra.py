@@ -20,7 +20,6 @@
 
 import logging
 import pathlib
-import re
 
 import wx
 import wx.html2
@@ -46,6 +45,12 @@ STDERR_STR = "STDERR: "
 
 @debug_fxn
 def file_unable_to_open_dialog(parent, img_path):
+    """Common code whenever a file is not valid to be opened.
+
+    Args:
+        parent (wx.Window or None): parent window
+        img_path (str): path to image file that was invalid
+    """
     LOGGER.warning("Unable to open file: %s", img_path)
     wx.MessageDialog(parent,
             message="Unable to open file: %s"%img_path,
@@ -61,15 +66,22 @@ class StderrToLog:
         self.buffer = ""
 
     def write(self, text):
-        LOGGER.error(STDERR_STR + text)
+        """Write test directly to LOGGER.error.  Masquerade as stderr.write()
+        """
+        LOGGER.error("%s%s", STDERR_STR, text)
         return len(text)
 
     def writelines(self, lines):
-        LOGGER.error(STDERR_STR + "StderrToLog.writelines()")
+        """Write lines of text directly to LOGGER.error.  Masquerade as
+            stderr.writelines().
+        """
+        LOGGER.error("%s%s", STDERR_STR, "StderrToLog.writelines()")
         self.write("".join(lines))
 
     def flush(self):
-        LOGGER.error(STDERR_STR + "StderrToLog.flush()")
+        """NOP.  Masquerade as stderr.flush().
+        """
+        LOGGER.error("%s%s", STDERR_STR, "StderrToLog.flush()")
 
 
 class FileHistory(wx.FileHistory):
