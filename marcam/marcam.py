@@ -185,14 +185,16 @@ class MarcamApp(wx.App):
         self.display_size = wx.Display().GetClientArea().GetSize()
 
         for open_filename in open_files:
-            img_ok = self.new_frame_open_file(open_filename)
+            # Will open error dialog if file is unreadable.
+            self.new_frame_open_file(open_filename)
 
         # if after giving chances to open files from command-line, OS events,
         #   etc., we still don't have any open frames, open an empty one
         #   on startup
         if self.file_windows.has_zero():
-            # open an empty frame
-            img_ok = self.new_frame_open_file(None)
+            # Open an empty frame.
+            # Will open error dialog if file is unreadable.
+            self.new_frame_open_file(None)
 
         # binding to App is surest way to catch keys accurately, not having
         #   to worry about which widget has focus
@@ -280,7 +282,7 @@ class MarcamApp(wx.App):
             evt (wx.Event): event object having attribute with filename to open.
         """
         LOGGER.info("Event received: %s", evt.open_filename)
-        img_ok = self.open_file(evt.open_filename)
+        self.open_file(evt.open_filename)
 
     def on_key_down(self, evt):
         """Event handler for any key down event in the Application. Calls
@@ -419,11 +421,10 @@ class MarcamApp(wx.App):
     def new_frame_open_file(self, open_filename):
         """Open specified file in new frame
 
+        Will open an error dialog if file is unreadable.
+
         Args:
             open_filename (pathlike or None): filename to open in new frame
-
-        Returns:
-            (bool): True if image loaded successfully, False otherwise.
         """
         if open_filename is not None:
             open_filename = pathlib.Path(open_filename)
@@ -468,14 +469,13 @@ class MarcamApp(wx.App):
                     )
             self.file_windows.append(new_frame)
             if open_filename is not None:
+                # Will open error dialog if file is unreadable.
                 new_frame.open_image_this_frame(open_filename)
             # need to actually GetPosition to get real position, in case both
             #   self.last_frame_pos = (-1, -1) and new_pos = (-1, -1)
             self.last_frame_pos = new_frame.GetPosition()
         else:
             marcam_extra.file_unable_to_open_dialog(None, open_filename)
-
-        return img_ok
 
     @debug_fxn
     def quit_app(self):
@@ -542,19 +542,16 @@ class MarcamApp(wx.App):
 
         Args:
             open_filename (pathlike): image filename to open
-
-        Returns:
-            (bool): True if image loaded successfully, False otherwise.
         """
         # open in blank window, or
         #   add to file_windows list of file windows
         if self.file_windows.has_zero() or self.file_windows.all_have_image():
-            img_ok = self.new_frame_open_file(open_filename)
+            # Will open error dialog if file is unreadable.
+            self.new_frame_open_file(open_filename)
         else:
             # only one frame, and it has no image
-            img_ok = self.file_windows.only_frame().open_image_this_frame(open_filename)
-
-        return img_ok
+            # Will open error dialog if file is unreadable.
+            self.file_windows.only_frame().open_image_this_frame(open_filename)
 
     @debug_fxn
     def read_config(self):

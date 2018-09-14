@@ -466,22 +466,15 @@ class FileDropTarget(wx.FileDropTarget):
             _y (int): y coordinate of mouse
             filenames (list): A list of filepaths
         """
-        filename = filenames[0]
-        LOGGER.info("MSC:Drag and Drop filename:\n    %s", repr(filename))
-
-        # ---------
-        # OPTION 1: Open new frame or put image in existing blank frame
-        img_ok = self.window_target.parent.open_image(filename)
-        # ---------
-        ## OPTION 2: Replace existing image in same frame
-        ## Close any existing image
-        #self.window_target.parent.close_image(keep_win_open=True)
-        ## Open Drag-and-Dropped image file
-        #img_ok = self.window_target.parent.open_image_this_frame(filename)
-        # ---------
+        for filename in filenames:
+            # Open new frame or put image in existing blank frame
+            self.window_target.parent.open_image(filename)
+            # log it
+            LOGGER.info("MSC:Drag and Drop filename:\n    %s", repr(filename))
 
         # True to accept data, False to veto
-        return img_ok
+        # Just return True all the time, we'll sort it out internally.
+        return True
 
 
 class ImageAutoContrastDialog(wx.Dialog):

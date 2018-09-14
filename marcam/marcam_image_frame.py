@@ -861,10 +861,7 @@ class ImageFrame(wx.Frame):
 
         # get filepath and attempt to open image into bitmap
         img_path = open_file_dialog.GetPath()
-        img_ok = self.open_image(img_path)
-        if not img_ok:
-            # wx.ICON_ERROR has no effect on Mac
-            marcam_extra.file_unable_to_open_dialog(None, img_path)
+        self.open_image(img_path)
 
     @debug_fxn
     def on_open_recent(self, evt):
@@ -878,9 +875,7 @@ class ImageFrame(wx.Frame):
                 self.file_history.GetHistoryFile(evt.GetId() - wx.ID_FILE1)
                 )
         if img_path.exists():
-            img_ok = self.open_image(img_path)
-            if not img_ok:
-                marcam_extra.file_unable_to_open_dialog(None, img_path)
+            self.open_image(img_path)
         else:
             self.file_history.RemoveFileFromHistory(evt.GetId() - wx.ID_FILE1)
             wx.MessageDialog(self,
@@ -899,29 +894,24 @@ class ImageFrame(wx.Frame):
 
         Args:
             img_path (pathlike): full path to image to open
-
-        Returns:
-            (bool) img_ok - whether image was successfully loaded into current
-                or new frame
         """
         img_path = pathlib.Path(img_path)
 
         if self.img_panel.has_no_image():
-            img_ok = self.open_image_this_frame(img_path)
+            # will open error dialog if file is unreadable
+            self.open_image_this_frame(img_path)
         else:
-            img_ok = self.parent.new_frame_open_file(img_path)
-
-        return img_ok
+            # will open error dialog if file is unreadable
+            self.parent.new_frame_open_file(img_path)
 
     @debug_fxn
     def open_image_this_frame(self, img_path):
         """Open new image in this frame.
 
+        Will open an error dialog if file is unreadable.
+
         Args:
             img_path (pathlike): full path to image.
-
-        Returns:
-            (bool) img_ok - whether image was successfully loaded into frame
         """
         img_path = pathlib.Path(img_path)
 
@@ -942,9 +932,6 @@ class ImageFrame(wx.Frame):
                 self.Show()
         else:
             marcam_extra.file_unable_to_open_dialog(None, img_path)
-
-        # if we successfully loaded the file return True, else False
-        return img_ok
 
     @debug_fxn
     def load_mcmfile_from_path(self, imdata_path):
