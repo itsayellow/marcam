@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import pathlib
+import pytest
 
 import numpy as np
 import wx
@@ -57,24 +58,31 @@ def image_same(wx_image_ref, wx_image_test):
 
     return test_result
 
+@pytest.mark.skip(reason="Empty test")
 def test_fh_1sc_to_image():
     pass
 
+@pytest.mark.skip(reason="Empty test")
 def test_file1sc_to_image():
     pass
 
+@pytest.mark.skip(reason="Empty test")
 def test_image2memorydc():
     pass
 
+@pytest.mark.skip(reason="Empty test")
 def test_wxmemorydc2pilimage():
     pass
 
+@pytest.mark.skip(reason="Empty test")
 def test_wxbitmap2pilimage():
     pass
 
+@pytest.mark.skip(reason="Empty test")
 def test_wximage2pilimage():
     pass
 
+@pytest.mark.skip(reason="Empty test")
 def test_pilimage2wximage():
     pass
 
@@ -84,6 +92,7 @@ def test_image_invert():
     test_output = image_proc.image_invert(test_input)
     assert image_same(correct_output, test_output)
 
+@pytest.mark.skip(reason="Empty test")
 def test_image_autocontrast():
     pass
 
@@ -99,5 +108,6 @@ def test_image_remap_colormap():
                 )
         assert image_same(correct_output, test_output)
 
+@pytest.mark.skip(reason="Empty test")
 def test_get_image_info():
     pass
