@@ -502,23 +502,39 @@ class MarcamApp(wx.App):
             file_names: list of (str) file names to open
         """
         # NOTE: works great in bundled app,
-        #   but cmd-line invocation causes file_names to be last argument
-        #       of cmd-line, even if that's the script name (???)
+        #   but cmd-line invocation causes sends last argument of command-line
+        #   to this function, even if that's the script name.
 
-        # if we haven't set up config yet, schedule this to be run after
-        #   we finish setting up
         if self.config_data is None:
-            LOGGER.debug("Postponing MacOpenFiles until we have config_data.")
-            wx.CallAfter(self.MacOpenFiles, file_names)
+            # No config_data means we are starting up app.  In this case,
+            #   check if MacOpenFiles is just giving us args from sys.argv.
+            # If one or more file_names are in sys.argv, then it will be
+            #   processed by the main __init__ and we don't need to process
+            #   it here.
+            # This should also protect us against receiving the script name
+            #   as a filename to MacOpenFiles (which happens when starting
+            #   from the command-line).
+            LOGGER.debug("Before sys.argv pruning: " + str(file_names))
+            # Use list(enumerate()) to make a copy, so when we pop values
+            #   there's no generator to get screwed up.
+            for (i, filename) in list(enumerate(file_names)):
+                if filename in sys.argv:
+                    file_names.pop(i)
+            LOGGER.debug("After sys.argv pruning: " + str(file_names))
+
+            if file_names:
+                # if we haven't set up config yet, schedule this to be run after
+                #   we finish setting up
+                LOGGER.debug("Postponing MacOpenFiles until we have config_data.")
+                wx.CallAfter(self.MacOpenFiles, file_names)
+            else:
+                # No file_names left after pruning, so just cancel
+                LOGGER.debug("Canceling MacOpenFiles because all files are from sys.argv.")
             return
 
         LOGGER.debug(file_names)
         for open_filename in file_names:
-            img_ok = self.open_file(open_filename)
-            if img_ok:
-                LOGGER.info("MacOpenFiles: img_ok: %s", open_filename)
-            else:
-                LOGGER.info("MacOpenFiles: not img_ok: %s", open_filename)
+            self.open_file(open_filename)
 
     @debug_fxn
     def open_file(self, open_filename):
