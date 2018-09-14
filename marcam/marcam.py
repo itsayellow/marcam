@@ -434,9 +434,8 @@ class MarcamApp(wx.App):
                 # Already have a frame with that file open, don't open a dup
                 #   just move it to front
                 already_open_frame.activate()
-                # because our image is already open in a frame, we
-                #   return img_ok = True
-                return True
+                # our image is already open in a frame, so return early
+                return
             else:
                 # verify ok image before opening new frame
                 img_ok = can_read_image(open_filename)
