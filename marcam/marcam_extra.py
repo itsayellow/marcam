@@ -86,6 +86,8 @@ class StderrToLog:
 
 class FileHistory(wx.FileHistory):
     """Like wx.FileHistory, but changing how menu items are displayed
+        so that they are either all relative to user's home diretory, or
+        failing that, absolute paths.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -133,6 +135,15 @@ class FileHistory(wx.FileHistory):
             self._add_all_files_to_menu(menu)
 
     def FormatFilePathMenu(self, file_path):
+        """Given an input file_path string, output a formatted string to
+            be displayed in a Recent Files menu item.
+
+        Args:
+            file_path (str): path to a file
+
+        Output:
+            str: file_path formatted as it should appear in Recent Files menu
+        """
         file_path = pathlib.Path(file_path)
         try:
             # Attempt to find path relative to home directory
@@ -143,12 +154,22 @@ class FileHistory(wx.FileHistory):
         return str(file_path)
 
     def UseMenu(self, menu):
+        """Add menu to list of managed menus
+        """
         self.managed_menus.append(menu)
 
     def RemoveMenu(self, menu):
+        """Remove menu from list of managed menus
+        """
         self.managed_menus.remove(menu)
 
     def AddFilesToMenu(self, *args, **kwargs):
+        """Add all recent files to menu in argument.  If no menu in argument
+            then add files to all managed menus.
+
+        Args:
+            menu (wx.Menu): menu to add Recent Files to.
+        """
         if args or kwargs.get('menu', False):
             self._add_all_files_to_menu(args[0])
         elif kwargs.get('menu', False):
@@ -157,10 +178,20 @@ class FileHistory(wx.FileHistory):
             self._add_all_files_to_menus()
 
     def AddFileToHistory(self, filename):
+        """Add filename to database of recent files, and to all managed menus.
+
+        Args:
+            filename (str): filename to add
+        """
         super().AddFileToHistory(filename)
         self._add_file_to_menus()
 
     def RemoveFileFromHistory(self, i):
+        """Remove filename from database of recent files, and all managed menus.
+
+        Args:
+            filename (str): filename to remove
+        """
         super().RemoveFileFromHistory(i)
         self._remove_file_from_menus(i)
 
@@ -339,6 +370,12 @@ class EditHistory():
 
     @debug_fxn
     def get_actions_since_save(self):
+        """Return a formatted list of actions in EditHistory since last save
+
+        Returns:
+            list: list of strings representing actions happened since last
+                save
+        """
         if self.is_saved():
             # no edit history or no actions since save
             return None
