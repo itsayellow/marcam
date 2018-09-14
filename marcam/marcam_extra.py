@@ -68,20 +68,26 @@ class StderrToLog:
     def write(self, text):
         """Write test directly to LOGGER.error.  Masquerade as stderr.write()
         """
-        LOGGER.error("%s%s", STDERR_STR, text)
+        # must not put STDERR_STR as format string, because our custom
+        #   MarcamFormatter doesn't format when looking for STDERR_STR
+        LOGGER.error(STDERR_STR + text)
         return len(text)
 
     def writelines(self, lines):
         """Write lines of text directly to LOGGER.error.  Masquerade as
             stderr.writelines().
         """
-        LOGGER.error("%s%s", STDERR_STR, "StderrToLog.writelines()")
+        # must not put STDERR_STR as format string, because our custom
+        #   MarcamFormatter doesn't format when looking for STDERR_STR
+        LOGGER.error(STDERR_STR + "StderrToLog.writelines()")
         self.write("".join(lines))
 
     def flush(self):
         """NOP.  Masquerade as stderr.flush().
         """
-        LOGGER.error("%s%s", STDERR_STR, "StderrToLog.flush()")
+        # must not put STDERR_STR as format string, because our custom
+        #   MarcamFormatter doesn't format when looking for STDERR_STR
+        LOGGER.error(STDERR_STR + "StderrToLog.flush()")
 
 
 class FileHistory(wx.FileHistory):
