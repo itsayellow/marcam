@@ -1998,26 +1998,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         wx_image_orig = self.img_cache.get_current_imgmem()
 
         longtask.ThreadedProgressPulse(
-                thread_fxn=self.image_invert_thread,
-                thread_fxn_args=(wx_image_orig,),
+                thread_fxn=self.image_proc_thread,
+                thread_fxn_args=(
+                    image_proc.image_invert,
+                    wx_image_orig,
+                    "Image Inversion"
+                    ),
                 post_thread_fxn=self.image_proc_postthread,
                 progress_title="Processing Image",
                 progress_msg="Inverting image...",
                 parent=self.parent # can be None, a Frame, or another Dialog
                 )
-
-    def image_invert_thread(self, wx_image_orig):
-        """Thread part of image inversion
-
-        Args:
-            wx_image_orig (wx.Image): original image
-
-        Returns:
-            (wx.Image): output color-remapped version of input image
-        """
-        # create new image
-        wx_image_new = image_proc.image_invert(wx_image_orig)
-        return (wx_image_new, "Image Inversion")
 
     @debug_fxn
     def image_remap_colormap(self, cmap='viridis'):
@@ -2032,29 +2023,21 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # get current image
         wx_image_orig = self.img_cache.get_current_imgmem()
 
+        # create new image (3.7s for 4276x2676 image)
+
         longtask.ThreadedProgressPulse(
-                thread_fxn=self.image_remap_colormap_thread,
-                thread_fxn_args=(wx_image_orig, cmap),
+                thread_fxn=self.image_proc_thread,
+                thread_fxn_args=(
+                    image_proc.image_remap_colormap,
+                    wx_image_orig,
+                    "Image False Color",
+                    cmap
+                    ),
                 post_thread_fxn=self.image_proc_postthread,
                 progress_title="Processing Image",
                 progress_msg="Applying False Color to image...",
                 parent=self.parent # can be None, a Frame, or another Dialog
                 )
-
-    @debug_fxn
-    def image_remap_colormap_thread(self, wx_image_orig, cmap):
-        """Thread part of Apply False Color colormap to image
-
-        Args:
-            wx_image_orig (wx.Image): original image
-            cmap (str): name of colormap to remap colors
-
-        Returns:
-            (wx.Image): output color-remapped version of input image
-        """
-        # create new image (3.7s for 4276x2676 image)
-        wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
-        return (wx_image_new, "Image False Color")
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
@@ -2075,28 +2058,36 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         wx_image_orig = self.img_cache.get_current_imgmem()
 
         longtask.ThreadedProgressPulse(
-                thread_fxn=self.image_autocontrast_thread,
-                thread_fxn_args=(wx_image_orig, cutoff),
+                thread_fxn=self.image_proc_thread,
+                thread_fxn_args=(
+                    image_proc.image_autocontrast,
+                    wx_image_orig,
+                    "Image Auto-Contrast",
+                    cutoff
+                    ),
                 post_thread_fxn=self.image_proc_postthread,
                 progress_title="Processing Image",
                 progress_msg="Applying Auto-Contrast to image...",
                 parent=self.parent # can be None, a Frame, or another Dialog
                 )
 
-    def image_autocontrast_thread(self, wx_image_orig, cutoff=0):
-        """Thread part of Auto-Contrast image
+    def image_proc_thread(self, proc_fxn, wx_image_orig, description, *args):
+        """Thread part of all image processing threaded tasks
 
         Args:
             wx_image_orig (wx.Image): original image
-            cutoff (int): what percentage of the lightest and darkest pixels
-                to exclude from remapping.
+            proc_fxn (fxn handle): function that processes wx_image_orig
+                and returns a wx.Image
+            description (str): string describing operation, for Undo and Redo
+            args (tuple): any additional arguments for proc_fxn
 
         Returns:
-            (wx.Image): output color-remapped version of input image
+            (wx.Image, description): (processed version of input image,
+                description argument)
         """
         # create new image
-        wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=cutoff)
-        return (wx_image_new, "Image Auto-Contrast")
+        wx_image_new = proc_fxn(wx_image_orig, *args)
+        return (wx_image_new, description)
 
     @debug_fxn
     def image_proc_postthread(self, wx_image_new, description):
@@ -2104,6 +2095,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         Args:
             wx_image_new (wx.Image): output color-remapped version of image
+            description (str): string describing operation, for Undo and Redo
         """
         # delete all items after current one in list
         # add new img to end of list
