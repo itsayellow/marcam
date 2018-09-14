@@ -946,7 +946,7 @@ class ImageFrame(wx.Frame):
 
         # first load image from zip
         try:
-            (img, marks, img_name) = mcmfile.load(imdata_path)
+            (img, marks, _) = mcmfile.load(imdata_path)
             # need: img, img_name, marks
         except mcmfile.McmFileError:
             img = None
