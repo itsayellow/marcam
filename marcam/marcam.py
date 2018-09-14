@@ -515,13 +515,13 @@ class MarcamApp(wx.App):
             # This should also protect us against receiving the script name
             #   as a filename to MacOpenFiles (which happens when starting
             #   from the command-line).
-            LOGGER.debug("Before sys.argv pruning: " + str(file_names))
+            LOGGER.debug("Before sys.argv pruning: %s", str(file_names))
             # Use list(enumerate()) to make a copy, so when we pop values
             #   there's no generator to get screwed up.
             for (i, filename) in list(enumerate(file_names)):
                 if filename in sys.argv:
                     file_names.pop(i)
-            LOGGER.debug("After sys.argv pruning: " + str(file_names))
+            LOGGER.debug("After sys.argv pruning: %s", str(file_names))
 
             if file_names:
                 # if we haven't set up config yet, schedule this to be run after
