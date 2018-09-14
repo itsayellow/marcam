@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import sys
+import io
+
+class StderrReplacement:
+    def write(self, text):
+        print("write:")
+        print("REPLACEMENT: %s"%text, end="")
+        return len(text)
+
+    def writelines(self, lines):
+        print("writelines")
+        self.write("".join(lines))
+
+
+print("this is to sys.stderr", file=sys.stderr)
+print("this is to sys.stdout")
+
+sys.stderr = StderrReplacement()
+
+print("this is to sys.stderr", file=sys.stderr)
