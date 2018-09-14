@@ -1,0 +1,32 @@
+BytesIO
+-------
+Elapsed time: 428.3ms
+Elapsed time: 373.5ms
+Elapsed time: 372.2ms
+Elapsed time: 369.4ms
+Elapsed time: 365.8ms
+Elapsed time: 370.2ms
+Elapsed time: 367.1ms
+Elapsed time: 360.6ms
+Elapsed time: 367.9ms
+Elapsed time: 376.3ms
+
+Mean: 375.1
+Std: 18.1
+19% faster than tempfile (below)
+
+tempfile.mkdtemp / Zipfile.extract
+----------------------------------
+Elapsed time: 514.6ms
+Elapsed time: 446.6ms
+Elapsed time: 457.4ms
+Elapsed time: 449.0ms
+Elapsed time: 451.5ms
+Elapsed time: 463.9ms
+Elapsed time: 473.2ms
+Elapsed time: 451.2ms
+Elapsed time: 445.5ms
+Elapsed time: 452.8ms
+
+Mean: 460.7
+Std: 19.7
