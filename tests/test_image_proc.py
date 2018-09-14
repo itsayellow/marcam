@@ -88,7 +88,16 @@ def test_image_autocontrast():
     pass
 
 def test_image_remap_colormap():
-    pass
+    for colormap in ['viridis', 'plasma', 'inferno', 'magma']:
+        test_input = wx.Image(str(TEST_INPUT_IMAGE))
+        correct_output = wx.Image(
+                str(TESTDATA_IMAGEPROC / ('test_%s.png'%colormap))
+                )
+        test_output = image_proc.image_remap_colormap(
+                test_input,
+                cmap=colormap
+                )
+        assert image_same(correct_output, test_output)
 
 def test_get_image_info():
     pass
