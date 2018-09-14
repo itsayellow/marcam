@@ -472,6 +472,8 @@ class MarcamApp(wx.App):
             # need to actually GetPosition to get real position, in case both
             #   self.last_frame_pos = (-1, -1) and new_pos = (-1, -1)
             self.last_frame_pos = new_frame.GetPosition()
+        else:
+            marcam_extra.file_unable_to_open_dialog(None, open_filename)
 
         return img_ok
 

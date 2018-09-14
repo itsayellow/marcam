@@ -44,6 +44,15 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 STDERR_STR = "STDERR: "
 
 
+@debug_fxn
+def file_unable_to_open_dialog(parent, img_path):
+    wx.MessageDialog(parent,
+            message="Unable to open file: %s"%img_path,
+            caption="File Read Error",
+            style=wx.OK | wx.ICON_EXCLAMATION
+            ).ShowModal()
+
+
 class StderrToLog:
     """Replace sys.stderr with this to route stderr messages to LOGGER
     """

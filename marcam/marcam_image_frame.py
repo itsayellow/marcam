@@ -864,11 +864,7 @@ class ImageFrame(wx.Frame):
         img_ok = self.open_image(img_path)
         if not img_ok:
             # wx.ICON_ERROR has no effect on Mac
-            wx.MessageDialog(None,
-                    message="Unable to open file: %s"%img_path,
-                    caption="File Read Error",
-                    style=wx.OK | wx.ICON_EXCLAMATION
-                    ).ShowModal()
+            marcam_extra.file_unable_to_open_dialog(None, img_path)
 
     @debug_fxn
     def on_open_recent(self, evt):
@@ -884,12 +880,7 @@ class ImageFrame(wx.Frame):
         if img_path.exists():
             img_ok = self.open_image(img_path)
             if not img_ok:
-                # wx.ICON_ERROR has no effect on Mac
-                wx.MessageDialog(None,
-                        message="Unable to open file: %s"%img_path,
-                        caption="File Read Error",
-                        style=wx.OK | wx.ICON_EXCLAMATION
-                        ).ShowModal()
+                marcam_extra.file_unable_to_open_dialog(None, img_path)
         else:
             self.file_history.RemoveFileFromHistory(evt.GetId() - wx.ID_FILE1)
             wx.MessageDialog(self,
@@ -949,6 +940,8 @@ class ImageFrame(wx.Frame):
                 # on Mac we hide the last frame we close.  So when opening
                 #   we need to make sure to show it again
                 self.Show()
+        else:
+            marcam_extra.file_unable_to_open_dialog(None, img_path)
 
         # if we successfully loaded the file return True, else False
         return img_ok
