@@ -46,6 +46,7 @@ STDERR_STR = "STDERR: "
 
 @debug_fxn
 def file_unable_to_open_dialog(parent, img_path):
+    LOGGER.warning("Unable to open file: %s", img_path)
     wx.MessageDialog(parent,
             message="Unable to open file: %s"%img_path,
             caption="File Read Error",
