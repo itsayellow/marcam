@@ -68,7 +68,7 @@ class StderrToLog:
     def write(self, text):
         """Write test directly to LOGGER.error.  Masquerade as stderr.write()
         """
-        # must not put STDERR_STR as format string, because our custom
+        # must not put STDERR_STR as literal string, because our custom
         #   MarcamFormatter doesn't format when looking for STDERR_STR
         LOGGER.error(STDERR_STR + text)
         return len(text)
@@ -77,7 +77,7 @@ class StderrToLog:
         """Write lines of text directly to LOGGER.error.  Masquerade as
             stderr.writelines().
         """
-        # must not put STDERR_STR as format string, because our custom
+        # must not put STDERR_STR as literal string, because our custom
         #   MarcamFormatter doesn't format when looking for STDERR_STR
         LOGGER.error(STDERR_STR + "StderrToLog.writelines()")
         self.write("".join(lines))
@@ -85,7 +85,7 @@ class StderrToLog:
     def flush(self):
         """NOP.  Masquerade as stderr.flush().
         """
-        # must not put STDERR_STR as format string, because our custom
+        # must not put STDERR_STR as literal string, because our custom
         #   MarcamFormatter doesn't format when looking for STDERR_STR
         LOGGER.error(STDERR_STR + "StderrToLog.flush()")
 
@@ -232,8 +232,11 @@ class MarcamFormatter(logging.Formatter):
         Returns:
             out_string: processed log message
         """
-        # is this current log message starting with stderr string?
-        now_stderr = record.getMessage().startswith(STDERR_STR)
+        # Is this current log message starting with stderr string?
+        # msg must start with literal STDERR_STR and not %s that resolves
+        #   to STDERR_STR, otherwise processing format arguments gets very
+        #   complex.
+        now_stderr = record.msg.startswith(STDERR_STR)
 
         if now_stderr:
             # Remove STDERR_STR from beginning of message
