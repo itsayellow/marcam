@@ -2024,7 +2024,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         longtask.ThreadedProgressPulse(
                 thread_fxn=self.image_remap_colormap_thread,
                 thread_fxn_args=(wx_image_orig, cmap),
-                post_thread_fxn=self.image_remap_colormap_postthread,
+                post_thread_fxn=self.image_proc_postthread,
                 progress_title="Processing Image",
                 progress_msg="Applying False Color to image...",
                 parent=self.parent # can be None, a Frame, or another Dialog
@@ -2043,25 +2043,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # create new image (3.7s for 4276x2676 image)
         wx_image_new = image_proc.image_remap_colormap(wx_image_orig, cmap=cmap)
-        return wx_image_new
-
-    @debug_fxn
-    def image_remap_colormap_postthread(self, wx_image_new):
-        """Post-Thread part of Apply False Color colormap to image
-
-        Args:
-            wx_image_new (wx.Image): output color-remapped version of image
-        """
-        # delete all items after current one in list
-        # add new img to end of list
-        self.img_cache.replace_endlist_with_new(wx_image_new)
-        # save previous image idx, and new image idx
-        self.history.new(
-                ['IMAGE_XFORM', self.img_cache.get_idx() - 1, self.img_cache.get_idx()],
-                description="Image False Color"
-                )
-        # put new image in window (188ms for 4276x2676)
-        self.init_image(do_zoom_fit=False)
+        return (wx_image_new, "Image False Color")
 
     @debug_fxn
     def image_autocontrast(self, cutoff=0):
@@ -2080,16 +2062,47 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # get current image
         wx_image_orig = self.img_cache.get_current_imgmem()
+
+        longtask.ThreadedProgressPulse(
+                thread_fxn=self.image_autocontrast_thread,
+                thread_fxn_args=(wx_image_orig, cutoff),
+                post_thread_fxn=self.image_proc_postthread,
+                progress_title="Processing Image",
+                progress_msg="Applying Auto-Contrast to image...",
+                parent=self.parent # can be None, a Frame, or another Dialog
+                )
+
+    def image_autocontrast_thread(self, wx_image_orig, cutoff=0):
+        """Thread part of Auto-Contrast image
+
+        Args:
+            wx_image_orig (wx.Image): original image
+            cutoff (int): what percentage of the lightest and darkest pixels
+                to exclude from remapping.
+
+        Returns:
+            (wx.Image): output color-remapped version of input image
+        """
         # create new image
         wx_image_new = image_proc.image_autocontrast(wx_image_orig, cutoff=cutoff)
+        return (wx_image_new, "Image Auto-Contrast")
+
+    @debug_fxn
+    def image_proc_postthread(self, wx_image_new, description):
+        """Post-Thread part of all image processing threaded tasks
+
+        Args:
+            wx_image_new (wx.Image): output color-remapped version of image
+        """
         # delete all items after current one in list
         # add new img to end of list
         self.img_cache.replace_endlist_with_new(wx_image_new)
         # save previous image idx, and new image idx
         self.history.new(
                 ['IMAGE_XFORM', self.img_cache.get_idx() - 1, self.img_cache.get_idx()],
-                description="Image Auto-Contrast"
+                description=description
                 )
+        # put new image in window (188ms for 4276x2676)
         self.init_image(do_zoom_fit=False)
 
     @debug_fxn
