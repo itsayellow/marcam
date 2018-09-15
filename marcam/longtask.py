@@ -160,13 +160,83 @@ class ThreadedProgressPulse(Threaded):
         super().long_task_postthread(_evt)
 
 
+class ThreadedProgressPulseDelay(Threaded):
+    """Class supporting long tasks that need to be in separate thread.
+
+    EXPERIMENTAL.  Possible race conditions.
+
+    Handles running the thread part of the task in a separate thread,
+        wx Events needed to invoke post-thread actions, and wx ProgressDialog.
+        ProgressDialog has a delay to start, so that if thread finishes before
+        a certain time limit, no ProgressDialog will start at all.
+        Sets ProgressDialog to "Pulse" mode, which shows indeterminant progress
+        (just activity).
+    """
+    @debug_fxn
+    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
+            progress_title, progress_msg, parent, progress_delay_ms=100):
+        self.win_parent = parent
+        self.thread_fxn_returnvals = None
+        self.thread_done = False
+        self.progress_dialog = None
+        self.thread_lock = threading.Lock()
+
+        # Disable access to parent window
+        self.win_parent.Enable(False)
+
+        # invoke thread stuff after setting up progress_dialog, so thread
+        #   ending and post-thread destroying progress_dialog is impossible
+        #   to come first
+        super().__init__(thread_fxn, thread_fxn_args, post_thread_fxn, parent)
+
+        wx.CallLater(progress_delay_ms, self.delay_start)
+
+    @debug_fxn
+    def delay_start(self,):
+        self.thread_lock.acquire()
+        if not self.thread_done:
+            # Disable access to parent window
+            self.win_parent.Enable(True)
+
+            self.progress_dialog = wx.ProgressDialog(
+                    progress_title,
+                    progress_msg,
+                    parent=self.win_parent
+                    )
+            # Pulse seems to only be needed to be called once!  Not multiple times
+            #   as the docs imply.
+            self.progress_dialog.Pulse()
+        self.thread_lock.release()
+
+    @debug_fxn
+    def long_task_postthread(self, _evt):
+        """Function triggered when event signifies that thread fxn is done.
+
+        Args:
+            evt (self.myLongTaskDoneEvent): obj returned from event when long task
+                thread is finished
+        """
+        self.thread_lock.acquire()
+        self.thread_done = True
+        self.thread_lock.release()
+
+        if self.progress_dialog is None:
+            # Disable access to parent window
+            self.win_parent.Enable(True)
+        else:
+            # On Windows especially, must Destroy progress dialog for application
+            #   to continue
+            self.progress_dialog.Destroy()
+        # execute post thread function with return value(s) from thread_fxn
+        super().long_task_postthread(_evt)
+
+
 class ThreadedDisableEnable(Threaded):
     """Class supporting long tasks that need to be in separate thread.
 
     Handles running the thread part of the task in a separate thread,
-        wx Events needed to invoke post-thread actions, and wx ProgressDialog.
-        Sets ProgressDialog to "Pulse" mode, which shows indeterminant progress
-        (just activity).
+        wx Events needed to invoke post-thread actions, and disabling parent
+        window until thread is finished.
     """
     @debug_fxn
     def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
