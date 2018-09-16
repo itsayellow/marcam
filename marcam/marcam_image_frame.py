@@ -1066,9 +1066,12 @@ class ImageFrame(wx.Frame):
         if keep_win_open:
             # reset edit/save history
             self.frame_history.reset()
+            # set saved state to "True" to prevent "Save image?" dialog from
+            #   popping up if we quit application now
+            self.frame_history.save_notify()
             # reset filepath for mcm file to nothing on close
             self.save_filepath = None
-            # make scrolled window show no image
+            # Make scrolled window show no image.  Also resets frame_history
             self.img_panel.set_no_image()
             # Set window title to generic app name
             self.SetTitle('Marcam')

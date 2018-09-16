@@ -486,6 +486,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 Update() window area
         """
         self.history.reset()
+        # set saved state to "True" to prevent "Save image?" dialog from
+        #   popping up if we quit application now
+        self.history.save_notify()
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
         self.img_cache.reset()
