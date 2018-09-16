@@ -83,7 +83,7 @@ Application Log files stored in the directory:
 "C:\\Users\\<username>\\AppData\\Local\\Marcam\\Logs"
 
 Application preferences stored in the Registry:
-HKEY_CURRENT_USER\Software\itsayellow.com\Marcam
+HKEY_CURRENT_USER\\Software\\itsayellow.com\\Marcam
 
 Documentation References
 ------------------------
