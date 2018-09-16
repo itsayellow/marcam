@@ -268,21 +268,33 @@ class MarcamFormatter(logging.Formatter):
 
 class EditHistory():
     """Keeps track of Edit History, undo, redo, whether save is needed
+
+    TODO: when we initialize or reset, we need to know if we've ever been saved
     """
     def __init__(self):
+        print("frame_history.__init__")
         self.undo_menu_item = None
         self.redo_menu_item = None
         self.save_menu_item = None
-        self.history = []
-        self.history_ptr = -1
-        self._update_menu_items()
+
+        # (node0) - edge0 - (node1) - edge1 - (node2) - edge2 - (node3)
+        # edgeN connects nodeN and nodeN+1
+
+        self.reset()
 
     @debug_fxn
     def reset(self):
         """Reset Edit History so it has no entries and ptr is reset
         """
-        self.history = []
-        self.history_ptr = -1
+        print("frame_history.reset")
+        # one node for each state of file
+        self.history_nodes = [{'save_flag':False}]
+        self.history_node_i = 0
+        # one edge connects two nodes, an action that transforms previous
+        #   node to next node
+        self.history_edges = []
+
+        # update Save, Redo, Undo menu items
         self._update_menu_items()
 
     @debug_fxn
@@ -296,17 +308,25 @@ class EditHistory():
                 for putting after "Undo" or "Redo" in menu items.
                 e.g. "Undo Add Marks", "Undo Invert Image"
         """
-        # truncate list so current item is last item (makes empty list
-        #   if self.history_ptr == -1)
-        self.history = self.history[:self.history_ptr + 1]
-        self.history.append(
+        # truncate nodes so current node is last item
+        self.history_nodes = self.history_nodes[:self.history_node_i + 1]
+        # truncate edges (always len(history_nodes)-1 length)
+        self.history_edges = self.history_edges[:self.history_node_i]
+
+        self.history_nodes.append(
                 {
-                    'edit_action':item,
-                    'description':description,
                     'save_flag':False
                     }
                 )
-        self.history_ptr = len(self.history) - 1
+        self.history_edges.append(
+                {
+                    'edit_action':item,
+                    'description':description,
+                    }
+                )
+        self.history_node_i = len(self.history_nodes) - 1
+
+        # update Save, Redo, Undo menu items
         self._update_menu_items()
 
     @debug_fxn
@@ -318,12 +338,11 @@ class EditHistory():
         considered "saved" and we don't have to query user on close of file
         """
         # set all edit history save flags to False
-        for i in range(len(self.history)):
-            self.history[i]['save_flag'] = False
+        for i in range(len(self.history_nodes)):
+            self.history_nodes[i]['save_flag'] = False
 
-        # set current edit history action save flags to True
-        if self.history_ptr > -1:
-            self.history[self.history_ptr]['save_flag'] = True
+        # set current edit history node save flag to True
+        self.history_nodes[self.history_node_i]['save_flag'] = True
 
         # update Save, Redo, Undo menu items
         self._update_menu_items()
@@ -335,11 +354,7 @@ class EditHistory():
         Returns:
             bool: True if this point in history is saved
         """
-        if self.history_ptr == -1:
-            # no edit history, so no save needed
-            return True
-
-        return self.history[self.history_ptr]['save_flag']
+        return self.history_nodes[self.history_node_i]['save_flag']
 
     @debug_fxn
     def undo(self):
@@ -351,8 +366,8 @@ class EditHistory():
                 are action info.  Returns None if nothing left to redo
         """
         if self._can_undo():
-            undo_action = self.history[self.history_ptr]['edit_action']
-            self.history_ptr -= 1
+            undo_action = self.history_edges[self.history_node_i - 1]['edit_action']
+            self.history_node_i -= 1
         else:
             undo_action = None
 
@@ -369,8 +384,8 @@ class EditHistory():
                 are action info.  Returns None if nothing left to undo
         """
         if self._can_redo():
-            self.history_ptr += 1
-            redo_action = self.history[self.history_ptr]['edit_action']
+            redo_action = self.history_edges[self.history_node_i]['edit_action']
+            self.history_node_i += 1
         else:
             redo_action = None
 
@@ -390,22 +405,23 @@ class EditHistory():
             return None
 
         try:
-            save_loc = [x['save_flag'] for x in self.history].index(True)
+            save_loc = [x['save_flag'] for x in self.history_nodes].index(True)
         except ValueError:
             # never saved
             save_loc = -1
 
-        if save_loc < self.history_ptr:
-            edits_since_save = self.history[save_loc+1:self.history_ptr+1]
+        if save_loc < self.history_node_i:
+            edits_since_save = self.history_edges[save_loc:self.history_node_i]
             edits_since_save = [x for x in edits_since_save if x['edit_action'][0] != 'NOP']
             edits_since_save = [x['description'] for x in edits_since_save]
         else:
-            # save_loc > self.history_ptr:
-            edits_since_save = self.history[self.history_ptr+1:save_loc+1]
+            # save_loc > self.history_node_i:
+            edits_since_save = self.history_edges[self.history_node_i:save_loc]
             edits_since_save = [x for x in edits_since_save if x['edit_action'][0] != 'NOP']
             edits_since_save = ["Undo " + x['description'] for x in edits_since_save]
             edits_since_save.reverse()
 
+        # aggregate repeated sequential edits in one description
         item_count = 1
         edits_since_save_new = []
         for (i, this_edit) in enumerate(edits_since_save):
@@ -426,7 +442,7 @@ class EditHistory():
         Returns:
             bool: True if can undo
         """
-        return (len(self.history) > 0) and (self.history_ptr >= 0)
+        return (self.history_node_i > 0)
 
     @debug_fxn
     def _can_redo(self):
@@ -435,7 +451,7 @@ class EditHistory():
         Returns:
             bool: True if can redo
         """
-        return (len(self.history) > 0) and (self.history_ptr < len(self.history) - 1)
+        return (self.history_node_i < len(self.history_nodes) - 1)
 
     @debug_fxn
     def _update_menu_items(self):
@@ -448,7 +464,7 @@ class EditHistory():
             self.undo_menu_item.Enable(self._can_undo())
             if self._can_undo():
                 key_accel = self.undo_menu_item.GetItemLabel().split('\t')[1]
-                undo_descrip = self.history[self.history_ptr]['description']
+                undo_descrip = self.history_edges[self.history_node_i - 1]['description']
                 self.undo_menu_item.SetItemLabel(
                         "Undo " + undo_descrip + "\t" + key_accel
                         )
@@ -462,7 +478,7 @@ class EditHistory():
             self.redo_menu_item.Enable(self._can_redo())
             if self._can_redo():
                 key_accel = self.redo_menu_item.GetItemLabel().split('\t')[1]
-                undo_descrip = self.history[self.history_ptr + 1]['description']
+                undo_descrip = self.history_edges[self.history_node_i]['description']
                 self.redo_menu_item.SetItemLabel(
                         "Redo " + undo_descrip + "\t" + key_accel
                         )
