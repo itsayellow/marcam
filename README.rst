@@ -76,6 +76,9 @@ Application Log files stored in the directory:
 Application preferences stored in the file:
 "~/Library/Preferences/Marcam Preferences"
 
+Application file cache directory:
+"~/Library/Caches/Marcam"
+
 Windows
 ~~~~~~~
 
@@ -84,6 +87,9 @@ Application Log files stored in the directory:
 
 Application preferences stored in the Registry:
 HKEY_CURRENT_USER\\Software\\itsayellow.com\\Marcam
+
+Application file cache directory:
+"C:\\Users\\<username>\\AppData\\....."
 
 Documentation References
 ------------------------
