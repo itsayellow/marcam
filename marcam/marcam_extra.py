@@ -272,7 +272,6 @@ class EditHistory():
     TODO: when we initialize or reset, we need to know if we've ever been saved
     """
     def __init__(self):
-        print("frame_history.__init__")
         self.undo_menu_item = None
         self.redo_menu_item = None
         self.save_menu_item = None
@@ -286,7 +285,6 @@ class EditHistory():
     def reset(self):
         """Reset Edit History so it has no entries and ptr is reset
         """
-        print("frame_history.reset")
         # one node for each state of file
         self.history_nodes = [{'save_flag':False}]
         self.history_node_i = 0
