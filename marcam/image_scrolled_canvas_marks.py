@@ -107,7 +107,7 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         """
         # return early if no image
         if self.has_no_image():
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         mods = evt.GetModifiers()
@@ -192,7 +192,7 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
         if self.has_no_image() or self.mark_mode:
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         if evt.Dragging() and evt.LeftIsDown():
@@ -311,7 +311,7 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
         if self.has_no_image() or self.mark_mode:
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         evt_pos = evt.GetPosition()

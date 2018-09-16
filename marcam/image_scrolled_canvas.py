@@ -638,7 +638,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # return early if no image
         if self.has_no_image():
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         mods = evt.GetModifiers()
@@ -692,7 +692,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # return early if no image
         if self.has_no_image():
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         if evt.Dragging() and evt.LeftIsDown():
@@ -748,7 +748,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # return early if no image
         if self.has_no_image():
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         if self.is_dragging:
@@ -795,7 +795,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # return early if no image
         if self.has_no_image():
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         # point coordinate returned seems:
@@ -927,7 +927,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """
         # return early if no image
         if self.has_no_image():
-            wx.CallAfter(evt.Skip)
+            evt.Skip()
             return
 
         event_type = evt.GetEventType()
