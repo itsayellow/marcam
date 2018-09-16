@@ -1046,13 +1046,19 @@ class ImageFrame(wx.Frame):
             if len(changes_list) > 4:
                 extra_str = "[%d more...]"%(len(changes_list) - 3)
                 changes_list = changes_list[:3] + [extra_str,]
-            if changes_list is not None:
+
+            if changes_list:
                 changes_str = "\n".join(["    \u2022 "+x for x in changes_list])
+                title = "Save changes to \"%s\" before closing?"%image_to_close
+                message = "\nChanges since last save:\n%s\n"%changes_str
+            else:
+                title = "Save \"%s\" before closing?"%image_to_close
+                message = "\nImage was never saved as .mcm file."
 
             save_query = wx.MessageDialog(
                     self,
-                    "\nChanges since last save:\n%s\n"%changes_str,
-                    "Save changes to \"%s\" before closing?"%image_to_close,
+                    message,
+                    title,
                     wx.CANCEL | wx.YES_NO | wx.YES_DEFAULT
                     )
             save_query.SetYesNoLabels("&Save", "&Don't Save")
