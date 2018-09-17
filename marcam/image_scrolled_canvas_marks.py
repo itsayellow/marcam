@@ -189,10 +189,12 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         Args:
             evt (wx.MouseEvent): obj returned from mouse event
         """
+        # Resume normal Event Processing after this method returns
+        evt.Skip()
+
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
         if self.has_no_image() or self.mark_mode:
-            evt.Skip()
             return
 
         if evt.Dragging() and evt.LeftIsDown():

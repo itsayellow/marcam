@@ -690,9 +690,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.MouseEvent): obj returned from mouse event
         """
+        # Resume normal Event Processing after this method returns
+        evt.Skip()
+
         # return early if no image
         if self.has_no_image():
-            evt.Skip()
             return
 
         if evt.Dragging() and evt.LeftIsDown():
@@ -925,9 +927,11 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.ScrollWinEvent): obj returned from scrolled window event
         """
+        # Resume normal Event Processing after this method returns
+        evt.Skip()
+
         # return early if no image
         if self.has_no_image():
-            evt.Skip()
             return
 
         event_type = evt.GetEventType()
@@ -979,8 +983,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         elif orientation == wx.VERTICAL and event_type == wx.wxEVT_SCROLLWIN_LINEDOWN:
             self.pan_down(const.SCROLL_WHEEL_SPEED)
         else:
-            # process with default handler(s)
-            evt.Skip()
+            pass
 
     @debug_fxn
     def _debug_paint_client_area(self):
