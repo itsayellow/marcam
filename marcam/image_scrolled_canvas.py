@@ -1213,7 +1213,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """EVT_SIZE handler: resizing window
 
         Args:
-            evt (wx.ScrollWinEvent): obj returned from scrolled window event
+            evt (wx.SizeEvent): obj from sizing window
         """
         # Resume normal Event Processing after this method returns
         evt.Skip()
