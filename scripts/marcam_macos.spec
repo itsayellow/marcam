@@ -110,10 +110,13 @@ app = BUNDLE(
                 'CFBundleGetInfoString':'Count objects in images',
                 'CFBundleIdentifier':'com.itsayellow.osx.marcam',
                 'CFBundleName':'Marcam',
+                #'CFBundleSignature':'????', # Do we need this?
                 'CFBundleShortVersionString':const.VERSION_STR,
                 'CFBundleVersion':const.VERSION_STR,
+                #'NSAppleScriptEnabled':False, # by default is false
+                #'NSMainNibFile':'MainMenu', # if we had a MainMenu.nib file
                 'NSPrincipalClass':'NSApplication',
-                'NSHumanReadableCopyright': u"Copyright \u00A9 2018, " \
+                'NSHumanReadableCopyright': u"Copyright \u00A9 2017-2018, " \
                         "Matthew A. Clapp, All Rights Reserved",
                 'CFBundleDocumentTypes':[
                     {
@@ -126,7 +129,7 @@ app = BUNDLE(
                     {
                         'CFBundleTypeName':'Bio-Rad Gel File',
                         'CFBundleTypeRole':'Viewer',
-                        #'CFBundleTypeIconFile':'.icns',
+                        'CFBundleTypeIconFile':'media/marcam_doc.icns',
                         'LSHandlerRank': "Alternate",
                         'LSItemContentTypes': ["com.itsayellow.1sc"],
                         },
