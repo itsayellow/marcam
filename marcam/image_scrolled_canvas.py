@@ -335,7 +335,7 @@ class ImageCache:
     def _remove_cache_file_thread(self, cache_filepath, cache_file_lock):
         # wait until we acquire lock correpsonding to cache_filepath
         #   (in case it is still being saved).
-        with cache_file_lock
+        with cache_file_lock:
             # delete file
             cache_filepath.unlink()
 
