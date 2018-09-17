@@ -1,0 +1,114 @@
+Verify the following functions have evt.Skip():
+-----------------------------------------------
+marcam/common.py
+    on_evt_debug
+
+marcam/image_scrolled_canvas.py
+    self.on_paint
+    self.on_size
+    self.on_scroll
+    self.on_left_down
+    self.on_left_up
+    self.on_right_down
+    self.on_motion
+
+marcam/image_scrolled_canvas_marks.py
+    self.on_motion
+
+marcam/marcam.py
+    self.on_key_down * ? not always Skip
+    self.on_key_up * ? not always Skip
+
+marcam/marcam_image_frame.py
+    self.on_evt_close * APPROVED: not always Skip
+    self.on_evt_iconize
+
+
+Non-Command Events
+------------------
+marcam/image_scrolled_canvas.py
+    self.Bind(wx.EVT_PAINT, self.on_paint)
+    self.Bind(wx.EVT_SIZE, self.on_size)
+    self.Bind(wx.EVT_SCROLLWIN, self.on_scroll)
+    self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+    self.Bind(wx.EVT_LEFT_UP, self.on_left_up)
+    self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
+    self.Bind(wx.EVT_MOTION, self.on_motion)
+
+marcam/image_scrolled_canvas_marks.py
+    self.Bind(wx.EVT_MOTION, self.on_motion)
+
+marcam/marcam.py
+    self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
+    self.Bind(wx.EVT_KEY_UP, self.on_key_up)
+
+marcam/marcam_image_frame.py
+    self.Bind(wx.EVT_CLOSE, self.on_evt_close)
+    self.Bind(wx.EVT_ICONIZE, self.on_evt_iconize)
+    #self.Bind(wx.EVT_ACTIVATE, common.on_evt_debug)
+    #self.Bind(wx.EVT_ACTIVATE_APP, common.on_evt_debug)
+    #self.Bind(wx.EVT_HIBERNATE, common.on_evt_debug)
+    #self.Bind(wx.EVT_KILL_FOCUS, common.on_evt_debug)
+    #self.Bind(wx.EVT_MAXIMIZE, common.on_evt_debug)
+    #self.Bind(wx.EVT_SET_FOCUS, common.on_evt_debug)
+    #self.Bind(wx.EVT_SHOW, common.on_evt_debug)
+    #self.Bind(wx.EVT_SIZE, common.on_evt_debug)
+    #self.Bind(wx.EVT_SIZING, common.on_evt_debug)
+
+
+Command Events
+--------------
+marcam/marcam_extra.py
+    self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
+    #self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
+    this_frame.Bind(wx.EVT_MENU, menuitem_frame.on_window_menu_activate, this_menuitem)
+
+marcam/marcam_image_frame.py
+    self.Bind(wx.EVT_TOOL, self.on_selectmode, selecttool)
+    self.Bind(wx.EVT_TOOL, self.on_markmode, marktool)
+    self.Bind(wx.EVT_TOOL, self.on_toclip, tocliptool)
+    self.Bind(wx.EVT_TOOL, self.on_zoomout, zoomouttool)
+    self.Bind(wx.EVT_TOOL, self.on_zoomin, zoomintool)
+    self.Bind(wx.EVT_TOOL, self.on_zoomfit, zoomfittool)
+
+marcam/marcam_image_frame.py
+    self.Bind(wx.EVT_MENU, self.on_minimize, self.window_minimize_item)
+    self.Bind(wx.EVT_MENU, self.on_window_zoom, window_zoom_item)
+    self.Bind(wx.EVT_MENU, self.on_debug_benchzoom, debug_benchzoom_item)
+    self.Bind(wx.EVT_MENU, self.on_open, file_open_item)
+    self.Bind(wx.EVT_MENU, self.on_close, file_close_item)
+    self.Bind(wx.EVT_MENU, self.on_save, file_save_item)
+    self.Bind(wx.EVT_MENU, self.on_saveas, file_saveas_item)
+    self.Bind(wx.EVT_MENU, self.on_export_image, file_exportimage_item)
+    self.Bind(wx.EVT_MENU, self.on_quit, file_quit_item)
+    self.Bind(wx.EVT_MENU_RANGE, self.on_open_recent,
+    self.Bind(wx.EVT_MENU, self.on_undo, edit_undo_item)
+    self.Bind(wx.EVT_MENU, self.on_redo, edit_redo_item)
+    self.Bind(wx.EVT_MENU, self.on_toclip, edit_copy_item)
+    self.Bind(wx.EVT_MENU, self.on_select_all, self.selallitem)
+    self.Bind(wx.EVT_MENU, self.on_zoomout, zoom_zoomout_item)
+    self.Bind(wx.EVT_MENU, self.on_zoomin, zoom_zoomin_item)
+    self.Bind(wx.EVT_MENU, self.on_zoomfit, zoom_zoomfit_item)
+    self.Bind(wx.EVT_MENU, self.on_selectmode, self.select_menu_item)
+    self.Bind(wx.EVT_MENU, self.on_markmode, self.mark_menu_item)
+    self.Bind(wx.EVT_MENU, self.on_imginfo, tools_imginfo_item)
+    self.Bind(wx.EVT_MENU, self.on_imginvert, tools_imginvert_item)
+    self.Bind(wx.EVT_MENU, self.on_imgautocontrastdialog, tools_imgautocontrastdialog_item)
+    self.Bind(wx.EVT_MENU, self.on_imgautocontrastlast, self.tools_imgautocontrastlast_item)
+    self.Bind(wx.EVT_MENU, self.on_imgfalsecolordialog, tools_imgfcolordialog_item)
+    self.Bind(wx.EVT_MENU, self.on_imgfalsecolorlast, self.tools_imgfcolorlast_item)
+    self.Bind(wx.EVT_MENU, self.on_about, help_about_item)
+    self.Bind(wx.EVT_MENU, self.on_help, help_help_item)
+
+marcam/marcam_image_frame.py
+    #self.Bind(wx.EVT_WINDOW_CREATE, common.on_evt_debug)
+    #self.Bind(wx.EVT_WINDOW_DESTROY, common.on_evt_debug)
+
+
+Custom Events
+-------------
+marcam/longtask.py
+    self.win_parent.Bind(evt_long_task_done, self.long_task_postthread)
+
+marcam/marcam.py
+    self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
