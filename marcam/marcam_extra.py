@@ -627,6 +627,9 @@ class ImageAutoContrastDialog(wx.Dialog):
 
     def on_evt_slider(self, _evt):
         """When Slider is changed, change label showing value.
+
+        Args:
+            _evt (wx.): TODO
         """
         slider_val = self.slider.GetValue()
         self.value_display.SetLabel("%d"%slider_val)

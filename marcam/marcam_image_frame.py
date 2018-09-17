@@ -561,12 +561,14 @@ class ImageFrame(wx.Frame):
         Args:
             evt (wx.IconizeEvt):
         """
+        # Resume normal Event Processing after this method returns
+        evt.Skip()
+
         try:
             self.window_minimize_item.Enable(not self.IsIconized())
         except NameError:
             # if no window_minimize_item, silently ignore
             pass
-        evt.Skip()
 
     @debug_fxn
     def on_evt_close(self, evt):

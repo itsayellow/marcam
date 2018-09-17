@@ -1209,12 +1209,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         LOGGER.debug("Thaw()")
 
     @debug_fxn
-    def on_size(self, _evt):
+    def on_size(self, evt):
         """EVT_SIZE handler: resizing window
 
         Args:
-            _evt (wx.ScrollWinEvent): obj returned from scrolled window event
+            evt (wx.ScrollWinEvent): obj returned from scrolled window event
         """
+        # Resume normal Event Processing after this method returns
+        evt.Skip()
+
         # set new virtual window size and scroll position based on new window
         #   size
         self.set_virt_size_and_pos()
@@ -1222,12 +1225,15 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     # GetClientSize is size of window graphics not including scrollbars
     # GetSize is size of window including scrollbars
     @debug_fxn
-    def on_paint(self, _evt):
+    def on_paint(self, evt):
         """EVT_PAINT handler: update window area
 
         Args:
-            _evt (wx.PaintEvent): no useful information
+            evt (wx.PaintEvent): no useful information
         """
+        # Resume normal Event Processing after this method returns
+        evt.Skip()
+
         if LOGGER.isEnabledFor(logging.DEBUG):
             start_onpaint = time.time()
 
@@ -1268,7 +1274,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if self.paint_times is not None:
                 zoom_str = "%.3f"%self.zoom_val
                 self.paint_times.setdefault(zoom_str, []).append(onpaint_eltime)
-
 
     @debug_fxn
     def _get_margin_rects(self, rect_pos_log, rect_size, dest_pos, dest_size):
