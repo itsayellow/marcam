@@ -651,20 +651,6 @@ class ImageFrame(wx.Frame):
                 key_code, evt.GetRawKeyCode(), evt.GetPosition()
                 )
 
-        # Don't need these anymore since we have menu keystrokes
-        #if key_code == 91:
-        #    # [ key
-        #    #  key_code: 91
-        #    #  RawKeyCode: 33
-        #    # zoom out
-        #    self.on_zoomout(self, evt)
-        #if key_code == 93:
-        #    # ] key
-        #    #  key_code: 93
-        #    #  RawKeyCode: 30
-        #    # zoom in
-        #    self.on_zoomin(self, evt)
-
         # keys usually scroll, so down arrow makes image go up, etc.
         # "arrow keys move virtual viewport over image"
         # NOTE: if we wanted to automatically implement panning, we could
@@ -690,9 +676,6 @@ class ImageFrame(wx.Frame):
                     description="Delete Mark" + ("s" if len(deleted_marks) > 1 else "")
                     )
 
-        #if key_code == 307:
-            # option key - initiate temporary zoom
-            #LOGGER.debug("Option key down")
         if key_code == 32:
             # space bar
             LOGGER.debug("Space key down")
@@ -733,10 +716,6 @@ class ImageFrame(wx.Frame):
             # skip to process END
             evt.Skip()
 
-        if key_code == 32:
-            # Space Bar
-            pass
-
     @debug_fxn
     def on_key_up(self, evt):
         """EVT_KEY_UP Handler: releasing a key event.
@@ -753,8 +732,6 @@ class ImageFrame(wx.Frame):
                 key_code, evt.GetRawKeyCode(), evt.GetPosition()
                 )
 
-        #if key_code == 307:
-            # option key - release temporary zoom
         if key_code == 32:
             # space bar - release temporary zoom
             LOGGER.debug("Space key up")
