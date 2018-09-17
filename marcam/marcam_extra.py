@@ -395,18 +395,22 @@ class EditHistory():
         """Return a formatted list of actions in EditHistory since last save
 
         Returns:
-            list: list of strings representing actions happened since last
-                save
+            (list, bool): (list of strings representing actions happened since
+                last save, True if file was never saved)
         """
+        # initial value
+        never_saved = False
+
         if self.is_saved():
             # no edit history or no actions since save
-            return None
+            return (None, never_saved)
 
         try:
             save_loc = [x['save_flag'] for x in self.history_nodes].index(True)
         except ValueError:
-            # never saved
-            save_loc = -1
+            # never saved, set to initial node
+            never_saved = True
+            save_loc = 0
 
         if save_loc < self.history_node_i:
             edits_since_save = self.history_edges[save_loc:self.history_node_i]
@@ -431,7 +435,7 @@ class EditHistory():
                         )
                 item_count = 1
 
-        return edits_since_save_new
+        return (edits_since_save_new, never_saved)
 
     @debug_fxn
     def _can_undo(self):
