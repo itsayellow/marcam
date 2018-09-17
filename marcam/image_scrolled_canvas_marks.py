@@ -152,6 +152,9 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         else:
             # we allow click outside of image in case we drag onto image
 
+            # start following motion until on_left_up, in case this is a drag
+            self.Bind(wx.EVT_MOTION, self.on_motion)
+
             # in case we need a drag capture mouse
             self.CaptureMouse()
 
@@ -181,8 +184,7 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
                     'mark_pt_is_sel':mark_pt_is_sel
                     }
 
-    # don't debug on_motion normally, too much log msgs
-    #@debug_fxn
+    @debug_fxn_debug
     def on_motion(self, evt):
         """EVT_MOTION handler: "mouse moving".  Used esp. to track dragging
 
@@ -406,6 +408,9 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
 
         if self.HasCapture():
             self.ReleaseMouse()
+
+        # stop following motion
+        self.Unbind(wx.EVT_MOTION)
 
     @debug_fxn
     def move_mark(self, from_mark_pt, to_mark_pt, is_selected):

@@ -414,7 +414,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
         self.Bind(wx.EVT_LEFT_UP, self.on_left_up)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
-        self.Bind(wx.EVT_MOTION, self.on_motion)
 
         # determine widths of scrollbars
         self.get_scrollbar_widths()
@@ -665,6 +664,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         # we allow click outside of image in case we drag onto image
 
+        # start following motion until on_left_up, in case this is a drag
+        self.Bind(wx.EVT_MOTION, self.on_motion)
+
         # in case we need a drag capture mouse
         self.CaptureMouse()
 
@@ -682,8 +684,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 'is_toggling':is_toggling,
                 }
 
-    # don't debug on_motion normally, too much log msgs
-    #@debug_fxn
+    @debug_fxn_debug
     def on_motion(self, evt):
         """EVT_MOTION handler: "mouse moving".  Used esp. to track dragging
 
@@ -787,6 +788,9 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
         if self.HasCapture():
             self.ReleaseMouse()
+
+        # stop following motion
+        self.Unbind(wx.EVT_MOTION)
 
     @debug_fxn
     def on_right_down(self, evt):
