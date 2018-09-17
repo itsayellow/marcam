@@ -25,6 +25,7 @@ import wx
 import const
 import common
 from common import floor, ceil, clip
+import debug_timer
 import image_proc
 import longtask
 
@@ -1234,7 +1235,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         evt.Skip()
 
         if LOGGER.isEnabledFor(logging.DEBUG):
-            start_onpaint = time.time()
+            onpaint_timer = debug_timer.ElTimer()
 
         # use BufferedPaintDC or AutoBufferedPaintDC instead of PaintDC
         #   to try and avoid flicker in systems without double-buffered DC.
@@ -1262,17 +1263,17 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             upd.Next()
 
         if LOGGER.isEnabledFor(logging.DEBUG):
-            onpaint_eltime = time.time() - start_onpaint
             panel_size = self.GetSize()
-            LOGGER.info(
-                    "TIM:on_paint: %.3fs, zoom = %.3f, panel_size=(%d,%d)",
-                    onpaint_eltime,
+            onpaint_timer.log_ms(
+                    LOGGER.info,
+                    "TIM:on_paint(zoom = %.3f, panel_size=(%d,%d)): ",
                     self.zoom_val,
                     panel_size.x, panel_size.y,
                     )
             if self.paint_times is not None:
+                # self.paint_times is used for ImagePanel.on_debug_benchzoom
                 zoom_str = "%.3f"%self.zoom_val
-                self.paint_times.setdefault(zoom_str, []).append(onpaint_eltime)
+                self.paint_times.setdefault(zoom_str, []).append(onpaint_timer.eltime_s)
 
     @debug_fxn
     def _get_margin_rects(self, rect_pos_log, rect_size, dest_pos, dest_size):
@@ -1698,8 +1699,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             do_zoom_fit (bool): if True then zoom to fit image in window
         """
-        if LOGGER.isEnabledFor(logging.DEBUG):
-            staticdc_start = time.time()
+        staticdc_timer = debug_timer.ElTimer()
 
         # before calling init_image, must call new_img, or set_img_idx
         #   so this is correct
@@ -1726,9 +1726,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 white_bg=white_bg
                 )
 
-        if LOGGER.isEnabledFor(logging.DEBUG):
-            staticdc_eltime = time.time() - staticdc_start
-            LOGGER.info("TIM:Create MemoryDCs: %.3fs", staticdc_eltime)
+        staticdc_timer.log_ms(LOGGER.debug, "TIM:Create MemoryDCs: ")
 
         if do_zoom_fit:
             # set zoom_idx to scaling that will fit image in window

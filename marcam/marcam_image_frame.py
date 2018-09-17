@@ -28,16 +28,16 @@ import re
 import shutil
 import sys
 import tempfile
-import time
 
 import wx
 import wx.adv
 import wx.lib.dialogs
 
+import common
+import const
+import debug_timer
 import image_proc
 from image_scrolled_canvas_marks import ImageScrolledCanvasMarks
-import const
-import common
 import longtask
 import marcam_extra
 import mcmfile
@@ -84,14 +84,9 @@ class ImageFrame(wx.Frame):
         # FileHistory is held in MarcamApp parent
         self.file_history = self.parent.file_history
 
-        if LOGGER.isEnabledFor(logging.DEBUG):
-            start_time = time.time()
-
+        initui_timer = debug_timer.ElTimer()
         self.init_ui()
-
-        if LOGGER.isEnabledFor(logging.DEBUG):
-            eltime = time.time() - start_time
-            LOGGER.debug("init_ui elapsed time: %.3fms", eltime*1000)
+        initui_timer.log_ms(LOGGER.debug, "TIM:init_ui: ")
 
         # On init, we will always have no image, so this just disables
         #   unneeded menus
@@ -1111,7 +1106,9 @@ class ImageFrame(wx.Frame):
                 on_save_posttthread).
         """
         # use current filename/path to save
+        save_timer = debug_timer.ElTimer()
         save_ok = self.save_img_data(self.save_filepath)
+        save_timer.print_ms("on_save_thread: save: ")
         return save_ok
 
     @debug_fxn

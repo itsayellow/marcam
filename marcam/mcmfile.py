@@ -22,6 +22,7 @@ import zipfile
 import wx
 
 import common
+import debug_timer
 import image_proc
 
 

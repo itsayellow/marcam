@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import logging
-import time
 
 import wx
 import numpy as np
@@ -27,6 +26,7 @@ from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 
 import common
 import colormaps
+import debug_timer
 
 # logging stuff
 #   not necessary to make a handler since we will be child logger of marcam
@@ -240,7 +240,8 @@ def image_remap_colormap(wx_image, cmap='viridis'):
         (wx.Image): output image with false color new colormap
     """
     # numpy method is ~18x faster than pure python list comprehension method
-    start_time = time.time()
+    colorremap_timer = debug_timer.ElTimer()
+
     width = wx_image.GetWidth()
     height = wx_image.GetHeight()
     image_data = np.array(wx_image.GetData())
@@ -261,9 +262,13 @@ def image_remap_colormap(wx_image, cmap='viridis'):
         raise Exception("Internal Error: unknown colormap")
 
     wx_image = wx.Image(width, height, new_image_data)
-    LOGGER.debug("TIM:image_remap_colormap(%s), w x h = (%d x %d), time = %.fms",
-                cmap, width, height, 1000*(time.time()-start_time)
+
+    colorremap_timer.log_ms(
+            LOGGER.debug,
+            "TIM:image_remap_colormap(%s), w x h = (%d x %d), time = ",
+            cmap, width, height,
             )
+
     return wx_image
 
 #-----------------------
