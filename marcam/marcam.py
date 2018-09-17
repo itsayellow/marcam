@@ -296,7 +296,9 @@ class MarcamApp(wx.App):
         active_frame = self.file_windows.active_frame()
         if active_frame is not None:
             active_frame.on_key_down(evt)
+            # without evt.Skip() no EVT_CHAR will be produced
         else:
+            # with evt.Skip() an EVT_CHAR will also be produced
             evt.Skip()
 
     def on_key_up(self, evt):
@@ -309,7 +311,11 @@ class MarcamApp(wx.App):
         active_frame = self.file_windows.active_frame()
         if active_frame is not None:
             active_frame.on_key_up(evt)
+            # without evt.Skip() no EVT_CHAR will be produced
+            # without evt.Skip() we prevent cursor keys and page-up/page-down
+            #   from scrolling the window (we do it ourselves)
         else:
+            # with evt.Skip() an EVT_CHAR will also be produced
             evt.Skip()
 
     @debug_fxn

@@ -602,6 +602,7 @@ class ImageFrame(wx.Frame):
 
         if veto_close:
             # don't close window
+            # If we Veto, DO NOT evt.Skip().
             evt.Veto()
         else:
             # normally close window
@@ -609,7 +610,7 @@ class ImageFrame(wx.Frame):
             shutil.rmtree(self.cache_dir)
             winsize = self.GetSize()
             self.parent.config_data['winsize'] = list(winsize)
-            # continue with normal event handling
+            # continue with normal event handling (and closing of window)
             evt.Skip()
 
 
