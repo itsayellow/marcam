@@ -223,7 +223,8 @@ class ImageCache:
         """Get current Image in list of edit history of images
 
         Returns:
-            (wx.Image): Current image
+            (pathlib.Path, threading.Lock): (path to current image's cache file,
+                lock corresponding to current image cache file)
         """
         return self.img_list[self.img_idx][1]
 
