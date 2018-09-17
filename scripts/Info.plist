@@ -74,7 +74,7 @@
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>Marcam</string>
+	<string>MacOS/marcam</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Count objects in images</string>
 	<key>CFBundleIconFile</key>
