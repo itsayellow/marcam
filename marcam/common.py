@@ -173,8 +173,10 @@ def on_evt_debug(evt):
     Args:
         evt (wx.Event): any Event
     """
-    debug_print_evt_info(evt)
+    # Resume normal Event Processing after this method returns
     evt.Skip()
+
+    debug_print_evt_info(evt)
 
 # global dicts to decode numbers to constants
 EVT_TYPES = {}
