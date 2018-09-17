@@ -66,9 +66,9 @@ def repr_quick_nested(arg, max_len=60):
         return repr(arg)
 
     if isinstance(arg_new, list):
-        return [repr_quick(x) for x in arg_new]
+        return '[' + ', '.join([repr_quick(x) for x in arg_new]) + ']'
     elif isinstance(arg_new, tuple):
-        return tuple([repr_quick(x) for x in arg_new])
+        return '(' + ', '.join([repr_quick(x) for x in arg_new]) + ')'
     else:
         return repr(arg_new)
 
