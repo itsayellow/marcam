@@ -111,8 +111,15 @@ app = BUNDLE(
                 'CFBundleIdentifier':'com.itsayellow.osx.marcam',
                 'CFBundleName':'Marcam',
                 #'CFBundleSignature':'????', # Do we need this?
-                'CFBundleShortVersionString':const.VERSION_STR,
-                'CFBundleVersion':const.VERSION_STR,
+                # CFBundleShortVersionString shows up in Finder 'Info'
+                #   of app, and also in Marcam -> About version.
+                # "specifies the release version number of the bundle, which
+                #   identifies a released iteration of the app."
+                'CFBundleShortVersionString':const.VERSION_PLIST_STR,
+                # "specifies the build version number of the bundle, which
+                #   identifies an iteration (released or unreleased) of the
+                #   bundle."
+                'CFBundleVersion':const.VERSION_PLIST_STR,
                 #'NSAppleScriptEnabled':False, # by default is false
                 #'NSMainNibFile':'MainMenu', # if we had a MainMenu.nib file
                 'NSPrincipalClass':'NSApplication',
