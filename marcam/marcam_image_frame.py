@@ -1017,7 +1017,7 @@ class ImageFrame(wx.Frame):
         Returns:
             bool: Whether the image was closed.
         """
-        if not self.frame_history.is_saved():
+        if self.has_image() and not self.frame_history.is_saved():
             self.activate()
             image_to_close = self.img_path.name
 
