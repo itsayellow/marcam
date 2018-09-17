@@ -193,20 +193,19 @@ class ThreadedProgressPulseDelay(Threaded):
 
     @debug_fxn
     def delay_start(self,):
-        self.thread_lock.acquire()
-        if not self.thread_done:
-            # Disable access to parent window
-            self.win_parent.Enable(True)
+        with self.thread_lock:
+            if not self.thread_done:
+                # Disable access to parent window
+                self.win_parent.Enable(True)
 
-            self.progress_dialog = wx.ProgressDialog(
-                    progress_title,
-                    progress_msg,
-                    parent=self.win_parent
-                    )
-            # Pulse seems to only be needed to be called once!  Not multiple times
-            #   as the docs imply.
-            self.progress_dialog.Pulse()
-        self.thread_lock.release()
+                self.progress_dialog = wx.ProgressDialog(
+                        progress_title,
+                        progress_msg,
+                        parent=self.win_parent
+                        )
+                # Pulse seems to only be needed to be called once!  Not multiple times
+                #   as the docs imply.
+                self.progress_dialog.Pulse()
 
     @debug_fxn
     def long_task_postthread(self, _evt):
@@ -216,9 +215,8 @@ class ThreadedProgressPulseDelay(Threaded):
             evt (self.myLongTaskDoneEvent): obj returned from event when long task
                 thread is finished
         """
-        self.thread_lock.acquire()
-        self.thread_done = True
-        self.thread_lock.release()
+        with self.thread_lock:
+            self.thread_done = True
 
         if self.progress_dialog is None:
             # Disable access to parent window

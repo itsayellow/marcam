@@ -335,11 +335,9 @@ class ImageCache:
     def _remove_cache_file_thread(self, cache_filepath, cache_file_lock):
         # wait until we acquire lock correpsonding to cache_filepath
         #   (in case it is still being saved).
-        cache_file_lock.acquire()
-        # delete file
-        cache_filepath.unlink()
-        # release lock (may not be necessary but can't hurt)
-        cache_file_lock.release()
+        with cache_file_lock
+            # delete file
+            cache_filepath.unlink()
 
 
 # really a Scrolled Window
