@@ -1029,17 +1029,20 @@ class ImageFrame(wx.Frame):
 
             if never_saved:
                 title = "Save \"%s\" before closing?"%image_to_close
-                message = "\nImage was never saved as .mcm file."
+                message = "Image was never saved as .mcm file.\n\n"
             else:
                 title = "Save changes to \"%s\" before closing?"%image_to_close
                 message = ""
 
             if changes_list:
                 changes_str = "\n".join(["    \u2022 "+x for x in changes_list])
-                message += "\nEdits %s:\n%s\n"%(
+                message += "Edits %s:\n%s"%(
                         "made" if never_saved else "since last save",
                         changes_str
                         )
+
+            # one and only one trailing \n
+            message = message.rstrip("\n") + "\n"
 
             save_query = wx.MessageDialog(
                     self,
