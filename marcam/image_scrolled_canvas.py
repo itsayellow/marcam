@@ -224,10 +224,18 @@ class ImageCache:
         """Get current Image in list of edit history of images
 
         Returns:
-            (pathlib.Path, threading.Lock): (path to current image's cache file,
-                lock corresponding to current image cache file)
+            (bytes): PNG image data from cache
         """
-        return self.img_list[self.img_idx][1]
+        (img_cache_file, img_cache_lock) = self.img_list[self.img_idx][1]
+        readcache_timer = debug_timer.ElTimer()
+        with img_cache_lock:
+            readcache_timer.print_ms("get_current_imgcache: waiting for lock: ")
+            readcache_timer.reset()
+            with open(img_cache_file, 'rb') as img_cache_fh:
+                img_cache_data = img_cache_fh.read()
+            readcache_timer.print_ms("get_current_imgcache: reading: ")
+
+        return img_cache_data
 
     @debug_fxn
     def initialize(self, img):
@@ -1660,8 +1668,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         """Get current Image in list of edit history of images
 
         Returns:
-            (pathlib.Path, threading.Lock): (path to current image's cache file,
-                lock corresponding to current image cache file)
+            (bytes): PNG image data from cache
         """
         return self.img_cache.get_current_imgcache()
 

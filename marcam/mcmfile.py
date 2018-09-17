@@ -308,7 +308,7 @@ def save(imdata_path, img, marks):
     return returnval
 
 @debug_fxn
-def save_cached(imdata_path, img_cache_file, img_cache_lock, marks):
+def save_cached(imdata_path, img_cache_bytes, marks):
     """Save image and mark locations to .mcm zipfile
 
     Args:
@@ -325,14 +325,13 @@ def save_cached(imdata_path, img_cache_file, img_cache_lock, marks):
             'marks':marks
             }
 
-    # acquire lock to cache file to make sure it's ready to be read
-    img_cache_lock.acquire()
-
     # write new save file
     try:
         with zipfile.ZipFile(str(imdata_path), 'w') as container_fh:
+            imgsave_timer = debug_timer.ElTimer()
             # write image file data to archive
-            container_fh.write(img_cache_file, MCM_IMAGE_NAME)
+            container_fh.writestr(MCM_IMAGE_NAME, img_cache_bytes)
+            imgsave_timer.print_ms("save_cached: image writestr: ")
             # write json text file to archive
             container_fh.writestr(
                     MCM_INFO_NAME,
@@ -343,8 +342,5 @@ def save_cached(imdata_path, img_cache_file, img_cache_lock, marks):
         returnval = False
     else:
         returnval = True
-    finally:
-        # release lock to cache file to allow other operations to access
-        img_cache_lock.release()
 
     return returnval

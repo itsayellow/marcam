@@ -86,6 +86,7 @@ def debug_fxn_factory(logger_fxn):
     debug_fxn_state = DEBUG_FXN_STATE
 
     # debug decorator that announces function call/entry and lists args
+    # TODO: accept a different fxn_depth track for threads, e.g. T0-1, T0-2
     def debug_fxn(func):
         """Function decorator that prints the function name and the arguments
         used in the function call before executing the function

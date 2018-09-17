@@ -1440,7 +1440,7 @@ class ImageFrame(wx.Frame):
         """
         returnval = mcmfile.save_cached(
                 imdata_path,
-                *self.img_panel.get_current_img_cachefile(),
+                self.img_panel.get_current_img_cachefile(),
                 self.img_panel.marks
                 )
         return returnval
