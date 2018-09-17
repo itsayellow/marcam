@@ -42,8 +42,8 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
 
 # create debug function using this file's logger
-debug_fxn = common.debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE)
-debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
+debug_fxn = common.debug_fxn_factory(LOGGER.info)
+debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug)
 
 
 # constant not defined by win32pipe

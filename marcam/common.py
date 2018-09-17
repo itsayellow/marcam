@@ -72,7 +72,7 @@ def repr_quick_nested(arg, max_len=60):
     else:
         return repr(arg_new)
 
-def debug_fxn_factory(logger_fxn, debug_fxn_state=None):
+def debug_fxn_factory(logger_fxn):
     """Factory to produce debug_fxn that logs to specified logger object
 
     Args:
@@ -83,9 +83,7 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=None):
             using the same variable from the same module as argument to all.
             (typically common.DEBUG_FXN_STATE)
     """
-    # default
-    if debug_fxn_state is None:
-        debug_fxn_state = DEBUG_FXN_STATE
+    debug_fxn_state = DEBUG_FXN_STATE
 
     # debug decorator that announces function call/entry and lists args
     def debug_fxn(func):
@@ -117,8 +115,8 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=None):
 
 
 # create debug function using this file's logger
-debug_fxn = debug_fxn_factory(LOGGER.info, DEBUG_FXN_STATE)
-debug_fxn_debug = debug_fxn_factory(LOGGER.debug, DEBUG_FXN_STATE)
+debug_fxn = debug_fxn_factory(LOGGER.info)
+debug_fxn_debug = debug_fxn_factory(LOGGER.debug)
 
 
 def floor(num):
