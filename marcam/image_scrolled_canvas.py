@@ -636,9 +636,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.MouseEvent): obj returned from mouse event
         """
+        # Resume normal Event Processing after this method returns
+        # Continue processing click, for example shifting focus to app.
+        evt.Skip()
+
         # return early if no image
         if self.has_no_image():
-            evt.Skip()
             return
 
         mods = evt.GetModifiers()
@@ -678,9 +681,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 'is_appending':is_appending,
                 'is_toggling':is_toggling,
                 }
-
-        # continue processing click, for example shifting focus to app
-        evt.Skip()
 
     # don't debug on_motion normally, too much log msgs
     #@debug_fxn
@@ -746,9 +746,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.MouseEvent): obj returned from mouse event
         """
+        # Resume normal Event Processing after this method returns
+        # Continue processing click, for example shifting focus to app.
+        evt.Skip()
+
         # return early if no image
         if self.has_no_image():
-            evt.Skip()
             return
 
         if self.is_dragging:
@@ -783,9 +786,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         if self.HasCapture():
             self.ReleaseMouse()
 
-        # continue processing click, for example shifting focus to app
-        evt.Skip()
-
     @debug_fxn
     def on_right_down(self, evt):
         """EVT_RIGHT_DOWN handler: mouse right-clicks
@@ -793,9 +793,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             evt (wx.MouseEvent): obj returned from mouse event
         """
+        # Resume normal Event Processing after this method returns
+        # Continue processing click, for example shifting focus to app.
+        evt.Skip()
+
         # return early if no image
         if self.has_no_image():
-            evt.Skip()
             return
 
         # point coordinate returned seems:
@@ -813,9 +816,6 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         #self.img_at_wincenter = RealPoint(img_x, img_y)
         #self.scroll_to_img_at_wincenter()
         self.panimate(img_x, img_y, 1250)
-
-        # continue processing click, for example shifting focus to app
-        evt.Skip()
 
     @debug_fxn
     def panimate(self, img_x_end, img_y_end, max_speed):

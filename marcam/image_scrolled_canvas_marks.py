@@ -105,9 +105,12 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         Args:
             evt (wx.MouseEvent): obj returned from mouse event
         """
+        # Resume normal Event Processing after this method returns
+        # Continue processing click, for example shifting focus to app.
+        evt.Skip()
+
         # return early if no image
         if self.has_no_image():
-            evt.Skip()
             return
 
         mods = evt.GetModifiers()
@@ -177,9 +180,6 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
                     'mark_pt':sel_pt,
                     'mark_pt_is_sel':mark_pt_is_sel
                     }
-
-        # continue processing click, for example shifting focus to app
-        evt.Skip()
 
     # don't debug on_motion normally, too much log msgs
     #@debug_fxn
@@ -308,10 +308,13 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         Args:
             evt (wx.MouseEvent): obj returned from mouse event
         """
+        # Resume normal Event Processing after this method returns
+        # Continue processing click, for example shifting focus to app.
+        evt.Skip()
+
         # return early if no image or if in Mark Mode
         #   (Mark mode does everything in on_left_down, no drags)
         if self.has_no_image() or self.mark_mode:
-            evt.Skip()
             return
 
         evt_pos = evt.GetPosition()
@@ -401,9 +404,6 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
 
         if self.HasCapture():
             self.ReleaseMouse()
-
-        # continue processing click, for example shifting focus to app
-        evt.Skip()
 
     @debug_fxn
     def move_mark(self, from_mark_pt, to_mark_pt, is_selected):
