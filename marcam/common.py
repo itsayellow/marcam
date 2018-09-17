@@ -32,6 +32,46 @@ LOGGER.addHandler(logging.NullHandler())
 DEBUG_FXN_STATE = [0]
 
 
+def repr_quick(arg, max_len=60):
+    """Quick version of repr (abridges large-sized arguments)
+
+    Args:
+        arg (any): any data variable
+        max_len (int): maximum length of iterable arg to show with repr
+
+    Outputs:
+        str: repr(arg[:max_len])
+    """
+    try:
+        return repr(arg[:max_len])
+    except TypeError:
+        return repr(arg)
+
+def repr_quick_nested(arg, max_len=60):
+    """Quick hierarchical version of repr (abridges large-sized arguments)
+
+    The _nested version also applies repr_quick to every item of a list or
+    tuple arg.  (Only looks down one level of hierarchy.)
+
+    Args:
+        arg (any): any data variable
+        max_len (int): maximum length of iterable arg to show with repr
+
+    Outputs:
+        str: repr(arg[:max_len])
+    """
+    try:
+        arg_new = arg[:max_len]
+    except TypeError:
+        return repr(arg)
+
+    if isinstance(arg_new, list):
+        return [repr_quick(x) for x in arg_new]
+    elif isinstance(arg_new, tuple):
+        return tuple([repr_quick(x) for x in arg_new])
+    else:
+        return repr(arg_new)
+
 def debug_fxn_factory(logger_fxn, debug_fxn_state=None):
     """Factory to produce debug_fxn that logs to specified logger object
 
@@ -54,18 +94,20 @@ def debug_fxn_factory(logger_fxn, debug_fxn_state=None):
         """
         def func_wrapper(*args, **kwargs):
             debug_fxn_state[0] += 1
-            log_string = "FXN%d: %s.%s(\n"%(debug_fxn_state[0], func.__module__, func.__qualname__)
+            fxn_depth = debug_fxn_state[0]
+            log_string = "FXN%d: %s.%s(\n"%(fxn_depth, func.__module__, func.__qualname__)
+
             for arg in args:
-                log_string += "    " + repr(arg) + ",\n"
+                log_string += "    " + repr_quick(arg) + ",\n"
             for key in kwargs:
-                log_string += "    " + key + "=" + repr(kwargs[key]) + ",\n"
+                log_string += "    " + key + "=" + repr_quick(kwargs[key]) + ",\n"
             log_string += "    )"
             logger_fxn(log_string)
             return_vals = func(*args, **kwargs)
             logger_fxn(
                     "<--FXN%d: %s.%s\n   RETURNS: %s",
-                    debug_fxn_state[0], func.__module__, func.__qualname__,
-                    repr(return_vals)
+                    fxn_depth, func.__module__, func.__qualname__,
+                    repr_quick_nested(return_vals)
                     )
             debug_fxn_state[0] -= 1
             return return_vals
