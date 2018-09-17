@@ -1240,10 +1240,22 @@ class ImageFrame(wx.Frame):
                 return     # the user changed their mind
 
             # save the current contents in the file
-            pathname = file_dialog.GetPath()
-            # saves from memorydc
-            export_image = self.img_panel.export_to_image_marks()
-            export_image.SaveFile(pathname)
+            pathname = pathlib.Path(file_dialog.GetPath())
+
+            longtask.ThreadedProgressPulse(
+                    thread_fxn=self.on_export_image_thread,
+                    thread_fxn_args=(pathname,),
+                    post_thread_fxn=None,
+                    progress_title="Saving Image",
+                    progress_msg="Exporting %s..."%pathname.name,
+                    parent=self
+                    )
+
+    @debug_fxn
+    def on_export_image_thread(self, pathname):
+        # saves from memorydc
+        export_image = self.img_panel.export_to_image_marks()
+        export_image.SaveFile(str(pathname))
 
     @debug_fxn
     def on_undo(self, _evt):
