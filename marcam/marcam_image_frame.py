@@ -54,6 +54,7 @@ debug_fxn_debug = common.debug_fxn_factory(LOGGER.debug, common.DEBUG_FXN_STATE)
 class ImageFrame(wx.Frame):
     """Application Level Frame, one for each open image file.
     """
+    @debug_fxn
     def __init__(self, parent, **kwargs):
         # no parent window, so use None as only *arg
         super().__init__(None, **kwargs)
@@ -85,7 +86,9 @@ class ImageFrame(wx.Frame):
 
         if LOGGER.isEnabledFor(logging.DEBUG):
             start_time = time.time()
+
         self.init_ui()
+
         if LOGGER.isEnabledFor(logging.DEBUG):
             eltime = time.time() - start_time
             LOGGER.debug("init_ui elapsed time: %.3fms", eltime*1000)
@@ -896,6 +899,7 @@ class ImageFrame(wx.Frame):
         img_path = pathlib.Path(img_path)
 
         if img_path.suffix == ".mcm":
+            # load_mcmfile_from_path also calls self.frame_history.save_notify()
             img_ok = self.load_mcmfile_from_path(img_path)
         else:
             # image or *.1sc file
