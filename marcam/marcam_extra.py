@@ -683,16 +683,11 @@ class ImageFalseColorDialog(wx.Dialog):
 
         self.SetSizer(sizer)
         sizer.Fit(self)
-        #self.Bind(wx.EVT_SLIDER, self.on_evt_slider)
 
     def get_colormap(self):
         """Return lower-case canonical colormap string that was selected.
         """
         return self.cmap_choices[self.colormap_choice.GetSelection()].lower()
-
-    #def on_evt_slider(self, evt):
-    #    slider_val = self.slider.GetValue()
-    #    self.value_display.SetLabel("%d"%slider_val)
 
 
 class HelpFrame(wx.Frame):
