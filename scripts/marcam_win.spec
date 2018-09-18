@@ -80,9 +80,15 @@ exe = EXE(
         a.scripts,
         exclude_binaries=True,
         name='marcam',
+        # If True, Provide assistance with debugging a frozen application.
         debug=False,
+        # If not False, Apply a symbol-table strip to the executable and shared
+        #   libs (not recommended for Windows).
         strip=False,
+        # "UPX compresses executable files and libraries, making them smaller,
+        #   sometimes much smaller."
         upx=True,
+        # If True, Open a console window for standard i/o.
         console=False,
         # relative to execute dir (./)
         icon=abspath('marcam/media/marcam.ico')
