@@ -29,7 +29,7 @@ LOGGER.addHandler(logging.NullHandler())
 
 # Stores global depth for debug_fxn's in all modules
 #   (e.g. debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE))
-DEBUG_FXN_STATE = [0]
+DEBUG_FXN_STATE = {'MAIN':0}
 
 
 def repr_quick(arg, max_len=60):
@@ -78,12 +78,10 @@ def debug_fxn_factory(logger_fxn):
     Args:
         logger_fxn (logging.Logger.{info,debug,warning,error): Logger function
             send info msgs to.  Typically logging.Logger.info
-        debug_fxn_state (list of one integer): typically [0] at initialization,
-            this is a depth state that can be shared by all modules by
-            using the same variable from the same module as argument to all.
-            (typically common.DEBUG_FXN_STATE)
     """
-    debug_fxn_state = DEBUG_FXN_STATE
+    # Use module-level DEBUG_FXN_STATE, so state is shared among all modules
+    #   that instance this module, and not local to every
+    #   instanced debug_fxn_factory.
 
     # debug decorator that announces function call/entry and lists args
     # TODO: accept a different fxn_depth track for threads, e.g. T0-1, T0-2
@@ -92,8 +90,8 @@ def debug_fxn_factory(logger_fxn):
         used in the function call before executing the function
         """
         def func_wrapper(*args, **kwargs):
-            debug_fxn_state[0] += 1
-            fxn_depth = debug_fxn_state[0]
+            DEBUG_FXN_STATE['MAIN'] += 1
+            fxn_depth = DEBUG_FXN_STATE['MAIN']
             log_string = "FXN%d: %s.%s(\n"%(fxn_depth, func.__module__, func.__qualname__)
 
             for arg in args:
@@ -108,7 +106,7 @@ def debug_fxn_factory(logger_fxn):
                     fxn_depth, func.__module__, func.__qualname__,
                     repr_quick_nested(return_vals)
                     )
-            debug_fxn_state[0] -= 1
+            DEBUG_FXN_STATE['MAIN'] -= 1
             return return_vals
         return func_wrapper
 
