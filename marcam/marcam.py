@@ -98,7 +98,6 @@ def can_read_image(image_path):
 
     return img_ok
 
-@debug_fxn
 def logging_setup(log_level=logging.DEBUG):
     """Setup logging for all logged modules
 
@@ -224,6 +223,7 @@ class MarcamApp(wx.App):
             win_file_thread.start()
             self.Bind(EVT_WIN_FILE, self.on_evt_win_file)
 
+    @debug_fxn
     def set_last_autocontrast_level(self, level=0):
         """Set "last autocontrast" menuitem in all windows with given level
 
@@ -241,6 +241,7 @@ class MarcamApp(wx.App):
                         )
                     )
 
+    @debug_fxn
     def get_last_autocontrast_level(self):
         """Get "last autocontrast" level used in any window for Auto-Contrast
             image operation.
@@ -250,6 +251,7 @@ class MarcamApp(wx.App):
         """
         return self.last_autocontrast_level
 
+    @debug_fxn
     def set_last_falsecolor(self, cmap="viridis"):
         """Set "last false color" menuitem in all windows with given colormap
 
@@ -267,6 +269,7 @@ class MarcamApp(wx.App):
                         )
                     )
 
+    @debug_fxn
     def get_last_falsecolor(self):
         """Get "last false color" colormap used in any window for False Color
             image operation.
@@ -276,6 +279,7 @@ class MarcamApp(wx.App):
         """
         return self.last_falsecolor
 
+    @debug_fxn
     def on_evt_win_file(self, evt):
         """Event handler for our custom Event receiving Windows file open
             events from other application instances.
@@ -286,6 +290,7 @@ class MarcamApp(wx.App):
         LOGGER.info("Event received: %s", evt.open_filename)
         self.open_file(evt.open_filename)
 
+    @debug_fxn
     def on_key_down(self, evt):
         """Event handler for any key down event in the Application. Calls
         on_key_down of the frame that is active.
@@ -301,6 +306,7 @@ class MarcamApp(wx.App):
             # with evt.Skip() an EVT_CHAR will also be produced
             evt.Skip()
 
+    @debug_fxn
     def on_key_up(self, evt):
         """Event handler for any key up event in the Application.  Calls
         on_key_up of the frame that is active.
@@ -599,6 +605,7 @@ class MarcamApp(wx.App):
                 self.config_data['debug']
                 )
 
+    @debug_fxn
     def OnExit(self):
         """Overloaded function that is called before App finally exits
 
@@ -615,6 +622,7 @@ class MarcamApp(wx.App):
         return super().OnExit()
 
 
+@debug_fxn
 def process_command_line(argv):
     """Process command line invocation arguments and switches.
 
@@ -649,6 +657,7 @@ def process_command_line(argv):
 
     return args
 
+@debug_fxn
 def log_debug_main():
     """Log basic system information
     """
@@ -671,6 +680,7 @@ def log_debug_main():
     LOGGER.info(log_string)
     LOGGER.info("sys.argv:%s", repr(sys.argv))
 
+@debug_fxn
 def another_instance_running(srcfile_args):
     """Check if another instance of app is running, process open file arguments
         on Windows if they are present.
@@ -709,6 +719,7 @@ def another_instance_running(srcfile_args):
 
     return another_inst
 
+@debug_fxn
 def win_file_receiver(wx_app):
     """
     Only to be used on Windows
@@ -720,6 +731,7 @@ def win_file_receiver(wx_app):
     # for as long as this thread lives, wait for clients to write to pipe
     winpipe.server_pipe_read(WIN_FILE_PIPE_NAME, string_read_fxn)
 
+@debug_fxn
 def sanity_checks():
     """Things to check before we startup wx.App
 

@@ -342,6 +342,7 @@ class ImageCache:
         img.SaveFile(str(cache_filepath), wx.BITMAP_TYPE_PNG)
         cache_file_lock.release()
 
+    @debug_fxn
     def _remove_cache_file_thread(self, cache_filepath, cache_file_lock):
         # wait until we acquire lock correpsonding to cache_filepath
         #   (in case it is still being saved).
@@ -2090,6 +2091,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
                 parent=self.parent # can be None, a Frame, or another Dialog
                 )
 
+    @debug_fxn
     def image_proc_thread(self, proc_fxn, wx_image_orig, description, *args):
         """Thread part of all image processing threaded tasks
 
