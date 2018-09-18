@@ -52,7 +52,10 @@ class MarcamRepr(reprlib.Repr):
     def repr_bytes(self, x, level):
         """For bytes object type
 
-        Using repr_str from python source as a template
+        Stock method used for bytes had first step 'repr(x)' which was
+            way too slow.
+
+        Using repr_str from python source as a template.
         """
         s = builtins.repr(x[:self.maxbytes])
         if len(s) > self.maxbytes:
