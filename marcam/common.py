@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import builtins # for MarcamRepr
 import logging
+import reprlib
 import threading
 
 import wx
@@ -32,46 +34,37 @@ LOGGER.addHandler(logging.NullHandler())
 #   (e.g. debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE))
 DEBUG_FXN_STATE = {}
 
+class MarcamRepr(reprlib.Repr):
+    def __init__(self):
+        super().__init__()
+        # Defaults of reprlib.Repr
+        #self.maxlevel = 6      self.maxtuple = 6       self.maxlist = 6
+        #self.maxarray = 5      self.maxdict = 4        self.maxset = 6
+        #self.maxfrozenset = 6  self.maxdeque = 6       self.maxstring = 30
+        #self.maxlong = 40      self.maxother = 30
+        self.maxtuple = 12
+        self.maxlist = 12
+        self.maxdict = 12
+        self.maxstring = 80
+        self.maxother = 80
+        self.maxbytes = 80
 
-def repr_quick(arg, max_len=60):
-    """Quick version of repr (abridges large-sized arguments)
+    def repr_bytes(self, x, level):
+        """For bytes object type
 
-    Args:
-        arg (any): any data variable
-        max_len (int): maximum length of iterable arg to show with repr
+        Using repr_str from python source as a template
+        """
+        s = builtins.repr(x[:self.maxbytes])
+        if len(s) > self.maxbytes:
+            i = max(0, (self.maxbytes-3)//2)
+            j = max(0, self.maxbytes-3-i)
+            s = builtins.repr(x[:i] + x[len(x)-j:])
+            s = s[:i] + '...' + s[len(s)-j:]
+        return s
 
-    Outputs:
-        str: repr(arg[:max_len])
-    """
-    try:
-        return repr(arg[:max_len])
-    except TypeError:
-        return repr(arg)
 
-def repr_quick_nested(arg, max_len=60):
-    """Quick hierarchical version of repr (abridges large-sized arguments)
+q_repr = MarcamRepr()
 
-    The _nested version also applies repr_quick to every item of a list or
-    tuple arg.  (Only looks down one level of hierarchy.)
-
-    Args:
-        arg (any): any data variable
-        max_len (int): maximum length of iterable arg to show with repr
-
-    Outputs:
-        str: repr(arg[:max_len])
-    """
-    try:
-        arg_new = arg[:max_len]
-    except TypeError:
-        return repr(arg)
-
-    if isinstance(arg_new, list):
-        return '[' + ', '.join([repr_quick(x) for x in arg_new]) + ']'
-    elif isinstance(arg_new, tuple):
-        return '(' + ', '.join([repr_quick(x) for x in arg_new]) + ')'
-    else:
-        return repr(arg_new)
 
 def debug_fxn_factory(logger_fxn):
     """Factory to produce debug_fxn that logs to specified logger object
@@ -99,9 +92,9 @@ def debug_fxn_factory(logger_fxn):
                     )
 
             for arg in args:
-                log_string += "    " + repr_quick(arg) + ",\n"
+                log_string += "    " + q_repr.repr(arg) + ",\n"
             for key in kwargs:
-                log_string += "    " + key + "=" + repr_quick(kwargs[key]) + ",\n"
+                log_string += "    " + key + "=" + q_repr.repr(kwargs[key]) + ",\n"
             log_string += "    )"
             logger_fxn(log_string)
             return_vals = func(*args, **kwargs)
@@ -109,7 +102,7 @@ def debug_fxn_factory(logger_fxn):
                     "<--FXN%s%d: %s.%s\n   RETURNS: %s",
                     "" if thread_name=='MainThread' else "%s."%thread_name,
                     fxn_depth, func.__module__, func.__qualname__,
-                    repr_quick_nested(return_vals)
+                    q_repr.repr(return_vals)
                     )
             DEBUG_FXN_STATE[thread_name] -= 1
             return return_vals
