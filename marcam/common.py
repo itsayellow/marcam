@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import logging
+import threading
 
 import wx
 
@@ -29,7 +30,7 @@ LOGGER.addHandler(logging.NullHandler())
 
 # Stores global depth for debug_fxn's in all modules
 #   (e.g. debug_fxn_factory(LOGGER.info, common.DEBUG_FXN_STATE))
-DEBUG_FXN_STATE = {'MAIN':0}
+DEBUG_FXN_STATE = {}
 
 
 def repr_quick(arg, max_len=60):
@@ -84,15 +85,18 @@ def debug_fxn_factory(logger_fxn):
     #   instanced debug_fxn_factory.
 
     # debug decorator that announces function call/entry and lists args
-    # TODO: accept a different fxn_depth track for threads, e.g. T0-1, T0-2
     def debug_fxn(func):
         """Function decorator that prints the function name and the arguments
         used in the function call before executing the function
         """
         def func_wrapper(*args, **kwargs):
-            DEBUG_FXN_STATE['MAIN'] += 1
-            fxn_depth = DEBUG_FXN_STATE['MAIN']
-            log_string = "FXN%d: %s.%s(\n"%(fxn_depth, func.__module__, func.__qualname__)
+            thread_name = threading.current_thread().name
+            DEBUG_FXN_STATE[thread_name] = DEBUG_FXN_STATE.setdefault(thread_name, 0) + 1
+            fxn_depth = DEBUG_FXN_STATE[thread_name]
+            log_string = "FXN%s%d: %s.%s(\n"%(
+                    "" if thread_name=='MainThread' else "%s."%thread_name,
+                    fxn_depth, func.__module__, func.__qualname__
+                    )
 
             for arg in args:
                 log_string += "    " + repr_quick(arg) + ",\n"
@@ -102,11 +106,12 @@ def debug_fxn_factory(logger_fxn):
             logger_fxn(log_string)
             return_vals = func(*args, **kwargs)
             logger_fxn(
-                    "<--FXN%d: %s.%s\n   RETURNS: %s",
+                    "<--FXN%s%d: %s.%s\n   RETURNS: %s",
+                    "" if thread_name=='MainThread' else "%s."%thread_name,
                     fxn_depth, func.__module__, func.__qualname__,
                     repr_quick_nested(return_vals)
                     )
-            DEBUG_FXN_STATE['MAIN'] -= 1
+            DEBUG_FXN_STATE[thread_name] -= 1
             return return_vals
         return func_wrapper
 
