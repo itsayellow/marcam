@@ -56,8 +56,8 @@ a = Analysis(
         # relative to dir of this file
         # Use computed absolute paths so we don't have to care.
         [abspath('marcam/marcam.py')],
-        # relative to execute dir (./)
-        pathex=[abspath('./marcam'), abspath('.')],
+        # "." dir is already added.  relative to execute dir (./)
+        pathex=[abspath('./marcam')],
         binaries=[],
         datas=marcam_datas,
         hiddenimports=[],
