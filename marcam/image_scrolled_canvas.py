@@ -285,6 +285,13 @@ class ImageCache:
         return self.img_idx
 
     @debug_fxn
+    def shutdown(self):
+        for thread_obj in self.active_threads:
+            thread_obj.abort_event.set()
+        # TODO: should we also delete all files in cache here with a new
+        #   thread?  Or leave that to grandparent?
+
+    @debug_fxn
     def _remove_indicies(self, start_idx=0):
         """Remove all list items in self.img_list, starting with start_idx
             to and including the end of the self.img_list.  Remove all cache
@@ -447,6 +454,12 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # Update immediately repaints invalidated areas
         #   without this, repainting will happen next iteration of event loop
         self.Update()
+
+    @debug_fxn
+    def Close(self):
+        # Shut down ImageCache.  In particular abort any running threads.
+        self.img_cache.shutdown()
+        super().Close()
 
     @debug_fxn
     def get_scrollbar_widths(self):

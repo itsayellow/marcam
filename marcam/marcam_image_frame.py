@@ -608,9 +608,13 @@ class ImageFrame(wx.Frame):
             shutil.rmtree(self.cache_dir)
             winsize = self.GetSize()
             self.parent.config_data['winsize'] = list(winsize)
+            # close image panel nicely
+            # (TODO: is there an automatic way image_panel knows it's closed?
+            #   it doesn't seem to automatically have Close() or Destroy()
+            #   called without explicitly doing it here.)
+            self.img_panel.Close()
             # continue with normal event handling (and closing of window)
             evt.Skip()
-
 
     @debug_fxn
     def on_close(self, _evt):
