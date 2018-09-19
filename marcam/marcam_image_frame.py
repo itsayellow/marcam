@@ -603,9 +603,8 @@ class ImageFrame(wx.Frame):
             # If we Veto, DO NOT evt.Skip().
             evt.Veto()
         else:
-            # normally close window
-            # remove cache dir for this window
-            shutil.rmtree(self.cache_dir)
+            # Normally close window.
+
             winsize = self.GetSize()
             self.parent.config_data['winsize'] = list(winsize)
             # close image panel nicely
@@ -613,6 +612,8 @@ class ImageFrame(wx.Frame):
             #   it doesn't seem to automatically have Close() or Destroy()
             #   called without explicitly doing it here.)
             self.img_panel.Close()
+            # remove cache dir for this window
+            shutil.rmtree(self.cache_dir)
             # continue with normal event handling (and closing of window)
             evt.Skip()
 
