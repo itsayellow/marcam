@@ -184,6 +184,8 @@ class RealPoint(wx.RealPoint):
         return "RealPoint(" + repr(self.x) + ", " + repr(self.y) + ")"
 
 
+# TODO: It's possible cache file creation could be faster with multiprocessing
+#   instead of threading
 class ImageCache:
     """An object that keeps track of memory- and file-cached images in
         the edit history
