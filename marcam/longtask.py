@@ -55,7 +55,11 @@ class Threaded:
             parent (wx.Window): Window that handles events and is parent
                 of ProgressDialog
         """
-
+        self.task_thread = None
+        # abort_event may not really need to be an Event since we never wait
+        #   for it and setting a regular variable to a bool should be atomic.
+        #   But it's safer to just make it an Event.
+        self.abort_event = threading.Event()
         self.thread_fxn = thread_fxn
         self.thread_fxn_args = thread_fxn_args
         self.post_thread_fxn = post_thread_fxn
@@ -74,14 +78,14 @@ class Threaded:
         self.win_parent.Bind(evt_long_task_done, self.long_task_postthread)
 
         # build thread
-        task_thread = threading.Thread(
+        self.task_thread = threading.Thread(
                 target=self.long_task_thread,
                 )
         # Start task thread computing.
         # Do this last, so that if it ends super fast we are not trying to
         #   still do things with self.progress_dialog after long_task_postthread
         #   Destroys the dialog.
-        task_thread.start()
+        self.task_thread.start()
 
     @debug_fxn
     def long_task_thread(self):
@@ -102,7 +106,8 @@ class Threaded:
                 # if returnvals are single value, wrap in tuple
                 self.thread_fxn_returnvals = (thread_fxn_returnvals,)
 
-        wx.PostEvent(self.win_parent, self.myLongTaskDoneEvent())
+        if not self.abort_event.is_set():
+            wx.PostEvent(self.win_parent, self.myLongTaskDoneEvent())
 
     @debug_fxn
     def long_task_postthread(self, _evt):
