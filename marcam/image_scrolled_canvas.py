@@ -199,6 +199,7 @@ class ImageCache:
         self.cache_unique_id = 0
         self.img_list = None
         self.img_idx = None
+        self.active_threads = []
         if img is not None:
             self.initialize(img)
 
@@ -303,9 +304,10 @@ class ImageCache:
             remove_cache_file_task = longtask.Threaded(
                     self._remove_cache_file_thread,
                     (cache_filepath, cache_file_lock),
-                    None,
+                    self._thread_done,
                     self.parent
                     )
+            self.active_threads.append(create_cache_file_task)
             # TODO: if remove_cache_file_task goes out of scope here, is it
             #   deleted??  Does that make things break?
 
@@ -329,9 +331,11 @@ class ImageCache:
         create_cache_file_task = longtask.Threaded(
                 self._create_cache_file_thread,
                 (img, cache_filepath, cache_file_lock),
-                None,
+                self._thread_done,
                 self.parent
                 )
+        self.active_threads.append(create_cache_file_task)
+
         # TODO: if create_cache_file_task goes out of scope here, is it
         #   deleted??  Does that make things break?
 
@@ -349,6 +353,14 @@ class ImageCache:
         with cache_file_lock:
             # delete file
             cache_filepath.unlink()
+
+    @debug_fxn
+    def _thread_done(self):
+        """Remove finished thread from self.active_threads.
+        """
+        LOGGER.debug(repr(self.active_threads))
+        self.active_threads = [x for x in self.active_threads if x.task_thread.is_alive()]
+        LOGGER.debug(repr(self.active_threads))
 
 
 # really a Scrolled Window
