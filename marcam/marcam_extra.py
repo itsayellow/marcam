@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GUI for displaying an image and counting cells
 
-
+import collections
 import logging
 import pathlib
 
@@ -716,8 +715,7 @@ class FrameList():
     @debug_fxn
     def __init__(self):
         # index dict by ID, as we use this most often
-        self.frame_dict = {}
-        self.win_menu_list = []
+        self.frame_dict = collections.OrderedDict()
         self.is_handling_window_menu = False
 
     @debug_fxn
@@ -816,7 +814,6 @@ class FrameList():
         self.frame_dict[frame_to_append.GetId()]['frame'] = frame_to_append
         # if wxpython ever automatically manages the Window menu on Mac, the
         #   following will be unnecessary
-        self.win_menu_list.append(frame_to_append.GetId())
         self.update_window_menu()
 
     @debug_fxn
@@ -835,7 +832,7 @@ class FrameList():
             this_frame = self.frame_dict[frame_id]['frame']
             win_menu = self.frame_dict[frame_id]['menu']
             win_menu_origcount = self.frame_dict[frame_id]['menu_origcount']
-            for (i, menuitem_frame_id) in enumerate(self.win_menu_list):
+            for (i, menuitem_frame_id) in enumerate(self.frame_dict.keys()):
                 menuitem_frame = self.frame_dict[menuitem_frame_id]['frame']
                 menuitem_frame_title = menuitem_frame.GetTitle()
                 if win_menu_origcount + i < win_menu.GetMenuItemCount():
@@ -879,6 +876,7 @@ class FrameList():
         """Remove the frame specified by frame ID from the FrameList
         """
         self.frame_dict.pop(frame_id_to_remove)
+        self.update_window_menu()
 
     @debug_fxn
     def register_window_menu(self, frame_inst, window_menu):
