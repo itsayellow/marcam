@@ -309,7 +309,7 @@ class ImageCache:
                     self._thread_done,
                     self.parent
                     )
-            self.active_threads.append(create_cache_file_task)
+            self.active_threads.append(remove_cache_file_task)
             # TODO: if remove_cache_file_task goes out of scope here, is it
             #   deleted??  Does that make things break?
 
