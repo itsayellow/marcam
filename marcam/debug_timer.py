@@ -20,42 +20,54 @@ import time
 
 class ElTimer:
     def __init__(self):
+        self.has_thread_time = hasattr(time, 'thread_time')
         self.reset()
 
     def reset(self):
         self.time_start = time.time()
-        self.thread_time_start = time.thread_time()
+        if self.has_thread_time:
+            self.thread_time_start = time.thread_time()
 
     def eltime_s(self):
         return (time.time() - self.time_start)
 
     def thread_eltime_s(self):
-        return (time.thread_time() - self.thread_time_start)
+        if self.has_thread_time:
+            return (time.thread_time() - self.thread_time_start)
+        else:
+            return 0
 
     def eltime_ms(self):
         return 1000 * (time.time() - self.time_start)
 
     def thread_eltime_ms(self):
-        return 1000 * (time.thread_time() - self.thread_time_start)
+        if self.has_thread_time:
+            return 1000 * (time.thread_time() - self.thread_time_start)
+        else:
+            return 0
 
     def log_ms(self, log_fxn, message, *args):
         message = message + "%.1fms"%(self.eltime_ms())
-        message = message + " (thread: %.1fms)"%(self.thread_eltime_ms())
+        if self.has_thread_time:
+            message = message + " (thread: %.1fms)"%(self.thread_eltime_ms())
         log_fxn(message, *args)
 
     def print_ms(self, message, *args):
         message = message + "%.1fms"%(self.eltime_ms())
-        message = message + " (thread: %.1fms)"%(self.thread_eltime_ms())
+        if self.has_thread_time:
+            message = message + " (thread: %.1fms)"%(self.thread_eltime_ms())
         print(message, *args)
 
     def log_s(self, log_fxn, message, *args):
         message = message + "%.1fs"%(self.eltime_s())
-        message = message + " (thread: %.1fs)"%(self.thread_eltime_s())
+        if self.has_thread_time:
+            message = message + " (thread: %.1fs)"%(self.thread_eltime_s())
         log_fxn(message, *args)
 
     def print_s(self, message, *args):
         message = message + "%.1fs"%(self.eltime_s())
-        message = message + " (thread: %.1fs)"%(self.thread_eltime_s())
+        if self.has_thread_time:
+            message = message + " (thread: %.1fs)"%(self.thread_eltime_s())
         print(message, *args)
 
     def log_thread_ms(self, log_fxn, message, *args):
