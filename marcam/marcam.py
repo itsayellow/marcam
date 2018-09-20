@@ -800,6 +800,8 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    # bare except below is catch-all
+    # pylint: disable=bare-except
     try:
         STATUS = main(sys.argv)
     except KeyboardInterrupt:
