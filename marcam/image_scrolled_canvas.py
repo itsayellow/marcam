@@ -2001,10 +2001,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Returns:
             (wx.Image): image output
         """
-        dc_source = self.img_dc
-
         # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
-        size = dc_source.GetSize()
+        size = self.img_dc.GetSize()
 
         # Create a Bitmap that will later on hold the screenshot image
         # Note that the Bitmap must have a size big enough to hold the screenshot
@@ -2017,21 +2015,25 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         # all drawing action on the memory DC will go to the Bitmap now
         mem_dc = wx.MemoryDC(bmp)
 
-        # Blit (in this case copy) the actual screen on the memory DC
-        # and thus the Bitmap
-        mem_dc.Blit(0, 0,    # dest position
-            size.width, size.height, # src, dest size
-            dc_source,      # From where do we copy?
-            0, 0            # src position
-            )
+        # draw image to mem_dc
+        self.export_draw_to_memdc(mem_dc, size.width, size.height)
 
         # Select the Bitmap out of the memory DC by selecting a new
         # uninitialized Bitmap
         mem_dc.SelectObject(wx.NullBitmap)
 
         img = bmp.ConvertToImage()
-        #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
         return img
+
+    @debug_fxn
+    def export_draw_to_memdc(self, mem_dc, width, height):
+        # Blit (in this case copy) the actual screen on the memory DC
+        # and thus the Bitmap
+        mem_dc.Blit(0, 0,   # dest position
+            width, height,  # src, dest size
+            self.img_dc,    # From where do we copy?
+            0, 0            # src position
+            )
 
     @debug_fxn
     def image_invert(self):

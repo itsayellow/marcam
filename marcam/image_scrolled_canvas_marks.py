@@ -760,35 +760,12 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
                             )
 
     @debug_fxn
-    def export_to_image_marks(self):
-        """Export current Device Context with marks to wx.Image
-
-        Resulting Image looks as though it were a Window drawn at 100%
-
-        Returns:
-            (wx.Image): image output
-        """
-        dc_source = self.img_dc
-
-        # based largely on code posted to wxpython-users by Andrea Gavana 2006-11-08
-        size = dc_source.GetSize()
-
-        # Create a Bitmap that will later on hold the screenshot image
-        # Note that the Bitmap must have a size big enough to hold the screenshot
-        # -1 means using the current default colour depth
-        bmp = wx.Bitmap(size.width, size.height)
-
-        # Create a memory DC that will be used for actually taking the screenshot
-        #   use bmp as SelectObject
-        # Tell the memory DC to use our Bitmap
-        # all drawing action on the memory DC will go to the Bitmap now
-        mem_dc = wx.MemoryDC(bmp)
-
+    def export_draw_to_memdc(self, mem_dc, width, height):
         # Blit (in this case copy) the actual screen on the memory DC
         # and thus the Bitmap
-        mem_dc.Blit(0, 0,    # dest position
-            size.width, size.height, # src, dest size
-            dc_source,      # From where do we copy?
+        mem_dc.Blit(0, 0,   # dest position
+            width, height,  # src, dest size
+            self.img_dc,    # From where do we copy?
             0, 0            # src position
             )
 
@@ -809,17 +786,10 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
         self.draw_marks(
                 mem_dc,
                 (0 - sq_size/2), (0 - sq_size/2),
-                (size.width + sq_size), (size.height + sq_size))
+                (width + sq_size), (height + sq_size)
+                )
 
         # restore self.zoom_val and self.img_coord_xlation_{x,y}
         self.zoom_val = self.zoom_list[self.zoom_idx]
         self.img_coord_xlation.x = img_coord_xlation_x_save
         self.img_coord_xlation.y = img_coord_xlation_y_save
-
-        # Select the Bitmap out of the memory DC by selecting a new
-        # uninitialized Bitmap
-        mem_dc.SelectObject(wx.NullBitmap)
-
-        img = bmp.ConvertToImage()
-        #img.SaveFile('saved.png', wx.BITMAP_TYPE_PNG)
-        return img
