@@ -29,11 +29,10 @@ fi
 export PYTHONPATH='marcam/'
 
 extra_pylint_args=''
-if hash uname 2>/dev/null ; then
-    # uname is present, use it to find ostype
-    if [ "$ostype" != "Darwin" ] ; then
-        extra_pylint_args='--ignored-modules=wx,wx.*,win32pipe,win32file,pywintypes'
-    fi
+
+# if uname is present, use it to find ostype
+if hash uname 2>/dev/null && [ "$ostype" != "Darwin" ] ; then
+    extra_pylint_args='--ignored-modules=wx,wx.*,win32pipe,win32file,pywintypes'
 fi
 
 # run tests
