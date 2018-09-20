@@ -1,4 +1,4 @@
-.PHONY: clean clean_all tests pylint
+.PHONY: clean clean_all tests pylint pylint_errors
 clean:
 	rm -rf build dist
 
@@ -16,9 +16,16 @@ wininstall: dist/Marcam_Installer.exe
 pylint: virt_test
 	@echo ""
 	@echo "---------------------------------------------------------------"
-	@echo "Execute tests"
+	@echo "Execute pylint"
 	@echo ""
-	./scripts/do_pylint
+	./scripts/do_pylint --exit-zero
+
+pylint_errors: virt_test
+	@echo ""
+	@echo "---------------------------------------------------------------"
+	@echo "Execute pylint --errors-only"
+	@echo ""
+	./scripts/do_pylint --errors-only
 
 tests: virt_test tests/*
 	@echo ""
