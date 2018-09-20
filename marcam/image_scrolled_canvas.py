@@ -16,6 +16,8 @@
 
 import logging
 import pathlib
+import shutil
+import tempfile
 import threading
 import time
 
@@ -198,7 +200,7 @@ class ImageCache:
             img (wx.Image): if present, first image in initialized cache
         """
         self.parent = parent
-        self.cache_dir = tempfile.mkdtemp(dir=const.USER_CACHE_DIR)
+        self.cache_dir = pathlib.Path(tempfile.mkdtemp(dir=const.USER_CACHE_DIR))
         self.cache_unique_id = 0
         self.img_list = None
         self.img_idx = None
