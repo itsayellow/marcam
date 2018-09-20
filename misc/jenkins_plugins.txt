@@ -110,12 +110,12 @@ bouncycastle API Plugin v2.17
 i18n for Blue Ocean v1.8.2
 
 ------------------------------------------------------------------------------
-Installed Short Names
+Installed Short Names (* are default plugins)
 ---------------------
 ace-editor
 analysis-core
-ant
-antisamy-markup-formatter
+ant *
+antisamy-markup-formatter *
 apache-httpcomponents-client-4-api
 authentication-tokens
 bitbucket
@@ -140,15 +140,15 @@ blueocean-pipeline-scm-api
 blueocean-rest
 blueocean-rest-impl
 blueocean-web
-bouncycastle-api
+bouncycastle-api *
 branch-api
 build-timeout
 cloudbees-bitbucket-branch-source
 cloudbees-folder
-command-launcher
-credentials
+command-launcher *
+credentials *
 credentials-binding
-display-url-api
+display-url-api *
 docker-commons
 docker-workflow
 durable-task
@@ -165,22 +165,22 @@ handlebars
 handy-uri-templates-2-api
 htmlpublisher
 jackson2-api
-javadoc
-jdk-tool
+javadoc *
+jdk-tool *
 jenkins-design-language
 jira
 jquery-detached
 jsch
-junit
-ldap
-mailer
+junit *
+ldap *
+mailer *
 mapdb-api
-matrix-auth
-matrix-project
-maven-plugin
+matrix-auth *
+matrix-project *
+maven-plugin *
 mercurial
 momentjs
-pam-auth
+pam-auth *
 pipeline-build-step
 pipeline-github-lib
 pipeline-graph-analysis
@@ -198,12 +198,12 @@ plain-credentials
 pubsub-light
 resource-disposer
 scm-api
-script-security
+script-security *
 sse-gateway
-ssh-credentials
-ssh-slaves
+ssh-credentials *
+ssh-slaves *
 structs
-subversion
+subversion *
 timestamper
 token-macro
 variant
@@ -220,3 +220,29 @@ workflow-scm-step
 workflow-step-api
 workflow-support
 ws-cleanup
+-------------------------------------------------------------------------------
+Default Plugins
+---------------
+ant.hpi
+antisamy-markup-formatter.hpi
+bouncycastle-api.hpi
+command-launcher.hpi
+credentials.hpi
+cvs.hpi
+display-url-api.hpi
+external-monitor-job.hpi
+javadoc.hpi
+jdk-tool.hpi
+junit.hpi
+ldap.hpi
+mailer.hpi
+matrix-auth.hpi
+matrix-project.hpi
+maven-plugin.hpi
+pam-auth.hpi
+script-security.hpi
+ssh-credentials.hpi
+ssh-slaves.hpi
+subversion.hpi
+translation.hpi
+windows-slaves.hpi
