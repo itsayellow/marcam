@@ -49,7 +49,7 @@ class MarcamRepr(reprlib.Repr):
         self.maxother = 80
         self.maxbytes = 80
 
-    def repr_bytes(self, x, level):
+    def repr_bytes(self, x, _level):
         """For bytes object type
 
         Stock method used for bytes had first step 'repr(x)' which was
