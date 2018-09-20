@@ -25,9 +25,7 @@ import logging
 import pathlib
 import platform
 import re
-import shutil
 import sys
-import tempfile
 
 import wx
 import wx.adv
