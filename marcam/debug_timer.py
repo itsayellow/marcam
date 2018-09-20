@@ -30,7 +30,7 @@ class ElTimer:
         """
         self.time_start = time.time()
         if self.has_thread_time:
-            # jenkins: disable=no-member
+            # pylint: disable=no-member
             self.thread_time_start = time.thread_time()
 
     def eltime_s(self):
@@ -52,7 +52,7 @@ class ElTimer:
                 unavailable.
         """
         if self.has_thread_time:
-            # jenkins: disable=no-member
+            # pylint: disable=no-member
             return time.thread_time() - self.thread_time_start
         else:
             return 0
@@ -77,7 +77,7 @@ class ElTimer:
                 unavailable.
         """
         if self.has_thread_time:
-            # jenkins: disable=no-member
+            # pylint: disable=no-member
             return 1000 * (time.thread_time() - self.thread_time_start)
         else:
             return 0
