@@ -194,10 +194,10 @@ class ThreadedProgressPulseDelay(Threaded):
         #   to come first
         super().__init__(thread_fxn, thread_fxn_args, post_thread_fxn, parent)
 
-        wx.CallLater(progress_delay_ms, self.delay_start)
+        wx.CallLater(progress_delay_ms, self.delay_start, progress_title, progress_msg)
 
     @debug_fxn
-    def delay_start(self,):
+    def delay_start(self, progress_title, progress_msg):
         with self.thread_lock:
             if not self.thread_done:
                 # Disable access to parent window
@@ -242,8 +242,7 @@ class ThreadedDisableEnable(Threaded):
         window until thread is finished.
     """
     @debug_fxn
-    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn,
-            progress_title, progress_msg, parent):
+    def __init__(self, thread_fxn, thread_fxn_args, post_thread_fxn, parent):
         self.win_parent = parent
         self.thread_fxn_returnvals = None
 
