@@ -19,6 +19,8 @@ import time
 
 
 class ElTimer:
+    """Elapsed timing helper for debuging convenience.
+    """
     def __init__(self):
         self.has_thread_time = hasattr(time, 'thread_time')
         self.reset()
