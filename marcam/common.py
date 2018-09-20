@@ -90,7 +90,7 @@ def debug_fxn_factory(logger_fxn):
             DEBUG_FXN_STATE[thread_name] = DEBUG_FXN_STATE.setdefault(thread_name, 0) + 1
             fxn_depth = DEBUG_FXN_STATE[thread_name]
             log_string = "FXN%s%d: %s.%s(\n"%(
-                    "" if thread_name=='MainThread' else "%s."%thread_name,
+                    "" if thread_name == 'MainThread' else "%s."%thread_name,
                     fxn_depth, func.__module__, func.__qualname__
                     )
 
@@ -103,7 +103,7 @@ def debug_fxn_factory(logger_fxn):
             return_vals = func(*args, **kwargs)
             logger_fxn(
                     "<--FXN%s%d: %s.%s\n   RETURNS: %s",
-                    "" if thread_name=='MainThread' else "%s."%thread_name,
+                    "" if thread_name == 'MainThread' else "%s."%thread_name,
                     fxn_depth, func.__module__, func.__qualname__,
                     q_repr.repr(return_vals)
                     )
