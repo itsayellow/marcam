@@ -69,6 +69,7 @@ class StderrToLog:
         """
         # must not put STDERR_STR as literal string, because our custom
         #   MarcamFormatter doesn't format when looking for STDERR_STR
+        # pylint: disable=logging-not-lazy
         LOGGER.error(STDERR_STR + text)
         return len(text)
 
@@ -78,6 +79,7 @@ class StderrToLog:
         """
         # must not put STDERR_STR as literal string, because our custom
         #   MarcamFormatter doesn't format when looking for STDERR_STR
+        # pylint: disable=logging-not-lazy
         LOGGER.error(STDERR_STR + "StderrToLog.writelines()")
         self.write("".join(lines))
 
@@ -86,6 +88,7 @@ class StderrToLog:
         """
         # must not put STDERR_STR as literal string, because our custom
         #   MarcamFormatter doesn't format when looking for STDERR_STR
+        # pylint: disable=logging-not-lazy
         LOGGER.error(STDERR_STR + "StderrToLog.flush()")
 
 
