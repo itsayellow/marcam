@@ -274,6 +274,9 @@ class EditHistory():
         self.undo_menu_item = None
         self.redo_menu_item = None
         self.save_menu_item = None
+        self.history_nodes = None
+        self.history_node_i = None
+        self.history_edges = None
 
         # (node0) - edge0 - (node1) - edge1 - (node2) - edge2 - (node3)
         # edgeN connects nodeN and nodeN+1
@@ -443,7 +446,7 @@ class EditHistory():
         Returns:
             bool: True if can undo
         """
-        return (self.history_node_i > 0)
+        return self.history_node_i > 0
 
     @debug_fxn
     def _can_redo(self):
@@ -452,7 +455,7 @@ class EditHistory():
         Returns:
             bool: True if can redo
         """
-        return (self.history_node_i < len(self.history_nodes) - 1)
+        return self.history_node_i < (len(self.history_nodes) - 1)
 
     @debug_fxn
     def _update_menu_items(self):
