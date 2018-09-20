@@ -27,6 +27,20 @@ pylint_errors: virt_test
 	@echo ""
 	./scripts/do_pylint --errors-only
 
+pylint_jenkins: virt_test
+	@echo ""
+	@echo "---------------------------------------------------------------"
+	@echo "Execute pylint"
+	@echo ""
+	./scripts/do_pylint --exit-zero --output-format=text
+
+pylint_errors_jenkins: virt_test
+	@echo ""
+	@echo "---------------------------------------------------------------"
+	@echo "Execute pylint, looking only for errors"
+	@echo ""
+	./scripts/do_pylint --errors-only --output-format=text
+
 tests: virt_test tests/*
 	@echo ""
 	@echo "---------------------------------------------------------------"

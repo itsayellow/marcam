@@ -28,7 +28,7 @@ fi
 #   can be imported
 export PYTHONPATH='marcam/'
 
-extra_pylint_args="$1"
+extra_pylint_args="$*"
 
 # if uname is present, use it to find ostype
 if hash uname 2>/dev/null && [ "$ostype" != "Darwin" ] ; then
