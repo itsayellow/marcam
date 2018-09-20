@@ -1,0 +1,108 @@
+Ant Plugin v1.8
+Authentication Tokens API Plugin v1.3
+Autofavorite for Blue Ocean v1.2.2
+Bitbucket Branch Source Plugin v2.2.12
+Bitbucket Pipeline for Blue Ocean v1.8.2
+Blue Ocean Core JS v1.8.2
+Blue Ocean Pipeline Editor v1.8.2
+Blue Ocean v1.8.2
+Branch API Plugin v2.0.20
+Build Timeout v1.19
+Command Agent Launcher Plugin v1.2
+Common API for Blue Ocean v1.8.2
+Config API for Blue Ocean v1.8.2
+Credentials Binding Plugin v1.16
+Credentials Plugin v2.1.18
+Dashboard for Blue Ocean v1.8.2
+Display URL API v2.2.0
+Display URL for Blue Ocean v2.2.0
+Docker Commons Plugin v1.13
+Docker Pipeline v1.17
+Durable Task Plugin v1.25
+Email Extension Plugin v2.63
+Events API for Blue Ocean v1.8.2
+Favorite v2.3.2
+Folders Plugin v6.6
+Git Pipeline for Blue Ocean v1.8.2
+GitHub API Plugin v1.92
+GitHub Branch Source Plugin v2.3.6
+GitHub Pipeline for Blue Ocean v1.8.2
+GitHub plugin v1.29.2
+Gradle Plugin v1.29
+HTML Publisher plugin v1.16
+Handy Uri Templates 2.x API Plugin v2.1.6-1.0
+JDK Tool Plugin v1.1
+JIRA Integration for Blue Ocean v1.8.2
+JUnit Plugin v1.25
+JWT for Blue Ocean v1.8.2
+Jackson 2 API Plugin v2.8.11.3
+JavaScript GUI Lib: ACE Editor bundle plugin v1.1
+JavaScript GUI Lib: Handlebars bundle plugin v1.1.1
+JavaScript GUI Lib: Moment.js bundle plugin v1.1.1
+JavaScript GUI Lib: jQuery bundles (jQuery and jQuery UI) plugin v1.2.1
+Javadoc Plugin v1.4
+Jenkins Apache HttpComponents Client 4.x API Plugin v4.5.5-3.0
+Jenkins Bitbucket Plugin v1.1.8
+Jenkins Design Language v1.8.2
+Jenkins GIT server Plugin v1.7
+Jenkins Git client plugin v2.7.3
+Jenkins Git plugin v3.9.1
+Jenkins JIRA plugin v3.0.1
+Jenkins JSch dependency plugin v0.1.54.2
+Jenkins Mailer Plugin v1.21
+Jenkins Mercurial plugin v2.4
+Jenkins Pub-Sub "light" Bus v1.12
+Jenkins SSH Slaves plugin v1.28.1
+Jenkins Subversion Plug-in v2.12.0
+Jenkins Workspace Cleanup Plugin v0.34</plugins>
+LDAP Plugin v1.20
+MapDB API Plugin v1.0.9.0
+Matrix Authorization Strategy Plugin v2.3
+Matrix Project Plugin v1.13
+Maven Integration plugin v3.1.2
+OWASP Markup Formatter Plugin v1.5
+PAM Authentication plugin v1.4
+Personalization for Blue Ocean v1.8.2
+Pipeline Graph Analysis Plugin v1.7
+Pipeline SCM API for Blue Ocean v1.8.2
+Pipeline implementation for Blue Ocean v1.8.2
+Pipeline: API v2.29
+Pipeline: Basic Steps v2.11
+Pipeline: Build Step v2.7
+Pipeline: Declarative Agent API v1.1.1
+Pipeline: Declarative Extension Points API v1.3.2
+Pipeline: Declarative v1.3.2
+Pipeline: GitHub Groovy Libraries v1.0
+Pipeline: Groovy v2.55
+Pipeline: Input Step v2.8
+Pipeline: Job v2.25
+Pipeline: Milestone Step v1.3.1
+Pipeline: Model API v1.3.2
+Pipeline: Multibranch v2.20
+Pipeline: Nodes and Processes v2.21
+Pipeline: REST API Plugin v2.10
+Pipeline: SCM Step v2.6
+Pipeline: Shared Groovy Libraries v2.11
+Pipeline: Stage Step v2.3
+Pipeline: Stage Tags Metadata v1.3.2
+Pipeline: Stage View Plugin v2.10
+Pipeline: Step API v2.16
+Pipeline: Supporting APIs v2.20
+Pipeline v2.5
+Plain Credentials Plugin v1.4
+REST API for Blue Ocean v1.8.2
+REST Implementation for Blue Ocean v1.8.2
+Resource Disposer Plugin v0.12
+SCM API Plugin v2.2.7
+SSH Credentials Plugin v1.14
+Script Security Plugin v1.46
+Server Sent Events (SSE) Gateway Plugin v1.16
+Static Analysis Utilities v1.95
+Structs Plugin v1.14
+Timestamper v1.8.10
+Token Macro Plugin v2.5
+Variant Plugin v1.1
+Warnings Plug-in v4.68
+Web for Blue Ocean v1.8.2
+bouncycastle API Plugin v2.17
+i18n for Blue Ocean v1.8.2
