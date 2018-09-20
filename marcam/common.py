@@ -81,7 +81,7 @@ def debug_fxn_factory(logger_fxn):
     #   instanced debug_fxn_factory.
 
     # debug decorator that announces function call/entry and lists args
-    def debug_fxn(func):
+    def debug_fxn_(func):
         """Function decorator that prints the function name and the arguments
         used in the function call before executing the function
         """
@@ -111,7 +111,7 @@ def debug_fxn_factory(logger_fxn):
             return return_vals
         return func_wrapper
 
-    return debug_fxn
+    return debug_fxn_
 
 
 # create debug function using this file's logger
