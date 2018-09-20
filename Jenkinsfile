@@ -1,4 +1,8 @@
 #!/usr/bin/env groovy
+/*
+Jenkins plugins added: Bitbucket Plugin, Warnings Plugin,
+    Static Analysis Utilities,
+*/
 pipeline {
     agent any
 
