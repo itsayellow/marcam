@@ -46,10 +46,8 @@ class ImageScrolledCanvasMarks(image_scrolled_canvas.ImageScrolledCanvas):
     def __init__(self, parent, *args, **kwargs):
         # get win_history and pass on to ImageScrolledCanvas
         # get marks_num_update_fxn and don't pass on to ImageScrolledCanvas
-        cache_dir = kwargs.get('cache_dir', None)
         win_history = kwargs.get('win_history', None)
         marks_num_update_fxn = kwargs.pop('marks_num_update_fxn', None)
-        assert cache_dir is not None
         assert win_history is not None
         assert marks_num_update_fxn is not None
 

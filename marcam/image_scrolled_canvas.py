@@ -191,13 +191,14 @@ class ImageCache:
         the edit history
     """
     @debug_fxn
-    def __init__(self, cache_dir, parent, img=None):
+    def __init__(self, parent, img=None):
         """Initialize
 
-        Assumes that this class owns all files in cache_dir
+        Args:
+            img (wx.Image): if present, first image in initialized cache
         """
         self.parent = parent
-        self.cache_dir = pathlib.Path(cache_dir)
+        self.cache_dir = tempfile.mkdtemp(dir=const.USER_CACHE_DIR)
         self.cache_unique_id = 0
         self.img_list = None
         self.img_idx = None
@@ -212,6 +213,19 @@ class ImageCache:
         self._remove_indicies()
         self.img_list = None
         self.img_idx = None
+
+    @debug_fxn
+    def initialize(self, img):
+        """Create edit history image list and put Image as first member
+
+        Args:
+            img (wx.Image): Current image
+        """
+        # remove all indicies in list, delete all cache files
+        self._remove_indicies()
+        # add new and only value to list
+        self.img_list = []
+        self._add_new(img)
 
     @debug_fxn
     def get_current_imgmem(self):
@@ -239,19 +253,6 @@ class ImageCache:
             readcache_timer.print_ms("get_current_imgcache: reading: ")
 
         return img_cache_data
-
-    @debug_fxn
-    def initialize(self, img):
-        """Create edit history image list and put Image as first member
-
-        Args:
-            img (wx.Image): Current image
-        """
-        # remove all indicies in list, delete all cache files
-        self._remove_indicies()
-        # add new and only value to list
-        self.img_list = []
-        self._add_new(img)
 
     @debug_fxn
     def replace_endlist_with_new(self, image_new):
@@ -288,8 +289,8 @@ class ImageCache:
     def shutdown(self):
         for thread_obj in self.active_threads:
             thread_obj.abort_event.set()
-        # TODO: should we also delete all files in cache here with a new
-        #   thread?  Or leave that to grandparent?
+        # remove cache dir for this window
+        shutil.rmtree(self.cache_dir)
 
     @debug_fxn
     def _remove_indicies(self, start_idx=0):
@@ -380,21 +381,18 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
     """
     @debug_fxn
     def __init__(self, parent, *args, **kwargs):
-        # get cache_dir and win_history from init
-        cache_dir = kwargs.pop('cache_dir', None)
+        # get win_history from init
         win_history = kwargs.pop('win_history', None)
-        assert cache_dir is not None
         assert win_history is not None
 
         super().__init__(parent, *args, **kwargs)
 
         # init all unknown properties to None (cause error if accessed before
         #   proper init)
-        self.cache_dir = cache_dir
         self.history = win_history
         self.img_at_wincenter = RealPoint(0, 0)
         self.img_coord_xlation = None
-        self.img_cache = ImageCache(self.cache_dir, self)
+        self.img_cache = ImageCache(self)
         self.img_dc = None
         self.img_dc_div2 = None
         self.img_dc_div4 = None

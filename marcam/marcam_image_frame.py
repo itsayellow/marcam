@@ -68,7 +68,6 @@ class ImageFrame(wx.Frame):
         self.close_source = None
         # make dir for saving cache images of this window
         const.USER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        self.cache_dir = tempfile.mkdtemp(dir=const.USER_CACHE_DIR)
 
         # GUI-related
         self.html = None
@@ -382,7 +381,6 @@ class ImageFrame(wx.Frame):
                 self,
                 win_history=self.frame_history,
                 marks_num_update_fxn=self.marks_num_update,
-                cache_dir=self.cache_dir,
                 # the following always makes scrollbars,
                 #   Mac: they appear tiny and all the way to 0 (not
                 #       disabled, and bad looking)
@@ -612,8 +610,6 @@ class ImageFrame(wx.Frame):
             #   it doesn't seem to automatically have Close() or Destroy()
             #   called without explicitly doing it here.)
             self.img_panel.Close()
-            # remove cache dir for this window
-            shutil.rmtree(self.cache_dir)
             # continue with normal event handling (and closing of window)
             evt.Skip()
 
