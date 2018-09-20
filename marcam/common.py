@@ -57,13 +57,13 @@ class MarcamRepr(reprlib.Repr):
 
         Using repr_str from python source as a template.
         """
-        s = builtins.repr(x[:self.maxbytes])
-        if len(s) > self.maxbytes:
+        str_rep = builtins.repr(x[:self.maxbytes])
+        if len(str_rep) > self.maxbytes:
             i = max(0, (self.maxbytes-3)//2)
             j = max(0, self.maxbytes-3-i)
-            s = builtins.repr(x[:i] + x[len(x)-j:])
-            s = s[:i] + '...' + s[len(s)-j:]
-        return s
+            str_rep = builtins.repr(x[:i] + x[len(x)-j:])
+            str_rep = str_rep[:i] + '...' + str_rep[len(str_rep)-j:]
+        return str_rep
 
 
 q_repr = MarcamRepr()
