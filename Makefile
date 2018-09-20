@@ -23,7 +23,7 @@ pylint: virt_test
 pylint_errors: virt_test
 	@echo ""
 	@echo "---------------------------------------------------------------"
-	@echo "Execute pylint --errors-only"
+	@echo "Execute pylint, looking only for errors"
 	@echo ""
 	./scripts/do_pylint --errors-only
 
