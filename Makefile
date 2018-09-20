@@ -1,4 +1,4 @@
-.PHONY: clean clean_all tests
+.PHONY: clean clean_all tests pylint
 clean:
 	rm -rf build dist
 
@@ -12,6 +12,13 @@ dmg: dist/Marcam.dmg
 exe: dist/marcam/Marcam.exe
 
 wininstall: dist/Marcam_Installer.exe
+
+pylint: virt_test
+	@echo ""
+	@echo "---------------------------------------------------------------"
+	@echo "Execute tests"
+	@echo ""
+	./scripts/do_pylint
 
 tests: virt_test tests/*
 	@echo ""
