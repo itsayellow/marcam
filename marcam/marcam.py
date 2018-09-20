@@ -695,6 +695,7 @@ def another_instance_running(srcfile_args):
             user, False otherwise.
     """
     # make global to persist until app is closed
+    # pylint: disable=global-statement
     global SINGLEINST_INSTANCE
     singleinst_name = "Marcam-%s"%wx.GetUserId()
     const.USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -751,6 +752,7 @@ def main(argv=None):
     """Main entrance into app.  Setup logging, create App, and enter main loop
     """
     # allow setting of global from main
+    # pylint: disable=global-statement
     global DEBUG
 
     # process command line if started from there
