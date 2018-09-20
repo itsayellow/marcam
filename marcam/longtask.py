@@ -198,6 +198,13 @@ class ThreadedProgressPulseDelay(Threaded):
 
     @debug_fxn
     def delay_start(self, progress_title, progress_msg):
+        """Function that starts after initial delay, checks if postthread has
+        disabled it, and if not actually starts the Progress Dialog
+
+        Args:
+            progress_title (str): title of Progress Dialog
+            progress_msg (str): message inside of Progress Dialog
+        """
         with self.thread_lock:
             if not self.thread_done:
                 # Disable access to parent window

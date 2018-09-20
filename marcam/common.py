@@ -35,6 +35,8 @@ LOGGER.addHandler(logging.NullHandler())
 DEBUG_FXN_STATE = {}
 
 class MarcamRepr(reprlib.Repr):
+    """Facilitating a quicker, abridged version of repr()
+    """
     def __init__(self):
         super().__init__()
         # Defaults of reprlib.Repr

@@ -1258,6 +1258,12 @@ class ImageFrame(wx.Frame):
 
     @debug_fxn
     def on_export_image_thread(self, pathname):
+        """Thread part of on_export_image, executes in background during
+        Progress Dialog
+
+        Args:
+            pathname (pathlib.Path or str): path to save image to
+        """
         # saves from memorydc
         export_image = self.img_panel.export_to_image_marks()
         export_image.SaveFile(str(pathname))

@@ -289,6 +289,9 @@ class ImageCache:
 
     @debug_fxn
     def shutdown(self):
+        """Shutdown instance and clean up, removing cache dir created and
+        shutting down threads.
+        """
         for thread_obj in self.active_threads:
             thread_obj.abort_event.set()
         # remove cache dir for this window
@@ -457,6 +460,8 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def Close(self):
+        """Over-ride Close to gracefully shutdown self.img_cache
+        """
         # Shut down ImageCache.  In particular abort any running threads.
         self.img_cache.shutdown()
         super().Close()
@@ -2027,6 +2032,13 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
 
     @debug_fxn
     def export_draw_to_memdc(self, mem_dc, width, height):
+        """Implement drawing into MemoryDC for export_to_image function
+
+        Args:
+            mem_dc (wx.MemoryDC): MemoryDC to draw into
+            width (int): width of MemoryDC image
+            height (int): height of MemoryDC image
+        """
         # Blit (in this case copy) the actual screen on the memory DC
         # and thus the Bitmap
         mem_dc.Blit(0, 0,   # dest position

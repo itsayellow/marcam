@@ -83,41 +83,129 @@ class ElTimer:
             return 0
 
     def log_ms(self, log_fxn, message, *args):
+        """Print a log message that ends in elapsed milliseconds string.
+
+        If time.thread_time() is available, elapsed ms is followed by the
+            string "(thread: <eltime>ms)" showing thread time only.
+
+        Args:
+            log_fxn (logging.{debug,info,warn,error}): logging function
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "%.1fms"%(self.eltime_ms())
         if self.has_thread_time:
             message = message + " (thread: %.1fms)"%(self.thread_eltime_ms())
         log_fxn(message, *args)
 
     def print_ms(self, message, *args):
+        """Print a message to stdout that ends in elapsed milliseconds string.
+
+        If time.thread_time() is available, elapsed ms is followed by the
+            string "(thread: <eltime>ms)" showing thread time only.
+
+        Args:
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "%.1fms"%(self.eltime_ms())
         if self.has_thread_time:
             message = message + " (thread: %.1fms)"%(self.thread_eltime_ms())
         print(message, *args)
 
     def log_s(self, log_fxn, message, *args):
+        """Print a log message that ends in elapsed seconds string.
+
+        If time.thread_time() is available, elapsed s is followed by the
+            string "(thread: <eltime>s)" showing thread time only.
+
+        Args:
+            log_fxn (logging.{debug,info,warn,error}): logging function
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "%.1fs"%(self.eltime_s())
         if self.has_thread_time:
             message = message + " (thread: %.1fs)"%(self.thread_eltime_s())
         log_fxn(message, *args)
 
     def print_s(self, message, *args):
+        """Print a message to stdout that ends in elapsed milliseconds string.
+
+        If time.thread_time() is available, elapsed s is followed by the
+            string "(thread: <eltime>s)" showing thread time only.
+
+        Args:
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "%.1fs"%(self.eltime_s())
         if self.has_thread_time:
             message = message + " (thread: %.1fs)"%(self.thread_eltime_s())
         print(message, *args)
 
     def log_thread_ms(self, log_fxn, message, *args):
+        """Print a log message that ends in: time elapsed in this thread
+        in milliseconds string.
+
+        If time.thread_time() is not available in this platform, thread time
+            returned will always be 0ms.
+
+        Args:
+            log_fxn (logging.{debug,info,warn,error}): logging function
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "(thread: %.1fms)"%(self.thread_eltime_ms())
         log_fxn(message, *args)
 
     def print_thread_ms(self, message, *args):
+        """Print a message to stdout that ends in: time elapsed in this
+        thread in milliseconds string.
+
+        If time.thread_time() is not available in this platform, thread time
+            returned will always be 0ms.
+
+        Args:
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "(thread: %.1fms)"%(self.thread_eltime_ms())
         print(message, *args)
 
     def log_thread_s(self, log_fxn, message, *args):
+        """Print a log message that ends in: time elapsed in this thread
+        in seconds string.
+
+        If time.thread_time() is not available in this platform, thread time
+            returned will always be 0s.
+
+        Args:
+            log_fxn (logging.{debug,info,warn,error}): logging function
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "(thread: %.1fs)"%(self.thread_eltime_s())
         log_fxn(message, *args)
 
     def print_thread_s(self, message, *args):
+        """Print a message to stdout that ends in: time elapsed in this
+        thread in seconds string.
+
+        If time.thread_time() is not available in this platform, thread time
+            returned will always be 0s.
+
+        Args:
+            message (str): string with possible string-format codes
+            *args (str format objects): any objects of string-formatting in
+                message.
+        """
         message = message + "(thread: %.1fs)"%(self.thread_eltime_s())
         print(message, *args)
