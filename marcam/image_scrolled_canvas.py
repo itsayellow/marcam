@@ -982,33 +982,26 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         event_type = evt.GetEventType()
         orientation = evt.GetOrientation()
         if LOGGER.isEnabledFor(logging.DEBUG):
-            log_string = "MSC:"
-            if orientation == wx.HORIZONTAL:
-                log_string += " wx.HORIZONTAL"
-            elif orientation == wx.VERTICAL:
-                log_string += " wx.VERTICAL"
-            else:
-                log_string += " orientation="+repr(orientation)
+            orientation_decode = {
+                    wx.HORIZONTAL: "wx.HORIZONTAL",
+                    wx.VERTICAL: "wx.VERTICAL",
+                    }
+            event_type_decode = {
+                    wx.wxEVT_SCROLLWIN_TOP: " wx.wxEVT_SCROLLWIN_TOP",
+                    wx.wxEVT_SCROLLWIN_BOTTOM: " wx.wxEVT_SCROLLWIN_BOTTOM",
+                    wx.wxEVT_SCROLLWIN_LINEUP: " wx.wxEVT_SCROLLWIN_LINEUP",
+                    wx.wxEVT_SCROLLWIN_LINEDOWN: " wx.wxEVT_SCROLLWIN_LINEDOWN",
+                    wx.wxEVT_SCROLLWIN_PAGEUP: " wx.wxEVT_SCROLLWIN_PAGEUP",
+                    wx.wxEVT_SCROLLWIN_PAGEDOWN: " wx.wxEVT_SCROLLWIN_PAGEDOWN",
+                    wx.wxEVT_SCROLLWIN_THUMBTRACK: " wx.wxEVT_SCROLLWIN_THUMBTRACK",
+                    wx.wxEVT_SCROLLWIN_THUMBRELEASE: " wx.wxEVT_SCROLLWIN_THUMBRELEASE",
+                    }
 
-            if event_type == wx.wxEVT_SCROLLWIN_TOP:
-                log_string += " wx.wxEVT_SCROLLWIN_TOP"
-            elif event_type == wx.wxEVT_SCROLLWIN_BOTTOM:
-                log_string += " wx.wxEVT_SCROLLWIN_BOTTOM"
-            elif event_type == wx.wxEVT_SCROLLWIN_LINEUP:
-                log_string += " wx.wxEVT_SCROLLWIN_LINEUP"
-            elif event_type == wx.wxEVT_SCROLLWIN_LINEDOWN:
-                log_string += " wx.wxEVT_SCROLLWIN_LINEDOWN"
-            elif event_type == wx.wxEVT_SCROLLWIN_PAGEUP:
-                log_string += " wx.wxEVT_SCROLLWIN_PAGEUP"
-            elif event_type == wx.wxEVT_SCROLLWIN_PAGEDOWN:
-                log_string += " wx.wxEVT_SCROLLWIN_PAGEDOWN"
-            elif event_type == wx.wxEVT_SCROLLWIN_THUMBTRACK:
-                log_string += " wx.wxEVT_SCROLLWIN_THUMBTRACK"
-            elif event_type == wx.wxEVT_SCROLLWIN_THUMBRELEASE:
-                log_string += " wx.wxEVT_SCROLLWIN_THUMBRELEASE"
-            else:
-                log_string += " event_type="+repr(event_type)
-            LOGGER.info(log_string)
+            LOGGER.debug(
+                    "MSC: %s %s,",
+                    orientation_decode.get(orientation, "orientation="+repr(orientation)),
+                    event_type_decode.get(event_type, "event_type="+repr(event_type))
+                    )
 
         # NOTE: by setting position only on scroll (and not on zoom) we
         #   preserve position on zoom out/zoom back in even if the image gets
