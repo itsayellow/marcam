@@ -24,23 +24,54 @@ class ElTimer:
         self.reset()
 
     def reset(self):
+        """Reset elapsed timer to 0
+        """
         self.time_start = time.time()
         if self.has_thread_time:
             self.thread_time_start = time.thread_time()
 
     def eltime_s(self):
+        """Return elapsed time since __init__ or reset in seconds.
+
+        Returns:
+            float: elapsed time in seconds
+        """
         return time.time() - self.time_start
 
     def thread_eltime_s(self):
+        """Return elapsed thread_time since __init__ or reset in seconds.
+
+        thread_time is cpu time spent in this thread only since reset.
+        If thread_time is not available on this platform, return 0.
+
+        Returns:
+            float: elapsed time in seconds, or 0 if thread_time is
+                unavailable.
+        """
         if self.has_thread_time:
             return time.thread_time() - self.thread_time_start
         else:
             return 0
 
     def eltime_ms(self):
+        """Return elapsed time since __init__ or reset in milliseconds.
+
+        Returns:
+            float: elapsed time in milliseconds
+        """
         return 1000 * (time.time() - self.time_start)
 
     def thread_eltime_ms(self):
+        """Return elapsed thread_time since __init__ or reset in
+        milliseconds.
+
+        thread_time is cpu time spent in this thread only since reset.
+        If thread_time is not available on this platform, return 0.
+
+        Returns:
+            float: elapsed time in milliseconds, or 0 if thread_time is
+                unavailable.
+        """
         if self.has_thread_time:
             return 1000 * (time.thread_time() - self.thread_time_start)
         else:
