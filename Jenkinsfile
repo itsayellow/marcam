@@ -23,8 +23,8 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'make tests'
                 sh 'make pylint_errors_jenkins'
+                sh 'make tests'
             }
             post {
                 always {
