@@ -29,11 +29,11 @@ class ElTimer:
             self.thread_time_start = time.thread_time()
 
     def eltime_s(self):
-        return (time.time() - self.time_start)
+        return time.time() - self.time_start
 
     def thread_eltime_s(self):
         if self.has_thread_time:
-            return (time.thread_time() - self.thread_time_start)
+            return time.thread_time() - self.thread_time_start
         else:
             return 0
 

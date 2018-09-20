@@ -14,10 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import sys
-import wx
-import appdirs
 import pathlib
+
+import appdirs
+import wx
+
 
 APP_NAME = 'Marcam'
 # "Interesting Version", this can be replaced at build by other strings
