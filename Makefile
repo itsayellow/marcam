@@ -32,7 +32,7 @@ pylint_jenkins: virt_test
 	@echo "---------------------------------------------------------------"
 	@echo "Execute pylint"
 	@echo ""
-	./scripts/do_pylint --exit-zero --output-format=json
+	./scripts/do_pylint --exit-zero --output-format=parseable
 
 pylint_errors_jenkins: virt_test
 	@echo ""
