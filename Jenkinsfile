@@ -27,7 +27,8 @@ pipeline {
             }
             post {
                 always {
-                    recordIssues tools: [tool: [$class: 'PyLint']]
+                    recordIssues enabledForFailure: true,
+                        tools: [[tool: [$class: 'PyLint']]]
                 }
             }
         }
