@@ -25,6 +25,17 @@ pipeline {
             steps {
                 sh 'make pylint_jenkins'
             }
+            post {
+                always {
+                    [$class: 'WarningsPublisher', parserConfigurations: [[
+                        parserName: 'pylint',
+                    ]]]
+                    /*
+                    recordIssues enabledForFailure: true,
+                        tools: [[tool: [$class: 'PyLint']]]
+                    */
+                }
+            }
         }
         stage('Test') {
             steps {
@@ -47,12 +58,6 @@ pipeline {
                     archiveArtifacts 'dist/Marcam.dmg'
                 }
             }
-        }
-    }
-    post {
-        always {
-            recordIssues enabledForFailure: true,
-                tools: [[tool: [$class: 'PyLint']]]
         }
     }
 }
