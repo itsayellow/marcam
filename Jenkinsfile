@@ -38,11 +38,15 @@ pipeline {
                         tools: [[tool: [$class: 'PyLint']]]
                     */
                 }
+                failure {
+                    echo "Pylint errors, failure:"
+                    sh 'grep \'\\[E\' pylint.log'
+                }
             }
         }
         stage('Test') {
             steps {
-                sh 'make pylint_errors_jenkins'
+                //sh 'make pylint_errors_jenkins'
                 sh 'make tests'
             }
             post {
