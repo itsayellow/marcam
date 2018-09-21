@@ -31,7 +31,7 @@ pipeline {
                         parserName: 'pylint',
                         pattern: 'pylint.log'
                     ]]])
-                    /*
+                    /* theoretically the following works on Warnings v5.0
                     recordIssues enabledForFailure: true,
                         tools: [[tool: [$class: 'PyLint']]]
                     */
