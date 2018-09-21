@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import logging
 
 import wx
@@ -27,6 +28,7 @@ from biorad1sc_reader import BioRadInvalidFileError, BioRadParsingError
 import common
 import colormaps
 import debug_timer
+
 
 # logging stuff
 #   not necessary to make a handler since we will be child logger of marcam

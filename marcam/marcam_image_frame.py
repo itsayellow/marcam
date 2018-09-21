@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Top-level module to run to run the Marcam application
 """
-
 # Copyright 2017-2018 Matthew A. Clapp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

@@ -25,6 +25,7 @@
 # Original code at:
 # https://github.com/bids/colormap (colormap.py)
 
+
 import numpy as np
 
 

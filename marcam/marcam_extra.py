@@ -1,6 +1,5 @@
 """Classes necessary for marcam.py that are not MarcamApp or ImageWindow
 """
-
 # Copyright 2017-2018 Matthew A. Clapp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

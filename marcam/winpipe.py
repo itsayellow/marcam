@@ -18,6 +18,7 @@
 # original from:
 # https://stackoverflow.com/questions/48542644/python-and-windows-named-pipes
 
+
 import logging
 import time
 import sys
@@ -27,6 +28,7 @@ import win32pipe
 import win32file
 
 import common
+
 
 # https://docs.microsoft.com/en-us/windows/desktop/ipc/named-pipe-operations
 # https://docs.microsoft.com/en-us/windows/desktop/ipc/named-pipes

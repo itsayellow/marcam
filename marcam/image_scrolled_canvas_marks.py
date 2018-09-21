@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import logging
 
 import wx
@@ -22,6 +23,7 @@ import numpy as np
 import const
 import common
 import image_scrolled_canvas
+
 
 # logging stuff
 #   not necessary to make a handler since we will be child logger of marcam
