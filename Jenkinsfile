@@ -27,9 +27,9 @@ pipeline {
             }
             post {
                 always {
-                    [$class: 'WarningsPublisher', parserConfigurations: [[
+                    step([$class: 'WarningsPublisher', parserConfigurations: [[
                         parserName: 'pylint',
-                    ]]]
+                    ]]])
                     /*
                     recordIssues enabledForFailure: true,
                         tools: [[tool: [$class: 'PyLint']]]
