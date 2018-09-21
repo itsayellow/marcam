@@ -78,6 +78,11 @@ class ImageFrame(wx.Frame):
         self.started_temp_zoom = False
         self.menu_items_disable_no_image = None
 
+        # Debug only
+        self.benchzoom_iteration = None
+        self.benchzoom_origwinsize = None
+        self.benchzoom_zoom_num = None
+
         # FileHistory is held in MarcamApp parent
         self.file_history = self.parent.file_history
 
