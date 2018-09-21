@@ -24,7 +24,8 @@ pipeline {
         stage('Pylint') {
             steps {
                 sh 'make pylint_jenkins | tee pylint.log'
-                sh 'grep -q \'\\[E\' pylint.log && false'
+                // if any errors in pylint.log, make exit(1)
+                sh '! grep -q \'\\[E\' pylint.log'
             }
             post {
                 always {
