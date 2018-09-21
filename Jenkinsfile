@@ -23,7 +23,7 @@ pipeline {
         }
         stage('Pylint') {
             steps {
-                sh 'make pylint_jenkins | tee report/pylint.log || true'
+                sh 'make pylint_jenkins | tee pylint.log'
             }
             post {
                 always {
