@@ -21,6 +21,16 @@ pipeline {
                 sh 'make app'
             }
         }
+        stage('Pylint') {
+            steps {
+                sh 'make pylint_jenkins'
+            }
+            post {
+                always {
+                    recordIssues tools: [tool: [$class: 'PyLint']]
+                }
+            }
+        }
         stage('Test') {
             steps {
                 sh 'make pylint_errors_jenkins'
