@@ -377,6 +377,7 @@ class ImageCache:
         self.active_threads = [x for x in self.active_threads if x.task_thread.is_alive()]
         LOGGER.debug(repr(self.active_threads))
 
+jinkeianasdfi
 
 # really a Scrolled Window
 class ImageScrolledCanvas(wx.ScrolledCanvas):
