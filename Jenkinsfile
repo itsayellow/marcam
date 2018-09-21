@@ -23,12 +23,13 @@ pipeline {
         }
         stage('Pylint') {
             steps {
-                sh 'make pylint_jenkins'
+                sh 'make pylint_jenkins | tee report/pylint.log'
             }
             post {
                 always {
                     step([$class: 'WarningsPublisher', parserConfigurations: [[
                         parserName: 'pylint',
+                        pattern: 'report/pylint.log'
                     ]]])
                     /*
                     recordIssues enabledForFailure: true,
