@@ -1556,7 +1556,7 @@ class ImageFrame(wx.Frame):
             benchzoom_data['wx_ver'] = wx.__version__
             benchzoom_data['datetime'] = datetime.now().strftime('%Y%m%d_%H:%M:%S')
             data_filename = const.USER_LOG_DIR / \
-                    "data_benchzoom_" + benchzoom_data['datetime'] + ".json"
+                    ("data_benchzoom_" + benchzoom_data['datetime'] + ".json")
             with open(data_filename, 'w') as data_fh:
                 json.dump(benchzoom_data, data_fh, separators=(',', ':'))
             LOGGER.debug("Wrote benchzoom data to file: %s", data_filename)

@@ -1307,7 +1307,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
             if self.paint_times is not None:
                 # self.paint_times is used for ImagePanel.on_debug_benchzoom
                 zoom_str = "%.3f"%self.zoom_val
-                self.paint_times.setdefault(zoom_str, []).append(onpaint_timer.eltime_s)
+                self.paint_times.setdefault(zoom_str, []).append(onpaint_timer.eltime_s())
 
     @debug_fxn
     def _get_margin_rects(self, rect_pos_log, rect_size, dest_pos, dest_size):
