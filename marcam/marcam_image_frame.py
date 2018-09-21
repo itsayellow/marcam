@@ -1482,6 +1482,10 @@ class ImageFrame(wx.Frame):
         Args:
             _evt (wx.CommandEvent):
         """
+        # don't execute if no image is present
+        if not self.has_image():
+            return
+
         desired_panel_size = wx.Size(1024, 768)
 
         # get current size of window
