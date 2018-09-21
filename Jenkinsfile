@@ -29,7 +29,7 @@ pipeline {
                 always {
                     step([$class: 'WarningsPublisher', parserConfigurations: [[
                         parserName: 'pylint',
-                        pattern: 'report/pylint.log'
+                        pattern: 'pylint.log'
                     ]]])
                     /*
                     recordIssues enabledForFailure: true,
