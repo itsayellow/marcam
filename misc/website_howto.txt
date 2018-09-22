@@ -6,7 +6,7 @@
 bundle install
 
 # upgrade gems
-bundle upgrade
+bundle update
 
 # rebuild the site using my gems.
 bundle exec jekyll serve -w -l -o
