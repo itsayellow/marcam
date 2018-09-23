@@ -272,6 +272,15 @@ class ImageCache:
         self._add_new(image_new)
 
     @debug_fxn
+    def get_idx(self):
+        """Get the current index
+
+        Returns:
+            int: index (pointer) of current cache image in ImageCache
+        """
+        return self.img_idx
+
+    @debug_fxn
     def set_idx(self, idx_set):
         """Set current index for edit history image list of images
 
@@ -280,14 +289,10 @@ class ImageCache:
         """
         self.img_idx = idx_set
 
-    @debug_fxn
-    def get_idx(self):
-        """Get the current index
-
-        Returns:
-            int: index (pointer) of current cache image in ImageCache
-        """
-        return self.img_idx
+    # Make {get,set}_idx available as just read/write to idx.
+    # Easier here than using @property and @idx.setter so we don't have to
+    #   worry about affecting @debug_fxn or fxn names.
+    idx = property(get_idx, set_idx)
 
     @debug_fxn
     def shutdown(self):
@@ -1725,7 +1730,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         Args:
             idx_set (int): Index to desired image
         """
-        self.img_cache.set_idx(idx_set)
+        self.img_cache.idx = idx_set
 
     @debug_fxn
     def init_image(self, do_zoom_fit=True):
@@ -2159,7 +2164,7 @@ class ImageScrolledCanvas(wx.ScrolledCanvas):
         self.img_cache.replace_endlist_with_new(wx_image_new)
         # save previous image idx, and new image idx
         self.history.new(
-                ['IMAGE_XFORM', self.img_cache.get_idx() - 1, self.img_cache.get_idx()],
+                ['IMAGE_XFORM', self.img_cache.idx - 1, self.img_cache.idx],
                 description=description
                 )
         # put new image in window (188ms for 4276x2676)
