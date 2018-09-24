@@ -26,6 +26,8 @@ addition, it allows you to make other key image modifications.
 
 # Downloads
 
+*For installation help, see the [Installation Instructions](installation).*
+
 ### Latest Release -- 2018 Aug 25
 [Marcam 0.8 (macOS)](https://github.com/itsayellow/marcam/releases/download/v0.8/Marcam.0.8.Mac.dmg)
 
@@ -37,10 +39,10 @@ addition, it allows you to make other key image modifications.
 # Screenshots
 
 ### Mac Screenshot
-![Mac Screenshot](assets/img/marcam_main_mac.png)
+![Mac Screenshot]({{ site.baseurl }}/assets/img/marcam_main_mac.png)
 
 ### Windows Screenshot
-![Windows Screenshot](assets/img/marcam_main_win.png)
+![Windows Screenshot]({{ site.baseurl }}/assets/img/marcam_main_win.png)
 
 # Documentation
 
@@ -52,3 +54,8 @@ You can also access this help from the Help&rarr;Marcam Help menu inside of Marc
 # System Requirements
 * Mac OS X 10.10 Yosemite or later.
 * Windows 10
+
+# Credits
+The [people behind Marcam](about) are:
+* Dr. Matthew A. Clapp (Software)
+* Dr. Emanuela Colla (Biology)
