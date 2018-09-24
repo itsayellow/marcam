@@ -19,3 +19,8 @@ bundle exec jekyll serve -w -l -o
 # -l, --livereload   Use LiveReload to automatically refresh browsers
 # -o, --open-url     Launch your site in a browser
 jekyll serve -w -l -o
+
+
+# USE JEKYLL TO BUILD THE WEBSITE (not serve)
+# -------------------------------------------
+jekyll build

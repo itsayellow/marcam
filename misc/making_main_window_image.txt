@@ -1,3 +1,5 @@
+.. include:: <isonum.txt>
+
 All platforms
 -------------
 open "misc/Dapi A.mcm" in Marcam (1280x800 image with marks)
@@ -11,8 +13,33 @@ Windows extra (dropshadow)
 open screenshot in Photoshop
 Set canvas size to 1348x1200
 Layer fx->Drop Shadow...
-    Opacity: 10%
-    Angle: 90degrees, Use Global Light
-    Distance: 24px  ?
-    Spread: 42%     ?
-    Size: 62px      ?
+
+* Opacity: 10%
+* Angle: 90\ |deg|, Use Global Light
+* Distance: 24px  ?
+* Spread: 42%     ?
+* Size: 62px      ?
+
+Online claim of dropshadow parameters
+-------------------------------------
+https://apple.stackexchange.com/questions/73849/mac-os-x-10-7-window-shadow-params
+
+Non-Retina
+~~~~~~~~~~
+
+* Color: #000000
+* Angle: 90\ |deg|
+* Opacity: 50% opacity
+* Distance: 22px
+* Size: 45px
+* Spread: 0px
+
+Retina
+~~~~~~
+
+* Color: #000000
+* Angle: 90\ |deg|
+* Opacity: 50%
+* Distance: 45px
+* Size: 90px
+* Spread: 0px
