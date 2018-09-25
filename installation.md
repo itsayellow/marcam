@@ -17,7 +17,8 @@ the application from your Mac's Launchpad or Dock as normal.
 ## Windows
 1. Download the latest Windows release from the [Downloads](index#downloads)
 section of the Marcam home page.
-1. Open the installer program.
-1. When asked 'Do you want to allow this app from an unknown publisher to make
-changes to your device?', click 'Yes'.
+1. Double-click to open the installer program.
+1. Possible Windows Dialogs:
+   a. If asked 'Do you want to allow this app from an unknown publisher to make changes to your device?', click 'Yes'.
+   b. If you see a dialog that says "Windows Protected your PC", click "More Info" and then "Run anyway".
 1. Click 'Next' and then 'Install'.  Finally click 'Close'.
