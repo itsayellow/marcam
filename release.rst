@@ -7,26 +7,23 @@ Summary
 1. Make sure it builds, installs, runs on all platforms.
 #. Increase version numbers
 
-   i. file: scripts/Info.plist
+   a. file: marcam/const.py
 
-      a. ``<string>``\ <version_num>\ ``</string>``
-      #. ``<string>``\ <version_num>\ ``</string>``
-
-   #. file: marcam/const.py
-
-      #. ``VERSION_STR = "``\ <version_num>\ ``"``
+      i. ``VERSION_STR = "``\ <version_num>\ ``"``
+      #. ``VERSION_PLIST_STR = "``\ <version_num>\ ``"``
 
 #. Check in
-#. Github: write new release and tag it v0.0.7
+#. Github: write new release and tag it v0.7.0
 
-   i. In separate tab, look over all commits since last release to write up
+   a. Use misc/release_notes/release_notes_<version_num>.md as a basis
+   #. In separate tab, look over all commits since last release to write up
       notable changes.
 
 #. Build Installers
 
-   i. In Windows, upload installer as "Marcam <version_num> Windows Installer.exe" to Github release.
+   a. In Windows, upload installer as "Marcam <version_num> Windows Installer.exe" to Github release.
    #. On Mac, upload dmg file as "Marcam <version_num> Mac.dmg" to Github release.
 
 #. Update Website for new release
 
-   i. Edit the front page of website under branch gh-pages under Downloads
+   a. Edit the front page of website under branch gh-pages under Downloads
