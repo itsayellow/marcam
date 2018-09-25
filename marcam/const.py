@@ -28,12 +28,12 @@ APP_NAME = 'Marcam'
 # In built apps, this will appear after VERSION_PLIST_STR in About dialog
 # In command-line invocations, this will appear after the Python version in
 #   About dialog
-VERSION_STR = "0.8.0"
+VERSION_STR = "0.9.0"
 # What will show up in Info.plist for macOS.  Should be #.#.# format.
 # "Canonical Version"
 # In built apps, this will appear first in About dialog
 # In command-line invocations, this will not appear in About dialog
-VERSION_PLIST_STR = "0.8.0"
+VERSION_PLIST_STR = "0.9.0"
 
 # OS-dependent
 # Use appauthor=False (only applicable to Windows) to indicate only one
