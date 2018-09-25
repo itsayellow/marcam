@@ -31,6 +31,10 @@
 ; The name of the installer
 Name "Marcam"
 
+; What appears in "relief" at the bottom of the install window in the 
+;   horizontal rule.
+BrandingText "https://itsayellow.github.io/marcam/"
+
 ; The file to write
 OutFile "..\dist\Marcam_Installer.exe"
 
