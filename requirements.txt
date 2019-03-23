@@ -1,4 +1,6 @@
 # requirements for marcam app and building
+
+# pypi packages
 appdirs==1.4.3
 biorad1sc-reader==0.6
 numpy==1.15.1
