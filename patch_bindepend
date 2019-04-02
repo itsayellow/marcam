@@ -1,0 +1,1 @@
+patch virt/lib/site-packages/PyInstaller/depend/bindepend.py bindepend.patch

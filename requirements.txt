@@ -4,7 +4,7 @@
 appdirs==1.4.3
 biorad1sc-reader==0.6
 numpy==1.15.1
-wxPython==4.0.3
+wxPython==4.0.4
 PyInstaller==3.4
 Pillow==5.2.0
 pip==18.0
