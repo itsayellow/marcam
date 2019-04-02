@@ -1,0 +1,15 @@
+--- virt/lib/site-packages/PyInstaller/depend/bindepend.py	2019-04-02 14:18:40.692441400 -0700
++++ ./bindepend_mod.py	2019-04-02 14:20:29.667452200 -0700
+@@ -872,6 +872,12 @@
+                 return filename
+ 
+     # Python library NOT found. Resume searching using alternative methods.
++
++    # Work around for python venv having VERSION.dll rather than pythonXY.dll
++    if is_win and 'VERSION.dll' in dlls:
++        pydll = 'python%d%d.dll' % sys.version_info[:2]
++        return getfullnameof(pydll)
++
+     # Applies only to non Windows platforms.
+ 
+     if is_unix:
