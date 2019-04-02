@@ -39,6 +39,9 @@ $script_dir/git_version_str win marcam/const.py
 # activate virtual environment for python
 source virt/Scripts/activate
 
+# Add dll path on Windows 10 (NOTE: other OS may need other paths)
+PATH=/c/Windows/System32/downlevel:$PATH
+
 # build app using pyinstaller
 pyinstaller $script_dir/marcam_win.spec
 
