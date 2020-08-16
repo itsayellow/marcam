@@ -1,3 +1,3 @@
 -r requirements.txt
 # really only necessary for building a mac dmg bundle
-dmgbuild==1.3.2
+dmgbuild==1.3.3
