@@ -6,6 +6,6 @@ biorad1sc-reader==0.6
 numpy==1.19.0
 wxPython==4.1.0
 PyInstaller==4.0
-Pillow==8.3.2
+Pillow==9.0.1
 pip==21.1
 setuptools==49.6.0
