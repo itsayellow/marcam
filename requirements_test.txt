@@ -1,2 +1,2 @@
 pytest==9.0.3
-pylint==2.5.3
+pylint==4.0.9
